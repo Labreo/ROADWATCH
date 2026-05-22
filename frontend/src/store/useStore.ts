@@ -1,6 +1,7 @@
 import { create } from 'zustand';
-import { RoadStatus, Complaint, SyncQueueItem } from '@/types';
-import { complaints as mockComplaints } from '@/data/mockData';
+import { RoadStatus, Complaint, SyncQueueItem, Road } from '@/types';
+import { complaints as mockComplaints, roads as mockRoads } from '@/data/mockData';
+import { CachedRoadRepository, SyncLog } from '@/services/cachedRoadRepository';
 
 export type AppView = 'dashboard' | 'roads' | 'contractors' | 'budgets' | 'complaints';
 
@@ -29,10 +30,21 @@ interface AppState {
   // Online / Offline Capability & Local Queue
   isOnline: boolean;
   setIsOnline: (online: boolean) => void;
+  isSyncing: boolean;
   offlineQueue: SyncQueueItem[];
+  syncQueueCount: number;
+  syncLogs: SyncLog[];
+  cachedRoads: Road[];
+  conflicts: { id: string; localItem: SyncQueueItem; serverItem: Complaint }[];
+
+  loadCachedData: () => Promise<void>;
+  cacheAllRoadsOffline: () => Promise<void>;
+  clearCachedRoads: () => Promise<void>;
   queueComplaint: (complaintData: Omit<Complaint, 'id' | 'createdAt'>) => Complaint;
   processSyncQueue: () => Promise<void>;
-  syncQueueCount: number;
+  retrySyncItem: (id: string) => Promise<void>;
+  discardSyncItem: (id: string) => Promise<void>;
+  resolveConflict: (id: string, resolution: 'keep_local' | 'keep_server' | 'discard') => Promise<void>;
 
   // Wizard state
   isReporting: boolean;
@@ -55,22 +67,9 @@ const getStoredComplaints = (): Complaint[] => {
   }
 };
 
-// Helper to load queued offline complaints
-const getStoredQueue = (): SyncQueueItem[] => {
-  if (typeof window === 'undefined') return [];
-  try {
-    const stored = window.localStorage.getItem('roadwatch_offline_queue');
-    return stored ? JSON.parse(stored) : [];
-  } catch (e) {
-    console.error('Error loading offline queue:', e);
-    return [];
-  }
-};
-
 export const useStore = create<AppState>((set, get) => {
-  // Initial lists
+  // Initial lists (localStorage fallback for custom synced complaints)
   const initialCustomComplaints = getStoredComplaints();
-  const initialQueue = getStoredQueue();
   const initialComplaintsList = [...initialCustomComplaints, ...mockComplaints];
 
   return {
@@ -105,8 +104,47 @@ export const useStore = create<AppState>((set, get) => {
         get().processSyncQueue();
       }
     },
-    offlineQueue: initialQueue,
-    syncQueueCount: initialQueue.length,
+    isSyncing: false,
+    offlineQueue: [],
+    syncQueueCount: 0,
+    syncLogs: [],
+    cachedRoads: [],
+    conflicts: [],
+
+    loadCachedData: async () => {
+      try {
+        const queue = await CachedRoadRepository.getQueue();
+        const logs = await CachedRoadRepository.getSyncLogs();
+        const roads = await CachedRoadRepository.getCachedRoads();
+        set({
+          offlineQueue: queue,
+          syncQueueCount: queue.length,
+          syncLogs: logs,
+          cachedRoads: roads
+        });
+      } catch (error) {
+        console.error('Failed to load cached offline data:', error);
+      }
+    },
+
+    cacheAllRoadsOffline: async () => {
+      try {
+        await CachedRoadRepository.cacheRoads(mockRoads);
+        const roads = await CachedRoadRepository.getCachedRoads();
+        set({ cachedRoads: roads });
+      } catch (error) {
+        console.error('Failed to cache roads offline:', error);
+      }
+    },
+
+    clearCachedRoads: async () => {
+      try {
+        await CachedRoadRepository.clearRoadsCache();
+        set({ cachedRoads: [] });
+      } catch (error) {
+        console.error('Failed to clear cached roads:', error);
+      }
+    },
 
     // Report Wizard toggle
     isReporting: false,
@@ -136,21 +174,24 @@ export const useStore = create<AppState>((set, get) => {
         ...complaintData,
         id: generatedId,
         createdAt: generatedCreatedAt,
-        clientTempId: tempTicketId
+        clientTempId: tempTicketId,
+        status: 'pending'
       };
 
       const { isOnline: onlineState, offlineQueue, addComplaint } = get();
 
       if (onlineState) {
         // If online, submit immediately
-        addComplaint(newComplaint);
+        addComplaint({ ...newComplaint, status: 'routed' });
       } else {
         // If offline, save in sync queue
         const syncItem: SyncQueueItem = {
           id: `sync-${generatedId}`,
           action: 'create_complaint',
           payload: newComplaint,
-          timestamp: generatedCreatedAt
+          timestamp: generatedCreatedAt,
+          status: 'pending',
+          imagePreview: complaintData.imagePreview
         };
 
         const updatedQueue = [...offlineQueue, syncItem];
@@ -159,41 +200,290 @@ export const useStore = create<AppState>((set, get) => {
           syncQueueCount: updatedQueue.length 
         });
 
-        if (typeof window !== 'undefined') {
-          window.localStorage.setItem('roadwatch_offline_queue', JSON.stringify(updatedQueue));
-        }
+        // Async write to IndexedDB
+        CachedRoadRepository.enqueue(syncItem).catch(err => {
+          console.error('IndexedDB enqueue failed:', err);
+        });
       }
 
       return newComplaint;
     },
 
     processSyncQueue: async () => {
-      const { offlineQueue, addComplaint, isOnline: onlineState } = get();
-      if (!onlineState || offlineQueue.length === 0) return;
+      const { offlineQueue, isOnline: onlineState, isSyncing, addComplaint } = get();
+      if (!onlineState || offlineQueue.length === 0 || isSyncing) return;
 
-      // Simulate a network latency before syncing each item
+      set({ isSyncing: true });
+
       const queueToProcess = [...offlineQueue];
-      
-      // Clear queue state immediately to avoid double submissions during sync
-      set({ 
-        offlineQueue: [],
-        syncQueueCount: 0 
-      });
-      if (typeof window !== 'undefined') {
-        window.localStorage.removeItem('roadwatch_offline_queue');
+      const itemsLogged: { title: string; category: string; result: 'synced' | 'failed' | 'conflict_resolved' }[] = [];
+      let successCount = 0;
+      let failedCount = 0;
+      let errorOccurredMsg = '';
+
+      for (const item of queueToProcess) {
+        // Set item to syncing status
+        const updatedQueue = get().offlineQueue.map(q => 
+          q.id === item.id ? { ...q, status: 'syncing' as const } : q
+        );
+        set({ offlineQueue: updatedQueue });
+        await CachedRoadRepository.enqueue({ ...item, status: 'syncing' });
+
+        // Simulate network latency
+        await new Promise(resolve => setTimeout(resolve, 1200));
+
+        // 1. Check for simulated conflict
+        const isConflict = 
+          item.payload.title?.toLowerCase().includes('conflict') ||
+          item.payload.description?.toLowerCase().includes('conflict');
+
+        if (isConflict) {
+          failedCount++;
+          errorOccurredMsg = 'Conflict detected: A similar report is already active in this jurisdiction.';
+          
+          // Add to conflicts list if not already there
+          const existingConflicts = get().conflicts;
+          if (!existingConflicts.some(c => c.id === item.id)) {
+            const serverItem: Complaint = {
+              ...item.payload,
+              id: Math.floor(200000 + Math.random() * 900000),
+              title: `[Existing] ${item.payload.title}`,
+              description: `This report was submitted by another citizen on ${new Date(Date.now() - 86400000).toLocaleDateString()} and is already under PWD review.`,
+              status: 'in_progress',
+              createdAt: new Date(Date.now() - 86400000 * 2).toISOString() // 2 days ago
+            };
+            set({ conflicts: [...existingConflicts, { id: item.id, localItem: item, serverItem }] });
+          }
+
+          const failedItem: SyncQueueItem = {
+            ...item,
+            status: 'failed',
+            error: 'Conflict: Ticket already exists'
+          };
+          const postFailedQueue = get().offlineQueue.map(q => q.id === item.id ? failedItem : q);
+          set({ offlineQueue: postFailedQueue });
+          await CachedRoadRepository.enqueue(failedItem);
+
+          itemsLogged.push({
+            title: item.payload.title || 'Complaint',
+            category: item.payload.category || 'General',
+            result: 'failed'
+          });
+
+          continue;
+        }
+
+        // 2. Simulate 15% chance of random municipal gateway error to show retry resilience
+        const hasNetworkHiccup = Math.random() < 0.15;
+        if (hasNetworkHiccup) {
+          failedCount++;
+          errorOccurredMsg = 'Intermittent Municipal Gateway Error (Timeout 504)';
+          
+          const failedItem: SyncQueueItem = {
+            ...item,
+            status: 'failed',
+            error: errorOccurredMsg
+          };
+          const postFailedQueue = get().offlineQueue.map(q => q.id === item.id ? failedItem : q);
+          set({ offlineQueue: postFailedQueue });
+          await CachedRoadRepository.enqueue(failedItem);
+
+          itemsLogged.push({
+            title: item.payload.title || 'Complaint',
+            category: item.payload.category || 'General',
+            result: 'failed'
+          });
+          continue;
+        }
+
+        // 3. Successful sync
+        successCount++;
+        const syncedComplaint: Complaint = {
+          ...item.payload,
+          status: 'routed'
+        };
+        addComplaint(syncedComplaint);
+
+        // Remove from store queue
+        const postSuccessQueue = get().offlineQueue.filter(q => q.id !== item.id);
+        set({ 
+          offlineQueue: postSuccessQueue,
+          syncQueueCount: postSuccessQueue.length
+        });
+        
+        // Remove from IndexedDB queue
+        await CachedRoadRepository.dequeue(item.id);
+
+        itemsLogged.push({
+          title: item.payload.title || 'Complaint',
+          category: item.payload.category || 'General',
+          result: 'synced'
+        });
       }
 
-      // Add each item to the active complaints list
-      for (const item of queueToProcess) {
-        if (item.action === 'create_complaint') {
-          // Simulate server status update to 'routed' or 'pending' upon successful sync
-          const syncedComplaint: Complaint = {
-            ...item.payload,
-            status: 'routed' // update state on successful routing
-          };
-          addComplaint(syncedComplaint);
-        }
+      // Add Sync Log
+      if (itemsLogged.length > 0) {
+        const syncLog: SyncLog = {
+          id: `log-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          count: itemsLogged.length,
+          success: failedCount === 0,
+          error: failedCount > 0 ? errorOccurredMsg : undefined,
+          items: itemsLogged
+        };
+
+        const updatedLogs = [syncLog, ...get().syncLogs];
+        set({ syncLogs: updatedLogs });
+        await CachedRoadRepository.addSyncLog(syncLog);
       }
+
+      set({ isSyncing: false });
+    },
+
+    retrySyncItem: async (id) => {
+      const { offlineQueue, isOnline: onlineState, isSyncing, addComplaint } = get();
+      if (!onlineState || isSyncing) return;
+
+      const item = offlineQueue.find(q => q.id === id);
+      if (!item) return;
+
+      set({ isSyncing: true });
+
+      // Update status to syncing
+      const updatedQueue = offlineQueue.map(q => 
+        q.id === id ? { ...q, status: 'syncing' as const } : q
+      );
+      set({ offlineQueue: updatedQueue });
+      await CachedRoadRepository.enqueue({ ...item, status: 'syncing' });
+
+      // Simulate latency
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      const isConflict = 
+        item.payload.title?.toLowerCase().includes('conflict') ||
+        item.payload.description?.toLowerCase().includes('conflict');
+
+      if (isConflict) {
+        // Handle conflict
+        const existingConflicts = get().conflicts;
+        if (!existingConflicts.some(c => c.id === item.id)) {
+          const serverItem: Complaint = {
+            ...item.payload,
+            id: Math.floor(200000 + Math.random() * 900000),
+            title: `[Existing] ${item.payload.title}`,
+            description: `This report was submitted by another citizen on ${new Date(Date.now() - 86400000).toLocaleDateString()} and is already under PWD review.`,
+            status: 'in_progress',
+            createdAt: new Date(Date.now() - 86400000 * 2).toISOString()
+          };
+          set({ conflicts: [...existingConflicts, { id: item.id, localItem: item, serverItem }] });
+        }
+
+        const failedItem: SyncQueueItem = {
+          ...item,
+          status: 'failed',
+          error: 'Conflict: Ticket already exists'
+        };
+        const postFailedQueue = get().offlineQueue.map(q => q.id === item.id ? failedItem : q);
+        set({ offlineQueue: postFailedQueue });
+        await CachedRoadRepository.enqueue(failedItem);
+
+        const syncLog: SyncLog = {
+          id: `log-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          count: 1,
+          success: false,
+          error: 'Conflict detected during manual retry',
+          items: [{ title: item.payload.title || 'Complaint', category: item.payload.category || 'General', result: 'failed' }]
+        };
+        set({ syncLogs: [syncLog, ...get().syncLogs] });
+        await CachedRoadRepository.addSyncLog(syncLog);
+        
+        set({ isSyncing: false });
+        return;
+      }
+
+      // Success sync
+      const syncedComplaint: Complaint = {
+        ...item.payload,
+        status: 'routed'
+      };
+      addComplaint(syncedComplaint);
+
+      const postSuccessQueue = get().offlineQueue.filter(q => q.id !== id);
+      set({ 
+        offlineQueue: postSuccessQueue,
+        syncQueueCount: postSuccessQueue.length
+      });
+      await CachedRoadRepository.dequeue(id);
+
+      const syncLog: SyncLog = {
+        id: `log-${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        count: 1,
+        success: true,
+        items: [{ title: item.payload.title || 'Complaint', category: item.payload.category || 'General', result: 'synced' }]
+      };
+      set({ syncLogs: [syncLog, ...get().syncLogs] });
+      await CachedRoadRepository.addSyncLog(syncLog);
+
+      set({ isSyncing: false });
+    },
+
+    discardSyncItem: async (id) => {
+      const { offlineQueue } = get();
+      const updatedQueue = offlineQueue.filter(q => q.id !== id);
+      set({ 
+        offlineQueue: updatedQueue,
+        syncQueueCount: updatedQueue.length,
+        conflicts: get().conflicts.filter(c => c.id !== id)
+      });
+      await CachedRoadRepository.dequeue(id);
+    },
+
+    resolveConflict: async (id, resolution) => {
+      const conflict = get().conflicts.find(c => c.id === id);
+      if (!conflict) return;
+
+      const { localItem, serverItem } = conflict;
+
+      if (resolution === 'keep_local') {
+        const syncedComplaint: Complaint = {
+          ...localItem.payload,
+          status: 'routed'
+        };
+        get().addComplaint(syncedComplaint);
+        
+        const syncLog: SyncLog = {
+          id: `log-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          count: 1,
+          success: true,
+          items: [{ title: localItem.payload.title || 'Complaint', category: localItem.payload.category || 'General', result: 'conflict_resolved' }]
+        };
+        set({ syncLogs: [syncLog, ...get().syncLogs] });
+        await CachedRoadRepository.addSyncLog(syncLog);
+      } else if (resolution === 'keep_server') {
+        get().addComplaint(serverItem);
+        
+        const syncLog: SyncLog = {
+          id: `log-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          count: 1,
+          success: true,
+          items: [{ title: serverItem.title || 'Complaint', category: serverItem.category || 'General', result: 'conflict_resolved' }]
+        };
+        set({ syncLogs: [syncLog, ...get().syncLogs] });
+        await CachedRoadRepository.addSyncLog(syncLog);
+      }
+      
+      const updatedQueue = get().offlineQueue.filter(q => q.id !== id);
+      set({
+        offlineQueue: updatedQueue,
+        syncQueueCount: updatedQueue.length,
+        conflicts: get().conflicts.filter(c => c.id !== id)
+      });
+      await CachedRoadRepository.dequeue(id);
     }
   };
 });
+

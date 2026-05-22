@@ -47,6 +47,7 @@ import { DashboardStatsSkeleton } from '@/components/shared/LoadingState';
 import { OfflineSyncManager } from '@/services/offlineSync';
 import ComplaintTimeline from '@/components/complaints/ComplaintTimeline';
 import ComplaintWizard from '@/components/complaints/ComplaintWizard';
+import SyncCenter from '@/components/transparency/SyncCenter';
 
 // Transparency & Budget dashboard imports
 import { calculateRoadTransparency, getScoreGrade, getCitywideTransparencyData } from '@/services/transparencyEngine';
@@ -71,12 +72,14 @@ export default function Page() {
     isOnline,
     syncQueueCount,
     setIsReporting,
-    complaintsList
+    complaintsList,
+    offlineQueue
   } = useStore();
 
   // Selected sub-entities for contractors/budget detail views
   const [selectedContractorId, setSelectedContractorId] = useState<number | null>(null);
   const [isSyncingUI, setIsSyncingUI] = useState(false);
+  const [complaintsTab, setComplaintsTab] = useState<'reports' | 'sync'>('reports');
 
   // Initialize connection sync manager on mount
   useEffect(() => {
@@ -1063,140 +1066,178 @@ export default function Page() {
       {activeView === 'complaints' && (
         <div className="flex-1 flex flex-col lg:flex-row gap-6 min-h-0 overflow-hidden animate-in fade-in duration-300">
           
-          {/* Main List */}
+          {/* Main List / Sync Center */}
           <div className="flex-1 flex flex-col bg-slate-950/45 border border-border/80 rounded-xl p-5 space-y-4 overflow-hidden">
-            <div className="flex justify-between items-center flex-wrap gap-3">
-              <h2 className="text-xs font-black text-slate-200 uppercase tracking-widest flex items-center gap-1.5">
-                <FileText className="w-4 h-4 text-cyan-400" /> Citizen Defect Registry ({filteredComplaints.length})
-              </h2>
+            <div className="flex justify-between items-center flex-wrap gap-4 border-b border-slate-900 pb-3">
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setComplaintsTab('reports')}
+                  className={`text-xs font-black uppercase tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all ${
+                    complaintsTab === 'reports'
+                      ? 'bg-gradient-to-r from-cyan-950/45 to-indigo-950/45 border-cyan-500/80 text-cyan-400 shadow-md shadow-cyan-500/5'
+                      : 'bg-transparent border-transparent text-muted-foreground hover:text-slate-200 hover:bg-slate-900/40'
+                  }`}
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  Defect Registry ({filteredComplaints.length})
+                </button>
+                <button
+                  onClick={() => setComplaintsTab('sync')}
+                  className={`text-xs font-black uppercase tracking-wider flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all ${
+                    complaintsTab === 'sync'
+                      ? 'bg-gradient-to-r from-cyan-950/45 to-indigo-950/45 border-cyan-500/80 text-cyan-400 shadow-md shadow-cyan-500/5'
+                      : 'bg-transparent border-transparent text-muted-foreground hover:text-slate-250 hover:bg-slate-900/40'
+                  }`}
+                >
+                  <Activity className="w-3.5 h-3.5" />
+                  Sync & Operations
+                  {offlineQueue.length > 0 && (
+                    <span className="flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-cyan-500 text-[9px] font-black text-slate-950 shadow-md shadow-cyan-500/20">
+                      {offlineQueue.length}
+                    </span>
+                  )}
+                </button>
+              </div>
               
               {/* Category Filter */}
-              <div className="flex gap-1.5 flex-wrap">
-                {(['all', 'pothole', 'paving_defect', 'waterlogging', 'debris', 'missing_signage'] as const).map(cat => (
-                  <button
-                    key={cat}
-                    onClick={() => setComplaintCategoryFilter(cat)}
-                    className={`text-[9px] font-bold px-2 py-1 border rounded capitalize transition-all ${
-                      complaintCategoryFilter === cat 
-                        ? 'bg-cyan-500 border-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10'
-                        : 'bg-slate-900/60 border-border text-slate-350 hover:border-slate-700'
-                    }`}
-                  >
-                    {cat.replace('_', ' ')}
-                  </button>
-                ))}
-              </div>
+              {complaintsTab === 'reports' && (
+                <div className="flex gap-1.5 flex-wrap">
+                  {(['all', 'pothole', 'paving_defect', 'waterlogging', 'debris', 'missing_signage'] as const).map(cat => (
+                    <button
+                      key={cat}
+                      onClick={() => setComplaintCategoryFilter(cat)}
+                      className={`text-[9px] font-bold px-2 py-1 border rounded capitalize transition-all ${
+                        complaintCategoryFilter === cat 
+                          ? 'bg-cyan-500 border-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10'
+                          : 'bg-slate-900/60 border-border text-slate-350 hover:border-slate-700'
+                      }`}
+                    >
+                      {cat.replace('_', ' ')}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* Simulated report trigger block */}
-            <div className="p-4 rounded-xl bg-slate-900/40 border border-border/60 flex items-center justify-between flex-wrap gap-4 select-none">
-              <div className="space-y-1">
-                <h4 className="text-xs font-black text-slate-250 uppercase tracking-wide flex items-center gap-1.5">
-                  <Activity className="w-4 h-4 text-cyan-400" /> Offline Reporting Simulator
-                </h4>
-                <p className="text-[10px] text-muted-foreground max-w-[450px] leading-relaxed">
-                  ROADWATCH architecture supports local SQLite/IndexedDB queue states for offline mapping. Click to mock report a new pothole while connection is throttled.
-                </p>
-              </div>
-              <button 
-                onClick={handleSimulateReport}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[10px] font-extrabold uppercase tracking-wider bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-500/25 active:scale-95 transition-all shrink-0"
-              >
-                <Plus className="w-4 h-4" /> Mock Report defect
-              </button>
-            </div>
-
-            {/* Complaints grid list */}
-            <div className="flex-1 overflow-y-auto pr-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filteredComplaints.map((c) => {
-                const road = c.roadId ? roads.find(r => r.id === c.roadId) : null;
-                const authority = getAuthority(c.assignedAuthorityId);
-
-                return (
-                  <div 
-                    key={c.id} 
-                    onClick={() => setSelectedComplaintId(c.id)}
-                    className={`p-4 rounded-xl border cursor-pointer transition-all space-y-3 flex flex-col justify-between ${
-                      selectedComplaintId === c.id 
-                        ? 'bg-slate-900 border-cyan-500 shadow-md shadow-cyan-500/5' 
-                        : 'bg-slate-950/60 border-border hover:border-cyan-500/30 hover:bg-slate-950/80'
-                    }`}
-                  >
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-start gap-2 flex-wrap">
-                        <span className="text-[9px] font-black uppercase text-slate-400 flex items-center gap-1.5">
-                          {c.category === 'pothole' && <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span>}
-                          {c.category.replace('_', ' ')}
-                        </span>
-                        <span className={`text-[8px] font-black uppercase border px-1.5 py-0.2 rounded tracking-wide ${
-                          c.status === 'resolved' ? 'bg-emerald-950/60 text-emerald-400 border-emerald-900/60' :
-                          c.status === 'in_progress' ? 'bg-cyan-950/60 text-cyan-400 border-cyan-900/60' :
-                          'bg-slate-900 text-slate-400 border-border'
-                        }`}>
-                          {c.status}
-                        </span>
-                      </div>
-                      <h3 className="text-xs font-extrabold text-slate-200 leading-snug">{c.title}</h3>
-                      <p className="text-[10px] text-muted-foreground leading-relaxed font-medium line-clamp-2">{c.description}</p>
-                    </div>
-
-                    <div className="border-t border-border/30 pt-3 text-[10px] text-muted-foreground space-y-1">
-                      <div className="flex justify-between">
-                        <span>Road Segment:</span>
-                        <strong className="text-slate-355">{road ? road.name : 'Unknown Segment'}</strong>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Assigned to:</span>
-                        <strong className="text-slate-355">{authority ? authority.departmentCode : 'Unassigned'}</strong>
-                      </div>
-                      <div className="text-[9px] text-right text-slate-500 pt-1">
-                        Reported: {new Date(c.createdAt).toLocaleDateString()}
-                      </div>
-                    </div>
+            {complaintsTab === 'reports' ? (
+              <>
+                {/* Simulated report trigger block */}
+                <div className="p-4 rounded-xl bg-slate-900/40 border border-border/60 flex items-center justify-between flex-wrap gap-4 select-none">
+                  <div className="space-y-1">
+                    <h4 className="text-xs font-black text-slate-250 uppercase tracking-wide flex items-center gap-1.5">
+                      <Activity className="w-4 h-4 text-cyan-400" /> Offline Reporting Simulator
+                    </h4>
+                    <p className="text-[10px] text-muted-foreground max-w-[450px] leading-relaxed">
+                      ROADWATCH architecture supports local SQLite/IndexedDB queue states for offline mapping. Click to mock report a new pothole while connection is throttled.
+                    </p>
                   </div>
-                );
-              })}
-            </div>
+                  <button 
+                    onClick={handleSimulateReport}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[10px] font-extrabold uppercase tracking-wider bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-500/25 active:scale-95 transition-all shrink-0"
+                  >
+                    <Plus className="w-4 h-4" /> Mock Report defect
+                  </button>
+                </div>
+
+                {/* Complaints grid list */}
+                <div className="flex-1 overflow-y-auto pr-1 grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in duration-300">
+                  {filteredComplaints.map((c) => {
+                    const road = c.roadId ? roads.find(r => r.id === c.roadId) : null;
+                    const authority = getAuthority(c.assignedAuthorityId);
+
+                    return (
+                      <div 
+                        key={c.id} 
+                        onClick={() => setSelectedComplaintId(c.id)}
+                        className={`p-4 rounded-xl border cursor-pointer transition-all space-y-3 flex flex-col justify-between ${
+                          selectedComplaintId === c.id 
+                            ? 'bg-slate-900 border-cyan-500 shadow-md shadow-cyan-500/5' 
+                            : 'bg-slate-950/60 border-border hover:border-cyan-500/30 hover:bg-slate-950/80'
+                        }`}
+                      >
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-start gap-2 flex-wrap">
+                            <span className="text-[9px] font-black uppercase text-slate-400 flex items-center gap-1.5">
+                              {c.category === 'pothole' && <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span>}
+                              {c.category.replace('_', ' ')}
+                            </span>
+                            <span className={`text-[8px] font-black uppercase border px-1.5 py-0.2 rounded tracking-wide ${
+                              c.status === 'resolved' ? 'bg-emerald-950/60 text-emerald-400 border-emerald-900/60' :
+                              c.status === 'in_progress' ? 'bg-cyan-950/60 text-cyan-400 border-cyan-900/60' :
+                              'bg-slate-900 text-slate-400 border-border'
+                            }`}>
+                              {c.status}
+                            </span>
+                          </div>
+                          <h3 className="text-xs font-extrabold text-slate-200 leading-snug">{c.title}</h3>
+                          <p className="text-[10px] text-muted-foreground leading-relaxed font-medium line-clamp-2">{c.description}</p>
+                        </div>
+
+                        <div className="border-t border-border/30 pt-3 text-[10px] text-muted-foreground space-y-1">
+                          <div className="flex justify-between">
+                            <span>Road Segment:</span>
+                            <strong className="text-slate-355">{road ? road.name : 'Unknown Segment'}</strong>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Assigned to:</span>
+                            <strong className="text-slate-355">{authority ? authority.departmentCode : 'Unassigned'}</strong>
+                          </div>
+                          <div className="text-[9px] text-right text-slate-500 pt-1">
+                            Reported: {new Date(c.createdAt).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              <div className="flex-1 overflow-y-auto pr-1 animate-in fade-in duration-300">
+                <SyncCenter />
+              </div>
+            )}
           </div>
 
           {/* Right Side Details Drawer: Defect Lifecycle Timeline */}
-          {selectedComplaintId ? (
-            <section className="w-full lg:w-[350px] shrink-0 h-full flex flex-col bg-slate-950 rounded-xl overflow-hidden border border-border/80 shadow-2xl relative z-10 transition-all duration-300 animate-in slide-in-from-bottom lg:slide-in-from-right">
-              <div className="flex items-center justify-between px-5 py-4 border-b border-border/60">
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-cyan-400" />
-                  <h3 className="text-xs uppercase font-extrabold tracking-wider text-slate-100">
-                    Defect Lifecycle Audit
-                  </h3>
+          {complaintsTab === 'reports' && (
+            selectedComplaintId ? (
+              <section className="w-full lg:w-[350px] shrink-0 h-full flex flex-col bg-slate-950 rounded-xl overflow-hidden border border-border/80 shadow-2xl relative z-10 transition-all duration-300 animate-in slide-in-from-bottom lg:slide-in-from-right">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-border/60">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-cyan-400" />
+                    <h3 className="text-xs uppercase font-extrabold tracking-wider text-slate-100">
+                      Defect Lifecycle Audit
+                    </h3>
+                  </div>
+                  <button 
+                    onClick={() => setSelectedComplaintId(null)}
+                    className="p-1 rounded-lg border border-border hover:bg-slate-900 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
-                <button 
-                  onClick={() => setSelectedComplaintId(null)}
-                  className="p-1 rounded-lg border border-border hover:bg-slate-900 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-              <div className="flex-1 overflow-y-auto p-5">
-                {(() => {
-                  const complaint = complaintsList.find(c => c.id === selectedComplaintId);
-                  return complaint ? (
-                    <ComplaintTimeline complaint={complaint} />
-                  ) : (
-                    <p className="text-[10px] text-muted-foreground text-center py-8">Select a complaint to view audit timeline.</p>
-                  );
-                })()}
-              </div>
-            </section>
-          ) : (
-            <section className="hidden lg:block w-[320px] shrink-0 h-full">
-              <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center border border-dashed border-border/50 rounded-xl bg-slate-950/20">
-                <Clock className="w-7 h-7 text-cyan-400/60 mb-2" />
-                <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider mb-1">Timeline Audit</h4>
-                <p className="text-[10px] text-muted-foreground leading-relaxed max-w-[200px]">
-                  Click on any complaint card to view its live status routing log, AI diagnostics, and assigned Executive Engineer.
-                </p>
-              </div>
-            </section>
+                <div className="flex-1 overflow-y-auto p-5">
+                  {(() => {
+                    const complaint = complaintsList.find(c => c.id === selectedComplaintId);
+                    return complaint ? (
+                      <ComplaintTimeline complaint={complaint} />
+                    ) : (
+                      <p className="text-[10px] text-muted-foreground text-center py-8">Select a complaint to view audit timeline.</p>
+                    );
+                  })()}
+                </div>
+              </section>
+            ) : (
+              <section className="hidden lg:block w-[320px] shrink-0 h-full">
+                <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center border border-dashed border-border/50 rounded-xl bg-slate-950/20">
+                  <Clock className="w-7 h-7 text-cyan-400/60 mb-2" />
+                  <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider mb-1">Timeline Audit</h4>
+                  <p className="text-[10px] text-muted-foreground leading-relaxed max-w-[200px]">
+                    Click on any complaint card to view its live status routing log, AI diagnostics, and assigned Executive Engineer.
+                  </p>
+                </div>
+              </section>
+            )
           )}
 
         </div>

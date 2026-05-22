@@ -24,9 +24,17 @@ import { routeComplaint, RoutingResult } from '@/services/routingEngine';
 import { ComplaintCategory, Complaint } from '@/types';
 import { roads } from '@/data/mockData';
 
+import type { ComponentType } from 'react';
+
+interface WizardMapProps {
+  center: [number, number];
+  onChange: (coords: [number, number]) => void;
+  roadId: number | null;
+}
+
 // Dynamically load the wizard map to prevent Next.js SSR crashes
-const WizardMap = dynamic(
-  () => import('./WizardMap'),
+const WizardMap = dynamic<WizardMapProps>(
+  () => import('./WizardMap') as any,
   {
     ssr: false,
     loading: () => (
@@ -154,14 +162,31 @@ export default function ComplaintWizard() {
     setRoutingInfo(routing);
   }, [coordinates, associatedRoadId]);
 
+  // Helper to convert File to Base64
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
   // Image Upload handler
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
     simulateUpload();
+
+    try {
+      const base64 = await fileToBase64(file);
+      setImagePreview(base64);
+    } catch (err) {
+      console.error('Base64 image conversion failed, falling back to object URL:', err);
+      setImagePreview(URL.createObjectURL(file));
+    }
   };
 
   const simulateUpload = () => {
@@ -201,7 +226,8 @@ export default function ComplaintWizard() {
       },
       status: 'pending' as const,
       assignedAuthorityId: routingInfo.authorityId,
-      roadId: associatedRoadId || undefined
+      roadId: associatedRoadId || undefined,
+      imagePreview: imagePreview || undefined
     };
 
     // Store action queues or saves immediately
@@ -496,7 +522,7 @@ export default function ComplaintWizard() {
                 <p className="text-[10px] text-muted-foreground leading-normal">
                   {isOnline 
                     ? 'Your complaint has been successfully routed to the Executive Engineer. Decency timelines check is active.'
-                    : 'Network connection is offline. The report has been queued locally in LocalStorage and will sync automatically when connection restores.'}
+                    : 'Network connection is offline. The report has been queued locally in IndexedDB and will sync automatically when connection restores.'}
                 </p>
               </div>
 

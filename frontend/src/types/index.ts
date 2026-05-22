@@ -72,6 +72,8 @@ export interface Complaint {
   assignedAuthorityId: number;
   roadId?: number;
   createdAt: string;
+  imageUrl?: string;
+  imagePreview?: string;
 }
 
 // UI/Layout related types
@@ -96,6 +98,9 @@ export interface SyncQueueItem {
   action: 'create_complaint' | 'update_complaint';
   payload: any;
   timestamp: string;
+  status?: 'pending' | 'syncing' | 'failed';
+  error?: string;
+  imagePreview?: string;
 }
 
 export interface YearlyAllocation {
