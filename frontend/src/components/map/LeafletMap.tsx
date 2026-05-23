@@ -33,9 +33,15 @@ const getStatusColor = (status: string, isSelected: boolean) => {
 // Helper component to center and animate map viewpoint changes
 function MapController({ selectedRoad }: { selectedRoad: Road | null }) {
   const map = useMap();
+  const { mapViewport } = useStore();
 
   useEffect(() => {
-    if (selectedRoad && selectedRoad.geometry.coordinates.length > 0) {
+    if (mapViewport) {
+      map.flyTo(mapViewport.center, mapViewport.zoom, {
+        duration: 1.8,
+        easeLinearity: 0.25
+      });
+    } else if (selectedRoad && selectedRoad.geometry.coordinates.length > 0) {
       // Find midpoint or bound fit
       const leafletCoords = getLeafletCoords(selectedRoad.geometry.coordinates);
       const bounds = L.latLngBounds(leafletCoords);
@@ -45,7 +51,7 @@ function MapController({ selectedRoad }: { selectedRoad: Road | null }) {
         easeLinearity: 0.25
       });
     }
-  }, [selectedRoad, map]);
+  }, [selectedRoad, mapViewport, map]);
 
   return null;
 }

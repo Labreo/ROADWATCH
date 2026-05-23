@@ -84,6 +84,10 @@ interface AppState {
   setPlaybackSpeed: (speed: number) => void;
   stepPlaybackForward: () => void;
   stepPlaybackBackward: () => void;
+
+  // Map Camera Control Viewport
+  mapViewport: { center: [number, number]; zoom: number } | null;
+  setMapViewport: (viewport: { center: [number, number]; zoom: number } | null) => void;
 }
 
 // Helper to load custom complaints from LocalStorage
@@ -148,6 +152,10 @@ export const useStore = create<AppState>((set, get) => {
         set({ currentPlaybackStepId: playbackSteps[currentIndex - 1].id });
       }
     },
+
+    // Map Viewport
+    mapViewport: null,
+    setMapViewport: (viewport) => set({ mapViewport: viewport }),
 
     // Network / Offline Queue
     isOnline: typeof window !== 'undefined' ? window.navigator.onLine : true,
