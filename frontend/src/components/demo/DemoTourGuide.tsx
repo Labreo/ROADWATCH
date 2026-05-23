@@ -18,47 +18,47 @@ interface TourStep {
   highlightSelector?: string; // CSS selector to highlight if any
 }
 
+const steps: TourStep[] = [
+  {
+    title: "1. Interactive Spatial Audit Map",
+    description: "We are starting in the **Road Registry**. We have selected **S.V. Road** which is currently flagged in **poor (red)** condition. Click 'Next Step' to ask the chatbot about it.",
+    view: 'roads',
+    roadId: 3,
+    complaintId: null,
+    highlightSelector: '.leaflet-container'
+  },
+  {
+    title: "2. Non-Hallucinating RAG Chatbot",
+    description: "Click the **Ask AI** button in the bottom right corner, and click the suggested prompt: *'Why is S.V. Road damaged again?'* to see the chatbot fetch SQLite facts deterministically.",
+    view: 'roads',
+    roadId: 3,
+    complaintId: null,
+    highlightSelector: '.custom-marker-wrapper'
+  },
+  {
+    title: "3. Real-Time Operations Control Center",
+    description: "Let's check the **Operations Center** using the Sidebar. Here, we selected the *'Uneven Paver Blocks'* complaint. Go ahead and dispatch a repair contractor!",
+    view: 'admin',
+    roadId: null,
+    complaintId: 3,
+    highlightSelector: '[aria-label="Main Navigation Sidebar"]'
+  },
+  {
+    title: "4. Budget Audits & Transparency Ledgers",
+    description: "Finally, let's verify the **Budget Audits** tab. S.V. Road's Transparency Scorecard lists active budget variances, audit deduction details, and project delayed trends.",
+    view: 'budgets',
+    roadId: 3,
+    complaintId: null,
+    highlightSelector: '.glass-panel'
+  }
+];
+
 export default function DemoTourGuide({ currentStep, setStep, onExit }: DemoTourGuideProps) {
   const { 
     setActiveView, 
     setSelectedRoadId, 
     setSelectedComplaintId 
   } = useStore();
-
-  const steps: TourStep[] = [
-    {
-      title: "1. Interactive Spatial Audit Map",
-      description: "We are starting in the **Road Registry**. We have selected **S.V. Road** which is currently flagged in **poor (red)** condition. Click 'Next Step' to ask the chatbot about it.",
-      view: 'roads',
-      roadId: 3,
-      complaintId: null,
-      highlightSelector: '.leaflet-container'
-    },
-    {
-      title: "2. Non-Hallucinating RAG Chatbot",
-      description: "Click the **Ask AI** button in the bottom right corner, and click the suggested prompt: *'Why is S.V. Road damaged again?'* to see the chatbot fetch SQLite facts deterministically.",
-      view: 'roads',
-      roadId: 3,
-      complaintId: null,
-      highlightSelector: '.custom-marker-wrapper'
-    },
-    {
-      title: "3. Real-Time Operations Control Center",
-      description: "Let's check the **Operations Center** using the Sidebar. Here, we selected the *'Uneven Paver Blocks'* complaint. Go ahead and dispatch a repair contractor!",
-      view: 'admin',
-      roadId: null,
-      complaintId: 3,
-      highlightSelector: '[aria-label="Main Navigation Sidebar"]'
-    },
-    {
-      title: "4. Budget Audits & Transparency Ledgers",
-      description: "Finally, let's verify the **Budget Audits** tab. S.V. Road's Transparency Scorecard lists active budget variances, audit deduction details, and project delayed trends.",
-      view: 'budgets',
-      roadId: 3,
-      complaintId: null,
-      highlightSelector: '.glass-panel'
-    }
-  ];
 
   const stepData = steps[currentStep - 1];
 

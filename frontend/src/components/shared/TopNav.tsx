@@ -110,6 +110,7 @@ export default function TopNav() {
       case 'roads': return 'Road Registry Explorer';
       case 'contractors': return 'Contractor Transparency Panel';
       case 'budgets': return 'Budget & Expense Audits';
+      case 'playback': return 'Historical Road Playback';
       case 'complaints': return 'Citizen Defect Reports';
       default: return 'ROADWATCH Dashboard';
     }

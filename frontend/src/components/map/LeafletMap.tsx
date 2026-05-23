@@ -6,6 +6,7 @@ import L from 'leaflet';
 import { useStore } from '@/store/useStore';
 import { roads, getComplaintsForRoad } from '@/data/mockData';
 import { Road } from '@/types';
+import { getHistoricalRoadState, playbackSteps } from '@/data/historicalData';
 
 // Swaps GeoJSON [longitude, latitude] to Leaflet [latitude, longitude]
 const getLeafletCoords = (coords: [number, number][]): [number, number][] => {
@@ -73,14 +74,27 @@ export default function LeafletMap() {
     selectedRoadId, 
     setSelectedRoadId, 
     searchQuery, 
-    statusFilter 
+    statusFilter,
+    activeView,
+    currentPlaybackStepId
   } = useStore();
 
   // Find active road object
   const selectedRoad = roads.find(r => r.id === selectedRoadId) || null;
 
-  // Active complaints for selected road
-  const activeComplaints = selectedRoad ? getComplaintsForRoad(selectedRoad.id) : [];
+  // Active complaints for selected road, filtered by playback date if in timeline mode
+  const baseComplaints = selectedRoad ? getComplaintsForRoad(selectedRoad.id) : [];
+  
+  const activeComplaints = (() => {
+    if (activeView === 'playback') {
+      const step = playbackSteps.find(s => s.id === currentPlaybackStepId);
+      if (step) {
+        const cutoff = new Date(step.cutoffDate).getTime();
+        return baseComplaints.filter(c => new Date(c.createdAt).getTime() <= cutoff);
+      }
+    }
+    return baseComplaints;
+  })();
 
   // Filter roads displayed on map based on store settings
   const filteredRoads = roads.filter(road => {
@@ -175,25 +189,50 @@ export default function LeafletMap() {
                   }
                 }}
                 pathOptions={{
-                  color: getStatusColor(road.status, isSelected),
+                  color: getStatusColor(
+                    activeView === 'playback'
+                      ? getHistoricalRoadState(road.id, currentPlaybackStepId).status
+                      : road.status,
+                    isSelected
+                  ),
                   weight: isSelected ? 6 : 4,
                   opacity: isSelected ? 1.0 : 0.8,
                   lineCap: 'round',
                   lineJoin: 'round',
-                  dashArray: road.status === 'under_construction' ? '8, 8' : undefined
+                  dashArray: (
+                    activeView === 'playback'
+                      ? getHistoricalRoadState(road.id, currentPlaybackStepId).status
+                      : road.status
+                  ) === 'under_construction' ? '8, 8' : undefined
                 }}
               >
                 <Popup>
-                  <div className="text-xs p-1">
+                  <div className="text-xs p-1 space-y-1">
                     <p className="font-semibold text-slate-200">{road.name}</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">Code: {road.roadCode} ({road.lengthKm} km)</p>
-                    <p className="text-[10px] capitalize font-medium mt-1">
+                    <p className="text-[10px] text-muted-foreground">Code: {road.roadCode} ({road.lengthKm} km)</p>
+                    <p className="text-[10px] capitalize font-medium">
                       Status: <span className={
-                        road.status === 'good' ? 'text-emerald-400' :
-                        road.status === 'fair' ? 'text-amber-400' :
-                        road.status === 'poor' ? 'text-red-400' : 'text-cyan-400'
-                      }>{road.status.replace('_', ' ')}</span>
+                        (activeView === 'playback'
+                          ? getHistoricalRoadState(road.id, currentPlaybackStepId).status
+                          : road.status) === 'good' ? 'text-emerald-400' :
+                        (activeView === 'playback'
+                          ? getHistoricalRoadState(road.id, currentPlaybackStepId).status
+                          : road.status) === 'fair' ? 'text-amber-400' :
+                        (activeView === 'playback'
+                          ? getHistoricalRoadState(road.id, currentPlaybackStepId).status
+                          : road.status) === 'poor' ? 'text-red-400' : 'text-cyan-400'
+                      }>
+                        {(activeView === 'playback'
+                          ? getHistoricalRoadState(road.id, currentPlaybackStepId).status
+                          : road.status
+                        ).replace('_', ' ')}
+                      </span>
                     </p>
+                    {activeView === 'playback' && (
+                      <p className="text-[10px] font-semibold text-slate-350">
+                        Health Score: {getHistoricalRoadState(road.id, currentPlaybackStepId).healthScore}%
+                      </p>
+                    )}
                   </div>
                 </Popup>
               </Polyline>

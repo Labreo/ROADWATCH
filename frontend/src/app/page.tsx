@@ -52,6 +52,7 @@ import ChatPanel from '@/components/chat/ChatPanel';
 import OperationsDashboard from '@/components/operations/OperationsDashboard';
 import LandingHero from '@/components/demo/LandingHero';
 import DemoTourGuide from '@/components/demo/DemoTourGuide';
+import PlaybackDashboard from '@/components/playback/PlaybackDashboard';
 
 // Transparency & Budget dashboard imports
 import { calculateRoadTransparency, getScoreGrade, getCitywideTransparencyData } from '@/services/transparencyEngine';
@@ -77,7 +78,11 @@ export default function Page() {
     syncQueueCount,
     setIsReporting,
     complaintsList,
-    offlineQueue
+    offlineQueue,
+    isPlaybackPlaying,
+    playbackSpeed,
+    stepPlaybackForward,
+    setPlaybackPlaying
   } = useStore();
 
   // Selected sub-entities for contractors/budget detail views
@@ -94,6 +99,28 @@ export default function Page() {
   useEffect(() => {
     OfflineSyncManager.initialize();
   }, []);
+
+  // Timeline Playback Interval Controller
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout | null = null;
+    
+    if (isPlaybackPlaying && activeView === 'playback') {
+      intervalId = setInterval(() => {
+        stepPlaybackForward();
+      }, playbackSpeed);
+    }
+    
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [isPlaybackPlaying, playbackSpeed, stepPlaybackForward, activeView]);
+
+  // Reset playback status when navigating away
+  useEffect(() => {
+    if (activeView !== 'playback') {
+      setPlaybackPlaying(false);
+    }
+  }, [activeView, setPlaybackPlaying]);
 
   // Format currency helper
   const formatINR = (value: number) => {
@@ -1257,6 +1284,11 @@ export default function Page() {
         <div className="flex-1 min-h-0 overflow-y-auto pr-1">
           <OperationsDashboard />
         </div>
+      )}
+
+      {/* VIEW 7: HISTORICAL PLAYBACK SYSTEM */}
+      {activeView === 'playback' && (
+        <PlaybackDashboard />
       )}
 
       {/* Complaint wizard overlay */}

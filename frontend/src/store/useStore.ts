@@ -2,8 +2,9 @@ import { create } from 'zustand';
 import { RoadStatus, Complaint, SyncQueueItem, Road } from '@/types';
 import { complaints as mockComplaints, roads as mockRoads } from '@/data/mockData';
 import { CachedRoadRepository, SyncLog } from '@/services/cachedRoadRepository';
+import { playbackSteps } from '@/data/historicalData';
 
-export type AppView = 'dashboard' | 'roads' | 'contractors' | 'budgets' | 'complaints' | 'admin';
+export type AppView = 'dashboard' | 'roads' | 'contractors' | 'budgets' | 'complaints' | 'admin' | 'playback';
 
 interface AppState {
   // Sidebar State
@@ -73,6 +74,16 @@ interface AppState {
     engineerName: string;
     notes?: string;
   }) => void;
+
+  // Playback Timeline State
+  currentPlaybackStepId: string;
+  isPlaybackPlaying: boolean;
+  playbackSpeed: number;
+  setPlaybackStepId: (stepId: string) => void;
+  setPlaybackPlaying: (playing: boolean) => void;
+  setPlaybackSpeed: (speed: number) => void;
+  stepPlaybackForward: () => void;
+  stepPlaybackBackward: () => void;
 }
 
 // Helper to load custom complaints from LocalStorage
@@ -113,6 +124,30 @@ export const useStore = create<AppState>((set, get) => {
     // Navigation
     activeView: 'dashboard',
     setActiveView: (view) => set({ activeView: view, selectedRoadId: null, selectedComplaintId: null }),
+
+    // Playback State
+    currentPlaybackStepId: '2026-Q2',
+    isPlaybackPlaying: false,
+    playbackSpeed: 1500,
+    setPlaybackStepId: (stepId) => set({ currentPlaybackStepId: stepId }),
+    setPlaybackPlaying: (playing) => set({ isPlaybackPlaying: playing }),
+    setPlaybackSpeed: (speed) => set({ playbackSpeed: speed }),
+    stepPlaybackForward: () => {
+      const { currentPlaybackStepId } = get();
+      const currentIndex = playbackSteps.findIndex(s => s.id === currentPlaybackStepId);
+      if (currentIndex < playbackSteps.length - 1) {
+        set({ currentPlaybackStepId: playbackSteps[currentIndex + 1].id });
+      } else {
+        set({ isPlaybackPlaying: false });
+      }
+    },
+    stepPlaybackBackward: () => {
+      const { currentPlaybackStepId } = get();
+      const currentIndex = playbackSteps.findIndex(s => s.id === currentPlaybackStepId);
+      if (currentIndex > 0) {
+        set({ currentPlaybackStepId: playbackSteps[currentIndex - 1].id });
+      }
+    },
 
     // Network / Offline Queue
     isOnline: typeof window !== 'undefined' ? window.navigator.onLine : true,

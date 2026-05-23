@@ -19,13 +19,16 @@ import {
   getAuthority, 
   getProjectsForRoad, 
   getContractor, 
-  getComplaintsForRoad, 
-  getRoad 
+  getRoad,
+  projects,
+  contractors
 } from '@/data/mockData';
 import { Contractor, Project, Road } from '@/types';
+import RoadHealthScorecard from './RoadHealthScorecard';
+import InfrastructureDiagnostics from './InfrastructureDiagnostics';
 
 export default function RoadDetailsPanel() {
-  const { selectedRoadId, setSelectedRoadId } = useStore();
+  const { selectedRoadId, setSelectedRoadId, complaintsList } = useStore();
   
   if (!selectedRoadId) return null;
   
@@ -34,7 +37,7 @@ export default function RoadDetailsPanel() {
 
   const authority = getAuthority(road.authorityId);
   const roadProjects = getProjectsForRoad(road.id);
-  const complaints = getComplaintsForRoad(road.id);
+  const complaints = complaintsList.filter(c => c.roadId === road.id);
 
   // Take the most recent active or completed project to display financials & contractor
   const primaryProject = roadProjects.find(p => p.status === 'in_progress') || roadProjects[0];
@@ -98,6 +101,22 @@ export default function RoadDetailsPanel() {
 
       {/* Content Area */}
       <div className="flex-1 overflow-y-auto p-5 space-y-6">
+        
+        {/* Road Health Intelligence Scorecard */}
+        <RoadHealthScorecard
+          road={road}
+          projects={projects}
+          contractors={contractors}
+          complaints={complaintsList}
+        />
+        
+        {/* Infrastructure Diagnostic Insights */}
+        <InfrastructureDiagnostics
+          road={road}
+          projects={projects}
+          contractors={contractors}
+          complaints={complaintsList}
+        />
         
         {/* Section 1: Authority & Last Relayed */}
         <div className="grid grid-cols-2 gap-3">
