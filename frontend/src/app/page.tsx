@@ -50,6 +50,8 @@ import ComplaintWizard from '@/components/complaints/ComplaintWizard';
 import SyncCenter from '@/components/transparency/SyncCenter';
 import ChatPanel from '@/components/chat/ChatPanel';
 import OperationsDashboard from '@/components/operations/OperationsDashboard';
+import LandingHero from '@/components/demo/LandingHero';
+import DemoTourGuide from '@/components/demo/DemoTourGuide';
 
 // Transparency & Budget dashboard imports
 import { calculateRoadTransparency, getScoreGrade, getCitywideTransparencyData } from '@/services/transparencyEngine';
@@ -82,6 +84,11 @@ export default function Page() {
   const [selectedContractorId, setSelectedContractorId] = useState<number | null>(null);
   const [isSyncingUI, setIsSyncingUI] = useState(false);
   const [complaintsTab, setComplaintsTab] = useState<'reports' | 'sync'>('reports');
+
+  // Onboarding & Demo walkthrough states
+  const [showLanding, setShowLanding] = useState(true);
+  const [isTourActive, setIsTourActive] = useState(false);
+  const [tourStep, setTourStep] = useState(1);
 
   // Initialize connection sync manager on mount
   useEffect(() => {
@@ -1257,6 +1264,32 @@ export default function Page() {
 
       {/* Floating AI Chatbot Assistant */}
       <ChatPanel onSelectContractor={setSelectedContractorId} />
+
+      {/* Interactive Tour Guide Dock */}
+      {isTourActive && (
+        <DemoTourGuide 
+          currentStep={tourStep}
+          setStep={setTourStep}
+          onExit={() => {
+            setIsTourActive(false);
+          }}
+        />
+      )}
+
+      {/* Landing Page Cinematic Overlay */}
+      {showLanding && (
+        <LandingHero 
+          onStartTour={() => {
+            setShowLanding(false);
+            setIsTourActive(true);
+            setTourStep(1);
+          }}
+          onEnterDirect={() => {
+            setShowLanding(false);
+            setIsTourActive(false);
+          }}
+        />
+      )}
     </div>
   );
 }
