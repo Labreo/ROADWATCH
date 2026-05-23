@@ -66,17 +66,17 @@ export default function TimelineSlider() {
 
         <button
           onClick={() => setPlaybackPlaying(!isPlaybackPlaying)}
-          className={`p-3 rounded-xl transition-all shadow-md ${
+          className={`p-3 rounded-xl transition-all shadow-sm ${
             isPlaybackPlaying 
-              ? 'bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-cyan-500/20' 
-              : 'bg-slate-900 hover:bg-slate-800 border border-border/80 text-cyan-400'
+              ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-950 font-bold' 
+              : 'bg-zinc-900 hover:bg-zinc-855 border border-zinc-800 text-zinc-350'
           }`}
           title={isPlaybackPlaying ? 'Pause Playback' : 'Play Timeline'}
         >
           {isPlaybackPlaying ? (
-            <Pause className="w-4 h-4 fill-slate-950" />
+            <Pause className="w-4 h-4 fill-current" />
           ) : (
-            <Play className="w-4 h-4 fill-cyan-400 translate-x-0.2" />
+            <Play className="w-4 h-4 fill-current translate-x-0.2" />
           )}
         </button>
 
@@ -94,7 +94,7 @@ export default function TimelineSlider() {
       <div className="flex-1 w-full space-y-1">
         <div className="flex justify-between items-center text-[10px] px-1.5 font-bold uppercase tracking-wider text-muted-foreground">
           <span>Timeline Scrubber</span>
-          <span className="text-cyan-400 bg-cyan-950/40 border border-cyan-900/60 px-2 py-0.5 rounded animate-pulse">
+          <span className="text-zinc-300 bg-zinc-900 border border-zinc-800/80 px-2 py-0.5 rounded animate-pulse">
             Active: {activeStep.label} ({activeStep.date})
           </span>
         </div>
@@ -107,11 +107,11 @@ export default function TimelineSlider() {
             max={playbackSteps.length - 1}
             value={currentIndex === -1 ? 0 : currentIndex}
             onChange={handleSliderChange}
-            className="w-full h-1.5 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-cyan-500 focus:outline-none"
+            className="w-full h-1.5 bg-zinc-900 rounded-lg appearance-none cursor-pointer accent-zinc-500 focus:outline-none"
             style={{
-              background: `linear-gradient(to right, #06b6d4 0%, #06b6d4 ${
+              background: `linear-gradient(to right, #a1a1aa 0%, #a1a1aa ${
                 (currentIndex / (playbackSteps.length - 1)) * 100
-              }%, #1e293b ${(currentIndex / (playbackSteps.length - 1)) * 100}%, #1e293b 100%)`
+              }%, #27272a ${(currentIndex / (playbackSteps.length - 1)) * 100}%, #27272a 100%)`
             }}
           />
         </div>
@@ -125,7 +125,7 @@ export default function TimelineSlider() {
                 key={step.id}
                 onClick={() => setPlaybackStepId(step.id)}
                 className={`transition-colors border-t border-border pt-1 hover:text-slate-200 cursor-pointer ${
-                  isSelected ? 'text-cyan-400 border-cyan-500/80 font-black' : 'border-slate-800'
+                  isSelected ? 'text-zinc-200 border-zinc-400 font-extrabold' : 'border-zinc-900 text-zinc-650'
                 }`}
                 style={{ width: `${100 / playbackSteps.length}%` }}
               >
@@ -152,7 +152,7 @@ export default function TimelineSlider() {
                 onClick={() => handleSpeedToggle(sp.ms)}
                 className={`text-[9px] font-extrabold px-2.5 py-1 rounded-lg uppercase transition-all cursor-pointer ${
                   isSelected 
-                    ? 'bg-slate-950 text-cyan-400 border border-cyan-800/40 shadow-inner' 
+                    ? 'bg-slate-950 text-zinc-100 border border-zinc-800/80 shadow-inner' 
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >

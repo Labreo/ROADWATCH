@@ -178,32 +178,32 @@ export default function DemoTourGuide({ currentStep, setStep, onExit }: DemoTour
   };
 
   return (
-    <div className={`fixed bottom-6 left-6 right-6 lg:left-72 z-[1050] bg-slate-950/95 border border-cyan-500/80 p-5 rounded-2xl shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-5 transition-all duration-300 ${
-      soundPulse ? 'scale-[1.01] border-indigo-500 shadow-indigo-500/10' : 'shadow-cyan-500/5'
+    <div className={`fixed bottom-6 left-6 right-6 lg:left-72 z-[1050] bg-zinc-950/95 border border-zinc-800/80 p-5 rounded-2xl shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-5 transition-all duration-300 ${
+      soundPulse ? 'scale-[1.01] border-zinc-700 shadow-zinc-950/65' : 'shadow-zinc-950/50'
     }`}>
       
       {/* Dynamic Scenario HUD */}
       <div className="flex items-start gap-4 flex-1 min-w-0">
-        <div className="p-2.5 rounded-xl bg-cyan-500 text-slate-950 shrink-0 mt-0.5 shadow-md shadow-cyan-500/25 relative">
-          <Sparkles className="w-5 h-5" />
+        <div className="p-2.5 rounded-xl bg-zinc-900 text-zinc-100 shrink-0 mt-0.5 border border-zinc-800 relative shadow-inner">
+          <Sparkles className="w-4 h-4" />
           {soundPulse && (
-            <span className="absolute inset-0 rounded-xl border border-cyan-400 animate-ping opacity-75"></span>
+            <span className="absolute inset-0 rounded-xl border border-zinc-500 animate-ping opacity-30"></span>
           )}
         </div>
 
         <div className="space-y-1.5 min-w-0">
           <div className="flex items-center gap-2.5 flex-wrap">
-            <span className="text-[9px] font-black uppercase text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800/40 tracking-widest">
+            <span className="text-[8px] font-extrabold uppercase text-zinc-400 bg-zinc-900/60 px-2 py-0.5 rounded border border-zinc-800/60 tracking-wider">
               Guided Demo Step {currentStep} of {steps.length}
             </span>
-            <span className="text-xs font-extrabold text-slate-200 uppercase tracking-wide">
+            <span className="text-xs font-bold text-slate-100 uppercase tracking-wide">
               {stepData?.title}
             </span>
           </div>
 
-          <p className="text-[11px] leading-relaxed text-slate-300 font-medium max-w-3xl">
+          <p className="text-[11px] leading-relaxed text-zinc-300 font-medium max-w-3xl">
             {stepData?.description.split('**').map((txt, idx) => 
-              idx % 2 === 1 ? <strong key={idx} className="text-cyan-400 font-bold">{txt}</strong> : txt
+              idx % 2 === 1 ? <strong key={idx} className="text-zinc-100 font-semibold border-b border-zinc-800">{txt}</strong> : txt
             )}
           </p>
 
@@ -213,7 +213,7 @@ export default function DemoTourGuide({ currentStep, setStep, onExit }: DemoTour
               demoActionStatus !== 'compaction_audited' ? (
                 <button
                   onClick={runScenarioAction}
-                  className="px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider rounded-lg bg-slate-900 border border-cyan-500/50 hover:bg-slate-800 text-cyan-400 hover:text-cyan-300 cursor-pointer active:scale-95 transition-all"
+                  className="px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider rounded-lg bg-zinc-900 border border-zinc-800 hover:bg-zinc-850 hover:border-zinc-700 text-zinc-300 hover:text-white cursor-pointer active:scale-95 transition-all"
                 >
                   Inspect Sub-Base
                 </button>
@@ -228,7 +228,7 @@ export default function DemoTourGuide({ currentStep, setStep, onExit }: DemoTour
               demoActionStatus !== 'aggregate_audited' ? (
                 <button
                   onClick={runScenarioAction}
-                  className="px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider rounded-lg bg-slate-900 border border-cyan-500/50 hover:bg-slate-800 text-cyan-400 hover:text-cyan-300 cursor-pointer active:scale-95 transition-all"
+                  className="px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider rounded-lg bg-zinc-900 border border-zinc-800 hover:bg-zinc-850 hover:border-zinc-700 text-zinc-300 hover:text-white cursor-pointer active:scale-95 transition-all"
                 >
                   Audit Paving Mix
                 </button>
@@ -243,13 +243,13 @@ export default function DemoTourGuide({ currentStep, setStep, onExit }: DemoTour
               demoActionStatus !== 'complaint_submitted' ? (
                 <button
                   onClick={runScenarioAction}
-                  className="px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider rounded-lg bg-slate-900 border border-cyan-500/50 hover:bg-slate-800 text-cyan-400 hover:text-cyan-300 cursor-pointer active:scale-95 transition-all"
+                  className="px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider rounded-lg bg-zinc-900 border border-zinc-800 hover:bg-zinc-850 hover:border-zinc-700 text-zinc-300 hover:text-white cursor-pointer active:scale-95 transition-all"
                 >
                   Simulate Waterlogging Report
                 </button>
               ) : (
-                <span className="text-[9.5px] font-extrabold text-emerald-400 flex items-center gap-1 bg-emerald-950/40 border border-emerald-900/60 px-2.5 py-1 rounded-lg animate-bounce">
-                  <Activity className="w-3.5 h-3.5 text-blue-400" /> Ticket #RW-2026-8899 Synced & Auto-Routed to Ward K-West!
+                <span className="text-[9.5px] font-extrabold text-emerald-400 flex items-center gap-1 bg-emerald-950/40 border border-emerald-900/60 px-2.5 py-1 rounded-lg">
+                  <Activity className="w-3.5 h-3.5 text-emerald-400" /> Ticket #RW-2026-8899 Synced & Auto-Routed to Ward K-West!
                 </span>
               )
             )}
@@ -258,7 +258,7 @@ export default function DemoTourGuide({ currentStep, setStep, onExit }: DemoTour
               demoActionStatus !== 'contractor_dispatched' ? (
                 <button
                   onClick={runScenarioAction}
-                  className="px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider rounded-lg bg-slate-900 border border-cyan-500/50 hover:bg-slate-800 text-cyan-400 hover:text-cyan-300 cursor-pointer active:scale-95 transition-all"
+                  className="px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider rounded-lg bg-zinc-900 border border-zinc-800 hover:bg-zinc-850 hover:border-zinc-700 text-zinc-300 hover:text-white cursor-pointer active:scale-95 transition-all"
                 >
                   Dispatch Zenith Construction
                 </button>
@@ -277,7 +277,7 @@ export default function DemoTourGuide({ currentStep, setStep, onExit }: DemoTour
         <button
           onClick={handleBack}
           disabled={currentStep === 1}
-          className={`p-2.5 rounded-xl border border-border/85 text-slate-200 hover:text-white bg-slate-950/50 hover:bg-slate-900 transition-all flex items-center gap-1 text-[10px] font-black uppercase tracking-wider cursor-pointer active:scale-95 ${
+          className={`p-2.5 rounded-xl border border-zinc-850 text-slate-300 hover:text-white bg-zinc-900/40 hover:bg-zinc-900 transition-all flex items-center gap-1 text-[10px] font-black uppercase tracking-wider cursor-pointer active:scale-95 ${
             currentStep === 1 ? 'opacity-40 cursor-not-allowed' : ''
           }`}
         >
@@ -287,7 +287,7 @@ export default function DemoTourGuide({ currentStep, setStep, onExit }: DemoTour
 
         <button
           onClick={handleNext}
-          className="px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black transition-all flex items-center gap-1.5 text-[10px] uppercase tracking-widest shadow-md shadow-cyan-500/20 cursor-pointer active:scale-95"
+          className="px-4 py-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-950 font-bold transition-all flex items-center gap-1.5 text-[10px] uppercase tracking-wider shadow-sm cursor-pointer active:scale-95"
         >
           {currentStep === steps.length ? 'Finish Tour' : 'Next Step'}
           <ArrowRight className="w-3.5 h-3.5" />
@@ -297,7 +297,7 @@ export default function DemoTourGuide({ currentStep, setStep, onExit }: DemoTour
 
         <button
           onClick={onExit}
-          className="p-2.5 rounded-xl border border-border/65 hover:bg-red-950/20 text-muted-foreground hover:text-red-400 transition-all flex items-center justify-center shrink-0 cursor-pointer"
+          className="p-2.5 rounded-xl border border-zinc-800/80 hover:bg-zinc-900/60 text-muted-foreground hover:text-red-400 transition-all flex items-center justify-center shrink-0 cursor-pointer"
           title="Exit Tour"
         >
           <X className="w-4 h-4" />

@@ -42,30 +42,30 @@ export default function InfrastructureDiagnostics({
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case 'high':
-        return 'text-red-400 bg-red-950/50 border-red-900/60';
+        return 'text-red-400 bg-red-950/40 border-red-900/40';
       case 'medium':
-        return 'text-amber-400 bg-amber-950/50 border-amber-900/60';
+        return 'text-amber-400 bg-amber-950/40 border-amber-900/40';
       default:
-        return 'text-cyan-400 bg-cyan-950/50 border-cyan-900/60';
+        return 'text-zinc-450 bg-zinc-950/40 border-zinc-900/40';
     }
   };
 
   const getFactorIcon = (type: string) => {
     switch (type) {
       case 'drainage_failure':
-        return <AlertTriangle className="w-4 h-4 text-blue-400" />;
+        return <AlertTriangle className="w-4 h-4 text-zinc-500" />;
       case 'repair_cycle':
-        return <Activity className="w-4 h-4 text-orange-400" />;
+        return <Activity className="w-4 h-4 text-zinc-550" />;
       case 'contractor_reliability':
-        return <HardHat className="w-4 h-4 text-indigo-400" />;
+        return <HardHat className="w-4 h-4 text-zinc-500" />;
       case 'weather_degradation':
-        return <Info className="w-4 h-4 text-cyan-400" />;
+        return <Info className="w-4 h-4 text-zinc-500" />;
       case 'budget_inconsistency':
-        return <Coins className="w-4 h-4 text-rose-400" />;
+        return <Coins className="w-4 h-4 text-zinc-550" />;
       case 'complaint_density':
-        return <Clock className="w-4 h-4 text-yellow-400" />;
+        return <Clock className="w-4 h-4 text-zinc-550" />;
       default:
-        return <Cpu className="w-4 h-4 text-slate-400" />;
+        return <Cpu className="w-4 h-4 text-zinc-500" />;
     }
   };
 
@@ -74,19 +74,19 @@ export default function InfrastructureDiagnostics({
       {/* Header section with scanning animation */}
       <div className="flex items-center justify-between border-b border-border/40 pb-2">
         <div className="flex items-center gap-1.5">
-          <Cpu className="w-4 h-4 text-cyan-400" />
+          <Cpu className="w-4 h-4 text-zinc-400" />
           <h3 className="text-xs uppercase font-extrabold tracking-wider text-slate-200">
             Infrastructure Diagnostics
           </h3>
         </div>
         
         {/* Blinking telemetry pulse */}
-        <div className="flex items-center gap-1.5 bg-slate-900/60 border border-slate-800 px-2 py-0.5 rounded-lg select-none">
+        <div className="flex items-center gap-1.5 bg-zinc-900/40 border border-zinc-800/60 px-2 py-0.5 rounded-lg select-none">
           <div className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-zinc-500 opacity-60"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-zinc-400"></span>
           </div>
-          <span className="text-[8px] uppercase font-bold tracking-wider text-cyan-400">Scan Active</span>
+          <span className="text-[8px] uppercase font-bold tracking-wider text-zinc-400">Scan Active</span>
         </div>
       </div>
 
@@ -156,24 +156,24 @@ export default function InfrastructureDiagnostics({
 
                           {/* Engineering Recommendation */}
                           <div>
-                            <span className="text-[8.5px] text-cyan-450 block font-bold uppercase tracking-wider mb-1">
+                            <span className="text-[8.5px] text-zinc-400 block font-bold uppercase tracking-wider mb-1">
                               Recommended Mitigation Action
                             </span>
-                            <p className="text-slate-300 font-semibold">{f.recommendation}</p>
+                            <p className="text-slate-350 font-semibold">{f.recommendation}</p>
                           </div>
 
                           {/* Supporting Evidence Chips */}
                           <div className="space-y-1.5 pt-1.5 border-t border-slate-900/80">
-                            <span className="text-[8.5px] text-slate-450 block font-bold uppercase tracking-wider">
+                            <span className="text-[8.5px] text-slate-400 block font-bold uppercase tracking-wider">
                               Supporting Telemetry Evidence
                             </span>
                             <div className="flex flex-wrap gap-1.5">
                               {f.evidence.map((ev, idx) => (
                                 <span 
                                   key={idx}
-                                  className="inline-flex items-center gap-1 text-[8.5px] font-semibold bg-slate-900 hover:bg-slate-850 transition-colors text-slate-300 border border-slate-800 px-2 py-0.5 rounded-full"
+                                  className="inline-flex items-center gap-1 text-[8.5px] font-semibold bg-zinc-900/50 hover:bg-zinc-800/60 transition-colors text-slate-300 border border-zinc-800/40 px-2 py-0.5 rounded-full"
                                 >
-                                  <FileText className="w-2.5 h-2.5 text-cyan-400 shrink-0" />
+                                  <FileText className="w-2.5 h-2.5 text-zinc-550 shrink-0" />
                                   <span>{ev}</span>
                                 </span>
                               ))}
@@ -205,11 +205,11 @@ export default function InfrastructureDiagnostics({
       {/* Diagnostics telemetry confidence badge footer */}
       <div className="pt-2 border-t border-border/40 flex items-center justify-between text-[9px] text-muted-foreground select-none">
         <span className="flex items-center gap-1.5 font-medium">
-          <ShieldAlert className="w-3.5 h-3.5 text-cyan-400" />
+          <ShieldAlert className="w-3.5 h-3.5 text-zinc-500" />
           <span>Diagnostic Confidence:</span>
         </span>
         <span className="font-extrabold text-slate-300">
-          {diagnosis.confidenceScore}% — <span className="text-cyan-400 font-medium">{diagnosis.confidenceLevel.split(' ')[0]}</span>
+          {diagnosis.confidenceScore}% — <span className="text-zinc-400 font-medium">{diagnosis.confidenceLevel.split(' ')[0]}</span>
         </span>
       </div>
     </div>

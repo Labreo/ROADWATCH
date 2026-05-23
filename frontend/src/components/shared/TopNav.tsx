@@ -142,11 +142,14 @@ export default function TopNav() {
         <Search className="absolute top-2.5 left-3 w-4 h-4 text-muted-foreground" />
         <input
           type="text"
-          placeholder="Global registry search (road name, contractor)..."
+          placeholder="Search road index, contractor code... (⌘K)"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-9 pr-4 py-2 text-xs bg-slate-950/75 border border-border/60 rounded-xl placeholder-muted-foreground text-slate-100 focus:outline-none focus:border-cyan-500/80 focus:ring-1 focus:ring-cyan-500/80 transition-all shadow-inner"
+          className="w-full pl-9 pr-10 py-2 text-xs bg-zinc-900 border border-zinc-700/50 rounded-xl placeholder-muted-foreground text-slate-200 focus:outline-none focus:border-zinc-500/80 focus:ring-1 focus:ring-zinc-550 transition-all shadow-inner"
         />
+        <span className="absolute right-3 top-2.5 px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700/60 text-[9px] text-muted-foreground font-semibold font-mono leading-none select-none pointer-events-none">
+          ⌘K
+        </span>
       </div>
 
       {/* Action Tray */}
@@ -175,7 +178,7 @@ export default function TopNav() {
         </div>
 
         {/* Region Code */}
-        <span className="hidden md:inline-block text-[9px] bg-cyan-950 border border-cyan-900 text-cyan-400 font-extrabold tracking-wide uppercase px-2 py-0.5 rounded">
+        <span className="hidden md:inline-block text-[9px] bg-zinc-900 border border-zinc-800 text-zinc-350 font-bold tracking-wide uppercase px-2 py-0.5 rounded">
           Mumbai Corp
         </span>
 
@@ -189,8 +192,8 @@ export default function TopNav() {
             <Bell className="w-4 h-4" />
             {unreadCount > 0 && (
               <span className="absolute top-0.5 right-0.5 flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-zinc-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-zinc-100"></span>
               </span>
             )}
           </button>

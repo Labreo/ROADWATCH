@@ -44,7 +44,7 @@ export default function PlaybackDashboard() {
       case 'poor':
         return 'bg-red-950/80 text-red-400 border border-red-800/40';
       case 'under_construction':
-        return 'bg-cyan-950/80 text-cyan-400 border border-cyan-800/40 animate-pulse';
+        return 'bg-zinc-900 border border-zinc-800 text-zinc-350 animate-pulse';
       default:
         return 'bg-slate-900 text-slate-400 border border-border';
     }
@@ -63,14 +63,14 @@ export default function PlaybackDashboard() {
               placeholder="Search roads by name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 text-xs bg-slate-900 border border-border/80 rounded-lg placeholder-muted-foreground text-slate-100 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
+              className="w-full pl-9 pr-4 py-2 text-xs bg-slate-900 border border-border/80 rounded-lg placeholder-muted-foreground text-slate-100 focus:outline-none focus:border-zinc-700/60 focus:ring-1 focus:ring-zinc-800 transition-all"
             />
           </div>
         </div>
 
         {/* Info header */}
         <div className="flex items-center gap-1.5 text-[10px] uppercase font-extrabold tracking-widest text-slate-300 border-b border-border/40 pb-2">
-          <History className="w-4 h-4 text-cyan-400" />
+          <History className="w-4 h-4 text-zinc-550" />
           <span>Road Chronology Registry</span>
         </div>
 
@@ -86,7 +86,7 @@ export default function PlaybackDashboard() {
                 onClick={() => setSelectedRoadId(road.id)}
                 className={`w-full text-left p-3 rounded-xl border transition-all duration-200 cursor-pointer flex items-center justify-between gap-3 ${
                   isSelected 
-                    ? 'bg-slate-900 border-cyan-500/80 shadow-[0_0_8px_rgba(6,182,212,0.1)]' 
+                    ? 'bg-slate-900 border-zinc-700/60 shadow-sm shadow-zinc-950/45' 
                     : 'bg-slate-950/20 border-border/45 hover:border-slate-800'
                 }`}
               >

@@ -1,28 +1,28 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
-/* Core Theme Variables (Default Dark Theme for rich aesthetics) */
+/* Core Theme Variables (Sleek Matte Dark Theme) */
 :root {
-  --background: #0f111a;
-  --foreground: #f8fafc;
-  --card: #151926;
-  --card-foreground: #f8fafc;
-  --popover: #151926;
-  --popover-foreground: #f8fafc;
-  --primary: #06b6d4; /* Vibrant Cyan */
-  --primary-foreground: #0f111a;
-  --secondary: #1e293b;
-  --secondary-foreground: #f8fafc;
-  --muted: #1e293b;
-  --muted-foreground: #94a3b8;
-  --accent: #0f172a;
-  --accent-foreground: #06b6d4;
-  --destructive: #ef4444;
-  --destructive-foreground: #f8fafc;
-  --border: #272d42;
-  --input: #1e293b;
-  --ring: #06b6d4;
-  --radius: 0.75rem;
+  --background: #09090b; /* Zinc 950 */
+  --foreground: #f4f4f5; /* Zinc 100 */
+  --card: #09090b;
+  --card-foreground: #f4f4f5;
+  --popover: #09090b;
+  --popover-foreground: #f4f4f5;
+  --primary: #f4f4f5; /* Clean white primary */
+  --primary-foreground: #09090b;
+  --secondary: #18181b; /* Zinc 900 */
+  --secondary-foreground: #f4f4f5;
+  --muted: #18181b;
+  --muted-foreground: #71717a; /* Zinc 400 */
+  --accent: #18181b;
+  --accent-foreground: #f4f4f5;
+  --destructive: #f43f5e; /* Rose 500 */
+  --destructive-foreground: #f4f4f5;
+  --border: rgba(255, 255, 255, 0.06); /* Thin desaturated borders */
+  --input: #18181b;
+  --ring: #27272a; /* Zinc 800 */
+  --radius: 0.5rem; /* Restrained borders */
 }
 
 @theme inline {
@@ -56,17 +56,17 @@ body {
 
 /* Glassmorphism utility classes */
 .glass-panel {
-  background: rgba(21, 25, 38, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(9, 9, 11, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .glass-card {
-  background: rgba(30, 41, 59, 0.4);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  background: rgba(24, 24, 27, 0.35);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.02);
 }
 
 /* Sleek scrollbar styling */
@@ -76,26 +76,26 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f111a;
+  background: #09090b;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #27272a;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #06b6d4;
+  background: #3f3f46;
 }
 
 /* Dark OSM tile filter for premium styling */
 .dark-map-tiles {
-  filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+  filter: invert(100%) hue-rotate(190deg) saturate(15%) brightness(90%) contrast(95%);
 }
 
 /* Custom Leaflet overrides for styling consistency */
 .leaflet-container {
-  background-color: #0f111a !important;
+  background-color: #09090b !important;
   font-family: inherit !important;
 }
 

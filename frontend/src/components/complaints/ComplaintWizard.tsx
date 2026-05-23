@@ -39,7 +39,7 @@ const WizardMap = dynamic<WizardMapProps>(
     ssr: false,
     loading: () => (
       <div className="w-full h-48 bg-slate-900 rounded-lg flex items-center justify-center border border-border">
-        <Loader2 className="w-5 h-5 animate-spin text-cyan-400" />
+        <Loader2 className="w-5 h-5 animate-spin text-zinc-550" />
         <span className="text-xs text-muted-foreground ml-2">Loading GIS Locator Frame...</span>
       </div>
     )
@@ -247,7 +247,7 @@ export default function ComplaintWizard() {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border/60">
           <div className="flex items-center gap-2">
-            <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-cyan-950 border border-cyan-800 text-cyan-400">
+            <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-350">
               <Sparkles className="w-4 h-4" />
             </span>
             <div>
@@ -271,9 +271,9 @@ export default function ComplaintWizard() {
             <div key={s} className="flex items-center gap-2 flex-1 last:flex-none">
               <span className={`w-5 h-5 rounded-full flex items-center justify-center border font-bold ${
                 step === s 
-                  ? 'bg-cyan-500 border-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10'
+                  ? 'bg-zinc-100 border-zinc-100 text-zinc-950 shadow-sm'
                   : step > s 
-                  ? 'bg-cyan-950/50 border-cyan-850 text-cyan-400'
+                  ? 'bg-zinc-900 border-zinc-800 text-zinc-300'
                   : 'bg-slate-950 border-border text-slate-500'
               }`}>
                 {s}
@@ -301,7 +301,7 @@ export default function ComplaintWizard() {
                   placeholder="e.g. Deep pothole next to junction signal"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-3 py-2 text-xs bg-slate-900 border border-border/80 rounded-lg placeholder-muted-foreground focus:outline-none focus:border-cyan-500"
+                  className="w-full px-3 py-2 text-xs bg-slate-900 border border-border/80 rounded-lg placeholder-muted-foreground focus:outline-none focus:border-zinc-700/60"
                 />
               </div>
 
@@ -312,24 +312,24 @@ export default function ComplaintWizard() {
                   placeholder="Describe the defect, dimensions, water logging, or hazardous traffic details. AI will parse this to route authority..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full px-3 py-2 text-xs bg-slate-900 border border-border/80 rounded-lg placeholder-muted-foreground focus:outline-none focus:border-cyan-500"
+                  className="w-full px-3 py-2 text-xs bg-slate-900 border border-border/80 rounded-lg placeholder-muted-foreground focus:outline-none focus:border-zinc-700/60"
                 />
               </div>
 
               {/* AI Suggestion box */}
               {showAiSuggestion && (
-                <div className="p-3 bg-gradient-to-r from-cyan-950/40 to-indigo-950/40 border border-cyan-800/60 rounded-xl flex items-start gap-2.5 animate-in slide-in-from-top-2">
-                  <Sparkles className="w-5 h-5 text-cyan-400 shrink-0 mt-0.5 animate-pulse" />
+                <div className="p-3 bg-zinc-900/60 border border-zinc-800/60 rounded-xl flex items-start gap-2.5 animate-in slide-in-from-top-2">
+                  <Sparkles className="w-5 h-5 text-zinc-500 shrink-0 mt-0.5 animate-pulse" />
                   <div className="space-y-1.5 flex-1">
-                    <span className="text-[9px] uppercase font-bold text-cyan-400 tracking-wider">ROADWATCH AI Suggestion</span>
+                    <span className="text-[9px] uppercase font-bold text-zinc-350 tracking-wider">ROADWATCH AI Suggestion</span>
                     <p className="text-[10px] text-slate-300 leading-normal">
                       Based on description, AI classified:
-                      {suggestedCategory && <span> Category: <strong className="text-cyan-300 uppercase">{suggestedCategory}</strong></span>}
-                      {suggestedSeverity && <span> Severity: <strong className="text-cyan-300 uppercase">{suggestedSeverity}</strong></span>}
+                      {suggestedCategory && <span> Category: <strong className="text-zinc-205 uppercase">{suggestedCategory}</strong></span>}
+                      {suggestedSeverity && <span> Severity: <strong className="text-zinc-205 uppercase">{suggestedSeverity}</strong></span>}
                     </p>
                     <button 
                       onClick={applyAiSuggestion}
-                      className="text-[9px] font-extrabold bg-cyan-500 text-slate-950 px-2 py-0.8 rounded hover:bg-cyan-400"
+                      className="text-[9px] font-bold bg-zinc-100 hover:bg-zinc-200 text-zinc-950 px-2.5 py-1 rounded-lg cursor-pointer"
                     >
                       Apply Suggested Filters
                     </button>
@@ -339,7 +339,7 @@ export default function ComplaintWizard() {
 
               {aiAnalyzing && (
                 <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground animate-pulse">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-400" />
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-550" />
                   <span>AI running diagnostic parse...</span>
                 </div>
               )}
@@ -350,7 +350,7 @@ export default function ComplaintWizard() {
                   <select 
                     value={category}
                     onChange={(e) => setCategory(e.target.value as ComplaintCategory)}
-                    className="w-full px-2 py-2 text-xs bg-slate-900 border border-border/80 rounded-lg focus:outline-none focus:border-cyan-500 text-slate-200 capitalize"
+                    className="w-full px-2 py-2 text-xs bg-slate-900 border border-border/80 rounded-lg focus:outline-none focus:border-zinc-700/60 text-slate-200 capitalize"
                   >
                     <option value="pothole">Pothole</option>
                     <option value="paving_defect">Paving Defect</option>
@@ -365,7 +365,7 @@ export default function ComplaintWizard() {
                   <select 
                     value={severity}
                     onChange={(e) => setSeverity(e.target.value as any)}
-                    className="w-full px-2 py-2 text-xs bg-slate-900 border border-border/80 rounded-lg focus:outline-none focus:border-cyan-500 text-slate-200 capitalize"
+                    className="w-full px-2 py-2 text-xs bg-slate-900 border border-border/80 rounded-lg focus:outline-none focus:border-zinc-700/60 text-slate-200 capitalize"
                   >
                     <option value="low">Low Priority</option>
                     <option value="medium">Medium Priority</option>
@@ -385,7 +385,7 @@ export default function ComplaintWizard() {
                 <select
                   value={associatedRoadId || ''}
                   onChange={(e) => setAssociatedRoadId(e.target.value ? Number(e.target.value) : null)}
-                  className="w-full px-2 py-2 text-xs bg-slate-900 border border-border/80 rounded-lg focus:outline-none focus:border-cyan-500 text-slate-200"
+                  className="w-full px-2 py-2 text-xs bg-slate-900 border border-border/80 rounded-lg focus:outline-none focus:border-zinc-700/60 text-slate-200"
                 >
                   <option value="">Select general region location (no road segment)</option>
                   {roads.map(r => (
@@ -404,8 +404,8 @@ export default function ComplaintWizard() {
                   />
                 </div>
                 <div className="flex justify-between items-center text-[9px] text-muted-foreground font-semibold bg-slate-900/50 p-2 rounded border border-border/40">
-                  <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-cyan-400" /> GPS Lat/Lng</span>
-                  <span className="font-mono text-slate-350">{coordinates[0].toFixed(5)}, {coordinates[1].toFixed(5)}</span>
+                  <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-zinc-550" /> GPS Lat/Lng</span>
+                  <span className="font-mono text-slate-355">{coordinates[0].toFixed(5)}, {coordinates[1].toFixed(5)}</span>
                 </div>
               </div>
             </div>
@@ -417,14 +417,14 @@ export default function ComplaintWizard() {
               <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">evidence capture (Photo upload)</label>
               
               {!imagePreview ? (
-                <div className="border-2 border-dashed border-border hover:border-cyan-500/40 rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all bg-slate-900/10 hover:bg-slate-900/25 relative">
+                <div className="border-2 border-dashed border-border hover:border-zinc-700/60 rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all bg-slate-900/10 hover:bg-slate-900/25 relative">
                   <input
                     type="file"
                     accept="image/*"
                     onChange={handleImageChange}
                     className="absolute inset-0 opacity-0 cursor-pointer"
                   />
-                  <Camera className="w-8 h-8 text-cyan-455 mb-2.5" />
+                  <Camera className="w-8 h-8 text-zinc-500 mb-2.5" />
                   <h4 className="text-xs font-bold text-slate-200">Select Defect Photo</h4>
                   <p className="text-[10px] text-muted-foreground mt-1 max-w-[220px]">Upload a JPG or PNG representing pothole size or waterlogging depths.</p>
                 </div>
@@ -449,7 +449,7 @@ export default function ComplaintWizard() {
 
                     {isUploading && (
                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-2.5 bg-slate-950/60">
-                        <Loader2 className="w-7 h-7 animate-spin text-cyan-400" />
+                        <Loader2 className="w-7 h-7 animate-spin text-zinc-550" />
                         <span className="text-[10px] font-bold text-slate-350 uppercase tracking-widest">Uploading Photo... {uploadProgress}%</span>
                       </div>
                     )}
@@ -457,7 +457,7 @@ export default function ComplaintWizard() {
 
                   {isUploading && (
                     <div className="w-full h-1.5 rounded-full bg-slate-900 overflow-hidden">
-                      <div className="h-full bg-cyan-500 transition-all duration-150" style={{ width: `${uploadProgress}%` }}></div>
+                      <div className="h-full bg-zinc-400 transition-all duration-150" style={{ width: `${uploadProgress}%` }}></div>
                     </div>
                   )}
                 </div>
@@ -468,7 +468,7 @@ export default function ComplaintWizard() {
           {/* STEP 4: INTELLECTUAL ROUTING AUDIT REVIEW */}
           {step === 4 && (
             <div className="space-y-4 animate-in fade-in duration-200">
-              <h3 className="text-xs uppercase font-extrabold tracking-wider text-slate-250 border-b border-border/40 pb-1.5 flex items-center gap-1"><Landmark className="w-4 h-4 text-cyan-400" /> AI Authority Routing Audit</h3>
+              <h3 className="text-xs uppercase font-extrabold tracking-wider text-slate-250 border-b border-border/40 pb-1.5 flex items-center gap-1"><Landmark className="w-4 h-4 text-zinc-500" /> AI Authority Routing Audit</h3>
               
               {routingInfo && (
                 <div className="space-y-4">
@@ -480,7 +480,7 @@ export default function ComplaintWizard() {
                         <h4 className="text-xs font-black text-slate-200 leading-none">{routingInfo.executiveEngineer}</h4>
                         <p className="text-[10px] text-muted-foreground mt-1">{routingInfo.authorityName}</p>
                       </div>
-                      <span className="text-[8px] font-black uppercase text-cyan-400 border border-cyan-900/60 bg-cyan-950/40 px-2 py-0.5 rounded">
+                      <span className="text-[8px] font-black uppercase text-zinc-350 border border-zinc-800 bg-zinc-900/40 px-2 py-0.5 rounded">
                         {routingInfo.jurisdictionType.replace('_', ' ')}
                       </span>
                     </div>
@@ -497,7 +497,7 @@ export default function ComplaintWizard() {
                     <div className="p-3.5 rounded-lg border border-border/40 bg-slate-950/60 font-mono text-[9px] text-slate-350 space-y-1.5">
                       {routingInfo.routingTrail.map((t, idx) => (
                         <div key={idx} className="flex items-start gap-1.5">
-                          <span className="text-cyan-400 shrink-0 select-none">→</span>
+                          <span className="text-zinc-500 shrink-0 select-none">→</span>
                           <span>{t}</span>
                         </div>
                       ))}
@@ -530,7 +530,7 @@ export default function ComplaintWizard() {
               <div className="max-w-xs mx-auto p-4 rounded-xl border border-border bg-slate-900/25 space-y-2 text-[10px] text-left">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Tracking ID:</span>
-                  <strong className="font-mono text-cyan-400">{ticketResult.clientTempId || `RW-2026-${ticketResult.id}`}</strong>
+                  <strong className="font-mono text-zinc-400">{ticketResult.clientTempId || `RW-2026-${ticketResult.id}`}</strong>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Status:</span>
@@ -575,7 +575,7 @@ export default function ComplaintWizard() {
               <button
                 onClick={() => setStep(step + 1)}
                 disabled={step === 1 && (!title || !description)}
-                className={`flex items-center gap-1 text-[10px] uppercase font-extrabold tracking-wider bg-cyan-500 hover:bg-cyan-400 disabled:bg-slate-800 text-slate-950 disabled:text-slate-500 px-4 py-2 rounded-xl transition-all shadow-md shadow-cyan-500/10 ${
+                className={`flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider bg-zinc-100 hover:bg-zinc-200 disabled:bg-zinc-900 text-zinc-950 disabled:text-zinc-600 px-4 py-2 rounded-xl transition-all shadow-sm ${
                   step === 1 && (!title || !description) ? 'cursor-not-allowed shadow-none' : 'active:scale-95'
                 }`}
               >
@@ -584,7 +584,7 @@ export default function ComplaintWizard() {
             ) : (
               <button
                 onClick={handleSubmit}
-                className="flex items-center gap-1.5 text-[10px] uppercase font-black tracking-widest bg-cyan-500 hover:bg-cyan-400 text-slate-950 px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-cyan-500/20 active:scale-95"
+                className="flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-wider bg-zinc-100 hover:bg-zinc-200 text-zinc-950 px-5 py-2.5 rounded-xl transition-all shadow-sm active:scale-95"
               >
                 Submit Defect Report <CheckCircle className="w-4 h-4" />
               </button>

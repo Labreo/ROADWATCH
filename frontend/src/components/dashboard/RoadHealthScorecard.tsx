@@ -48,14 +48,14 @@ export default function RoadHealthScorecard({
   const getDialColor = (type: MetricType, value: number) => {
     if (type === 'risk') {
       // For risk, high values are BAD (Red), low are GOOD (Emerald)
-      if (value > 65) return '#ef4444'; // Red
-      if (value > 30) return '#f59e0b'; // Amber
-      return '#10b981'; // Emerald
+      if (value > 65) return '#f87171'; // Desaturated Rose Red
+      if (value > 30) return '#fbbf24'; // Desaturated Amber
+      return '#34d399'; // Desaturated Emerald Green
     } else {
       // For other scores, high is GOOD (Emerald), low is BAD (Red)
-      if (value >= 80) return '#10b981'; // Emerald
-      if (value >= 50) return '#f59e0b'; // Amber
-      return '#ef4444'; // Red
+      if (value >= 80) return '#34d399'; // Desaturated Emerald Green
+      if (value >= 50) return '#fbbf24'; // Desaturated Amber
+      return '#f87171'; // Desaturated Rose Red
     }
   };
 
@@ -103,7 +103,7 @@ export default function RoadHealthScorecard({
       label: 'Road Health',
       value: intel.healthScore,
       unit: '%',
-      icon: <Activity className="w-4 h-4 text-cyan-400" />,
+      icon: <Activity className="w-4 h-4 text-zinc-450" />,
       description: 'Based on active complaints, repair counts, and time since last pave.'
     },
     {
@@ -111,7 +111,7 @@ export default function RoadHealthScorecard({
       label: 'Transparency',
       value: intel.transparencyScore,
       unit: '%',
-      icon: <Coins className="w-4 h-4 text-amber-400" />,
+      icon: <Coins className="w-4 h-4 text-zinc-450" />,
       description: 'Based on budget variances, contract delays, and contractor rating audits.'
     },
     {
@@ -119,7 +119,7 @@ export default function RoadHealthScorecard({
       label: 'Contractor IQ',
       value: intel.contractorReliabilityScore,
       unit: '%',
-      icon: <HardHat className="w-4 h-4 text-emerald-400" />,
+      icon: <HardHat className="w-4 h-4 text-zinc-450" />,
       description: 'Average completion rate and score of contractors assigned to this segment.'
     },
     {
@@ -127,7 +127,7 @@ export default function RoadHealthScorecard({
       label: 'Damage Risk',
       value: intel.recurringDamageRisk,
       unit: '%',
-      icon: <AlertTriangle className="w-4 h-4 text-rose-400" />,
+      icon: <AlertTriangle className="w-4 h-4 text-zinc-450" />,
       description: 'Forecasted repeat damage based on waterlogging & paving decay records.'
     }
   ];
@@ -144,10 +144,10 @@ export default function RoadHealthScorecard({
             <button
               key={m.id}
               onClick={() => setSelectedMetric(m.id)}
-              className={`p-3 rounded-xl border text-left transition-all duration-350 cursor-pointer relative overflow-hidden flex flex-col justify-between h-[115px] ${
+              className={`p-3 rounded-xl border text-left transition-all duration-300 cursor-pointer relative overflow-hidden flex flex-col justify-between h-[115px] ${
                 isSelected 
-                  ? 'bg-slate-900/90 border-cyan-500/80 shadow-[0_0_12px_rgba(6,182,212,0.15)] glowing-border-cyan' 
-                  : 'bg-slate-950/40 border-border/40 hover:border-slate-800'
+                  ? 'bg-zinc-900 border-zinc-700/60 shadow-[0_1px_3px_rgba(0,0,0,0.15)]' 
+                  : 'bg-zinc-950/20 border-border/40 hover:border-zinc-800'
               }`}
             >
               {/* Card Header */}
@@ -224,14 +224,14 @@ export default function RoadHealthScorecard({
             intel.healthDeductions.length > 0 ? (
               <div className="space-y-1.5 max-h-[140px] overflow-y-auto pr-1">
                 {intel.healthDeductions.map((d, i) => (
-                  <div key={i} className="flex items-start justify-between gap-3 p-2 rounded bg-slate-950/45 border border-border/30">
+                  <div key={i} className="flex items-start justify-between gap-3 p-2 rounded bg-zinc-900/40 border border-border/30">
                     <div className="flex gap-2">
                       <span className="mt-0.5 shrink-0">{getDeductionIcon(d.category)}</span>
-                      <span className="text-[9.5px] text-slate-300 font-semibold leading-normal">{d.reason}</span>
+                      <span className="text-[9.5px] text-slate-350 font-semibold leading-normal">{d.reason}</span>
                     </div>
                     {d.points !== 0 && (
                       <span className={`text-[9px] font-extrabold px-1.5 py-0.2 rounded shrink-0 ${
-                        d.points > 0 ? 'bg-red-950/40 text-red-400 border border-red-900/60' : 'bg-slate-900 text-slate-400 border border-border'
+                        d.points > 0 ? 'bg-red-955/20 text-red-400 border border-red-900/40' : 'bg-zinc-800 text-zinc-300 border border-border'
                       }`}>
                         {d.points > 0 ? `-${d.points}` : d.points} pts
                       </span>
@@ -240,7 +240,7 @@ export default function RoadHealthScorecard({
                 ))}
               </div>
             ) : (
-              <div className="p-3 rounded bg-emerald-950/25 border border-emerald-900/40 flex items-start gap-2.5">
+              <div className="p-3 rounded bg-emerald-950/15 border border-emerald-900/30 flex items-start gap-2.5">
                 <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                 <div>
                   <h5 className="text-[10px] font-bold text-emerald-400 uppercase tracking-wide">Excellent Road Health</h5>
@@ -256,19 +256,19 @@ export default function RoadHealthScorecard({
             intel.transparencyDeductions.length > 0 ? (
               <div className="space-y-1.5 max-h-[140px] overflow-y-auto pr-1">
                 {intel.transparencyDeductions.map((d, i) => (
-                  <div key={i} className="flex items-start justify-between gap-3 p-2 rounded bg-slate-950/45 border border-border/30">
+                  <div key={i} className="flex items-start justify-between gap-3 p-2 rounded bg-zinc-900/40 border border-border/30">
                     <div className="flex gap-2">
                       <span className="mt-0.5 shrink-0">{getDeductionIcon(d.category)}</span>
-                      <span className="text-[9.5px] text-slate-300 font-semibold leading-normal">{d.reason}</span>
+                      <span className="text-[9.5px] text-slate-350 font-semibold leading-normal">{d.reason}</span>
                     </div>
-                    <span className="text-[9px] font-extrabold text-red-400 bg-red-950/40 border border-red-900/60 px-1.5 py-0.2 rounded shrink-0">
+                    <span className="text-[9px] font-extrabold text-red-400 bg-red-955/20 border border-red-900/40 px-1.5 py-0.2 rounded shrink-0">
                       -{d.points} pts
                     </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="p-3 rounded bg-emerald-950/25 border border-emerald-900/40 flex items-start gap-2.5">
+              <div className="p-3 rounded bg-emerald-950/15 border border-emerald-900/30 flex items-start gap-2.5">
                 <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                 <div>
                   <h5 className="text-[10px] font-bold text-emerald-400 uppercase tracking-wide">Flawless Integrity Audit</h5>
@@ -283,14 +283,14 @@ export default function RoadHealthScorecard({
           {selectedMetric === 'contractor' && (
             <div className="space-y-1.5 max-h-[140px] overflow-y-auto pr-1">
               {intel.reliabilityFactors.map((f, i) => (
-                <div key={i} className="p-2 rounded bg-slate-950/45 border border-border/30 space-y-1">
+                <div key={i} className="p-2 rounded bg-zinc-900/40 border border-border/30 space-y-1">
                   <div className="flex justify-between items-center">
                     <span className="text-[10px] font-bold text-slate-200">{f.contractorName}</span>
                     <span className={`text-[9px] font-extrabold border px-1.5 py-0.2 rounded uppercase ${
-                      f.isBlacklisted ? 'bg-red-950/60 text-red-450 border-red-900/60' :
-                      f.score >= 80 ? 'bg-emerald-950/60 text-emerald-400 border-emerald-900/60' :
-                      f.score >= 50 ? 'bg-amber-950/60 text-amber-400 border-amber-900/60' :
-                      'bg-red-950/60 text-red-400 border-red-900/60'
+                      f.isBlacklisted ? 'bg-red-955/20 text-red-400 border border-red-900/40' :
+                      f.score >= 80 ? 'bg-emerald-955/20 text-emerald-400 border-emerald-900/45' :
+                      f.score >= 50 ? 'bg-amber-955/20 text-amber-400 border-amber-900/45' :
+                      'bg-red-955/20 text-red-400 border-red-900/40'
                     }`}>
                       IQ: {f.score}%
                     </span>
@@ -305,7 +305,7 @@ export default function RoadHealthScorecard({
             intel.damageRiskFactors.length > 0 ? (
               <div className="space-y-1.5 max-h-[140px] overflow-y-auto pr-1">
                 {intel.damageRiskFactors.map((f, i) => (
-                  <div key={i} className="flex items-start justify-between gap-3 p-2 rounded bg-slate-950/45 border border-border/30">
+                  <div key={i} className="flex items-start justify-between gap-3 p-2 rounded bg-zinc-900/40 border border-border/30">
                     <div className="flex gap-2">
                       <span className="mt-0.5 shrink-0">
                         {f.type === 'waterlogging' ? <AlertCircle className="w-3.5 h-3.5 text-blue-400" /> :
@@ -313,16 +313,16 @@ export default function RoadHealthScorecard({
                          f.type === 'repeat' ? <AlertTriangle className="w-3.5 h-3.5 text-orange-450" /> :
                          <Info className="w-3.5 h-3.5 text-slate-400" />}
                       </span>
-                      <span className="text-[9.5px] text-slate-300 font-semibold leading-normal">{f.reason}</span>
+                      <span className="text-[9.5px] text-slate-350 font-semibold leading-normal">{f.reason}</span>
                     </div>
-                    <span className="text-[9px] font-extrabold text-rose-400 bg-rose-950/40 border border-rose-900/60 px-1.5 py-0.2 rounded shrink-0">
+                    <span className="text-[9px] font-extrabold text-rose-400 bg-rose-955/20 border border-rose-900/40 px-1.5 py-0.2 rounded shrink-0">
                       +{f.percentage}% Risk
                     </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="p-3 rounded bg-emerald-950/25 border border-emerald-900/40 flex items-start gap-2.5">
+              <div className="p-3 rounded bg-emerald-950/15 border border-emerald-900/30 flex items-start gap-2.5">
                 <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                 <div>
                   <h5 className="text-[10px] font-bold text-emerald-400 uppercase tracking-wide">Minimal Structural Risk</h5>
@@ -338,11 +338,11 @@ export default function RoadHealthScorecard({
         {/* Confidence Footer */}
         <div className="pt-2 border-t border-border/40 flex items-center justify-between text-[9px]">
           <span className="text-muted-foreground flex items-center gap-1">
-            <ShieldCheck className="w-3 h-3 text-cyan-400" />
+            <ShieldCheck className="w-3 h-3 text-zinc-500" />
             <span>Audit Confidence:</span>
           </span>
-          <span className="font-extrabold text-slate-300">
-            {intel.confidenceScore}% — <span className="text-cyan-400 font-medium">{intel.confidenceLevel}</span>
+          <span className="font-extrabold text-slate-350">
+            {intel.confidenceScore}% — <span className="text-zinc-400 font-semibold">{intel.confidenceLevel}</span>
           </span>
         </div>
       </div>

@@ -27,20 +27,20 @@ export default function BudgetTimeline({ projects, contractors }: BudgetTimeline
       case 'completed':
         return <CheckCircle2 className="w-4 h-4 text-emerald-450" />;
       case 'in_progress':
-        return <Clock className="w-4 h-4 text-cyan-400 animate-pulse" />;
+        return <Clock className="w-4 h-4 text-zinc-400 animate-pulse" />;
       case 'halted':
         return <Pause className="w-4 h-4 text-red-400" />;
       default:
-        return <Calendar className="w-4 h-4 text-slate-400" />;
+        return <Calendar className="w-4 h-4 text-zinc-500" />;
     }
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
-        return <span className="text-[8px] bg-emerald-950/60 text-emerald-400 border border-emerald-900/60 px-1.5 py-0.2 rounded font-extrabold uppercase">Completed</span>;
+        return <span className="text-[8px] bg-emerald-950/60 text-emerald-400/90 border border-emerald-900/60 px-1.5 py-0.2 rounded font-extrabold uppercase">Completed</span>;
       case 'in_progress':
-        return <span className="text-[8px] bg-cyan-950/60 text-cyan-400 border border-cyan-900/60 px-1.5 py-0.2 rounded font-extrabold uppercase animate-pulse">In Progress</span>;
+        return <span className="text-[8px] bg-zinc-900 border border-zinc-800 text-zinc-300 px-1.5 py-0.2 rounded font-extrabold uppercase animate-pulse">In Progress</span>;
       case 'halted':
         return <span className="text-[8px] bg-red-950/60 text-red-400 border border-red-900/65 px-1.5 py-0.2 rounded font-extrabold uppercase">Halted</span>;
       default:
@@ -73,7 +73,7 @@ export default function BudgetTimeline({ projects, contractors }: BudgetTimeline
               {/* Chronological Bullet Dot */}
               <span className={`absolute -left-[23px] top-1.5 w-4.5 h-4.5 rounded-full border bg-slate-950 flex items-center justify-center transition-all ${
                 p.status === 'completed' ? 'border-emerald-500/50' : 
-                p.status === 'in_progress' ? 'border-cyan-500/50 shadow-md shadow-cyan-500/10' : 'border-red-500/50'
+                p.status === 'in_progress' ? 'border-zinc-500/50 shadow-sm shadow-zinc-500/5' : 'border-red-500/50'
               }`}>
                 {getStatusIcon(p.status)}
               </span>
@@ -83,7 +83,7 @@ export default function BudgetTimeline({ projects, contractors }: BudgetTimeline
                 <div className="flex justify-between items-start flex-wrap gap-2">
                   <div className="space-y-0.5">
                     <div className="text-[9px] font-black text-slate-400 flex items-center gap-1.5">
-                      <Calendar className="w-3 h-3 text-cyan-500" /> {startLabel} – {endLabel}
+                      <Calendar className="w-3 h-3 text-zinc-500" /> {startLabel} – {endLabel}
                       <span className="text-slate-600">|</span>
                       <span>ID: #{p.id}</span>
                     </div>
@@ -110,11 +110,11 @@ export default function BudgetTimeline({ projects, contractors }: BudgetTimeline
                 <div className="space-y-1">
                   <div className="flex justify-between text-[8px] font-bold">
                     <span className="text-muted-foreground">Allocation Spent:</span>
-                    <span className={isOver ? 'text-red-400' : 'text-cyan-400'}>{utilization}%</span>
+                    <span className={isOver ? 'text-red-400' : 'text-zinc-400'}>{utilization}%</span>
                   </div>
                   <div className="w-full h-1 rounded-full bg-slate-900 overflow-hidden border border-border/10">
                     <div 
-                      className={`h-full rounded-full ${isOver ? 'bg-red-500' : 'bg-cyan-500'}`}
+                      className={`h-full rounded-full ${isOver ? 'bg-red-500' : 'bg-zinc-500'}`}
                       style={{ width: `${Math.min(100, utilization)}%` }}
                     ></div>
                   </div>
@@ -124,7 +124,7 @@ export default function BudgetTimeline({ projects, contractors }: BudgetTimeline
                 {contractor && (
                   <div className="flex justify-between items-center text-[9px] text-muted-foreground pt-1 flex-wrap gap-2">
                     <div className="flex items-center gap-1">
-                      <User className="w-3.5 h-3.5 text-cyan-400" />
+                      <User className="w-3.5 h-3.5 text-zinc-500" />
                       <span>Contractor: <strong className="text-slate-300 font-bold">{contractor.name}</strong></span>
                     </div>
                     {contractor.blacklisted && (

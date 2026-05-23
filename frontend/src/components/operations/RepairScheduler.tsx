@@ -48,7 +48,7 @@ export default function RepairScheduler({ selectedComplaint, onClearSelection }:
     <div className="glass-panel border border-border/80 rounded-xl p-5 bg-slate-950/40 flex flex-col justify-between h-full">
       <div className="space-y-4">
         <div className="flex items-center gap-2 border-b border-border/40 pb-2">
-          <Calendar className="w-4 h-4 text-cyan-400" />
+          <Calendar className="w-4 h-4 text-zinc-550" />
           <h3 className="text-xs uppercase font-black tracking-widest text-slate-200">
             Work Dispatch & Repair Scheduler
           </h3>
@@ -80,7 +80,7 @@ export default function RepairScheduler({ selectedComplaint, onClearSelection }:
                   <select
                     value={contractorId}
                     onChange={(e) => setContractorId(Number(e.target.value))}
-                    className="w-full bg-slate-900 border border-border rounded-xl px-3 py-2 text-[10px] text-slate-200 focus:outline-none focus:border-cyan-500/50 transition-all font-semibold"
+                    className="w-full bg-slate-900 border border-border rounded-xl px-3 py-2 text-[10px] text-slate-200 focus:outline-none focus:border-zinc-700/60 transition-all font-semibold"
                   >
                     {activeContractors.map(c => (
                       <option key={c.id} value={c.id}>
@@ -101,7 +101,7 @@ export default function RepairScheduler({ selectedComplaint, onClearSelection }:
                   required
                   value={scheduledDate}
                   onChange={(e) => setScheduledDate(e.target.value)}
-                  className="w-full bg-slate-900 border border-border rounded-xl px-3 py-1.5 text-[10px] text-slate-200 focus:outline-none focus:border-cyan-500/50 transition-all font-semibold"
+                  className="w-full bg-slate-900 border border-border rounded-xl px-3 py-1.5 text-[10px] text-slate-200 focus:outline-none focus:border-zinc-700/60 transition-all font-semibold"
                 />
               </div>
 
@@ -117,7 +117,7 @@ export default function RepairScheduler({ selectedComplaint, onClearSelection }:
                     placeholder="e.g. Er. K. V. Patil"
                     value={engineerName}
                     onChange={(e) => setEngineerName(e.target.value)}
-                    className="w-full bg-slate-900 border border-border rounded-xl px-3 py-1.5 text-[10px] text-slate-200 placeholder-muted-foreground focus:outline-none focus:border-cyan-500/50 transition-all font-semibold"
+                    className="w-full bg-slate-900 border border-border rounded-xl px-3 py-1.5 text-[10px] text-slate-200 placeholder-muted-foreground focus:outline-none focus:border-zinc-700/60 transition-all font-semibold"
                   />
                 </div>
               </div>
@@ -132,13 +132,13 @@ export default function RepairScheduler({ selectedComplaint, onClearSelection }:
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={2}
-                  className="w-full bg-slate-900 border border-border rounded-xl px-3 py-1.5 text-[10px] text-slate-200 placeholder-muted-foreground focus:outline-none focus:border-cyan-500/50 transition-all font-semibold resize-none"
+                  className="w-full bg-slate-900 border border-border rounded-xl px-3 py-1.5 text-[10px] text-slate-200 placeholder-muted-foreground focus:outline-none focus:border-zinc-700/60 transition-all font-semibold resize-none"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full py-2 rounded-xl text-[10px] font-black uppercase tracking-wider bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-md shadow-cyan-500/10 transition-all active:scale-[0.98] cursor-pointer"
+                className="w-full py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider bg-zinc-100 hover:bg-zinc-200 text-zinc-950 shadow-sm transition-all active:scale-[0.98] cursor-pointer"
               >
                 Dispatch Repair Contract
               </button>
@@ -146,7 +146,7 @@ export default function RepairScheduler({ selectedComplaint, onClearSelection }:
           )
         ) : (
           <div className="p-6 text-center border border-dashed border-border/50 rounded-xl bg-slate-950/20 select-none">
-            <Clock className="w-6 h-6 text-cyan-400/50 mx-auto mb-2" />
+            <Clock className="w-6 h-6 text-zinc-600 mx-auto mb-2" />
             <h4 className="text-[10px] font-bold text-slate-250 uppercase tracking-wider mb-1">Triage Dispatcher</h4>
             <p className="text-[9px] text-muted-foreground leading-relaxed">
               Select any active complaint from the queue or map to dispatch repairs, allocate budgets, and assign supervisor engineers.
@@ -168,7 +168,7 @@ export default function RepairScheduler({ selectedComplaint, onClearSelection }:
                 <div key={r.id} className="p-2.5 bg-slate-900/40 rounded-lg border border-border/40 text-[9px] space-y-1">
                   <div className="flex justify-between font-bold text-slate-200">
                     <span className="truncate max-w-[150px]">Supervisor: {r.engineerName}</span>
-                    <span className="text-cyan-400">{r.scheduledDate}</span>
+                    <span className="text-zinc-450 font-semibold">{r.scheduledDate}</span>
                   </div>
                   <div className="text-[8px] text-slate-400">
                     Contractor: **{contr ? contr.name : 'Apex'}**

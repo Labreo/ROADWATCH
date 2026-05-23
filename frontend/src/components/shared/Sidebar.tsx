@@ -82,8 +82,8 @@ export default function Sidebar() {
         {/* Logo Section */}
         <div className="flex items-center h-20 px-6 border-b border-border/60 justify-between">
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 shadow-md shadow-cyan-500/25 shrink-0">
-              <Shield className="w-5 h-5 text-slate-900" />
+            <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-700/60 shadow-sm shrink-0">
+              <Shield className="w-5 h-5 text-zinc-100" />
             </div>
             {sidebarOpen && (
               <div className="flex flex-col select-none">
@@ -126,13 +126,13 @@ export default function Sidebar() {
                 }}
                 className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl border text-xs font-semibold tracking-wide transition-all group ${
                   isActive
-                    ? 'bg-gradient-to-r from-cyan-950/45 to-indigo-950/45 border-cyan-500/80 text-cyan-400 shadow-md shadow-cyan-500/5'
-                    : 'bg-transparent border-transparent text-muted-foreground hover:text-slate-200 hover:bg-slate-900/40'
+                    ? 'bg-zinc-900 border-zinc-700/60 text-zinc-150 shadow-[0_1px_3px_rgba(0,0,0,0.15)]'
+                    : 'bg-transparent border-transparent text-muted-foreground hover:text-slate-200 hover:bg-zinc-900/45'
                 }`}
                 aria-current={isActive ? 'page' : undefined}
               >
                 <Icon className={`w-5 h-5 shrink-0 transition-transform group-hover:scale-105 ${
-                  isActive ? 'text-cyan-400' : 'text-muted-foreground group-hover:text-slate-300'
+                  isActive ? 'text-zinc-100' : 'text-muted-foreground group-hover:text-slate-350'
                 }`} />
                 
                 {(sidebarOpen || window.innerWidth < 1024) && (
@@ -140,7 +140,7 @@ export default function Sidebar() {
                 )}
                 
                 {item.badge !== undefined && (sidebarOpen || window.innerWidth < 1024) && (
-                  <span className="flex items-center justify-center min-w-5 h-5 px-1 rounded-full bg-cyan-500 text-[10px] font-black text-slate-950 shadow-md shadow-cyan-500/20">
+                  <span className="flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-zinc-800 text-[10px] font-bold text-zinc-100 border border-zinc-700/60 shadow-sm">
                     {item.badge}
                   </span>
                 )}
@@ -164,8 +164,8 @@ export default function Sidebar() {
 
         {sidebarOpen && (
           <div className="p-4 border-t border-border/60 text-center shrink-0">
-            <div className="flex items-center justify-center gap-1.5 text-[9px] text-muted-foreground bg-slate-900/50 py-1.5 px-2 rounded-lg border border-border/40">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 inline-block animate-pulse"></span>
+            <div className="flex items-center justify-center gap-1.5 text-[9px] text-muted-foreground bg-zinc-900/50 py-1.5 px-2 rounded-lg border border-border/40">
+              <span className="w-1.5 h-1.5 rounded-full bg-zinc-600 inline-block animate-pulse"></span>
               <span className="font-semibold tracking-wider uppercase">Engine v1.0.0-Beta</span>
             </div>
           </div>

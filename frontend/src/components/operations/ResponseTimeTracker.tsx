@@ -27,7 +27,7 @@ export default function ResponseTimeTracker() {
   return (
     <div className="glass-panel border border-border/80 rounded-xl p-5 bg-slate-950/40 space-y-4">
       <div className="flex items-center gap-2 border-b border-border/40 pb-2">
-        <Clock className="w-4 h-4 text-cyan-400" />
+        <Clock className="w-4 h-4 text-zinc-550" />
         <h3 className="text-xs uppercase font-black tracking-widest text-slate-200">
           Response-Time & SLA Analytics
         </h3>
@@ -68,7 +68,7 @@ export default function ResponseTimeTracker() {
                 <div className="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden">
                   <div 
                     className={`h-full rounded-full ${
-                      pct > 80 ? 'bg-red-500' : pct > 50 ? 'bg-amber-500' : 'bg-cyan-500'
+                      pct > 80 ? 'bg-red-500' : pct > 50 ? 'bg-amber-500' : 'bg-zinc-400'
                     }`}
                     style={{ width: `${Math.min(100, pct)}%` }}
                   />
@@ -89,7 +89,7 @@ export default function ResponseTimeTracker() {
           {[12, 16, 15, unresolvedComplaints + 2, unresolvedComplaints].map((val, i) => (
             <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
               <div 
-                className="w-full bg-cyan-950/60 border border-cyan-850 rounded-t-sm group-hover:bg-cyan-500/30 transition-colors"
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-t-sm group-hover:bg-zinc-800 transition-colors"
                 style={{ height: `${Math.max(20, (val / 25) * 100)}%` }}
               />
               <span className="text-[7px] font-mono text-slate-500">Day {i + 1}</span>

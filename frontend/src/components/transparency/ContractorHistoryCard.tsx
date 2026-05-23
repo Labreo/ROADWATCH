@@ -58,7 +58,7 @@ export default function ContractorHistoryCard({ breakdown, contractors }: Contra
           return (
             <div 
               key={item.contractorId}
-              className={`p-4 rounded-xl border bg-slate-950/20 space-y-3.5 transition-all hover:border-cyan-500/30 ${
+              className={`p-4 rounded-xl border bg-slate-950/20 space-y-3.5 transition-all hover:border-zinc-700/60 ${
                 contractor.blacklisted 
                   ? 'border-red-900/50 bg-red-950/5' 
                   : 'border-border/60'
@@ -68,7 +68,7 @@ export default function ContractorHistoryCard({ breakdown, contractors }: Contra
               <div className="flex justify-between items-start gap-4 flex-wrap">
                 <div className="space-y-1">
                   <div className="flex items-center gap-1.5">
-                    <User className="w-4 h-4 text-cyan-400" />
+                    <User className="w-4 h-4 text-zinc-500" />
                     <h5 className="text-xs font-black text-slate-100 leading-tight">{contractor.name}</h5>
                   </div>
                   <div className="text-[9px] text-muted-foreground">

@@ -70,7 +70,7 @@ export default function ComplaintTimeline({ complaint }: ComplaintTimelineProps)
       <div className="p-4 rounded-xl border border-border bg-slate-900/30 space-y-2">
         <div className="flex justify-between items-start">
           <div>
-            <span className="text-[9px] font-black uppercase text-cyan-400 bg-cyan-950/40 border border-cyan-900/60 px-2 py-0.5 rounded tracking-wider">
+            <span className="text-[9px] font-black uppercase text-zinc-300 bg-zinc-900 border border-zinc-800/80 px-2 py-0.5 rounded tracking-wider">
               {complaint.category.replace('_', ' ')}
             </span>
             <h4 className="text-xs font-black text-slate-200 mt-1.5 leading-tight">{complaint.title}</h4>
@@ -78,8 +78,8 @@ export default function ComplaintTimeline({ complaint }: ComplaintTimelineProps)
           <span className={`text-[9px] font-black uppercase border px-2 py-0.5 rounded ${
             isResolved ? 'text-emerald-400 border-emerald-950 bg-emerald-950/40' :
             isRejected ? 'text-red-400 border-red-950 bg-red-950/40' :
-            isInProgress ? 'text-cyan-400 border-cyan-950 bg-cyan-950/40' :
-            isRouted ? 'text-indigo-400 border-indigo-950 bg-indigo-950/40' :
+            isInProgress ? 'text-zinc-300 border-zinc-900 bg-zinc-900/40' :
+            isRouted ? 'text-zinc-400 border-zinc-900 bg-zinc-900/40' :
             'text-slate-400 border-slate-800 bg-slate-900'
           }`}>
             {status}
@@ -113,7 +113,7 @@ export default function ComplaintTimeline({ complaint }: ComplaintTimelineProps)
         {/* Step 2: AI Diagnostic Classify */}
         <div className="relative">
           <span className="absolute -left-[21px] top-0 w-6 h-6 rounded-full border border-slate-700 bg-slate-950 flex items-center justify-center text-slate-400">
-            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+            <Sparkles className="w-3.5 h-3.5 text-zinc-500" />
           </span>
           <div className="space-y-1">
             <h5 className="text-[11px] font-extrabold uppercase text-slate-200 tracking-wider flex items-center gap-1">
@@ -185,8 +185,8 @@ export default function ComplaintTimeline({ complaint }: ComplaintTimelineProps)
                 <div className="p-2.5 rounded bg-slate-950 border border-border/40 text-[9.5px] space-y-1.5">
                   <h6 className="font-extrabold text-slate-300">{engineer.name}</h6>
                   <div className="flex flex-col gap-1 text-slate-400 font-medium">
-                    <span className="flex items-center gap-1.5"><Mail className="w-3 h-3 text-cyan-400" /> {engineer.email}</span>
-                    <span className="flex items-center gap-1.5"><Phone className="w-3 h-3 text-cyan-400" /> {engineer.phone}</span>
+                    <span className="flex items-center gap-1.5"><Mail className="w-3 h-3 text-zinc-550" /> {engineer.email}</span>
+                    <span className="flex items-center gap-1.5"><Phone className="w-3 h-3 text-zinc-550" /> {engineer.phone}</span>
                   </div>
                 </div>
               </div>
@@ -214,12 +214,12 @@ export default function ComplaintTimeline({ complaint }: ComplaintTimelineProps)
         ) : (
           <div className="relative">
             <span className={`absolute -left-[21px] top-0 w-6 h-6 rounded-full border bg-slate-950 flex items-center justify-center text-slate-400 ${
-              isResolved ? 'border-emerald-500/30' : isInProgress ? 'border-cyan-550/30 animate-pulse' : 'border-slate-800'
+              isResolved ? 'border-emerald-500/30' : isInProgress ? 'border-zinc-500/30 animate-pulse' : 'border-slate-800'
             }`}>
               {isResolved ? (
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
               ) : isInProgress ? (
-                <HardHat className="w-3.5 h-3.5 text-cyan-400" />
+                <HardHat className="w-3.5 h-3.5 text-zinc-500" />
               ) : (
                 <Clock className="w-3.5 h-3.5 text-slate-600" />
               )}

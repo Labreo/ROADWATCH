@@ -38,10 +38,10 @@ export default function OperationsDashboard() {
       <header className="flex justify-between items-center flex-wrap gap-4 border-b border-border/40 pb-4 shrink-0 select-none">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <div className="p-1.5 rounded-lg bg-gradient-to-tr from-cyan-600 to-indigo-600 text-slate-950">
-              <Shield className="w-5 h-5" />
+            <div className="p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-200 shadow-sm">
+              <Shield className="w-4 h-4" />
             </div>
-            <h2 className="text-sm font-black text-slate-100 uppercase tracking-widest flex items-center gap-1.5">
+            <h2 className="text-xs font-extrabold text-slate-100 uppercase tracking-wider flex items-center gap-1.5">
               Authority Operations Center
             </h2>
           </div>
@@ -52,8 +52,8 @@ export default function OperationsDashboard() {
 
         {/* Live system health status */}
         <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-wider text-slate-350">
-          <div className="flex items-center gap-1.5 bg-slate-900 border border-border/80 px-3 py-1.5 rounded-xl">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+          <div className="flex items-center gap-1.5 bg-zinc-900/40 border border-zinc-800/60 px-3 py-1.5 rounded-xl">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             <span>GIS Nodes Active</span>
           </div>
         </div>
@@ -61,43 +61,43 @@ export default function OperationsDashboard() {
 
       {/* Summary KPI Counters Grid */}
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 shrink-0 select-none">
-        <div className="glass-panel rounded-xl p-4 flex items-center gap-3 bg-slate-950/20 border border-border/60">
-          <div className="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800 text-slate-400">
-            <Activity className="w-5 h-5" />
+        <div className="glass-panel rounded-xl p-4 flex items-center gap-3 bg-zinc-950/25 border border-border/40">
+          <div className="p-2.5 rounded-lg bg-zinc-900 border border-zinc-800/80 text-zinc-400 shadow-inner">
+            <Activity className="w-4 h-4" />
           </div>
           <div>
             <span className="text-[9px] text-muted-foreground block uppercase font-bold tracking-wider">Total Reports logged</span>
-            <span className="text-base md:text-lg font-black text-slate-200">{stats.total} Incidents</span>
+            <span className="text-base font-black text-slate-200">{stats.total} Incidents</span>
           </div>
         </div>
 
-        <div className="glass-panel rounded-xl p-4 flex items-center gap-3 bg-slate-950/20 border border-border/60">
-          <div className="p-2.5 rounded-lg bg-amber-950/60 border border-amber-800/40 text-amber-400">
-            <AlertTriangle className="w-5 h-5 animate-pulse" />
+        <div className="glass-panel rounded-xl p-4 flex items-center gap-3 bg-zinc-950/25 border border-border/40">
+          <div className="p-2.5 rounded-lg bg-amber-950/20 border border-amber-900/30 text-amber-400/90 shadow-inner animate-pulse">
+            <AlertTriangle className="w-4 h-4" />
           </div>
           <div>
             <span className="text-[9px] text-muted-foreground block uppercase font-bold tracking-wider">Pending Triage</span>
-            <span className="text-base md:text-lg font-black text-slate-200">{stats.pending} Tickets</span>
+            <span className="text-base font-black text-slate-200">{stats.pending} Tickets</span>
           </div>
         </div>
 
-        <div className="glass-panel rounded-xl p-4 flex items-center gap-3 bg-slate-950/20 border border-border/60">
-          <div className="p-2.5 rounded-lg bg-cyan-950/60 border border-cyan-800/40 text-cyan-400">
-            <Clock className="w-5 h-5 animate-spin delay-1000" />
+        <div className="glass-panel rounded-xl p-4 flex items-center gap-3 bg-zinc-950/25 border border-border/40">
+          <div className="p-2.5 rounded-lg bg-zinc-900 border border-zinc-800/80 text-zinc-400 shadow-inner">
+            <Clock className="w-4 h-4" />
           </div>
           <div>
             <span className="text-[9px] text-muted-foreground block uppercase font-bold tracking-wider">Active Dispatches</span>
-            <span className="text-base md:text-lg font-black text-slate-200">{stats.progress} Repairing</span>
+            <span className="text-base font-black text-slate-200">{stats.progress} Repairing</span>
           </div>
         </div>
 
-        <div className="glass-panel rounded-xl p-4 flex items-center gap-3 bg-slate-950/20 border border-border/60">
-          <div className="p-2.5 rounded-lg bg-emerald-950/60 border border-emerald-800/40 text-emerald-400">
-            <CheckCircle className="w-5 h-5" />
+        <div className="glass-panel rounded-xl p-4 flex items-center gap-3 bg-zinc-950/25 border border-border/40">
+          <div className="p-2.5 rounded-lg bg-emerald-950/20 border border-emerald-900/30 text-emerald-400/90 shadow-inner">
+            <CheckCircle className="w-4 h-4" />
           </div>
           <div>
             <span className="text-[9px] text-muted-foreground block uppercase font-bold tracking-wider">Resolved Tickets</span>
-            <span className="text-base md:text-lg font-black text-slate-200">{stats.resolved} Closed</span>
+            <span className="text-base font-black text-slate-200">{stats.resolved} Closed</span>
           </div>
         </div>
       </section>

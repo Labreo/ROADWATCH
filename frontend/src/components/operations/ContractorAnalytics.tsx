@@ -32,7 +32,7 @@ export default function ContractorAnalytics() {
   return (
     <div className="glass-panel border border-border/80 rounded-xl p-5 bg-slate-950/40 space-y-4">
       <div className="flex items-center gap-2 border-b border-border/40 pb-2">
-        <HardHat className="w-4 h-4 text-cyan-400" />
+        <HardHat className="w-4 h-4 text-zinc-500" />
         <h3 className="text-xs uppercase font-black tracking-widest text-slate-200">
           Contractor Reliability Scorecard
         </h3>

@@ -56,8 +56,8 @@ export default function ComplaintOperationsPanel({
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'resolved': return 'text-emerald-400 border-emerald-950/60 bg-emerald-950/40';
-      case 'in_progress': return 'text-cyan-400 border-cyan-950/60 bg-cyan-950/40';
-      case 'routed': return 'text-indigo-400 border-indigo-950/60 bg-indigo-950/40';
+      case 'in_progress': return 'text-zinc-350 border-zinc-900/60 bg-zinc-900/40';
+      case 'routed': return 'text-zinc-400 border-zinc-900/60 bg-zinc-900/40';
       case 'rejected': return 'text-slate-500 border-border bg-slate-900';
       default: return 'text-amber-400 border-amber-950/60 bg-amber-950/40';
     }
@@ -82,7 +82,7 @@ export default function ComplaintOperationsPanel({
       <div className="w-full lg:w-[350px] shrink-0 flex flex-col space-y-3 min-h-0">
         <div className="flex items-center justify-between border-b border-border/40 pb-2">
           <div className="flex items-center gap-2">
-            <Activity className="w-4 h-4 text-cyan-400" />
+            <Activity className="w-4 h-4 text-zinc-500" />
             <h3 className="text-xs uppercase font-black tracking-widest text-slate-200">
               Operations Queue ({filteredComplaints.length})
             </h3>
@@ -132,7 +132,7 @@ export default function ComplaintOperationsPanel({
                 onClick={() => onSelectComplaint(c.id || null)}
                 className={`p-3 rounded-xl border text-left cursor-pointer transition-all ${
                   isSelected 
-                    ? 'bg-slate-900 border-cyan-500 shadow-md shadow-cyan-500/5'
+                    ? 'bg-zinc-900 border-zinc-700/60 shadow-sm shadow-zinc-950/40'
                     : 'bg-slate-950/60 border-border/50 hover:bg-slate-900/40'
                 }`}
               >
@@ -147,7 +147,7 @@ export default function ComplaintOperationsPanel({
                 <h4 className="text-xs font-bold text-slate-200 line-clamp-1">{c.title}</h4>
                 <div className="flex justify-between items-center text-[9px] text-muted-foreground mt-2 border-t border-border/20 pt-1.5 font-medium">
                   <span className="flex items-center gap-0.5 truncate max-w-[150px]">
-                    <MapPin className="w-2.5 h-2.5 text-cyan-500 shrink-0" />
+                    <MapPin className="w-2.5 h-2.5 text-zinc-500 shrink-0" />
                     {road ? road.name : 'Coordinates'}
                   </span>
                   <span>{new Date(c.createdAt || '').toLocaleDateString('en-IN', { month: '2-digit', day: '2-digit' })}</span>
@@ -179,7 +179,7 @@ export default function ComplaintOperationsPanel({
                 </div>
                 <button
                   onClick={() => onSelectComplaint(null)}
-                  className="text-[9px] font-black text-cyan-400 hover:underline uppercase tracking-wide shrink-0"
+                  className="text-[9px] font-black text-zinc-400 hover:text-zinc-200 hover:underline uppercase tracking-wide shrink-0"
                 >
                   Clear Selection
                 </button>
@@ -212,7 +212,7 @@ export default function ComplaintOperationsPanel({
                 {/* Re-route Authority */}
                 <div className="space-y-1.5">
                   <span className="text-[8px] text-muted-foreground uppercase font-black tracking-widest block flex items-center gap-1">
-                    <Building2 className="w-3 h-3 text-cyan-400" /> Reassign Maintaining Agency
+                    <Building2 className="w-3 h-3 text-zinc-500" /> Reassign Maintaining Agency
                   </span>
                   <select
                     value={selectedComplaint.assignedAuthorityId || ''}
@@ -259,7 +259,7 @@ export default function ComplaintOperationsPanel({
           </div>
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center select-none">
-            <HelpCircle className="w-7 h-7 text-cyan-400/50 mb-2" />
+            <HelpCircle className="w-7 h-7 text-zinc-600 mb-2" />
             <h4 className="text-[10px] font-bold text-slate-200 uppercase tracking-wider mb-1">Administrative Triage View</h4>
             <p className="text-[9px] text-muted-foreground leading-relaxed max-w-[240px]">
               Select a citizen report from the queue to run spatial duplicate audits, override maintenance routing, reassign departments, or close tickets.
