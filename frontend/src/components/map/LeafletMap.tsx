@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect } from 'react';
-import { MapContainer, TileLayer, Polyline, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Polyline, Marker, Popup, useMap, Circle } from 'react-leaflet';
 import L from 'leaflet';
 import { useStore } from '@/store/useStore';
 import { roads, getComplaintsForRoad } from '@/data/mockData';
 import { Road } from '@/types';
 import { getHistoricalRoadState, playbackSteps } from '@/data/historicalData';
+import { generateSensorsForRoads, generateStressZones, SENSOR_LEVEL_COLORS, SENSOR_COLORS, type SensorReading } from '@/data/sensorData';
 
 // Swaps GeoJSON [longitude, latitude] to Leaflet [latitude, longitude]
 const getLeafletCoords = (coords: [number, number][]): [number, number][] => {
@@ -18,17 +19,34 @@ const getLeafletPoint = (coords: [number, number]): [number, number] => {
   return [coords[1], coords[0]];
 };
 
-// Color codes based on road status
+// Color codes based on road status — cinematic intelligence palette
 const getStatusColor = (status: string, isSelected: boolean) => {
-  if (isSelected) return '#ffffff'; // White highlight for selected segment
+  if (isSelected) return '#e8e8f0';
   switch (status) {
-    case 'good': return '#10b981'; // Emerald Green
-    case 'fair': return '#f59e0b'; // Amber
-    case 'poor': return '#ef4444'; // Red
-    case 'under_construction': return '#71717a'; // Desaturated Zinc-500 for construction target
-    default: return '#52525b';
+    case 'good':              return '#34d399'; // Signal emerald
+    case 'fair':              return '#f59e0b'; // Signal amber
+    case 'poor':              return '#f43f5e'; // Signal rose
+    case 'under_construction':return '#71717a'; // Muted zinc
+    default:                  return '#3f3f46';
   }
 };
+
+// Generate underground utility line coordinates (offset from road geometry)
+function getUtilityCoords(
+  coords: [number, number][],
+  offsetLat: number,
+  offsetLng: number
+): [number, number][] {
+  return coords.map(c => [c[1] + offsetLat, c[0] + offsetLng] as [number, number]);
+}
+
+// Utility layer config
+const UTILITY_LAYERS = [
+  { key: 'water',    color: '#38bdf8', dashArray: '6 4', weight: 1.5, opacity: 0.5, offsetLat:  0.0004, offsetLng:  0.0003, label: 'Water Main' },
+  { key: 'electric', color: '#fbbf24', dashArray: '3 5', weight: 1.2, opacity: 0.4, offsetLat: -0.0004, offsetLng: -0.0003, label: 'Electrical Conduit' },
+  { key: 'fiber',    color: '#a78bfa', dashArray: '2 6', weight: 1.0, opacity: 0.35, offsetLat:  0.0008, offsetLng:  0.0002, label: 'Fiber Optic' },
+];
+
 
 // Helper component to center and animate map viewpoint changes
 function MapController({ selectedRoad }: { selectedRoad: Road | null }) {
@@ -75,6 +93,24 @@ const createComplaintIcon = (category: string) => {
   });
 };
 
+const createSensorIcon = (level: SensorReading['level'], type: SensorReading['type']) => {
+  const colors: Record<SensorReading['level'], string> = {
+    nominal:  '52, 211, 153',
+    elevated: '245, 158, 11',
+    critical: '244, 63, 94'
+  };
+  const rgb = colors[level];
+  return L.divIcon({
+    className: 'sensor-marker-wrapper',
+    html: `<div style="position:relative;width:20px;height:20px;display:flex;align-items:center;justify-content:center">
+             <div style="position:absolute;width:20px;height:20px;border-radius:50%;background:rgba(${rgb},0.25);animation:ping 1.5s ease-out infinite"></div>
+             <div style="width:10px;height:10px;border-radius:50%;background:rgba(${rgb},0.9);border:1.5px solid rgba(255,255,255,0.6);box-shadow:0 0 6px rgba(${rgb},0.8)"></div>
+           </div>`,
+    iconSize: [20, 20],
+    iconAnchor: [10, 10]
+  });
+};
+
 export default function LeafletMap() {
   const { 
     selectedRoadId, 
@@ -84,6 +120,10 @@ export default function LeafletMap() {
     activeView,
     currentPlaybackStepId
   } = useStore();
+
+  // Generate sensors & stress zones once (stable deterministic values)
+  const allSensors = generateSensorsForRoads(roads as any);
+  const stressZones = generateStressZones(roads as any);
 
   // Find active road object
   const selectedRoad = roads.find(r => r.id === selectedRoadId) || null;
@@ -131,9 +171,15 @@ export default function LeafletMap() {
           <span className="w-2.5 h-1.5 rounded bg-red-550 inline-block"></span>
           <span className="text-foreground">Poor</span>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-1.5 rounded bg-zinc-500 inline-block border border-dashed border-zinc-400"></span>
-          <span className="text-foreground">Work Underway</span>
+        {/* Utility layer legend */}
+        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-white/[0.04]">
+          <span className="text-muted-foreground uppercase tracking-wider font-semibold mb-0 text-[8px] shrink-0">UTILITIES</span>
+          {UTILITY_LAYERS.map(u => (
+            <div key={u.key} className="flex items-center gap-1">
+              <span className="w-3 h-[2px] inline-block" style={{ backgroundColor: u.color }} />
+              <span style={{ color: u.color }} className="text-[8px] font-semibold capitalize">{u.label.split(' ')[0]}</span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -151,26 +197,56 @@ export default function LeafletMap() {
           className="dark-map-tiles"
         />
 
-        {/* Draw Roads Polylines */}
+        {/* ── Underground Utility Overlays ── */}
+        {filteredRoads.map((road) => {
+          const rawCoords = road.geometry.coordinates as [number, number][];
+          return UTILITY_LAYERS.map(util => (
+            <Polyline
+              key={`util-${util.key}-${road.id}`}
+              positions={getUtilityCoords(rawCoords, util.offsetLat, util.offsetLng)}
+              pathOptions={{
+                color: util.color,
+                weight: util.weight,
+                opacity: util.opacity,
+                dashArray: util.dashArray,
+                lineCap: 'butt',
+                lineJoin: 'round',
+              }}
+            >
+              <Popup>
+                <div className="text-xs p-1 space-y-1">
+                  <p className="font-semibold" style={{ color: util.color }}>{util.label}</p>
+                  <p className="text-[10px] text-muted-foreground">{road.name}</p>
+                  <p className="text-[9px] text-muted-foreground">Underground infrastructure layer</p>
+                </div>
+              </Popup>
+            </Polyline>
+          ));
+        })}
+
+        {/* ── Road Segment Polylines ── */}
         {filteredRoads.map((road) => {
           const isSelected = selectedRoadId === road.id;
           const coords = getLeafletCoords(road.geometry.coordinates);
 
           return (
             <div key={road.id}>
-              {/* Outer shadow polyline for selected glowing effect */}
-              {isSelected && (
-                <Polyline
-                  positions={coords}
-                  pathOptions={{
-                    color: '#ffffff',
-                    weight: 12,
-                    opacity: 0.25,
-                    lineCap: 'round',
-                    lineJoin: 'round'
-                  }}
-                />
-              )}
+              {/* Outer glow halo — always present, dims when unselected */}
+              <Polyline
+                positions={coords}
+                pathOptions={{
+                  color: getStatusColor(
+                    activeView === 'playback'
+                      ? getHistoricalRoadState(road.id, currentPlaybackStepId).status
+                      : road.status,
+                    isSelected
+                  ),
+                  weight: isSelected ? 18 : 10,
+                  opacity: isSelected ? 0.12 : 0.05,
+                  lineCap: 'round',
+                  lineJoin: 'round',
+                }}
+              />
 
               {/* Main segment polyline */}
               <Polyline
@@ -245,6 +321,66 @@ export default function LeafletMap() {
             </div>
           );
         })}
+
+        {/* ── SENSOR OVERLAY (only in sensor view) ── */}
+        {activeView === 'sensors' && (
+          <>
+            {/* Stress zone circles */}
+            {stressZones.map((zone) => (
+              <Circle
+                key={`zone-${zone.roadId}`}
+                center={[zone.lat, zone.lng]}
+                radius={zone.radiusMeters}
+                pathOptions={{
+                  color: SENSOR_LEVEL_COLORS[zone.dominantAlert],
+                  fillColor: SENSOR_LEVEL_COLORS[zone.dominantAlert],
+                  fillOpacity: 0.08 + zone.heatIntensity * 0.14,
+                  weight: 1.5,
+                  opacity: 0.5,
+                  dashArray: zone.dominantAlert === 'critical' ? '4 3' : undefined
+                }}
+              >
+                <Popup>
+                  <div className="text-xs p-1 space-y-1">
+                    <p className="font-bold text-slate-200">{zone.zoneLabel}</p>
+                    <p className="text-[10px] text-muted-foreground">Stress Index: {zone.stressIndex}/100</p>
+                    <p className={`text-[10px] font-semibold capitalize ${
+                      zone.dominantAlert === 'critical' ? 'text-rose-400' :
+                      zone.dominantAlert === 'elevated' ? 'text-amber-400' : 'text-emerald-400'
+                    }`}>{zone.dominantAlert} alert level</p>
+                  </div>
+                </Popup>
+              </Circle>
+            ))}
+
+            {/* Individual sensor markers */}
+            {allSensors.map((sensor) => (
+              <Marker
+                key={sensor.id}
+                position={[sensor.lat, sensor.lng]}
+                icon={createSensorIcon(sensor.level, sensor.type)}
+              >
+                <Popup>
+                  <div className="text-xs p-1.5 space-y-1.5 max-w-[220px]">
+                    <div className="flex items-center gap-1.5">
+                      <span style={{ color: SENSOR_LEVEL_COLORS[sensor.level] }} className="font-black uppercase text-[9px]">
+                        {sensor.level}
+                      </span>
+                      <span className="text-[9px] text-muted-foreground">·</span>
+                      <span className="text-[9px] text-muted-foreground">{sensor.type.replace('_', ' ')}</span>
+                    </div>
+                    <p className="font-bold text-slate-200 leading-tight">{sensor.label}</p>
+                    <p className="text-[10px] text-muted-foreground leading-relaxed">{sensor.description}</p>
+                    <div className="flex items-center justify-between pt-1 border-t border-border/40 text-[9px] text-muted-foreground">
+                      <span>{sensor.value}{sensor.unit}</span>
+                      <span>{sensor.depth}</span>
+                    </div>
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
+          </>
+        )}
 
         {/* Draw active complaint markers for selected road */}
         {selectedRoad && activeComplaints.map((complaint) => {

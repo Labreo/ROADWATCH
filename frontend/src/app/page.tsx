@@ -53,6 +53,7 @@ import OperationsDashboard from '@/components/operations/OperationsDashboard';
 import LandingHero from '@/components/demo/LandingHero';
 import DemoTourGuide from '@/components/demo/DemoTourGuide';
 import PlaybackDashboard from '@/components/playback/PlaybackDashboard';
+import SensorDashboard from '@/components/sensors/SensorDashboard';
 
 // Transparency & Budget dashboard imports
 import { calculateRoadTransparency, getScoreGrade, getCitywideTransparencyData } from '@/services/transparencyEngine';
@@ -1285,6 +1286,11 @@ export default function Page() {
       {/* VIEW 7: HISTORICAL PLAYBACK SYSTEM */}
       {activeView === 'playback' && (
         <PlaybackDashboard />
+      )}
+
+      {/* VIEW 8: SMART INFRASTRUCTURE SENSOR MONITOR */}
+      {activeView === 'sensors' && (
+        <SensorDashboard />
       )}
 
       {/* Complaint wizard overlay */}
