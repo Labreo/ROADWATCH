@@ -20,7 +20,7 @@ export default function ResponsiveShell({ children }: ResponsiveShellProps) {
 
   return (
     <NetworkStatusProvider>
-      <div className="flex w-screen h-screen bg-[#0f111a] font-sans antialiased text-slate-100 overflow-hidden">
+      <div className="flex w-screen h-screen bg-slate-950 font-sans antialiased text-slate-100 overflow-hidden">
         {/* 1. Collapsible Sidebar Navigation */}
         <Sidebar />
 
@@ -33,7 +33,7 @@ export default function ResponsiveShell({ children }: ResponsiveShellProps) {
           <OfflineBanner />
 
           {/* 2b. Core Content Section */}
-          <main className="flex-1 flex flex-col p-4 md:p-6 min-h-0 overflow-y-auto relative bg-[#0c0e16]">
+          <main className="flex-1 flex flex-col p-4 md:p-6 min-h-0 overflow-y-auto relative bg-slate-950">
             {children}
           </main>
         </div>

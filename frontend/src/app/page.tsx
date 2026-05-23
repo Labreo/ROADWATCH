@@ -462,13 +462,11 @@ export default function Page() {
             </button>
           </div>
         </div>
-      )}
-
-      {/* VIEW 2: ROAD REGISTRY MAP VIEW (The primary road lookup slice) */}
+      )}      {/* VIEW 2: ROAD REGISTRY MAP VIEW (The primary road lookup slice) */}
       {activeView === 'roads' && (
-        <div className="flex-1 flex flex-col lg:flex-row gap-6 min-h-0 overflow-hidden animate-in fade-in duration-300">
+        <div className="flex-1 flex flex-col lg:flex-row gap-6 min-h-0 overflow-hidden animate-in fade-in duration-300 relative lg:pointer-events-none">
           {/* Left Side: Road Search & Sidebar Explorer */}
-          <section className="w-full lg:w-[320px] shrink-0 flex flex-col bg-slate-950/45 rounded-xl border border-border/60 p-4 space-y-4">
+          <section className="w-full lg:w-[320px] lg:absolute lg:left-4 lg:top-4 lg:bottom-4 lg:z-10 lg:h-auto flex flex-col glass-panel rounded-xl pointer-events-auto p-4 space-y-4 relative z-10">
             
             {/* Search Input handled in TopNav, but let's keep search here if they type specific to roads list */}
             <div>
@@ -496,10 +494,10 @@ export default function Page() {
                   <button
                     key={status}
                     onClick={() => setStatusFilter(status)}
-                    className={`text-[9px] px-2 py-1 rounded font-bold border capitalize transition-all ${
+                    className={`text-[9px] px-2 py-1 rounded font-bold border capitalize transition-all cursor-pointer ${
                       statusFilter === status 
-                        ? 'bg-cyan-500 border-cyan-500 text-slate-950 shadow-md shadow-cyan-500/10'
-                        : 'bg-slate-900/60 border-border text-slate-300 hover:border-slate-700'
+                        ? 'bg-zinc-100 border-zinc-100 text-zinc-950 shadow-md shadow-zinc-500/10'
+                        : 'bg-slate-900/60 border-border text-slate-350 hover:border-slate-700'
                     }`}
                   >
                     {status.replace('_', ' ')}
@@ -524,8 +522,8 @@ export default function Page() {
                       onClick={() => setSelectedRoadId(road.id)}
                       className={`p-3 rounded-lg border text-left cursor-pointer transition-all ${
                         isSelected 
-                          ? 'bg-slate-900 border-cyan-500/80 shadow-md shadow-cyan-500/5'
-                          : 'bg-slate-950/60 border-border/50 hover:bg-slate-900/40 hover:border-border'
+                          ? 'bg-slate-900 border-zinc-500/80 shadow-md shadow-zinc-500/5'
+                          : 'bg-slate-955/60 border-border/50 hover:bg-slate-900/40 hover:border-border'
                       }`}
                     >
                       <div className="flex justify-between items-start mb-1 gap-2">
@@ -538,8 +536,8 @@ export default function Page() {
                       </div>
                       <h4 className="text-xs font-bold text-slate-200 line-clamp-1">{road.name}</h4>
                       <div className="flex justify-between items-center text-[10px] text-muted-foreground mt-2 border-t border-border/30 pt-1.5">
-                        <span className="flex items-center gap-1 font-semibold text-slate-400">
-                          <MapPin className="w-3 h-3 text-cyan-500" />
+                        <span className="flex items-center gap-1 font-semibold text-slate-450">
+                          <MapPin className="w-3 h-3 text-zinc-400" />
                           {road.lengthKm} km
                         </span>
                         <span className="text-[9px]">Last Paved: {new Date(road.lastRelayingDate).toLocaleDateString('en-IN', { year: '2-digit', month: '2-digit' })}</span>
@@ -558,7 +556,7 @@ export default function Page() {
           </section>
 
           {/* Center: Dynamic Leaflet Map with Safety ErrorBoundary */}
-          <section className="flex-1 h-full min-h-[350px] lg:min-h-0 relative">
+          <section className="w-full h-[350px] lg:h-auto lg:absolute lg:inset-0 lg:z-0 pointer-events-auto">
             <ErrorBoundary>
               <MapWrapper />
             </ErrorBoundary>
@@ -566,13 +564,11 @@ export default function Page() {
 
           {/* Right Side: Selected Road Details Drawer/Panel */}
           {selectedRoadId ? (
-            <section className="w-full lg:w-[350px] shrink-0 h-full flex flex-col bg-slate-950 rounded-xl overflow-hidden border border-border/80 shadow-2xl relative z-10 transition-all duration-300 animate-in slide-in-from-bottom lg:slide-in-from-right">
+            <section className="w-full lg:w-[350px] lg:absolute lg:right-4 lg:top-4 lg:bottom-4 lg:z-10 lg:h-auto flex flex-col glass-panel rounded-xl overflow-hidden shadow-2xl pointer-events-auto relative z-10 transition-all duration-300 animate-in slide-in-from-bottom lg:slide-in-from-right">
               <RoadDetailsPanel />
             </section>
           ) : (
-            <section className="hidden lg:block w-[320px] shrink-0 h-full">
-              <EmptyState type="unselected" />
-            </section>
+            <div className="hidden lg:block lg:absolute lg:right-4 lg:top-4 lg:bottom-4 lg:z-10 w-[320px] pointer-events-none" />
           )}
         </div>
       )}

@@ -25,8 +25,8 @@ const getStatusColor = (status: string, isSelected: boolean) => {
     case 'good': return '#10b981'; // Emerald Green
     case 'fair': return '#f59e0b'; // Amber
     case 'poor': return '#ef4444'; // Red
-    case 'under_construction': return '#06b6d4'; // Cyan
-    default: return '#94a3b8';
+    case 'under_construction': return '#71717a'; // Desaturated Zinc-500 for construction target
+    default: return '#52525b';
   }
 };
 
@@ -120,7 +120,7 @@ export default function LeafletMap() {
       <div className="absolute top-3 right-3 z-[1000] flex flex-col gap-1 text-[11px] font-medium bg-slate-950/80 backdrop-blur-md px-3 py-2.5 rounded-lg border border-border shadow-md select-none">
         <span className="text-muted-foreground uppercase tracking-wider font-semibold mb-1 text-[9px]">Road Status Keys</span>
         <div className="flex items-center gap-2">
-          <span className="w-2.5 h-1.5 rounded bg-emerald-500 inline-block"></span>
+          <span className="w-2.5 h-1.5 rounded bg-emerald-550 inline-block"></span>
           <span className="text-foreground">Good</span>
         </div>
         <div className="flex items-center gap-2">
@@ -128,11 +128,11 @@ export default function LeafletMap() {
           <span className="text-foreground">Fair</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="w-2.5 h-1.5 rounded bg-red-500 inline-block"></span>
+          <span className="w-2.5 h-1.5 rounded bg-red-550 inline-block"></span>
           <span className="text-foreground">Poor</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="w-2.5 h-1.5 rounded bg-cyan-500 inline-block"></span>
+          <span className="w-2.5 h-1.5 rounded bg-zinc-500 inline-block border border-dashed border-zinc-400"></span>
           <span className="text-foreground">Work Underway</span>
         </div>
       </div>
@@ -163,9 +163,9 @@ export default function LeafletMap() {
                 <Polyline
                   positions={coords}
                   pathOptions={{
-                    color: '#06b6d4',
+                    color: '#ffffff',
                     weight: 12,
-                    opacity: 0.35,
+                    opacity: 0.25,
                     lineCap: 'round',
                     lineJoin: 'round'
                   }}

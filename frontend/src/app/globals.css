@@ -45,6 +45,19 @@
   --color-ring: var(--ring);
   --radius-lg: var(--radius);
   --font-sans: var(--font-outfit), var(--font-geist-sans), sans-serif;
+
+  /* Force all tailwind slate color classes to resolve to elegant Zinc palette */
+  --color-slate-50: #fafafa;
+  --color-slate-100: #f4f4f5;
+  --color-slate-200: #e4e4e7;
+  --color-slate-300: #d4d4d8;
+  --color-slate-400: #a1a1aa;
+  --color-slate-500: #71717a;
+  --color-slate-600: #52525b;
+  --color-slate-700: #3f3f46;
+  --color-slate-800: #27272a;
+  --color-slate-900: #18181b;
+  --color-slate-950: #09090b;
 }
 
 body {
@@ -52,21 +65,64 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
   overflow-x: hidden;
+  letter-spacing: -0.01em;
 }
 
-/* Glassmorphism utility classes */
+/* Typographic Scales & Fine Hierarchy Utilities */
+.h1-premium {
+  font-size: 1.25rem; /* Restrained but clear */
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: #f4f4f5;
+  text-transform: uppercase;
+}
+
+.h2-premium {
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #f4f4f5;
+  text-transform: uppercase;
+}
+
+.h3-premium {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: #e4e4e7;
+  text-transform: uppercase;
+}
+
+.text-meta-mono {
+  font-family: monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  color: #71717a;
+}
+
+.text-label-caps {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #71717a;
+}
+
+/* Premium Card & Panel Glassmorphism Depth (Palantir/Linear style) */
 .glass-panel {
-  background: rgba(9, 9, 11, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: linear-gradient(135deg, rgba(24, 24, 27, 0.7) 0%, rgba(9, 9, 11, 0.75) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .glass-card {
-  background: rgba(24, 24, 27, 0.35);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.02);
+  background: linear-gradient(135deg, rgba(39, 39, 42, 0.35) 0%, rgba(24, 24, 27, 0.4) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.02);
 }
 
 /* Sleek scrollbar styling */
@@ -210,6 +266,7 @@ body {
   padding: 1px;
   background: linear-gradient(to right, #06b6d4, #6366f1);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;

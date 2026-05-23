@@ -51,9 +51,9 @@ export default function PlaybackDashboard() {
   };
 
   return (
-    <div className="flex-1 flex flex-col lg:flex-row gap-6 min-h-0 overflow-hidden animate-in fade-in duration-300">
+    <div className="flex-1 flex flex-col lg:flex-row gap-6 min-h-0 overflow-hidden animate-in fade-in duration-300 relative lg:pointer-events-none">
       {/* Left Column: Historical Registry list */}
-      <section className="w-full lg:w-[320px] shrink-0 flex flex-col bg-slate-950/45 rounded-xl border border-border/60 p-4 space-y-4">
+      <section className="w-full lg:w-[320px] lg:absolute lg:left-4 lg:top-4 lg:bottom-4 lg:z-10 lg:h-auto flex flex-col glass-panel rounded-xl pointer-events-auto p-4 space-y-4 relative z-10">
         <div>
           <label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-1 block">Timeline filter</label>
           <div className="relative">
@@ -69,8 +69,8 @@ export default function PlaybackDashboard() {
         </div>
 
         {/* Info header */}
-        <div className="flex items-center gap-1.5 text-[10px] uppercase font-extrabold tracking-widest text-slate-300 border-b border-border/40 pb-2">
-          <History className="w-4 h-4 text-zinc-550" />
+        <div className="flex items-center gap-1.5 text-[10px] uppercase font-extrabold tracking-widest text-slate-350 border-b border-border/40 pb-2">
+          <History className="w-4 h-4 text-zinc-500" />
           <span>Road Chronology Registry</span>
         </div>
 
@@ -86,8 +86,8 @@ export default function PlaybackDashboard() {
                 onClick={() => setSelectedRoadId(road.id)}
                 className={`w-full text-left p-3 rounded-xl border transition-all duration-200 cursor-pointer flex items-center justify-between gap-3 ${
                   isSelected 
-                    ? 'bg-slate-900 border-zinc-700/60 shadow-sm shadow-zinc-950/45' 
-                    : 'bg-slate-950/20 border-border/45 hover:border-slate-800'
+                    ? 'bg-slate-900 border-zinc-500/80 shadow-sm shadow-zinc-950/45' 
+                    : 'bg-slate-955/20 border-border/45 hover:border-slate-800'
                 }`}
               >
                 <div className="min-w-0">
@@ -115,7 +115,7 @@ export default function PlaybackDashboard() {
       </section>
 
       {/* Center Column: Leaflet Map view with timeline scrubber */}
-      <section className="flex-1 h-full min-h-[350px] lg:min-h-0 relative rounded-xl border border-border/80 shadow-2xl overflow-hidden">
+      <section className="w-full h-[350px] lg:h-auto lg:absolute lg:inset-0 lg:z-0 pointer-events-auto">
         <ErrorBoundary>
           <MapWrapper />
         </ErrorBoundary>
@@ -125,7 +125,7 @@ export default function PlaybackDashboard() {
       </section>
 
       {/* Right Column: Historical Playback Event Panel */}
-      <section className="w-full lg:w-[350px] shrink-0 h-full flex flex-col bg-slate-950 rounded-xl overflow-hidden border border-border/80 shadow-2xl relative z-10 transition-all duration-300 animate-in slide-in-from-bottom lg:slide-in-from-right">
+      <section className="w-full lg:w-[350px] lg:absolute lg:right-4 lg:top-4 lg:bottom-4 lg:z-10 lg:h-auto flex flex-col glass-panel rounded-xl overflow-hidden shadow-2xl pointer-events-auto relative z-10 transition-all duration-300 animate-in slide-in-from-bottom lg:slide-in-from-right">
         <PlaybackEventPanel />
       </section>
     </div>

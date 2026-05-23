@@ -44,7 +44,7 @@ export default function TimelineSlider() {
   };
 
   return (
-    <div className="absolute bottom-4 left-4 right-4 z-[1000] p-4 glass-panel rounded-2xl border border-border/80 shadow-2xl flex flex-col md:flex-row items-center gap-4 bg-slate-950/90 text-foreground">
+    <div className="absolute bottom-4 left-4 right-4 lg:left-[22rem] lg:right-[24rem] z-[1000] p-4 glass-panel rounded-2xl border border-border/80 shadow-2xl flex flex-col md:flex-row items-center gap-4 bg-slate-950/90 text-foreground">
       {/* Controls Container */}
       <div className="flex items-center gap-2 shrink-0">
         <button
