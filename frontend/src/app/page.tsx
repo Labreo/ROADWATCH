@@ -48,6 +48,8 @@ import { OfflineSyncManager } from '@/services/offlineSync';
 import ComplaintTimeline from '@/components/complaints/ComplaintTimeline';
 import ComplaintWizard from '@/components/complaints/ComplaintWizard';
 import SyncCenter from '@/components/transparency/SyncCenter';
+import ChatPanel from '@/components/chat/ChatPanel';
+import OperationsDashboard from '@/components/operations/OperationsDashboard';
 
 // Transparency & Budget dashboard imports
 import { calculateRoadTransparency, getScoreGrade, getCitywideTransparencyData } from '@/services/transparencyEngine';
@@ -1243,8 +1245,18 @@ export default function Page() {
         </div>
       )}
 
+      {/* VIEW 6: AUTHORITY OPERATIONS DASHBOARD */}
+      {activeView === 'admin' && (
+        <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+          <OperationsDashboard />
+        </div>
+      )}
+
       {/* Complaint wizard overlay */}
       <ComplaintWizard />
+
+      {/* Floating AI Chatbot Assistant */}
+      <ChatPanel onSelectContractor={setSelectedContractorId} />
     </div>
   );
 }

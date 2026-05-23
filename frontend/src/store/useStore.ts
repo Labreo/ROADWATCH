@@ -3,7 +3,7 @@ import { RoadStatus, Complaint, SyncQueueItem, Road } from '@/types';
 import { complaints as mockComplaints, roads as mockRoads } from '@/data/mockData';
 import { CachedRoadRepository, SyncLog } from '@/services/cachedRoadRepository';
 
-export type AppView = 'dashboard' | 'roads' | 'contractors' | 'budgets' | 'complaints';
+export type AppView = 'dashboard' | 'roads' | 'contractors' | 'budgets' | 'complaints' | 'admin';
 
 interface AppState {
   // Sidebar State
@@ -53,6 +53,26 @@ interface AppState {
   // Complaints database
   complaintsList: Complaint[];
   addComplaint: (complaint: Complaint) => void;
+  updateComplaint: (id: number, updates: Partial<Complaint>) => void;
+  
+  // Scheduled Repairs
+  scheduledRepairs: {
+    id: string;
+    complaintId: number;
+    roadId: number;
+    contractorId: number;
+    scheduledDate: string;
+    engineerName: string;
+    notes?: string;
+  }[];
+  scheduleRepair: (repair: {
+    complaintId: number;
+    roadId: number;
+    contractorId: number;
+    scheduledDate: string;
+    engineerName: string;
+    notes?: string;
+  }) => void;
 }
 
 // Helper to load custom complaints from LocalStorage
@@ -163,6 +183,36 @@ export const useStore = create<AppState>((set, get) => {
         );
         window.localStorage.setItem('roadwatch_custom_complaints', JSON.stringify(custom));
       }
+    },
+    updateComplaint: (id, updates) => {
+      set((state) => ({
+        complaintsList: state.complaintsList.map(c => 
+          c.id === id ? { ...c, ...updates } : c
+        )
+      }));
+      
+      // Save custom complaints to local storage if edited
+      if (typeof window !== 'undefined') {
+        const { complaintsList } = get();
+        const custom = complaintsList.filter(
+          c => !mockComplaints.some(mc => mc.id === c.id)
+        );
+        window.localStorage.setItem('roadwatch_custom_complaints', JSON.stringify(custom));
+      }
+    },
+
+    // Scheduled Repairs
+    scheduledRepairs: [],
+    scheduleRepair: (repairData) => {
+      const newRepair = {
+        ...repairData,
+        id: `rep-${Math.floor(100000 + Math.random() * 900000)}`
+      };
+      set((state) => ({
+        scheduledRepairs: [...state.scheduledRepairs, newRepair]
+      }));
+      // Auto-update complaint status to 'in_progress' and link road if appropriate
+      get().updateComplaint(repairData.complaintId, { status: 'in_progress' });
     },
 
     queueComplaint: (complaintData) => {

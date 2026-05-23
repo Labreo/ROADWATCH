@@ -45,7 +45,8 @@ export default function Sidebar() {
     { id: 'roads' as AppView, label: 'Road Registry', icon: Map },
     { id: 'contractors' as AppView, label: 'Contractors', icon: HardHat },
     { id: 'budgets' as AppView, label: 'Budget Audits', icon: Coins },
-    { id: 'complaints' as AppView, label: 'Citizen Reports', icon: AlertTriangle, badge: syncQueueCount > 0 ? syncQueueCount : undefined }
+    { id: 'complaints' as AppView, label: 'Citizen Reports', icon: AlertTriangle, badge: syncQueueCount > 0 ? syncQueueCount : undefined },
+    { id: 'admin' as AppView, label: 'Operations Center', icon: Shield }
   ];
 
   return (

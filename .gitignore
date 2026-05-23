@@ -1,0 +1,37 @@
+# Next.js & Frontend dependencies
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
+
+# Python & Backend dependencies
+backend/__pycache__/
+backend/*/__pycache__/
+backend/*/*/__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+ENV/
+
+# Databases & Cache
+*.db
+*.sqlite
+backend/*.db
+backend/*.sqlite
+.pytest_cache/
+.eslintcache
+
+# Environment & Private configurations
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+
+# System & OS files
+.DS_Store
+Thumbs.db
