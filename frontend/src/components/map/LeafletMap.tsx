@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Polyline, Marker, Popup, useMap, Circle } from 'react-leaflet';
 import L from 'leaflet';
 import { useStore } from '@/store/useStore';
@@ -20,13 +20,13 @@ const getLeafletPoint = (coords: [number, number]): [number, number] => {
 };
 
 // Color codes based on road status — cinematic intelligence palette
-const getStatusColor = (status: string, isSelected: boolean) => {
-  if (isSelected) return '#e8e8f0';
+const getStatusColor = (status: string, isSelected: boolean, isLightMode: boolean) => {
+  if (isSelected) return isLightMode ? '#0891b2' : '#22d3ee';
   switch (status) {
-    case 'good':              return '#34d399'; // Signal emerald
+    case 'good':              return '#10b981'; // Signal emerald
     case 'fair':              return '#f59e0b'; // Signal amber
     case 'poor':              return '#f43f5e'; // Signal rose
-    case 'under_construction':return '#71717a'; // Muted zinc
+    case 'under_construction':return isLightMode ? '#94a3b8' : '#71717a'; // Muted zinc
     default:                  return '#3f3f46';
   }
 };
@@ -74,64 +74,68 @@ function MapController({ selectedRoad }: { selectedRoad: Road | null }) {
   return null;
 }
 
-// Custom HTML/Tailwind styling for markers to avoid missing asset paths
+// Custom HTML/Tailwind styling for markers with multi-layered glowing concentric ripples
 const createComplaintIcon = (category: string) => {
-  let color = 'bg-red-500';
-  if (category === 'waterlogging') color = 'bg-blue-500';
-  if (category === 'paving_defect') color = 'bg-yellow-500';
-  if (category === 'debris') color = 'bg-orange-600';
-  if (category === 'missing_signage') color = 'bg-fuchsia-500';
+  let color = '#ef4444';
+  if (category === 'waterlogging') color = '#3b82f6';
+  if (category === 'paving_defect') color = '#f59e0b';
+  if (category === 'debris') color = '#ea580c';
+  if (category === 'missing_signage') color = '#d946ef';
 
   return L.divIcon({
     className: 'custom-marker-wrapper',
-    html: `<div class="relative flex items-center justify-center w-5 h-5">
-             <div class="absolute w-5 h-5 rounded-full ${color} opacity-40 animate-ping"></div>
-             <div class="relative w-3.5 h-3.5 rounded-full ${color} border-2 border-slate-900 shadow-md"></div>
+    html: `<div style="position:relative;width:28px;height:28px;display:flex;align-items:center;justify-content:center;color:${color}">
+             <div class="marker-ripple"></div>
+             <div class="marker-ripple marker-ripple-2"></div>
+             <div style="width:10px;height:10px;border-radius:50%;background:${color};border:1.5px solid #09090b;box-shadow:0 0 10px ${color};z-index:2"></div>
            </div>`,
-    iconSize: [20, 20],
-    iconAnchor: [10, 10]
+    iconSize: [28, 28],
+    iconAnchor: [14, 14]
   });
 };
 
 const createSensorIcon = (level: SensorReading['level'], type: SensorReading['type']) => {
   const colors: Record<SensorReading['level'], string> = {
-    nominal:  '52, 211, 153',
-    elevated: '245, 158, 11',
-    critical: '244, 63, 94'
+    nominal:  '#10b981',
+    elevated: '#f59e0b',
+    critical: '#f43f5e'
   };
-  const rgb = colors[level];
+  const color = colors[level];
   return L.divIcon({
     className: 'sensor-marker-wrapper',
-    html: `<div style="position:relative;width:20px;height:20px;display:flex;align-items:center;justify-content:center">
-             <div style="position:absolute;width:20px;height:20px;border-radius:50%;background:rgba(${rgb},0.25);animation:ping 1.5s ease-out infinite"></div>
-             <div style="width:10px;height:10px;border-radius:50%;background:rgba(${rgb},0.9);border:1.5px solid rgba(255,255,255,0.6);box-shadow:0 0 6px rgba(${rgb},0.8)"></div>
+    html: `<div style="position:relative;width:28px;height:28px;display:flex;align-items:center;justify-content:center;color:${color}">
+             <div class="marker-ripple"></div>
+             <div class="marker-ripple marker-ripple-2"></div>
+             <div style="width:10px;height:10px;border-radius:50%;background:${color};border:1.5px solid #09090b;box-shadow:0 0 10px ${color};z-index:2"></div>
            </div>`,
-    iconSize: [20, 20],
-    iconAnchor: [10, 10]
+    iconSize: [28, 28],
+    iconAnchor: [14, 14]
   });
 };
 
 const createMaintenanceIcon = () => {
   return L.divIcon({
     className: 'maintenance-marker-wrapper',
-    html: `<div style="position:relative;width:24px;height:24px;display:flex;align-items:center;justify-content:center">
-             <div style="position:absolute;width:24px;height:24px;border-radius:50%;background:rgba(245,158,11,0.22);animation:ping 2s ease-out infinite"></div>
-             <div style="width:14px;height:14px;border-radius:50%;background:#f59e0b;border:1.5px solid #09090b;box-shadow:0 2px 6px rgba(245,158,11,0.4);display:flex;align-items:center;justify-content:center;font-size:8px">🚧</div>
+    html: `<div style="position:relative;width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:#f59e0b">
+             <div class="marker-ripple"></div>
+             <div class="marker-ripple marker-ripple-2"></div>
+             <div style="width:18px;height:18px;border-radius:50%;background:#f59e0b;border:2px solid #09090b;box-shadow:0 0 10px rgba(245,158,11,0.55);display:flex;align-items:center;justify-content:center;font-size:9px;z-index:2">🚧</div>
            </div>`,
-    iconSize: [24, 24],
-    iconAnchor: [12, 12]
+    iconSize: [32, 32],
+    iconAnchor: [16, 16]
   });
 };
 
 const createBudgetIcon = () => {
   return L.divIcon({
     className: 'budget-marker-wrapper',
-    html: `<div style="position:relative;width:24px;height:24px;display:flex;align-items:center;justify-content:center">
-             <div style="position:absolute;width:24px;height:24px;border-radius:50%;background:rgba(52,211,153,0.22);animation:ping 2.2s ease-out infinite"></div>
-             <div style="width:14px;height:14px;border-radius:50%;background:#34d399;border:1.5px solid #09090b;box-shadow:0 2px 6px rgba(52,211,153,0.4);display:flex;align-items:center;justify-content:center;font-size:8px;color:#09090b;font-weight:bold">₹</div>
+    html: `<div style="position:relative;width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:#10b981">
+             <div class="marker-ripple"></div>
+             <div class="marker-ripple marker-ripple-2"></div>
+             <div style="width:18px;height:18px;border-radius:50%;background:#10b981;border:2px solid #09090b;box-shadow:0 0 10px rgba(16,185,129,0.55);display:flex;align-items:center;justify-content:center;font-size:9px;color:#09090b;font-weight:bold;z-index:2">₹</div>
            </div>`,
-    iconSize: [24, 24],
-    iconAnchor: [12, 12]
+    iconSize: [32, 32],
+    iconAnchor: [16, 16]
   });
 };
 
@@ -152,6 +156,23 @@ export default function LeafletMap() {
     currentPlaybackStepId,
     complaintsList
   } = useStore();
+
+  const [isLightMode, setIsLightMode] = useState(false);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    setIsLightMode(document.documentElement.classList.contains('light'));
+    
+    const observer = new MutationObserver(() => {
+      setIsLightMode(document.documentElement.classList.contains('light'));
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
+
+  const tileUrl = isLightMode 
+    ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+    : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
 
   // Generate sensors & stress zones once (stable deterministic values)
   const allSensors = generateSensorsForRoads(roads as any);
@@ -222,11 +243,10 @@ export default function LeafletMap() {
         zoomControl={true}
         className="w-full h-full"
       >
-        {/* Dark Styled Tile Layer */}
+        {/* Sleek Cinematic CartoDB Dynamic Tile Layer */}
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          className="dark-map-tiles"
+          attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
+          url={tileUrl}
         />
 
         {/* ── Underground Utility Overlays ── */}
@@ -260,6 +280,11 @@ export default function LeafletMap() {
         {filteredRoads.map((road) => {
           const isSelected = selectedRoadId === road.id;
           const coords = getLeafletCoords(road.geometry.coordinates);
+          const roadStatus = activeView === 'playback'
+            ? getHistoricalRoadState(road.id, currentPlaybackStepId).status
+            : road.status;
+          
+          const color = getStatusColor(roadStatus, isSelected, isLightMode);
 
           return (
             <div key={road.id}>
@@ -267,18 +292,27 @@ export default function LeafletMap() {
               <Polyline
                 positions={coords}
                 pathOptions={{
-                  color: getStatusColor(
-                    activeView === 'playback'
-                      ? getHistoricalRoadState(road.id, currentPlaybackStepId).status
-                      : road.status,
-                    isSelected
-                  ),
-                  weight: isSelected ? 18 : 10,
-                  opacity: isSelected ? 0.12 : 0.05,
+                  color: color,
+                  weight: isSelected ? 24 : 12,
+                  opacity: isSelected ? 0.18 : 0.06,
                   lineCap: 'round',
                   lineJoin: 'round',
                 }}
               />
+
+              {/* Selected Middle Glow — only when selected, adds neon light intensity */}
+              {isSelected && (
+                <Polyline
+                  positions={coords}
+                  pathOptions={{
+                    color: color,
+                    weight: 12,
+                    opacity: 0.45,
+                    lineCap: 'round',
+                    lineJoin: 'round',
+                  }}
+                />
+              )}
 
               {/* Main segment polyline */}
               <Polyline
@@ -290,34 +324,25 @@ export default function LeafletMap() {
                   mouseover: (e) => {
                     const layer = e.target;
                     layer.setStyle({
-                      weight: isSelected ? 8 : 6,
+                      weight: isSelected ? 7 : 5,
                       opacity: 0.95
                     });
                   },
                   mouseout: (e) => {
                     const layer = e.target;
                     layer.setStyle({
-                      weight: isSelected ? 6 : 4,
-                      opacity: isSelected ? 1.0 : 0.8
+                      weight: isSelected ? 4.5 : 3.5,
+                      opacity: isSelected ? 1.0 : 0.85
                     });
                   }
                 }}
                 pathOptions={{
-                  color: getStatusColor(
-                    activeView === 'playback'
-                      ? getHistoricalRoadState(road.id, currentPlaybackStepId).status
-                      : road.status,
-                    isSelected
-                  ),
-                  weight: isSelected ? 6 : 4,
-                  opacity: isSelected ? 1.0 : 0.8,
+                  color: color,
+                  weight: isSelected ? 4.5 : 3.5,
+                  opacity: isSelected ? 1.0 : 0.85,
                   lineCap: 'round',
                   lineJoin: 'round',
-                  dashArray: (
-                    activeView === 'playback'
-                      ? getHistoricalRoadState(road.id, currentPlaybackStepId).status
-                      : road.status
-                  ) === 'under_construction' ? '8, 8' : undefined
+                  dashArray: roadStatus === 'under_construction' ? '8, 8' : undefined
                 }}
               >
                 <Popup>

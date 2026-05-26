@@ -89,7 +89,7 @@ export default function BottomSheet({
             // Responsive shell design:
             // Mobile: fixed bottom sheet sliding up from bottom
             // Desktop: floats as a card overlay in the top-right/left
-            className="fixed inset-x-0 bottom-0 z-[1012] lg:z-10 rounded-t-3xl lg:rounded-2xl glass-depth-2 border border-border/80 lg:shadow-2xl flex flex-col max-h-[96vh] lg:max-h-[calc(100vh-2rem)] select-none pointer-events-auto
+            className="fixed inset-x-0 bottom-0 z-[1012] lg:z-10 rounded-t-3xl lg:rounded-2xl glass-depth-2 border border-border/80 border-t-2 border-t-cyan-500/35 lg:border-t-2 lg:border-t-cyan-500/35 lg:shadow-2xl flex flex-col max-h-[96vh] lg:max-h-[calc(100vh-2rem)] select-none pointer-events-auto
               lg:absolute lg:top-4 lg:bottom-4 lg:right-4 lg:inset-x-auto lg:translate-y-0"
             style={{ 
               width: typeof window !== 'undefined' && window.innerWidth >= 1024 ? desktopWidth : 'auto',
@@ -99,9 +99,9 @@ export default function BottomSheet({
             {/* Grab Handle Header (Touch gesture indicator for mobile) */}
             <div 
               onPointerDown={(e) => dragControls.start(e)}
-              className="lg:hidden w-full h-7 flex items-center justify-center cursor-ns-resize active:scale-95 transition-all touch-none shrink-0"
+              className="lg:hidden w-full h-8 flex items-center justify-center cursor-ns-resize active:scale-95 transition-all touch-none shrink-0"
             >
-              <div className="w-10 h-1 bg-border-bright rounded-full opacity-60 hover:opacity-100 transition-opacity" />
+              <div className="w-12 h-1.2 bg-slate-650 rounded-full opacity-80 hover:opacity-100 transition-opacity" />
             </div>
 
             {/* Panel Title Bar */}

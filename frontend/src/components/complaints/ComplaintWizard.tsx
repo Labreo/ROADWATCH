@@ -94,6 +94,14 @@ const PRESETS = [
   }
 ];
 
+// Interactive Scanner Hot-spots mapping to presets (Google Lens style)
+const SCATTER_NODES = [
+  { presetIdx: 0, x: '35%', y: '45%', label: 'Pothole' },
+  { presetIdx: 1, x: '65%', y: '60%', label: 'Drainage Clog' },
+  { presetIdx: 2, x: '45%', y: '30%', label: 'Paver Defect' },
+  { presetIdx: 3, x: '75%', y: '40%', label: 'Aggregate Dump' }
+];
+
 // Helper to calculate distance in km between two lat/lng points
 function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371; // km
@@ -262,6 +270,7 @@ export default function ComplaintWizard() {
   const [shutterFlashing, setShutterFlashing] = useState(false);
   const [ticketResult, setTicketResult] = useState<Complaint | null>(null);
   const [routingInfo, setRoutingInfo] = useState<RoutingResult | null>(null);
+  const [analysisProgressText, setAnalysisProgressText] = useState('ISOLATING PAVEMENT LAYER COORDS...');
 
   // Geo-position coordinates jitter
   const [jitterCoords, setJitterCoords] = useState<[number, number]>([19.1242, 72.8422]);
@@ -278,6 +287,27 @@ export default function ComplaintWizard() {
       return () => clearInterval(interval);
     }
   }, [step, isWebcamActive, selectedPresetIndex]);
+
+  // Analysis text ticker cycle effect
+  useEffect(() => {
+    if (aiAnalyzing) {
+      const texts = [
+        'ISOLATING PAVEMENT LAYER COORDS...',
+        'COMPRESSING SUB-BASE TELEMETRY...',
+        'AUDITING AGGREGATE DENSITY MIX...',
+        'CALCULATING DEFECT VOLUMETRICS...',
+        'SPATIALLY VERIFYING WARD BOUNDS...',
+        'AUTO-RESOLVING JURISDICTION...'
+      ];
+      let idx = 0;
+      setAnalysisProgressText(texts[0]);
+      const interval = setInterval(() => {
+        idx = (idx + 1) % texts.length;
+        setAnalysisProgressText(texts[idx]);
+      }, 400);
+      return () => clearInterval(interval);
+    }
+  }, [aiAnalyzing]);
 
   // Load webcam stream
   const startWebcam = async () => {
@@ -551,6 +581,34 @@ export default function ComplaintWizard() {
               {/* Active scanning sweep bar */}
               <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400/80 to-transparent shadow-[0_0_12px_#22d3ee] pointer-events-none z-20 animate-scanline" />
 
+              {/* Google Lens Scatter Nodes */}
+              {!isWebcamActive && SCATTER_NODES.map((node) => {
+                const isActive = selectedPresetIndex === node.presetIdx;
+                return (
+                  <button
+                    key={node.presetIdx}
+                    type="button"
+                    onClick={() => setSelectedPresetIndex(node.presetIdx)}
+                    style={{ left: node.x, top: node.y }}
+                    className="absolute -translate-x-1/2 -translate-y-1/2 z-30 group p-1 focus:outline-none cursor-pointer"
+                    aria-label={`Select preset: ${node.label}`}
+                  >
+                    <span className="relative flex h-5 w-5 items-center justify-center">
+                      <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isActive ? 'bg-cyan-400' : 'bg-white/40'}`} />
+                      <span className={`relative inline-flex rounded-full h-2.5 w-2.5 shadow-[0_0_8px_currentColor] transition-all duration-300 ${
+                        isActive 
+                          ? 'bg-cyan-400 text-cyan-400 scale-125' 
+                          : 'bg-white/70 text-white group-hover:bg-cyan-300 group-hover:scale-110'
+                      }`} />
+                    </span>
+                    {/* Tooltip on hover */}
+                    <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-slate-950/90 border border-white/[0.08] text-[7.5px] font-black uppercase text-slate-200 px-2 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-md pointer-events-none">
+                      {node.label}
+                    </div>
+                  </button>
+                );
+              })}
+
               {/* Telemetry metadata layers */}
               <div className="absolute top-4 left-6 right-6 flex justify-between items-start pointer-events-none z-20">
                 <div className="bg-slate-950/60 backdrop-blur-md px-2 py-1 border border-white/[0.04] rounded-sm space-y-0.5">
@@ -656,23 +714,38 @@ export default function ComplaintWizard() {
                 
                 {/* AI bounding diagnostics frame */}
                 {!aiAnalyzing && (
-                  <div className="absolute inset-x-8 top-10 bottom-12 border-2 border-dashed border-rose-500/40 bg-rose-500/5 rounded flex flex-col justify-between p-2 animate-in zoom-in-95 duration-300">
+                  <div className="absolute inset-x-8 top-10 bottom-12 bg-rose-500/5 rounded flex flex-col justify-between p-2 animate-in zoom-in-95 duration-300">
+                    {/* Animated SVG Border */}
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none rounded">
+                      <rect 
+                        width="100%" 
+                        height="100%" 
+                        fill="none" 
+                        stroke="#f43f5e" 
+                        strokeWidth="1.5" 
+                        strokeDasharray="6 4" 
+                        className="animate-dash"
+                        style={{ opacity: 0.5 }}
+                      />
+                    </svg>
                     {/* Bounding box glow points */}
-                    <div className="absolute -top-1 -left-1 w-2.5 h-2.5 bg-rose-400 border border-white rounded-full animate-pulse" />
-                    <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-400 border border-white rounded-full animate-pulse" />
-                    <div className="absolute -bottom-1 -left-1 w-2.5 h-2.5 bg-rose-400 border border-white rounded-full animate-pulse" />
-                    <div className="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-rose-400 border border-white rounded-full animate-pulse" />
+                    <div className="absolute -top-1 -left-1 w-2 h-2 bg-rose-400 border border-white rounded-full animate-pulse z-10" />
+                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-rose-400 border border-white rounded-full animate-pulse z-10" />
+                    <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-rose-400 border border-white rounded-full animate-pulse z-10" />
+                    <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-rose-400 border border-white rounded-full animate-pulse z-10" />
 
-                    <div className="bg-rose-950/80 backdrop-blur-md px-1.5 py-0.5 rounded border border-rose-500/30 text-[7px] font-mono text-rose-400 self-start uppercase tracking-wider">
+                    <div className="bg-rose-950/85 backdrop-blur-md px-1.5 py-0.5 rounded border border-rose-500/30 text-[7px] font-mono text-rose-400 self-start uppercase tracking-wider relative z-10">
                       IDENTIFIED: {category.replace('_', ' ')} // {confidenceScore} CONFIDENCE
                     </div>
                   </div>
                 )}
 
                 {aiAnalyzing && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-950/80 backdrop-blur-xs">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-950/85 backdrop-blur-xs">
                     <Loader2 className="w-6 h-6 animate-spin text-cyan-400" />
-                    <span className="mono-label text-[8px] text-cyan-500/80 tracking-[0.18em]">ANALYZING DEFECT METRICS...</span>
+                    <span className="mono-label text-[8px] text-cyan-500/80 tracking-[0.15em] text-center px-4 font-mono">
+                      {analysisProgressText}
+                    </span>
                   </div>
                 )}
               </div>
@@ -858,9 +931,18 @@ export default function ComplaintWizard() {
               </div>
 
               {!isOnline && (
-                <div className="max-w-xs mx-auto p-2 bg-amber-950/20 border border-amber-900/40 rounded-lg flex items-center justify-center gap-1.5 text-[9.5px] text-amber-400">
-                  <WifiOff className="w-3.5 h-3.5 animate-pulse" />
-                  <span className="font-mono">INDEXEDDB QUEUE COUNT: +1</span>
+                <div className="max-w-xs mx-auto p-3.5 bg-amber-955/40 border border-amber-550/20 rounded-xl flex flex-col gap-1.5 text-[9.5px] text-amber-400 text-left">
+                  <div className="flex items-center gap-1.5 font-black uppercase tracking-wider text-amber-400">
+                    <WifiOff className="w-4 h-4 animate-pulse" />
+                    <span>Offline Sync Engaged</span>
+                  </div>
+                  <p className="text-[8.5px] text-amber-400/60 leading-relaxed font-mono">
+                    A secure cryptographic payload containing localized distress metrics, coordinate parameters, and your defect video frame has been cached to IndexedDB. Synchronization will initiate automatically once network telemetry is restored.
+                  </p>
+                  <div className="border-t border-amber-500/10 pt-1.5 flex justify-between font-mono text-[8px] opacity-75">
+                    <span>QUEUE SIZE: +1 Grievance</span>
+                    <span>INDEXEDDB V2</span>
+                  </div>
                 </div>
               )}
             </div>

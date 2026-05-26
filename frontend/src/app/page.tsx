@@ -484,7 +484,7 @@ export default function Page() {
           {/* ════════════ DESKTOP LAYOUT (FLOATING SIDEBARS) ════════════ */}
           
           {/* Left Side: Road Search & Sidebar Explorer (Desktop only) */}
-          <section className="hidden lg:flex w-full lg:w-[320px] lg:absolute lg:left-4 lg:top-4 lg:bottom-4 lg:z-10 lg:h-auto flex-col glass-panel rounded-xl pointer-events-auto p-4 space-y-4 relative z-10">
+          <section className="hidden lg:flex w-full lg:w-[320px] lg:absolute lg:left-4 lg:top-4 lg:bottom-4 lg:z-10 lg:h-auto flex-col glass-panel border-t-2 border-t-cyan-500/35 rounded-xl pointer-events-auto p-4 space-y-4 relative z-10">
             <div>
               <label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-1 block">Quick Registry filter</label>
               <div className="relative">
@@ -505,15 +505,15 @@ export default function Page() {
                 <SlidersHorizontal className="w-3 h-3" />
                 <span>Filter By Status</span>
               </div>
-              <div className="flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-1.5">
                 {(['all', 'good', 'fair', 'poor', 'under_construction'] as const).map((status) => (
                   <button
                     key={status}
                     onClick={() => setStatusFilter(status)}
-                    className={`text-[9px] px-2.5 py-1.2 rounded-lg font-bold border capitalize transition-all cursor-pointer ${
+                    className={`text-[9px] px-2.5 py-1.5 rounded-lg font-bold border capitalize transition-all cursor-pointer ${
                       statusFilter === status 
-                        ? 'bg-zinc-100 border-zinc-100 text-zinc-950 shadow-md'
-                        : 'bg-slate-900/60 border-border text-slate-350 hover:border-slate-700'
+                        ? 'bg-cyan-950/40 border-cyan-500 text-cyan-400 shadow-sm shadow-cyan-500/15'
+                        : 'bg-slate-955/50 border-border/80 text-slate-300 hover:border-slate-650 hover:text-slate-100'
                     }`}
                   >
                     {status.replace('_', ' ')}
@@ -523,8 +523,8 @@ export default function Page() {
             </div>
 
             {/* Scrollable Roads List */}
-            <div className="flex-1 overflow-y-auto pr-1 space-y-2">
-              <div className="flex justify-between items-center text-[10px] text-muted-foreground px-1 pb-1 uppercase tracking-wider font-bold">
+            <div className="flex-1 overflow-y-auto pr-1 space-y-3">
+              <div className="flex justify-between items-center text-[10px] text-muted-foreground px-1 pb-1.5 uppercase tracking-wider font-bold">
                 <span>Road Segments</span>
                 <span>{filteredRoads.length} loaded</span>
               </div>
@@ -536,27 +536,27 @@ export default function Page() {
                     <div
                       key={road.id}
                       onClick={() => setSelectedRoadId(road.id)}
-                      className={`p-3.5 rounded-xl border text-left cursor-pointer transition-all hover-raise ${
+                      className={`p-4 rounded-xl border text-left cursor-pointer transition-all hover-raise ${
                         isSelected 
-                          ? 'bg-slate-900/90 border-cyan-550 shadow-premium-md'
+                          ? 'bg-slate-900/95 border-cyan-500 shadow-premium-md glow-border-active'
                           : 'bg-slate-950/40 border-border/60'
                       }`}
                     >
-                      <div className="flex justify-between items-start mb-1 gap-2">
-                        <span className="text-[9px] font-bold text-slate-400 tracking-wider uppercase">
+                      <div className="flex justify-between items-center mb-1.5 gap-2">
+                        <span className="text-[8.5px] font-mono font-bold text-cyan-400 bg-cyan-950/30 border border-cyan-900/40 px-1.5 py-0.5 rounded tracking-wider uppercase">
                           {road.roadCode}
                         </span>
                         <span className={`text-[8px] font-extrabold uppercase border px-1.5 py-0.2 rounded tracking-wide ${getStatusTextClass(road.status)}`}>
                           {road.status.replace('_', ' ')}
                         </span>
                       </div>
-                      <h4 className="text-xs font-bold text-slate-200 line-clamp-1">{road.name}</h4>
-                      <div className="flex justify-between items-center text-[10px] text-muted-foreground mt-2 border-t border-border/30 pt-1.5">
-                        <span className="flex items-center gap-1 font-semibold text-slate-450">
-                          <MapPin className="w-3 h-3 text-zinc-400" />
+                      <h4 className="text-xs font-bold text-slate-200 line-clamp-1 tracking-tight mb-2">{road.name}</h4>
+                      <div className="flex justify-between items-center text-[10px] text-muted-foreground border-t border-border/30 pt-2">
+                        <span className="flex items-center gap-1 font-semibold text-slate-400">
+                          <MapPin className="w-3 h-3 text-zinc-550" />
                           {road.lengthKm} km
                         </span>
-                        <span className="text-[9px]">Last Paved: {new Date(road.lastRelayingDate).toLocaleDateString('en-IN', { year: '2-digit', month: '2-digit' })}</span>
+                        <span className="text-[9px] text-slate-455">Last Paved: {new Date(road.lastRelayingDate).toLocaleDateString('en-IN', { year: '2-digit', month: '2-digit' })}</span>
                       </div>
                     </div>
                   );
@@ -573,7 +573,7 @@ export default function Page() {
 
           {/* Right Side: Selected Road Details Drawer/Panel (Desktop only) */}
           {selectedRoadId ? (
-            <section className="hidden lg:flex w-full lg:w-[350px] lg:absolute lg:right-4 lg:top-4 lg:bottom-4 lg:z-10 lg:h-auto flex-col glass-panel rounded-xl overflow-hidden shadow-2xl pointer-events-auto relative z-10 transition-all duration-300 animate-in slide-in-from-bottom lg:slide-in-from-right">
+            <section className="hidden lg:flex w-full lg:w-[350px] lg:absolute lg:right-4 lg:top-4 lg:bottom-4 lg:z-10 lg:h-auto flex-col glass-panel border-t-2 border-t-cyan-500/35 rounded-xl overflow-hidden shadow-2xl pointer-events-auto relative z-10 transition-all duration-300 animate-in slide-in-from-bottom lg:slide-in-from-right">
               <RoadDetailsPanel />
             </section>
           ) : (
@@ -606,13 +606,13 @@ export default function Page() {
           </div>
 
           {/* Smart Nearby Telemetry Alerts Overlay */}
-          <div className="absolute top-20 right-4 z-[1001] max-w-[285px] pointer-events-auto hidden md:block">
-            <Card depth="card" glow="rose" className="p-3.5 bg-slate-950/85 backdrop-blur-md border border-red-500/20 shadow-lg select-none">
-              <div className="flex gap-2">
+          <div className="absolute top-20 right-4 z-[1001] max-w-[285px] pointer-events-auto hidden md:block animate-in fade-in slide-in-from-top-4 duration-500">
+            <Card depth="card" glow="rose" className="p-4 bg-slate-955/90 backdrop-blur-lg border border-red-500/30 border-t-2 border-t-red-500 shadow-2xl select-none">
+              <div className="flex gap-2.5">
                 <div className="status-beacon critical mt-1 animate-pulse" />
-                <div className="space-y-1">
-                  <span className="mono-label text-[8px] text-red-400 font-extrabold tracking-wider block">NEARBY TELEMETRY WARN</span>
-                  <p className="text-[10px] font-bold text-slate-200 leading-normal">
+                <div className="space-y-1.5">
+                  <span className="mono-label text-[8.5px] text-red-450 font-black tracking-wider block">NEARBY TELEMETRY WARN</span>
+                  <p className="text-[10.5px] font-bold text-slate-100 leading-normal">
                     S.V. Road: Interlocking paving caved (High Priority). Clog reported 12m ago.
                   </p>
                 </div>
@@ -641,10 +641,10 @@ export default function Page() {
                     <button
                       key={status}
                       onClick={() => setStatusFilter(status)}
-                      className={`text-[9px] px-2.5 py-1.2 rounded-lg font-bold border capitalize transition-all cursor-pointer ${
+                      className={`text-[9px] px-2.5 py-1.5 rounded-lg font-bold border capitalize transition-all cursor-pointer ${
                         statusFilter === status 
-                          ? 'bg-zinc-100 border-zinc-100 text-zinc-950 shadow-md'
-                          : 'bg-slate-900/60 border-border text-slate-350 hover:border-slate-700'
+                          ? 'bg-cyan-950/40 border-cyan-500 text-cyan-400 shadow-sm shadow-cyan-500/15'
+                          : 'bg-slate-955/50 border-border/80 text-slate-300 hover:border-slate-650 hover:text-slate-100'
                       }`}
                     >
                       {status.replace('_', ' ')}
@@ -654,8 +654,8 @@ export default function Page() {
               </div>
 
               {/* Scrollable list */}
-              <div className="space-y-2.5 pt-4 border-t border-border/30">
-                <div className="flex justify-between items-center text-[10px] text-muted-foreground px-1 pb-1 uppercase tracking-wider font-bold select-none">
+              <div className="space-y-3 pt-4 border-t border-border/30">
+                <div className="flex justify-between items-center text-[10px] text-muted-foreground px-1 pb-1.5 uppercase tracking-wider font-bold select-none">
                   <span>Road Segments</span>
                   <span>{filteredRoads.length} loaded</span>
                 </div>
@@ -664,15 +664,15 @@ export default function Page() {
                     <div
                       key={road.id}
                       onClick={() => setSelectedRoadId(road.id)}
-                      className="p-3.5 bg-slate-900/40 rounded-xl border border-border/60 text-left hover-raise cursor-pointer"
+                      className="p-4 bg-slate-950/40 rounded-xl border border-border/60 text-left hover-raise cursor-pointer"
                     >
-                      <div className="flex justify-between items-start mb-1 gap-2">
-                        <span className="text-[9px] font-bold text-slate-400 tracking-wider uppercase">{road.roadCode}</span>
+                      <div className="flex justify-between items-center mb-1.5 gap-2">
+                        <span className="text-[8.5px] font-mono font-bold text-cyan-400 bg-cyan-950/30 border border-cyan-900/40 px-1.5 py-0.5 rounded tracking-wider uppercase">{road.roadCode}</span>
                         <span className={`text-[8px] font-extrabold uppercase border px-1.5 py-0.2 rounded tracking-wide ${getStatusTextClass(road.status)}`}>
                           {road.status.replace('_', ' ')}
                         </span>
                       </div>
-                      <h4 className="text-xs font-bold text-slate-200 line-clamp-1">{road.name}</h4>
+                      <h4 className="text-xs font-bold text-slate-200 line-clamp-1 tracking-tight">{road.name}</h4>
                     </div>
                   ))
                 ) : (
