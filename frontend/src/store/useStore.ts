@@ -4,7 +4,7 @@ import { complaints as mockComplaints, roads as mockRoads } from '@/data/mockDat
 import { CachedRoadRepository, SyncLog } from '@/services/cachedRoadRepository';
 import { playbackSteps } from '@/data/historicalData';
 
-export type AppView = 'dashboard' | 'roads' | 'contractors' | 'budgets' | 'complaints' | 'admin' | 'playback' | 'sensors';
+export type AppView = 'dashboard' | 'roads' | 'contractors' | 'budgets' | 'complaints' | 'admin' | 'playback' | 'sensors' | 'twin';
 
 interface AppState {
   // Sidebar State

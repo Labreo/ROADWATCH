@@ -12,9 +12,25 @@ import {
   ChevronRight,
   Shield,
   History,
-  Radio
+  Radio,
+  Globe
 } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+
+// Mission clock hook
+function useClock() {
+  const [t, setT] = useState('');
+  useEffect(() => {
+    const tick = () => {
+      const n = new Date();
+      setT(`${String(n.getUTCHours()).padStart(2,'0')}:${String(n.getUTCMinutes()).padStart(2,'0')}:${String(n.getUTCSeconds()).padStart(2,'0')}`);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, []);
+  return t;
+}
 
 export default function Sidebar() {
   const { 
@@ -25,6 +41,8 @@ export default function Sidebar() {
     setActiveView,
     syncQueueCount
   } = useStore();
+
+  const clock = useClock();
 
   // Handle window resizing to close sidebar automatically on mobile
   useEffect(() => {
@@ -49,6 +67,7 @@ export default function Sidebar() {
     { id: 'budgets' as AppView, label: 'Budget Audits', icon: Coins },
     { id: 'playback' as AppView, label: 'Time Playback', icon: History },
     { id: 'sensors' as AppView, label: 'Sensor Monitor', icon: Radio },
+    { id: 'twin' as AppView, label: 'Digital Twin', icon: Globe },
     { id: 'complaints' as AppView, label: 'Citizen Reports', icon: AlertTriangle, badge: syncQueueCount > 0 ? syncQueueCount : undefined },
     { id: 'admin' as AppView, label: 'Operations Center', icon: Shield }
   ];
@@ -88,7 +107,7 @@ export default function Sidebar() {
               <Shield className="w-5 h-5 text-zinc-100" />
             </div>
             {sidebarOpen && (
-              <div className="flex flex-col select-none">
+              <div className="flex flex-col select-none animate-slide-reveal">
                 <span className="text-sm font-black tracking-wider text-slate-100 uppercase">
                   ROADWATCH
                 </span>
@@ -128,13 +147,13 @@ export default function Sidebar() {
                 }}
                 className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl border text-xs font-semibold tracking-wide transition-all group ${
                   isActive
-                    ? 'bg-zinc-900 border-zinc-700/60 text-zinc-150 shadow-[0_1px_3px_rgba(0,0,0,0.15)]'
+                    ? 'bg-zinc-900/80 border-cyan-500/20 text-zinc-100 glow-border-active border-l-[3px] border-l-cyan-400'
                     : 'bg-transparent border-transparent text-muted-foreground hover:text-slate-200 hover:bg-zinc-900/45'
                 }`}
                 aria-current={isActive ? 'page' : undefined}
               >
                 <Icon className={`w-5 h-5 shrink-0 transition-transform group-hover:scale-105 ${
-                  isActive ? 'text-zinc-100' : 'text-muted-foreground group-hover:text-slate-350'
+                  isActive ? 'text-cyan-400' : 'text-muted-foreground group-hover:text-slate-350'
                 }`} />
                 
                 {(sidebarOpen || window.innerWidth < 1024) && (
@@ -165,11 +184,12 @@ export default function Sidebar() {
         )}
 
         {sidebarOpen && (
-          <div className="p-4 border-t border-border/60 text-center shrink-0">
+          <div className="p-4 border-t border-border/60 text-center shrink-0 space-y-2">
             <div className="flex items-center justify-center gap-1.5 text-[9px] text-muted-foreground bg-zinc-900/50 py-1.5 px-2 rounded-lg border border-border/40">
-              <span className="w-1.5 h-1.5 rounded-full bg-zinc-600 inline-block animate-pulse"></span>
-              <span className="font-semibold tracking-wider uppercase">Engine v1.0.0-Beta</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 inline-block animate-pulse"></span>
+              <span className="font-semibold tracking-wider uppercase">Engine v2.0 // ACTIVE</span>
             </div>
+            <div className="text-[9px] font-mono text-cyan-500/60 tracking-widest">{clock} UTC</div>
           </div>
         )}
       </aside>

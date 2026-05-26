@@ -36,6 +36,7 @@ import {
 import MapWrapper from '@/components/map/MapWrapper';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { useStore } from '@/store/useStore';
+import StressIndicator from '@/components/sensors/StressIndicator';
 
 // ──────────────────────────────────────────────
 // Helper icons and labels
@@ -88,20 +89,20 @@ function timeSince(iso: string): string {
 // ──────────────────────────────────────────────
 function StatPill({ label, count, level }: { label: string; count: number; level: SensorLevel }) {
   const colors: Record<SensorLevel, string> = {
-    critical: 'bg-rose-950/60 border-rose-800/60 text-rose-400',
-    elevated: 'bg-amber-950/60 border-amber-800/60 text-amber-400',
-    nominal:  'bg-emerald-950/60 border-emerald-800/60 text-emerald-400'
+    critical: 'border-rose-500/20 text-rose-400 bg-rose-950/20',
+    elevated: 'border-amber-500/20 text-amber-400 bg-amber-950/20',
+    nominal:  'border-emerald-500/20 text-emerald-400 bg-emerald-950/20'
   };
-  const dots: Record<SensorLevel, string> = {
-    critical: 'bg-rose-500 animate-pulse',
-    elevated: 'bg-amber-500',
-    nominal:  'bg-emerald-500'
+  const beaconColors: Record<SensorLevel, string> = {
+    critical: 'critical',
+    elevated: 'elevated',
+    nominal:  'nominal'
   };
   return (
-    <div className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border ${colors[level]}`}>
-      <span className={`w-2 h-2 rounded-full shrink-0 ${dots[level]}`} />
-      <span className="text-[10px] uppercase font-black tracking-widest">{label}</span>
-      <span className="ml-auto text-lg font-black tabular-nums">{count}</span>
+    <div className={`flex items-center gap-2 px-2.5 py-1.5 rounded-sm border ${colors[level]}`}>
+      <div className={`status-beacon ${beaconColors[level]}`} />
+      <span className="mono-label text-[8px]">{label}</span>
+      <span className="ml-auto mono-readout text-xs font-bold">{count}</span>
     </div>
   );
 }
@@ -138,8 +139,8 @@ function SensorCard({
       onClick={onClick}
       className={`w-full text-left p-3.5 rounded-xl border transition-all duration-200 group ${
         isSelected
-          ? 'bg-zinc-900 border-zinc-600 shadow-lg'
-          : 'bg-slate-950/60 border-border/50 hover:bg-slate-900/60 hover:border-border'
+          ? 'glass-depth-2 border-cyan-500/30 shadow-lg'
+          : 'glass-card border-border/50 hover:bg-white/[0.02] hover:border-border'
       }`}
     >
       {/* Header row */}
@@ -187,6 +188,19 @@ function SensorCard({
           <span className="font-black text-slate-200">{sensor.value} {sensor.unit}</span>
         </div>
         <ValueBar value={sensor.value} />
+      </div>
+
+      {/* Micro-waveform */}
+      <div className="my-1.5 flex items-center justify-between">
+        <span className="text-[8px] font-mono text-cyan-500/50">FEED PULSE</span>
+        <StressIndicator 
+          value={sensor.value} 
+          level={sensor.level} 
+          width={85} 
+          height={16} 
+          showLabel={false} 
+          animated={false} 
+        />
       </div>
 
       {/* Footer */}
@@ -270,8 +284,8 @@ function DetailPanel({ sensor, onClose }: { sensor: SensorReading; onClose: () =
         </div>
 
         {/* Reading Gauge */}
-        <div className="glass-panel rounded-xl p-4 border border-border/60">
-          <div className="flex justify-between items-baseline mb-2">
+        <div className="glass-panel rounded-xl p-4 border border-border/60 space-y-3">
+          <div className="flex justify-between items-baseline">
             <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Current Reading</span>
             <span className="text-2xl font-black text-slate-100">
               {sensor.value}
@@ -279,7 +293,21 @@ function DetailPanel({ sensor, onClose }: { sensor: SensorReading; onClose: () =
             </span>
           </div>
           <ValueBar value={sensor.value} />
-          <div className="flex justify-between text-[9px] text-muted-foreground mt-1.5">
+
+          {/* Live Waveform Indicator */}
+          <div className="pt-2 border-t border-white/[0.04] space-y-1">
+            <span className="mono-label text-[8px]">FEED OSCILLOSCOPE WAVEFORM</span>
+            <StressIndicator 
+              value={sensor.value} 
+              level={sensor.level} 
+              width={240} 
+              height={40} 
+              showLabel={false} 
+              animated={true} 
+            />
+          </div>
+
+          <div className="flex justify-between text-[9px] text-muted-foreground pt-1">
             <span>0 — Nominal threshold: 45</span>
             <span>Critical: 75+</span>
           </div>

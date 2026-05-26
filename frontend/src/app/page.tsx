@@ -54,6 +54,7 @@ import LandingHero from '@/components/demo/LandingHero';
 import DemoTourGuide from '@/components/demo/DemoTourGuide';
 import PlaybackDashboard from '@/components/playback/PlaybackDashboard';
 import SensorDashboard from '@/components/sensors/SensorDashboard';
+import DigitalTwinView from '@/components/twin/DigitalTwinView';
 
 // Transparency & Budget dashboard imports
 import { calculateRoadTransparency, getScoreGrade, getCitywideTransparencyData } from '@/services/transparencyEngine';
@@ -1291,6 +1292,11 @@ export default function Page() {
       {/* VIEW 8: SMART INFRASTRUCTURE SENSOR MONITOR */}
       {activeView === 'sensors' && (
         <SensorDashboard />
+      )}
+
+      {/* VIEW 9: DIGITAL TWIN COMMAND CONSOLE */}
+      {activeView === 'twin' && (
+        <DigitalTwinView />
       )}
 
       {/* Complaint wizard overlay */}
