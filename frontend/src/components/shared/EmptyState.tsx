@@ -42,17 +42,17 @@ export default function EmptyState({
   const layout = getLayout();
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-slate-950/20 border border-dashed border-border/50 rounded-xl relative overflow-hidden">
+    <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center glass-panel border-dashed border-border/80 rounded-2xl relative overflow-hidden shadow-sm">
       {/* Background radial highlight */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.015),transparent_65%)] pointer-events-none"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.025),transparent_70%)] pointer-events-none"></div>
 
       <div className="flex flex-col items-center max-w-[280px] relative z-10 space-y-4">
-        <div className="p-3 bg-slate-950 rounded-full border border-border/70 shadow-sm shadow-black/40">
+        <div className="p-3.5 bg-slate-900/60 rounded-full border border-border/80 shadow-md">
           {layout.icon}
         </div>
         
-        <div className="space-y-1.5">
-          <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider">
+        <div className="space-y-2">
+          <h4 className="text-xs font-bold text-slate-200 uppercase tracking-widest leading-snug">
             {layout.title}
           </h4>
           <p className="text-[10px] text-muted-foreground leading-relaxed">
@@ -63,7 +63,7 @@ export default function EmptyState({
         {actionText && onAction && (
           <button
             onClick={onAction}
-            className="text-[9px] uppercase font-extrabold tracking-wider bg-slate-900 border border-border/60 hover:border-cyan-500/40 text-slate-300 hover:text-cyan-400 px-3.5 py-1.5 rounded-lg transition-all"
+            className="text-[9px] uppercase font-extrabold tracking-wider bg-slate-900 border border-border/80 text-slate-350 hover:text-cyan-400 px-4 py-1.8 rounded-xl transition-all hover-raise cursor-pointer"
           >
             {actionText}
           </button>

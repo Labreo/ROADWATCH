@@ -23,7 +23,8 @@ import {
   Plus,
   RefreshCw,
   HelpCircle,
-  Activity
+  Activity,
+  Menu
 } from 'lucide-react';
 
 import { useStore, AppView } from '@/store/useStore';
@@ -55,6 +56,8 @@ import DemoTourGuide from '@/components/demo/DemoTourGuide';
 import PlaybackDashboard from '@/components/playback/PlaybackDashboard';
 import SensorDashboard from '@/components/sensors/SensorDashboard';
 import DigitalTwinView from '@/components/twin/DigitalTwinView';
+import BottomSheet from '@/components/shared/BottomSheet';
+import Card from '@/components/shared/Card';
 
 // Transparency & Budget dashboard imports
 import { calculateRoadTransparency, getScoreGrade, getCitywideTransparencyData } from '@/services/transparencyEngine';
@@ -84,7 +87,8 @@ export default function Page() {
     isPlaybackPlaying,
     playbackSpeed,
     stepPlaybackForward,
-    setPlaybackPlaying
+    setPlaybackPlaying,
+    toggleSidebar
   } = useStore();
 
   // Selected sub-entities for contractors/budget detail views
@@ -241,43 +245,52 @@ export default function Page() {
         <div className="space-y-6 animate-in fade-in duration-300">
           {/* Summary counters grid */}
           <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="glass-panel rounded-xl p-4 flex items-center gap-3 border border-border/50">
-              <div className="p-2.5 rounded-lg bg-cyan-950/60 border border-cyan-800/40 text-cyan-400">
+            <div className="glass-panel hover-raise rounded-2xl p-5 flex items-center gap-4 border border-border/50">
+              <div className="p-3 rounded-xl bg-cyan-950/60 border border-cyan-800/40 text-cyan-400 shrink-0">
                 <MapPin className="w-5 h-5" />
               </div>
               <div>
-                <span className="text-[10px] text-muted-foreground block uppercase font-bold tracking-wider">Road Registry</span>
-                <span className="text-base md:text-lg font-extrabold text-slate-200">{stats.totalRoads} Segments</span>
+                <span className="text-label-caps block mb-1">Road Registry</span>
+                <div className="flex items-baseline">
+                  <span className="display-metric">{stats.totalRoads}</span>
+                  <span className="text-[9px] text-muted-foreground ml-1 font-bold uppercase tracking-widest">Segments</span>
+                </div>
               </div>
             </div>
 
-            <div className="glass-panel rounded-xl p-4 flex items-center gap-3 border border-border/50">
-              <div className="p-2.5 rounded-lg bg-indigo-950/60 border border-indigo-800/40 text-indigo-400">
+            <div className="glass-panel hover-raise rounded-2xl p-5 flex items-center gap-4 border border-border/50">
+              <div className="p-3 rounded-xl bg-indigo-950/60 border border-indigo-800/40 text-indigo-400 shrink-0">
                 <TrendingUp className="w-5 h-5" />
               </div>
               <div>
-                <span className="text-[10px] text-muted-foreground block uppercase font-bold tracking-wider">Sanctioned Audits</span>
-                <span className="text-base md:text-lg font-extrabold text-slate-200">{formatINR(stats.totalBudget)}</span>
+                <span className="text-label-caps block mb-1">Sanctioned Audits</span>
+                <span className="display-metric text-indigo-350">{formatINR(stats.totalBudget)}</span>
               </div>
             </div>
 
-            <div className="glass-panel rounded-xl p-4 flex items-center gap-3 border border-border/50">
-              <div className="p-2.5 rounded-lg bg-red-950/60 border border-red-800/40 text-red-400">
+            <div className="glass-panel hover-raise rounded-2xl p-5 flex items-center gap-4 border border-border/50">
+              <div className="p-3 rounded-xl bg-red-950/60 border border-red-800/40 text-red-400 shrink-0">
                 <AlertTriangle className="w-5 h-5 animate-pulse" />
               </div>
               <div>
-                <span className="text-[10px] text-muted-foreground block uppercase font-bold tracking-wider">Pending Defects</span>
-                <span className="text-base md:text-lg font-extrabold text-slate-200">{stats.activeComplaints} Active</span>
+                <span className="text-label-caps block mb-1">Pending Defects</span>
+                <div className="flex items-baseline">
+                  <span className="display-metric text-red-400">{stats.activeComplaints}</span>
+                  <span className="text-[9px] text-muted-foreground ml-1 font-bold uppercase tracking-widest">Active</span>
+                </div>
               </div>
             </div>
 
-            <div className="glass-panel rounded-xl p-4 flex items-center gap-3 border border-border/50">
-              <div className="p-2.5 rounded-lg bg-emerald-950/60 border border-emerald-800/40 text-emerald-400">
+            <div className="glass-panel hover-raise rounded-2xl p-5 flex items-center gap-4 border border-border/50">
+              <div className="p-3 rounded-xl bg-emerald-950/60 border border-emerald-800/40 text-emerald-400 shrink-0">
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
-                <span className="text-[10px] text-muted-foreground block uppercase font-bold tracking-wider">Resolution Rate</span>
-                <span className="text-base md:text-lg font-extrabold text-slate-200">{stats.resolutionRate}% Resolved</span>
+                <span className="text-label-caps block mb-1">Resolution Rate</span>
+                <div className="flex items-baseline">
+                  <span className="display-metric text-emerald-400">{stats.resolutionRate}%</span>
+                  <span className="text-[9px] text-muted-foreground ml-1 font-bold uppercase tracking-widest">Resolved</span>
+                </div>
               </div>
             </div>
           </section>
@@ -329,7 +342,7 @@ export default function Page() {
                         setSelectedComplaintId(complaint.id);
                         setActiveView('complaints');
                       }}
-                      className="p-3 bg-slate-950/50 rounded-lg border border-border/45 hover:border-cyan-500/40 cursor-pointer transition-all"
+                      className="p-3 bg-slate-950/30 rounded-xl border border-border/60 cursor-pointer hover-raise"
                     >
                       <div className="flex justify-between items-start gap-2 mb-1.5 flex-wrap">
                         <span className="text-[9px] font-bold text-slate-400 uppercase">
@@ -369,7 +382,7 @@ export default function Page() {
 
               <div className="space-y-3 flex-1 overflow-y-auto max-h-[400px] pr-1">
                 {contractors.slice(0, 5).map((contractor) => (
-                  <div key={contractor.id} className="p-3 bg-slate-950/50 rounded-lg border border-border/45 hover:border-border transition-all">
+                  <div key={contractor.id} className="p-3 bg-slate-950/30 rounded-xl border border-border/60 hover-raise">
                     <div className="flex items-center justify-between mb-1.5">
                       <h4 className="text-xs font-extrabold text-slate-200 truncate pr-2">{contractor.name}</h4>
                       {contractor.blacklisted ? (
@@ -412,7 +425,7 @@ export default function Page() {
                   const isOver = project.budgetSpent > project.budgetAllocated;
 
                   return (
-                    <div key={project.id} className="p-3 bg-slate-950/50 rounded-lg border border-border/45 hover:border-border transition-all space-y-2">
+                    <div key={project.id} className="p-3 bg-slate-950/30 rounded-xl border border-border/60 space-y-2 hover-raise">
                       <div className="flex justify-between items-start gap-2">
                         <div>
                           <h4 className="text-xs font-bold text-slate-200 line-clamp-1 leading-normal">{project.title}</h4>
@@ -466,11 +479,12 @@ export default function Page() {
         </div>
       )}      {/* VIEW 2: ROAD REGISTRY MAP VIEW (The primary road lookup slice) */}
       {activeView === 'roads' && (
-        <div className="flex-1 flex flex-col lg:flex-row gap-6 min-h-0 overflow-hidden animate-in fade-in duration-300 relative lg:pointer-events-none">
-          {/* Left Side: Road Search & Sidebar Explorer */}
-          <section className="w-full lg:w-[320px] lg:absolute lg:left-4 lg:top-4 lg:bottom-4 lg:z-10 lg:h-auto flex flex-col glass-panel rounded-xl pointer-events-auto p-4 space-y-4 relative z-10">
-            
-            {/* Search Input handled in TopNav, but let's keep search here if they type specific to roads list */}
+        <div className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-hidden animate-in fade-in duration-300 relative lg:pointer-events-none">
+          
+          {/* ════════════ DESKTOP LAYOUT (FLOATING SIDEBARS) ════════════ */}
+          
+          {/* Left Side: Road Search & Sidebar Explorer (Desktop only) */}
+          <section className="hidden lg:flex w-full lg:w-[320px] lg:absolute lg:left-4 lg:top-4 lg:bottom-4 lg:z-10 lg:h-auto flex-col glass-panel rounded-xl pointer-events-auto p-4 space-y-4 relative z-10">
             <div>
               <label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-1 block">Quick Registry filter</label>
               <div className="relative">
@@ -496,9 +510,9 @@ export default function Page() {
                   <button
                     key={status}
                     onClick={() => setStatusFilter(status)}
-                    className={`text-[9px] px-2 py-1 rounded font-bold border capitalize transition-all cursor-pointer ${
+                    className={`text-[9px] px-2.5 py-1.2 rounded-lg font-bold border capitalize transition-all cursor-pointer ${
                       statusFilter === status 
-                        ? 'bg-zinc-100 border-zinc-100 text-zinc-950 shadow-md shadow-zinc-500/10'
+                        ? 'bg-zinc-100 border-zinc-100 text-zinc-950 shadow-md'
                         : 'bg-slate-900/60 border-border text-slate-350 hover:border-slate-700'
                     }`}
                   >
@@ -522,10 +536,10 @@ export default function Page() {
                     <div
                       key={road.id}
                       onClick={() => setSelectedRoadId(road.id)}
-                      className={`p-3 rounded-lg border text-left cursor-pointer transition-all ${
+                      className={`p-3.5 rounded-xl border text-left cursor-pointer transition-all hover-raise ${
                         isSelected 
-                          ? 'bg-slate-900 border-zinc-500/80 shadow-md shadow-zinc-500/5'
-                          : 'bg-slate-955/60 border-border/50 hover:bg-slate-900/40 hover:border-border'
+                          ? 'bg-slate-900/90 border-cyan-550 shadow-premium-md'
+                          : 'bg-slate-950/40 border-border/60'
                       }`}
                     >
                       <div className="flex justify-between items-start mb-1 gap-2">
@@ -557,21 +571,141 @@ export default function Page() {
             </div>
           </section>
 
-          {/* Center: Dynamic Leaflet Map with Safety ErrorBoundary */}
-          <section className="w-full h-[350px] lg:h-auto lg:absolute lg:inset-0 lg:z-0 pointer-events-auto">
-            <ErrorBoundary>
-              <MapWrapper />
-            </ErrorBoundary>
-          </section>
-
-          {/* Right Side: Selected Road Details Drawer/Panel */}
+          {/* Right Side: Selected Road Details Drawer/Panel (Desktop only) */}
           {selectedRoadId ? (
-            <section className="w-full lg:w-[350px] lg:absolute lg:right-4 lg:top-4 lg:bottom-4 lg:z-10 lg:h-auto flex flex-col glass-panel rounded-xl overflow-hidden shadow-2xl pointer-events-auto relative z-10 transition-all duration-300 animate-in slide-in-from-bottom lg:slide-in-from-right">
+            <section className="hidden lg:flex w-full lg:w-[350px] lg:absolute lg:right-4 lg:top-4 lg:bottom-4 lg:z-10 lg:h-auto flex-col glass-panel rounded-xl overflow-hidden shadow-2xl pointer-events-auto relative z-10 transition-all duration-300 animate-in slide-in-from-bottom lg:slide-in-from-right">
               <RoadDetailsPanel />
             </section>
           ) : (
             <div className="hidden lg:block lg:absolute lg:right-4 lg:top-4 lg:bottom-4 lg:z-10 w-[320px] pointer-events-none" />
           )}
+
+          {/* ════════════ MOBILE LAYOUT & OVERLAYS ════════════ */}
+
+          {/* Mobile Top Floating Search Bar */}
+          <div className="absolute top-4 inset-x-4 z-[1001] lg:hidden flex flex-col gap-2 pointer-events-auto max-w-sm mx-auto animate-in fade-in slide-in-from-top-3 duration-300">
+            <div className="flex items-center gap-2 bg-slate-950/85 backdrop-blur-lg border border-border/80 p-2.5 rounded-2xl shadow-2xl">
+              <button
+                onClick={toggleSidebar}
+                className="p-2 rounded-xl bg-slate-900 border border-border text-slate-200 hover:text-cyan-400 transition-colors cursor-pointer"
+                aria-label="Toggle Navigation Sidebar"
+              >
+                <Menu className="w-4 h-4" />
+              </button>
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Search road segment..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 bg-transparent text-xs text-foreground placeholder:text-muted-foreground focus:outline-none"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Smart Nearby Telemetry Alerts Overlay */}
+          <div className="absolute top-20 right-4 z-[1001] max-w-[285px] pointer-events-auto hidden md:block">
+            <Card depth="card" glow="rose" className="p-3.5 bg-slate-950/85 backdrop-blur-md border border-red-500/20 shadow-lg select-none">
+              <div className="flex gap-2">
+                <div className="status-beacon critical mt-1 animate-pulse" />
+                <div className="space-y-1">
+                  <span className="mono-label text-[8px] text-red-400 font-extrabold tracking-wider block">NEARBY TELEMETRY WARN</span>
+                  <p className="text-[10px] font-bold text-slate-200 leading-normal">
+                    S.V. Road: Interlocking paving caved (High Priority). Clog reported 12m ago.
+                  </p>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          {/* Mobile bottom sheets */}
+          <div className="lg:hidden">
+            {/* 1. Mobile Registry Explorer List Sheet */}
+            <BottomSheet
+              isOpen={!selectedRoadId}
+              onClose={() => {}}
+              title="Road Registry Explorer"
+              snapPoints={[25, 55, 85]}
+              defaultSnapPoint={25}
+            >
+              {/* Filtering Status Controls */}
+              <div className="space-y-3 pb-3">
+                <div className="flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider text-slate-400 select-none">
+                  <SlidersHorizontal className="w-3 h-3" />
+                  <span>Filter By Status</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {(['all', 'good', 'fair', 'poor', 'under_construction'] as const).map((status) => (
+                    <button
+                      key={status}
+                      onClick={() => setStatusFilter(status)}
+                      className={`text-[9px] px-2.5 py-1.2 rounded-lg font-bold border capitalize transition-all cursor-pointer ${
+                        statusFilter === status 
+                          ? 'bg-zinc-100 border-zinc-100 text-zinc-950 shadow-md'
+                          : 'bg-slate-900/60 border-border text-slate-350 hover:border-slate-700'
+                      }`}
+                    >
+                      {status.replace('_', ' ')}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Scrollable list */}
+              <div className="space-y-2.5 pt-4 border-t border-border/30">
+                <div className="flex justify-between items-center text-[10px] text-muted-foreground px-1 pb-1 uppercase tracking-wider font-bold select-none">
+                  <span>Road Segments</span>
+                  <span>{filteredRoads.length} loaded</span>
+                </div>
+                {filteredRoads.length > 0 ? (
+                  filteredRoads.map((road) => (
+                    <div
+                      key={road.id}
+                      onClick={() => setSelectedRoadId(road.id)}
+                      className="p-3.5 bg-slate-900/40 rounded-xl border border-border/60 text-left hover-raise cursor-pointer"
+                    >
+                      <div className="flex justify-between items-start mb-1 gap-2">
+                        <span className="text-[9px] font-bold text-slate-400 tracking-wider uppercase">{road.roadCode}</span>
+                        <span className={`text-[8px] font-extrabold uppercase border px-1.5 py-0.2 rounded tracking-wide ${getStatusTextClass(road.status)}`}>
+                          {road.status.replace('_', ' ')}
+                        </span>
+                      </div>
+                      <h4 className="text-xs font-bold text-slate-200 line-clamp-1">{road.name}</h4>
+                    </div>
+                  ))
+                ) : (
+                  <EmptyState 
+                    type="no-search-results" 
+                    actionText="Clear Filter" 
+                    onAction={() => { setSearchQuery(''); setStatusFilter('all'); }} 
+                  />
+                )}
+              </div>
+            </BottomSheet>
+
+            {/* 2. Mobile Details Panel Sheet */}
+            <BottomSheet
+              isOpen={!!selectedRoadId}
+              onClose={() => setSelectedRoadId(null)}
+              title="Road Segment Details"
+              snapPoints={[35, 70, 95]}
+              defaultSnapPoint={35}
+            >
+              <RoadDetailsPanel />
+            </BottomSheet>
+          </div>
+
+          {/* ════════════ MAP CONTAINER (FULL BLEED) ════════════ */}
+
+          {/* Fullscreen Map container wrapper */}
+          <section className="absolute inset-0 w-full h-full lg:relative lg:inset-auto lg:flex-1 lg:h-full z-0 pointer-events-auto">
+            <ErrorBoundary>
+              <MapWrapper />
+            </ErrorBoundary>
+          </section>
+
         </div>
       )}
 

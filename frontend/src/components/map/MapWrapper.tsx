@@ -22,7 +22,9 @@ const LeafletMap = dynamic(
 
 export default function MapWrapper() {
   return (
-    <div className="w-full h-full min-h-[350px] md:min-h-[500px] transition-all duration-300">
+    <div className="w-full h-full min-h-[350px] md:min-h-[500px] transition-all duration-300 map-recessed">
+      {/* Immersive vignette overlay */}
+      <div className="map-vignette" />
       <LeafletMap />
     </div>
   );

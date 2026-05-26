@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { MapContainer, TileLayer, Polyline, Marker, Popup, useMap, Circle } from 'react-leaflet';
 import L from 'leaflet';
 import { useStore } from '@/store/useStore';
-import { roads, getComplaintsForRoad } from '@/data/mockData';
+import { roads, projects, getComplaintsForRoad } from '@/data/mockData';
 import { Road } from '@/types';
 import { getHistoricalRoadState, playbackSteps } from '@/data/historicalData';
 import { generateSensorsForRoads, generateStressZones, SENSOR_LEVEL_COLORS, SENSOR_COLORS, type SensorReading } from '@/data/sensorData';
@@ -111,6 +111,37 @@ const createSensorIcon = (level: SensorReading['level'], type: SensorReading['ty
   });
 };
 
+const createMaintenanceIcon = () => {
+  return L.divIcon({
+    className: 'maintenance-marker-wrapper',
+    html: `<div style="position:relative;width:24px;height:24px;display:flex;align-items:center;justify-content:center">
+             <div style="position:absolute;width:24px;height:24px;border-radius:50%;background:rgba(245,158,11,0.22);animation:ping 2s ease-out infinite"></div>
+             <div style="width:14px;height:14px;border-radius:50%;background:#f59e0b;border:1.5px solid #09090b;box-shadow:0 2px 6px rgba(245,158,11,0.4);display:flex;align-items:center;justify-content:center;font-size:8px">🚧</div>
+           </div>`,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12]
+  });
+};
+
+const createBudgetIcon = () => {
+  return L.divIcon({
+    className: 'budget-marker-wrapper',
+    html: `<div style="position:relative;width:24px;height:24px;display:flex;align-items:center;justify-content:center">
+             <div style="position:absolute;width:24px;height:24px;border-radius:50%;background:rgba(52,211,153,0.22);animation:ping 2.2s ease-out infinite"></div>
+             <div style="width:14px;height:14px;border-radius:50%;background:#34d399;border:1.5px solid #09090b;box-shadow:0 2px 6px rgba(52,211,153,0.4);display:flex;align-items:center;justify-content:center;font-size:8px;color:#09090b;font-weight:bold">₹</div>
+           </div>`,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12]
+  });
+};
+
+const getRoadMidpoint = (coordinates: [number, number][]): [number, number] => {
+  if (coordinates.length === 0) return [19.0760, 72.8777];
+  const midIndex = Math.floor(coordinates.length / 2);
+  const midPoint = coordinates[midIndex];
+  return [midPoint[1], midPoint[0]]; // [lat, lng]
+};
+
 export default function LeafletMap() {
   const { 
     selectedRoadId, 
@@ -118,7 +149,8 @@ export default function LeafletMap() {
     searchQuery, 
     statusFilter,
     activeView,
-    currentPlaybackStepId
+    currentPlaybackStepId,
+    complaintsList
   } = useStore();
 
   // Generate sensors & stress zones once (stable deterministic values)
@@ -157,27 +189,27 @@ export default function LeafletMap() {
   return (
     <div className="relative w-full h-full rounded-xl overflow-hidden border border-border/80 shadow-2xl">
       {/* Visual map status indicator */}
-      <div className="absolute top-3 right-3 z-[1000] flex flex-col gap-1 text-[11px] font-medium bg-slate-950/80 backdrop-blur-md px-3 py-2.5 rounded-lg border border-border shadow-md select-none">
-        <span className="text-muted-foreground uppercase tracking-wider font-semibold mb-1 text-[9px]">Road Status Keys</span>
+      <div className="absolute top-3 right-3 z-[1005] flex flex-col gap-1.5 text-[10px] font-bold glass-panel px-4 py-3 rounded-xl border border-border/80 shadow-2xl select-none min-w-[125px] border-l-2 border-l-cyan-400/80 transition-all duration-300">
+        <span className="text-muted-foreground uppercase tracking-widest font-black mb-1.5 text-[8px] opacity-75">Status Matrix</span>
         <div className="flex items-center gap-2">
-          <span className="w-2.5 h-1.5 rounded bg-emerald-550 inline-block"></span>
-          <span className="text-foreground">Good</span>
+          <span className="w-2.5 h-1.5 rounded-sm bg-[#34d399] inline-block shadow-sm"></span>
+          <span className="text-slate-200 text-[10px] font-semibold tracking-wide">Good</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="w-2.5 h-1.5 rounded bg-amber-500 inline-block"></span>
-          <span className="text-foreground">Fair</span>
+          <span className="w-2.5 h-1.5 rounded-sm bg-[#f59e0b] inline-block shadow-sm"></span>
+          <span className="text-slate-200 text-[10px] font-semibold tracking-wide">Fair</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="w-2.5 h-1.5 rounded bg-red-550 inline-block"></span>
-          <span className="text-foreground">Poor</span>
+          <span className="w-2.5 h-1.5 rounded-sm bg-[#f43f5e] inline-block shadow-sm"></span>
+          <span className="text-slate-200 text-[10px] font-semibold tracking-wide">Poor</span>
         </div>
         {/* Utility layer legend */}
-        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-white/[0.04]">
-          <span className="text-muted-foreground uppercase tracking-wider font-semibold mb-0 text-[8px] shrink-0">UTILITIES</span>
+        <div className="flex flex-wrap items-center gap-2 mt-2 pt-2.5 border-t border-white/[0.04]">
+          <span className="text-muted-foreground uppercase tracking-widest font-black text-[8px] shrink-0 opacity-75 mr-1">Utilities</span>
           {UTILITY_LAYERS.map(u => (
-            <div key={u.key} className="flex items-center gap-1">
-              <span className="w-3 h-[2px] inline-block" style={{ backgroundColor: u.color }} />
-              <span style={{ color: u.color }} className="text-[8px] font-semibold capitalize">{u.label.split(' ')[0]}</span>
+            <div key={u.key} className="flex items-center gap-1.5">
+              <span className="w-2.5 h-[2px] inline-block" style={{ backgroundColor: u.color }} />
+              <span style={{ color: u.color }} className="text-[8px] font-bold uppercase tracking-wider">{u.label.split(' ')[0]}</span>
             </div>
           ))}
         </div>
@@ -382,8 +414,100 @@ export default function LeafletMap() {
           </>
         )}
 
-        {/* Draw active complaint markers for selected road */}
-        {selectedRoad && activeComplaints.map((complaint) => {
+        {/* ── HEATMAP LAYER (only in roads registry explorer mode) ── */}
+        {activeView === 'roads' && complaintsList.map((complaint) => {
+          const latLng = getLeafletPoint(complaint.geometry.coordinates);
+          return (
+            <Circle
+              key={`heatmap-${complaint.id}`}
+              center={latLng}
+              radius={180}
+              pathOptions={{
+                color: '#f43f5e',
+                fillColor: '#f43f5e',
+                fillOpacity: 0.12,
+                weight: 0,
+              }}
+            />
+          );
+        })}
+
+        {/* ── CITIZEN COMPLAINT INDICATORS (visible in roads view) ── */}
+        {activeView === 'roads' && complaintsList.map((complaint) => {
+          const latLng = getLeafletPoint(complaint.geometry.coordinates);
+          return (
+            <Marker
+              key={`complaint-marker-${complaint.id}`}
+              position={latLng}
+              icon={createComplaintIcon(complaint.category)}
+            >
+              <Popup>
+                <div className="max-w-[200px] text-xs p-1">
+                  <span className="inline-block text-[9px] px-1.5 py-0.5 rounded bg-red-950/80 border border-red-800/50 text-red-400 capitalize mb-1">
+                    {complaint.category.replace('_', ' ')}
+                  </span>
+                  <h4 className="font-bold text-slate-100">{complaint.title}</h4>
+                  <p className="text-[10px] text-muted-foreground mt-1 line-clamp-2">{complaint.description}</p>
+                  <div className="flex items-center justify-between border-t border-border/50 pt-1.5 mt-1.5 text-[9px]">
+                    <span className="capitalize text-slate-350 font-semibold">{complaint.status}</span>
+                    <span className="text-muted-foreground">{new Date(complaint.createdAt).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
+
+        {/* ── MAINTENANCE MARKERS (hardhat zones in roads mode) ── */}
+        {activeView === 'roads' && filteredRoads.filter(r => r.status === 'under_construction').map((road) => {
+          const midpoint = getRoadMidpoint(road.geometry.coordinates);
+          return (
+            <Marker
+              key={`maintenance-${road.id}`}
+              position={midpoint}
+              icon={createMaintenanceIcon()}
+            >
+              <Popup>
+                <div className="text-xs p-1.5 space-y-1">
+                  <p className="font-extrabold text-amber-400 text-[10px] tracking-wide">🚧 ACTIVE WORK ZONE</p>
+                  <p className="font-bold text-slate-200">{road.name}</p>
+                  <p className="text-[10px] text-muted-foreground">Diversions active. Paving in progress.</p>
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
+
+        {/* ── BUDGET TRANSPARENCY MARKERS (rupee alerts in roads mode) ── */}
+        {activeView === 'roads' && filteredRoads.map((road) => {
+          const project = projects.find(p => p.roadId === road.id && p.budgetAllocated >= 50000000);
+          if (!project) return null;
+          const midpoint = getRoadMidpoint(road.geometry.coordinates);
+          return (
+            <Marker
+              key={`budget-marker-${road.id}`}
+              position={midpoint}
+              icon={createBudgetIcon()}
+            >
+              <Popup>
+                <div className="text-xs p-1.5 space-y-1.5 max-w-[200px]">
+                  <span className="inline-block text-[8.5px] px-1.5 py-0.5 rounded bg-emerald-955 border border-emerald-800 text-emerald-400 font-extrabold uppercase">
+                    ₹ AUDIT LEDGER
+                  </span>
+                  <h4 className="font-bold text-slate-100">{road.name}</h4>
+                  <p className="text-[10px] text-muted-foreground line-clamp-1">{project.title}</p>
+                  <div className="flex justify-between border-t border-border/40 pt-1 text-[9px] font-bold text-slate-350">
+                    <span>Allocated: ₹{(project.budgetAllocated / 10000000).toFixed(1)}Cr</span>
+                    <span className="text-emerald-400">Spent: {Math.round((project.budgetSpent / project.budgetAllocated) * 100)}%</span>
+                  </div>
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
+
+        {/* Draw active complaint markers for selected road in other views */}
+        {activeView !== 'roads' && selectedRoad && activeComplaints.map((complaint) => {
           const latLng = getLeafletPoint(complaint.geometry.coordinates);
           return (
             <Marker

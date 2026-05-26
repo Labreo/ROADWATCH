@@ -12,7 +12,9 @@ import {
   CheckCircle,
   AlertTriangle,
   Clock,
-  Settings
+  Settings,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { NotificationItem } from '@/types';
@@ -29,6 +31,30 @@ export default function TopNav() {
 
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Theme state
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
+  useEffect(() => {
+    const currentTheme = localStorage.getItem('theme') as 'dark' | 'light' || 'dark';
+    setTheme(currentTheme);
+    if (currentTheme === 'light') {
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    localStorage.setItem('theme', nextTheme);
+    if (nextTheme === 'light') {
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
+    }
+  };
 
   // Connection listener
   useEffect(() => {
@@ -145,9 +171,9 @@ export default function TopNav() {
           placeholder="Search road index, contractor code... (⌘K)"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-9 pr-10 py-2 text-xs bg-zinc-900 border border-zinc-700/50 rounded-xl placeholder-muted-foreground text-slate-200 focus:outline-none focus:border-zinc-500/80 focus:ring-1 focus:ring-zinc-550 transition-all shadow-inner"
+          className="w-full pl-9 pr-10 py-2 text-xs bg-slate-900/50 border border-border/80 rounded-xl placeholder-muted-foreground text-foreground focus:outline-none focus:border-cyan-550 focus:ring-1 focus:ring-cyan-500/25 transition-all shadow-inner"
         />
-        <span className="absolute right-3 top-2.5 px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700/60 text-[9px] text-muted-foreground font-semibold font-mono leading-none select-none pointer-events-none">
+        <span className="absolute right-3 top-2.5 px-1.5 py-0.5 rounded bg-slate-900/80 border border-border text-[9px] text-muted-foreground font-semibold font-mono leading-none select-none pointer-events-none">
           ⌘K
         </span>
       </div>
@@ -181,6 +207,16 @@ export default function TopNav() {
         <span className="hidden md:inline-block text-[9px] bg-zinc-900 border border-zinc-800 text-zinc-350 font-bold tracking-wide uppercase px-2 py-0.5 rounded">
           Mumbai Corp
         </span>
+
+        {/* Theme Toggle Button */}
+        <button
+          onClick={toggleTheme}
+          className="p-2 rounded-xl border border-border/60 hover:bg-slate-900 transition-colors text-slate-350 hover:text-slate-100 flex items-center justify-center cursor-pointer"
+          title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          aria-label="Toggle Theme"
+        >
+          {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-500" />}
+        </button>
 
         {/* Notifications Dropdown */}
         <div className="relative" ref={dropdownRef}>

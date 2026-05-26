@@ -74,16 +74,7 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile Menu Trigger overlay */}
-      {!sidebarOpen && (
-        <button
-          onClick={toggleSidebar}
-          className="lg:hidden fixed bottom-6 right-6 z-[1020] flex items-center justify-center w-12 h-12 rounded-full bg-cyan-500 text-slate-950 shadow-lg shadow-cyan-500/30 hover:scale-105 active:scale-95 transition-all"
-          aria-label="Open Navigation Menu"
-        >
-          <Menu className="w-6 h-6" />
-        </button>
-      )}
+
 
       {/* Mobile Drawer Backdrop */}
       {sidebarOpen && (

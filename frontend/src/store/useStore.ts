@@ -126,7 +126,7 @@ export const useStore = create<AppState>((set, get) => {
     setSelectedComplaintId: (id) => set({ selectedComplaintId: id }),
 
     // Navigation
-    activeView: 'dashboard',
+    activeView: 'roads',
     setActiveView: (view) => set({ activeView: view, selectedRoadId: null, selectedComplaintId: null }),
 
     // Playback State
