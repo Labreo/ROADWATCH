@@ -27,6 +27,11 @@ export default function BottomSheet({
   
   const sheetRef = useRef<HTMLDivElement>(null);
   const dragControls = useDragControls();
+  const [mounted, setMounted] = React.useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Snapping logic thresholds
   const getSnapPositions = () => {
@@ -37,6 +42,8 @@ export default function BottomSheet({
   };
 
   const positions = getSnapPositions();
+
+  if (!mounted) return null;
 
   return (
     <AnimatePresence>

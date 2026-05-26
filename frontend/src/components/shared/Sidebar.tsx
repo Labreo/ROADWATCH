@@ -13,7 +13,6 @@ import {
   History,
   Radio,
   Globe,
-  ScanLine,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -117,7 +116,7 @@ export default function Sidebar() {
           <div className="flex items-center gap-3 overflow-hidden min-w-0">
             {/* Logo mark */}
             <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500/20 to-indigo-600/20 border border-cyan-500/25 shadow-sm shrink-0">
-              <ScanLine className="w-4 h-4 text-cyan-400" />
+              <Shield className="w-4 h-4 text-cyan-400" />
             </div>
             {sidebarOpen && (
               <div className="flex flex-col select-none animate-slide-reveal min-w-0">
