@@ -478,7 +478,7 @@ export default function RoadInspectionScene() {
 
       {/* 3D Canvas */}
       <Canvas
-        shadows
+        shadows={{ type: THREE.PCFShadowMap }}
         camera={{ position: [0, 3.2, 4], fov: 45 }}
         className="w-full h-full"
       >
