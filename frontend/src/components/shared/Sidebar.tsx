@@ -1,19 +1,19 @@
 'use client';
 
 import { useStore, AppView } from '@/store/useStore';
-import { 
-  LayoutDashboard, 
-  Map, 
-  HardHat, 
-  Coins, 
-  AlertTriangle, 
-  Menu, 
-  ChevronLeft, 
+import {
+  LayoutDashboard,
+  Map,
+  HardHat,
+  Coins,
+  AlertTriangle,
+  ChevronLeft,
   ChevronRight,
   Shield,
   History,
   Radio,
-  Globe
+  Globe,
+  ScanLine,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -32,19 +32,28 @@ function useClock() {
   return t;
 }
 
+// Nav section separator
+function NavSeparator({ label }: { label: string }) {
+  return (
+    <div className="flex items-center gap-2 px-4 pt-4 pb-1">
+      <span className="text-[8px] font-black uppercase tracking-[0.18em] text-[#35354a] truncate">{label}</span>
+      <div className="flex-1 h-px bg-[#1a1a24]" />
+    </div>
+  );
+}
+
 export default function Sidebar() {
-  const { 
-    sidebarOpen, 
-    toggleSidebar, 
+  const {
+    sidebarOpen,
+    toggleSidebar,
     setSidebarOpen,
-    activeView, 
+    activeView,
     setActiveView,
-    syncQueueCount
+    syncQueueCount,
   } = useStore();
 
   const clock = useClock();
 
-  // Handle window resizing to close sidebar automatically on mobile
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 1024) {
@@ -53,134 +62,170 @@ export default function Sidebar() {
         setSidebarOpen(true);
       }
     };
-    
-    // Set initial size
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [setSidebarOpen]);
 
-  const navItems = [
-    { id: 'dashboard' as AppView, label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'roads' as AppView, label: 'Road Registry', icon: Map },
-    { id: 'contractors' as AppView, label: 'Contractors', icon: HardHat },
-    { id: 'budgets' as AppView, label: 'Budget Audits', icon: Coins },
-    { id: 'playback' as AppView, label: 'Time Playback', icon: History },
-    { id: 'sensors' as AppView, label: 'Sensor Monitor', icon: Radio },
-    { id: 'twin' as AppView, label: 'Digital Twin', icon: Globe },
-    { id: 'complaints' as AppView, label: 'Citizen Reports', icon: AlertTriangle, badge: syncQueueCount > 0 ? syncQueueCount : undefined },
-    { id: 'admin' as AppView, label: 'Operations Center', icon: Shield }
+  const navSections = [
+    {
+      label: 'Intelligence',
+      items: [
+        { id: 'dashboard' as AppView, label: 'Dashboard',     icon: LayoutDashboard },
+        { id: 'roads'     as AppView, label: 'Road Registry', icon: Map             },
+        { id: 'sensors'   as AppView, label: 'Sensor Monitor',icon: Radio           },
+        { id: 'twin'      as AppView, label: 'Digital Twin',  icon: Globe           },
+      ]
+    },
+    {
+      label: 'Accountability',
+      items: [
+        { id: 'contractors' as AppView, label: 'Contractors',   icon: HardHat      },
+        { id: 'budgets'     as AppView, label: 'Budget Audits', icon: Coins        },
+        { id: 'playback'    as AppView, label: 'Time Playback', icon: History      },
+        { id: 'complaints'  as AppView, label: 'Citizen Reports',icon: AlertTriangle,
+          badge: syncQueueCount > 0 ? syncQueueCount : undefined },
+      ]
+    },
+    {
+      label: 'System',
+      items: [
+        { id: 'admin' as AppView, label: 'Operations Center', icon: Shield },
+      ]
+    }
   ];
 
   return (
     <>
-
-
-      {/* Mobile Drawer Backdrop */}
+      {/* Mobile backdrop */}
       {sidebarOpen && (
-        <div 
+        <div
           onClick={toggleSidebar}
-          className="lg:hidden fixed inset-0 z-[1015] bg-[#000000]/60 backdrop-blur-sm"
+          className="lg:hidden fixed inset-0 z-[1015] bg-black/70 backdrop-blur-sm transition-opacity duration-300"
         />
       )}
 
-      {/* Sidebar Shell */}
+      {/* Sidebar shell */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-[1016] flex flex-col h-full glass-panel border-r border-border/80 transition-all duration-300 ${
-          sidebarOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full lg:w-20 lg:translate-x-0 overflow-hidden lg:overflow-visible'
+        className={`fixed lg:static inset-y-0 left-0 z-[1016] flex flex-col h-full glass-frosted border-r border-white/[0.055] transition-all duration-[320ms] ease-[cubic-bezier(0.4,0,0.2,1)] ${
+          sidebarOpen ? 'w-[240px] translate-x-0' : 'w-0 -translate-x-full lg:w-[68px] lg:translate-x-0 overflow-hidden lg:overflow-visible'
         }`}
         aria-label="Main Navigation Sidebar"
       >
-        {/* Logo Section */}
-        <div className="flex items-center h-20 px-6 border-b border-border/60 justify-between">
-          <div className="flex items-center gap-3 overflow-hidden">
-            <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-700/60 shadow-sm shrink-0">
-              <Shield className="w-5 h-5 text-zinc-100" />
+        {/* Logo */}
+        <div className="flex items-center h-14 px-4 border-b border-white/[0.055] justify-between shrink-0">
+          <div className="flex items-center gap-3 overflow-hidden min-w-0">
+            {/* Logo mark */}
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500/20 to-indigo-600/20 border border-cyan-500/25 shadow-sm shrink-0">
+              <ScanLine className="w-4 h-4 text-cyan-400" />
             </div>
             {sidebarOpen && (
-              <div className="flex flex-col select-none animate-slide-reveal">
-                <span className="text-sm font-black tracking-wider text-slate-100 uppercase">
+              <div className="flex flex-col select-none animate-slide-reveal min-w-0">
+                <span className="text-[12px] font-black tracking-[0.08em] text-slate-100 uppercase leading-none">
                   ROADWATCH
                 </span>
-                <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest -mt-0.5">
-                  Accountability
+                <span className="text-[8px] font-semibold text-cyan-500/60 uppercase tracking-[0.16em] mt-0.5">
+                  Infrastructure Intelligence
                 </span>
               </div>
             )}
           </div>
 
-          {/* Desktop collapse toggle */}
           {sidebarOpen && (
             <button
               onClick={toggleSidebar}
-              className="hidden lg:flex p-1.5 rounded-lg border border-border/60 hover:border-cyan-500/40 text-muted-foreground hover:text-cyan-400 bg-slate-950/40 transition-all"
+              className="hidden lg:flex p-1.5 rounded-lg border border-white/[0.06] hover:border-cyan-500/30 text-[#55555f] hover:text-cyan-400 bg-black/20 transition-all duration-200 shrink-0"
               aria-label="Collapse Sidebar"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
 
-        {/* Navigation items list */}
-        <nav className="flex-1 px-3 py-6 space-y-1.5 overflow-y-auto">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeView === item.id;
+        {/* Navigation */}
+        <nav className="flex-1 py-3 overflow-y-auto overflow-x-hidden">
+          {navSections.map(section => (
+            <div key={section.label}>
+              {sidebarOpen && <NavSeparator label={section.label} />}
+              <div className="px-2 space-y-0.5">
+                {section.items.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeView === item.id;
 
-            return (
-              <button
-                key={item.id}
-                onClick={() => {
-                  setActiveView(item.id);
-                  if (window.innerWidth < 1024) {
-                    setSidebarOpen(false);
-                  }
-                }}
-                className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl border text-xs font-semibold tracking-wide transition-all group ${
-                  isActive
-                    ? 'bg-zinc-900/80 border-cyan-500/20 text-zinc-100 glow-border-active border-l-[3px] border-l-cyan-400'
-                    : 'bg-transparent border-transparent text-muted-foreground hover:text-slate-200 hover:bg-zinc-900/45'
-                }`}
-                aria-current={isActive ? 'page' : undefined}
-              >
-                <Icon className={`w-5 h-5 shrink-0 transition-transform group-hover:scale-105 ${
-                  isActive ? 'text-cyan-400' : 'text-muted-foreground group-hover:text-slate-350'
-                }`} />
-                
-                {(sidebarOpen || window.innerWidth < 1024) && (
-                  <span className="flex-1 text-left truncate">{item.label}</span>
-                )}
-                
-                {item.badge !== undefined && (sidebarOpen || window.innerWidth < 1024) && (
-                  <span className="flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-zinc-800 text-[10px] font-bold text-zinc-100 border border-zinc-700/60 shadow-sm">
-                    {item.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setActiveView(item.id);
+                        if (window.innerWidth < 1024) setSidebarOpen(false);
+                      }}
+                      title={!sidebarOpen ? item.label : undefined}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border text-[11px] font-semibold tracking-wide transition-all duration-200 group relative ${
+                        isActive
+                          ? 'nav-item-active text-slate-100 border-transparent'
+                          : 'bg-transparent border-transparent text-[#55555f] hover:text-slate-300 hover:bg-white/[0.035]'
+                      }`}
+                      aria-current={isActive ? 'page' : undefined}
+                    >
+                      <Icon
+                        className={`nav-icon w-4.5 h-4.5 shrink-0 transition-all duration-200 ${
+                          isActive ? 'text-cyan-400' : 'text-[#45455a] group-hover:text-slate-350'
+                        }`}
+                        style={{ width: '1.05rem', height: '1.05rem' }}
+                      />
+
+                      {sidebarOpen && (
+                        <span className="flex-1 text-left truncate">{item.label}</span>
+                      )}
+
+                      {item.badge !== undefined && sidebarOpen && (
+                        <span className="flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500/20 text-[9px] font-black text-rose-400 border border-rose-500/30">
+                          {item.badge}
+                        </span>
+                      )}
+
+                      {/* Tooltip for collapsed mode */}
+                      {!sidebarOpen && (
+                        <div className="absolute left-full ml-3 px-2 py-1 bg-slate-900 border border-white/[0.08] rounded-lg text-[10px] font-semibold text-slate-200 whitespace-nowrap shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 z-50">
+                          {item.label}
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
 
-        {/* Footer actions / collapse expansion fallback for icon-only mode */}
+        {/* Footer */}
         {!sidebarOpen && (
-          <div className="hidden lg:flex items-center justify-center h-16 border-t border-border/60 py-4">
+          <div className="hidden lg:flex items-center justify-center h-14 border-t border-white/[0.055] shrink-0">
             <button
               onClick={toggleSidebar}
-              className="p-1.5 rounded-lg border border-border/60 hover:border-cyan-500/40 text-muted-foreground hover:text-cyan-400 bg-slate-950/40 transition-all"
+              className="p-1.5 rounded-lg border border-white/[0.06] hover:border-cyan-500/30 text-[#55555f] hover:text-cyan-400 bg-black/20 transition-all"
               aria-label="Expand Sidebar"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
         )}
 
         {sidebarOpen && (
-          <div className="p-4 border-t border-border/60 text-center shrink-0 space-y-2">
-            <div className="flex items-center justify-center gap-1.5 text-[9px] text-muted-foreground bg-zinc-900/50 py-1.5 px-2 rounded-lg border border-border/40">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 inline-block animate-pulse"></span>
-              <span className="font-semibold tracking-wider uppercase">Engine v2.0 // ACTIVE</span>
+          <div className="px-3 pb-4 pt-2 border-t border-white/[0.055] shrink-0 space-y-2">
+            {/* Status row */}
+            <div className="flex items-center gap-2 text-[8px] py-2 px-3 rounded-xl bg-black/25 border border-white/[0.04]">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-60" />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-500" />
+              </span>
+              <span className="font-bold tracking-[0.14em] uppercase text-[#45455a]">Engine v2.0</span>
+              <span className="ml-auto font-black text-cyan-500/60 font-mono tracking-wider">{clock}</span>
             </div>
-            <div className="text-[9px] font-mono text-cyan-500/60 tracking-widest">{clock} UTC</div>
+            {/* Version */}
+            <p className="text-center text-[7px] text-[#2a2a38] font-mono tracking-widest uppercase">
+              ROADWATCH · Mumbai Region
+            </p>
           </div>
         )}
       </aside>

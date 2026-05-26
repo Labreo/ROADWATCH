@@ -20,7 +20,10 @@ import {
   Minus,
   X,
   Eye,
-  type LucideProps
+  LayoutGrid,
+  Network,
+  Layers,
+  type LucideProps,
 } from 'lucide-react';
 
 import { roads } from '@/data/mockData';
@@ -31,24 +34,27 @@ import {
   SENSOR_LEVEL_COLORS,
   type SensorReading,
   type SensorType,
-  type SensorLevel
+  type SensorLevel,
 } from '@/data/sensorData';
-import MapWrapper from '@/components/map/MapWrapper';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { useStore } from '@/store/useStore';
 import StressIndicator from '@/components/sensors/StressIndicator';
+import SensorNetworkHUD from '@/components/sensors/SensorNetworkHUD';
+import UndergroundCrossSection from '@/components/sensors/UndergroundCrossSection';
+import SensorHeatmap, { TelemetrySparklinePanel } from '@/components/sensors/SensorHeatmap';
 
 // ──────────────────────────────────────────────
-// Helper icons and labels
+// Types & helpers
 // ──────────────────────────────────────────────
 type LucideIcon = React.FC<LucideProps>;
+type CenterView = 'network' | 'underground' | 'heatmap';
 
 const TYPE_ICONS: Record<SensorType, LucideIcon> = {
   vibration:        Radio,
   stress:           Gauge,
   drainage:         Droplets,
   traffic:          Activity,
-  repair_integrity: Wrench
+  repair_integrity: Wrench,
 };
 
 const TYPE_LABELS: Record<SensorType, string> = {
@@ -56,25 +62,25 @@ const TYPE_LABELS: Record<SensorType, string> = {
   stress:           'Structural Stress',
   drainage:         'Drainage',
   traffic:          'Traffic Load',
-  repair_integrity: 'Repair Integrity'
+  repair_integrity: 'Repair Integrity',
 };
 
 const LEVEL_LABELS: Record<SensorLevel, string> = {
   critical: 'Critical',
   elevated: 'Elevated',
-  nominal:  'Nominal'
+  nominal:  'Nominal',
 };
 
 const TREND_ICON: Record<SensorReading['trend'], LucideIcon> = {
   rising:  TrendingUp,
   falling: TrendingDown,
-  stable:  Minus
+  stable:  Minus,
 };
 
 const TREND_COLOR: Record<SensorReading['trend'], string> = {
   rising:  'text-rose-400',
   falling: 'text-emerald-400',
-  stable:  'text-slate-400'
+  stable:  'text-slate-400',
 };
 
 function timeSince(iso: string): string {
@@ -87,20 +93,16 @@ function timeSince(iso: string): string {
 // ──────────────────────────────────────────────
 // Sub-components
 // ──────────────────────────────────────────────
+
 function StatPill({ label, count, level }: { label: string; count: number; level: SensorLevel }) {
   const colors: Record<SensorLevel, string> = {
     critical: 'border-rose-500/20 text-rose-400 bg-rose-950/20',
     elevated: 'border-amber-500/20 text-amber-400 bg-amber-950/20',
-    nominal:  'border-emerald-500/20 text-emerald-400 bg-emerald-950/20'
-  };
-  const beaconColors: Record<SensorLevel, string> = {
-    critical: 'critical',
-    elevated: 'elevated',
-    nominal:  'nominal'
+    nominal:  'border-emerald-500/20 text-emerald-400 bg-emerald-950/20',
   };
   return (
     <div className={`flex items-center gap-2 px-2.5 py-1.5 rounded-sm border ${colors[level]}`}>
-      <div className={`status-beacon ${beaconColors[level]}`} />
+      <div className={`status-beacon ${level}`} />
       <span className="mono-label text-[8px]">{label}</span>
       <span className="ml-auto mono-readout text-xs font-bold">{count}</span>
     </div>
@@ -122,28 +124,30 @@ function ValueBar({ value }: { value: number }) {
 function SensorCard({
   sensor,
   isSelected,
-  onClick
+  onClick,
+  animDelay = 0,
 }: {
   sensor: SensorReading;
   isSelected: boolean;
   onClick: () => void;
+  animDelay?: number;
 }) {
   const Icon = TYPE_ICONS[sensor.type];
   const TrendIcon = TREND_ICON[sensor.trend];
   const road = roads.find(r => r.id === sensor.roadId);
   const levelColor = SENSOR_LEVEL_COLORS[sensor.level];
-  const typeColor = SENSOR_COLORS[sensor.type];
+  const typeColor  = SENSOR_COLORS[sensor.type];
 
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left p-3.5 rounded-xl border transition-all duration-200 group ${
+      className={`w-full text-left p-3.5 rounded-xl border transition-all duration-200 group animate-fade-in-up ${
         isSelected
           ? 'glass-depth-2 border-cyan-500/30 shadow-lg'
           : 'glass-card border-border/50 hover:bg-white/[0.02] hover:border-border'
       }`}
+      style={{ animationDelay: `${animDelay}ms`, animationFillMode: 'both' }}
     >
-      {/* Header row */}
       <div className="flex items-start justify-between gap-2 mb-2.5">
         <div className="flex items-center gap-2">
           <div
@@ -166,11 +170,7 @@ function SensorCard({
         <div className="flex flex-col items-end gap-1 shrink-0">
           <span
             className="text-[8px] font-black uppercase px-1.5 py-0.5 rounded border"
-            style={{
-              color: levelColor,
-              borderColor: `${levelColor}40`,
-              backgroundColor: `${levelColor}10`
-            }}
+            style={{ color: levelColor, borderColor: `${levelColor}40`, backgroundColor: `${levelColor}10` }}
           >
             {LEVEL_LABELS[sensor.level]}
           </span>
@@ -181,7 +181,6 @@ function SensorCard({
         </div>
       </div>
 
-      {/* Value bar */}
       <div className="space-y-1">
         <div className="flex justify-between items-center text-[9px]">
           <span className="text-muted-foreground">Reading</span>
@@ -190,20 +189,18 @@ function SensorCard({
         <ValueBar value={sensor.value} />
       </div>
 
-      {/* Micro-waveform */}
       <div className="my-1.5 flex items-center justify-between">
         <span className="text-[8px] font-mono text-cyan-500/50">FEED PULSE</span>
-        <StressIndicator 
-          value={sensor.value} 
-          level={sensor.level} 
-          width={85} 
-          height={16} 
-          showLabel={false} 
-          animated={false} 
+        <StressIndicator
+          value={sensor.value}
+          level={sensor.level}
+          width={85}
+          height={16}
+          showLabel={false}
+          animated={false}
         />
       </div>
 
-      {/* Footer */}
       <div className="flex items-center justify-between mt-2 text-[8px] text-muted-foreground">
         <span className="flex items-center gap-1">
           <Cpu className="w-2.5 h-2.5" />
@@ -220,14 +217,10 @@ function DetailPanel({ sensor, onClose }: { sensor: SensorReading; onClose: () =
   const TrendIcon = TREND_ICON[sensor.trend];
   const road = roads.find(r => r.id === sensor.roadId);
   const levelColor = SENSOR_LEVEL_COLORS[sensor.level];
-  const typeColor = SENSOR_COLORS[sensor.type];
+  const typeColor  = SENSOR_COLORS[sensor.type];
   const zone = generateStressZones(roads as any).find(z => z.roadId === sensor.roadId);
-
-  // Nearby sensors on same road
   const allSensors = generateSensorsForRoads(roads as any);
-  const sameRoadSensors = allSensors.filter(
-    s => s.roadId === sensor.roadId && s.id !== sensor.id
-  );
+  const sameRoadSensors = allSensors.filter(s => s.roadId === sensor.roadId && s.id !== sensor.id);
   const critCount = sameRoadSensors.filter(s => s.level === 'critical').length;
   const elevCount = sameRoadSensors.filter(s => s.level === 'elevated').length;
 
@@ -260,19 +253,13 @@ function DetailPanel({ sensor, onClose }: { sensor: SensorReading; onClose: () =
       </div>
 
       <div className="flex-1 overflow-y-auto p-5 space-y-5">
-        {/* Alert Level Banner */}
+        {/* Alert banner */}
         <div
           className="p-3.5 rounded-xl border"
-          style={{
-            borderColor: `${levelColor}40`,
-            backgroundColor: `${levelColor}10`
-          }}
+          style={{ borderColor: `${levelColor}40`, backgroundColor: `${levelColor}10` }}
         >
           <div className="flex items-center justify-between mb-1">
-            <span
-              className="text-[10px] font-black uppercase tracking-widest"
-              style={{ color: levelColor }}
-            >
+            <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: levelColor }}>
               {LEVEL_LABELS[sensor.level]} Alert
             </span>
             <span className="flex items-center gap-1 text-[8px] text-muted-foreground">
@@ -283,7 +270,7 @@ function DetailPanel({ sensor, onClose }: { sensor: SensorReading; onClose: () =
           <p className="text-xs text-slate-300 leading-relaxed">{sensor.description}</p>
         </div>
 
-        {/* Reading Gauge */}
+        {/* Reading gauge */}
         <div className="glass-panel rounded-xl p-4 border border-border/60 space-y-3">
           <div className="flex justify-between items-baseline">
             <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Current Reading</span>
@@ -293,35 +280,39 @@ function DetailPanel({ sensor, onClose }: { sensor: SensorReading; onClose: () =
             </span>
           </div>
           <ValueBar value={sensor.value} />
-
-          {/* Live Waveform Indicator */}
           <div className="pt-2 border-t border-white/[0.04] space-y-1">
-            <span className="mono-label text-[8px]">FEED OSCILLOSCOPE WAVEFORM</span>
-            <StressIndicator 
-              value={sensor.value} 
-              level={sensor.level} 
-              width={240} 
-              height={40} 
-              showLabel={false} 
-              animated={true} 
+            <span className="mono-label text-[8px]">OSCILLOSCOPE WAVEFORM</span>
+            <StressIndicator
+              value={sensor.value}
+              level={sensor.level}
+              width={240}
+              height={40}
+              showLabel={false}
+              animated={true}
             />
           </div>
-
           <div className="flex justify-between text-[9px] text-muted-foreground pt-1">
-            <span>0 — Nominal threshold: 45</span>
+            <span>0 — Nominal: 45</span>
             <span>Critical: 75+</span>
           </div>
         </div>
 
-        {/* Technical Details Grid */}
+        {/* Sparkline telemetry history */}
+        <TelemetrySparklinePanel
+          roadId={sensor.roadId}
+          sensorType={sensor.type}
+          baseValue={sensor.value}
+        />
+
+        {/* Technical details */}
         <div className="grid grid-cols-2 gap-3">
           {[
-            { label: 'Sensor Type', value: TYPE_LABELS[sensor.type] },
+            { label: 'Sensor Type',  value: TYPE_LABELS[sensor.type] },
             { label: 'Deploy Depth', value: sensor.depth ?? '—' },
-            { label: 'Trend', value: sensor.trend },
-            { label: 'Last Update', value: timeSince(sensor.lastUpdated) },
-            { label: 'Road Status', value: road?.status?.replace('_', ' ') ?? '—' },
-            { label: 'Road Code', value: road?.roadCode ?? '—' },
+            { label: 'Trend',        value: sensor.trend },
+            { label: 'Last Update',  value: timeSince(sensor.lastUpdated) },
+            { label: 'Road Status',  value: road?.status?.replace('_', ' ') ?? '—' },
+            { label: 'Road Code',    value: road?.roadCode ?? '—' },
           ].map(({ label, value }) => (
             <div key={label} className="bg-slate-950/60 rounded-lg border border-border/40 p-2.5">
               <span className="block text-[9px] uppercase font-bold text-muted-foreground tracking-wider mb-1">{label}</span>
@@ -330,32 +321,30 @@ function DetailPanel({ sensor, onClose }: { sensor: SensorReading; onClose: () =
           ))}
         </div>
 
-        {/* Zone Context */}
+        {/* Zone context */}
         {zone && (
           <div className="rounded-xl border border-border/60 bg-slate-950/40 p-4 space-y-3">
             <h4 className="text-[10px] uppercase font-black text-slate-400 tracking-wider">Infrastructure Stress Zone</h4>
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground">Zone Stress Index</span>
-              <span
-                className="text-sm font-black"
-                style={{ color: SENSOR_LEVEL_COLORS[zone.dominantAlert] }}
-              >
+              <span className="text-sm font-black" style={{ color: SENSOR_LEVEL_COLORS[zone.dominantAlert] }}>
                 {zone.stressIndex}/100
               </span>
             </div>
             <ValueBar value={zone.stressIndex} />
             <div className="grid grid-cols-2 gap-2 text-[9px]">
-              <span className="text-muted-foreground">
-                Critical sensors nearby: <strong className="text-rose-400">{critCount}</strong>
-              </span>
-              <span className="text-muted-foreground">
-                Elevated sensors: <strong className="text-amber-400">{elevCount}</strong>
-              </span>
+              <span className="text-muted-foreground">Critical nearby: <strong className="text-rose-400">{critCount}</strong></span>
+              <span className="text-muted-foreground">Elevated: <strong className="text-amber-400">{elevCount}</strong></span>
             </div>
           </div>
         )}
 
-        {/* Co-located sensors on same road */}
+        {/* Underground cross-section for this road */}
+        <div className="rounded-xl overflow-hidden border border-white/[0.04]" style={{ height: 360 }}>
+          <UndergroundCrossSection roadId={sensor.roadId} />
+        </div>
+
+        {/* Co-located sensors */}
         {sameRoadSensors.length > 0 && (
           <div className="space-y-2">
             <h4 className="text-[10px] uppercase font-black text-slate-400 tracking-wider">Other Sensors — Same Segment</h4>
@@ -384,73 +373,127 @@ function DetailPanel({ sensor, onClose }: { sensor: SensorReading; onClose: () =
 }
 
 // ──────────────────────────────────────────────
+// Center view toggle bar
+// ──────────────────────────────────────────────
+
+function CenterViewToggle({
+  current,
+  onChange,
+}: {
+  current: CenterView;
+  onChange: (v: CenterView) => void;
+}) {
+  const options: { key: CenterView; label: string; icon: LucideIcon }[] = [
+    { key: 'network',     label: 'Sensor Network', icon: Network    },
+    { key: 'underground', label: 'Cross-Section',  icon: Layers     },
+    { key: 'heatmap',     label: 'Heat Matrix',    icon: LayoutGrid },
+  ];
+  return (
+    <div className="flex items-center gap-1 p-1 rounded-lg bg-black/40 border border-white/[0.05] backdrop-blur-md">
+      {options.map(({ key, label, icon: Icon }) => (
+        <button
+          key={key}
+          onClick={() => onChange(key)}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[9px] font-black uppercase tracking-wider transition-all duration-200 ${
+            current === key
+              ? 'bg-cyan-500/15 border border-cyan-500/35 text-cyan-300'
+              : 'text-slate-500 hover:text-slate-300 border border-transparent'
+          }`}
+        >
+          <Icon className="w-3 h-3" />
+          <span className="hidden sm:inline">{label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────
 // Main Dashboard
 // ──────────────────────────────────────────────
-const ALL_TYPES: SensorType[] = ['vibration', 'stress', 'drainage', 'traffic', 'repair_integrity'];
+const ALL_TYPES: SensorType[]  = ['vibration', 'stress', 'drainage', 'traffic', 'repair_integrity'];
 const ALL_LEVELS: SensorLevel[] = ['critical', 'elevated', 'nominal'];
 
 export default function SensorDashboard() {
-  const allSensors = useMemo(() => generateSensorsForRoads(roads as any), []);
+  const allSensors  = useMemo(() => generateSensorsForRoads(roads as any), []);
   const stressZones = useMemo(() => generateStressZones(roads as any), []);
 
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [typeFilter, setTypeFilter] = useState<SensorType | 'all'>('all');
-  const [levelFilter, setLevelFilter] = useState<SensorLevel | 'all'>('all');
-  const [roadFilter, setRoadFilter] = useState<number | 'all'>('all');
+  const [selectedId,   setSelectedId]   = useState<string | null>(null);
+  const [typeFilter,   setTypeFilter]   = useState<SensorType | 'all'>('all');
+  const [levelFilter,  setLevelFilter]  = useState<SensorLevel | 'all'>('all');
+  const [roadFilter,   setRoadFilter]   = useState<number | 'all'>('all');
+  const [centerView,   setCenterView]   = useState<CenterView>('network');
 
-  const criticalCount  = useMemo(() => allSensors.filter(s => s.level === 'critical').length,  [allSensors]);
-  const elevatedCount  = useMemo(() => allSensors.filter(s => s.level === 'elevated').length,  [allSensors]);
-  const nominalCount   = useMemo(() => allSensors.filter(s => s.level === 'nominal').length,   [allSensors]);
+  const { setSelectedRoadId } = useStore();
 
-  const filteredSensors = useMemo(() => {
-    return allSensors
+  const criticalCount = useMemo(() => allSensors.filter(s => s.level === 'critical').length, [allSensors]);
+  const elevatedCount = useMemo(() => allSensors.filter(s => s.level === 'elevated').length, [allSensors]);
+  const nominalCount  = useMemo(() => allSensors.filter(s => s.level === 'nominal').length,  [allSensors]);
+
+  const filteredSensors = useMemo(() =>
+    allSensors
       .filter(s =>
-        (typeFilter  === 'all' || s.type    === typeFilter)  &&
-        (levelFilter === 'all' || s.level   === levelFilter) &&
-        (roadFilter  === 'all' || s.roadId  === roadFilter)
+        (typeFilter  === 'all' || s.type   === typeFilter)  &&
+        (levelFilter === 'all' || s.level  === levelFilter) &&
+        (roadFilter  === 'all' || s.roadId === roadFilter)
       )
       .sort((a, b) => {
         const order = { critical: 0, elevated: 1, nominal: 2 };
         return order[a.level] - order[b.level];
-      });
-  }, [allSensors, typeFilter, levelFilter, roadFilter]);
+      }),
+  [allSensors, typeFilter, levelFilter, roadFilter]);
 
   const selectedSensor = allSensors.find(s => s.id === selectedId) ?? null;
+  const selectedRoadId = selectedSensor?.roadId ?? null;
 
-  // Clear detail panel if it's filtered out
-  const handleSelect = (id: string) => setSelectedId(prev => prev === id ? null : id);
+  const handleSelect = (id: string) => {
+    setSelectedId(prev => prev === id ? null : id);
+  };
+
+  const handleHeatmapCell = (roadId: number, type: SensorType) => {
+    const sensor = allSensors.find(s => s.roadId === roadId && s.type === type);
+    if (sensor) {
+      setSelectedId(sensor.id);
+      setSelectedRoadId(roadId);
+    }
+  };
 
   return (
     <div className="flex-1 flex flex-col lg:flex-row gap-0 min-h-0 overflow-hidden animate-in fade-in duration-300 relative lg:pointer-events-none">
 
-      {/* ── LEFT PANEL: Filters + Sensor List ── */}
+      {/* ── LEFT: Filters + Sensor List ── */}
       <section className="w-full lg:w-[340px] lg:absolute lg:left-4 lg:top-4 lg:bottom-4 lg:z-10 flex flex-col glass-panel rounded-xl pointer-events-auto overflow-hidden">
 
-        {/* Header */}
+        {/* Header with live badge */}
         <div className="p-4 border-b border-border/60 shrink-0">
           <div className="flex items-center gap-2 mb-3">
             <div className="p-1.5 rounded-lg bg-cyan-950/60 border border-cyan-800/40">
               <Cpu className="w-4 h-4 text-cyan-400" />
             </div>
             <div>
-              <h2 className="text-xs font-black text-slate-100 uppercase tracking-widest">Sensor Monitor</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xs font-black text-slate-100 uppercase tracking-widest">Sensor Monitor</h2>
+                <span className="flex items-center gap-1 text-[7px] font-black uppercase px-1.5 py-0.5 rounded bg-cyan-950/60 border border-cyan-800/30 text-cyan-400">
+                  <span className="w-1 h-1 rounded-full bg-cyan-400 animate-pulse" />
+                  LIVE
+                </span>
+              </div>
               <p className="text-[9px] text-muted-foreground">{allSensors.length} active feeds across {roads.length} segments</p>
             </div>
           </div>
 
-          {/* Summary pills */}
           <div className="grid grid-cols-3 gap-1.5">
-            <StatPill label="Critical" count={criticalCount}  level="critical" />
-            <StatPill label="Elevated" count={elevatedCount}  level="elevated" />
-            <StatPill label="Nominal"  count={nominalCount}   level="nominal"  />
+            <StatPill label="Critical" count={criticalCount} level="critical" />
+            <StatPill label="Elevated" count={elevatedCount} level="elevated" />
+            <StatPill label="Nominal"  count={nominalCount}  level="nominal"  />
           </div>
         </div>
 
         {/* Filters */}
         <div className="p-3 border-b border-border/40 shrink-0 space-y-2.5">
-          {/* Sensor type filter */}
+          {/* Type filter */}
           <div>
-            <label className="text-[9px] uppercase font-black text-muted-foreground tracking-wider mb-1.5 block flex items-center gap-1">
+            <label className="text-[9px] uppercase font-black text-muted-foreground tracking-wider mb-1.5 flex items-center gap-1">
               <Filter className="w-2.5 h-2.5" /> Sensor Type
             </label>
             <div className="flex flex-wrap gap-1">
@@ -461,9 +504,7 @@ export default function SensorDashboard() {
                     ? 'bg-zinc-100 border-zinc-100 text-zinc-950'
                     : 'bg-slate-900 border-border text-slate-400 hover:border-slate-600'
                 }`}
-              >
-                All
-              </button>
+              >All</button>
               {ALL_TYPES.map(t => {
                 const Icon = TYPE_ICONS[t];
                 const isActive = typeFilter === t;
@@ -476,10 +517,7 @@ export default function SensorDashboard() {
                         ? 'text-slate-950 border-transparent'
                         : 'bg-slate-900 border-border text-slate-400 hover:border-slate-600'
                     }`}
-                    style={isActive ? {
-                      backgroundColor: SENSOR_COLORS[t],
-                      borderColor: SENSOR_COLORS[t]
-                    } : {}}
+                    style={isActive ? { backgroundColor: SENSOR_COLORS[t], borderColor: SENSOR_COLORS[t] } : {}}
                   >
                     <Icon className="w-2.5 h-2.5" />
                     {TYPE_LABELS[t].split(' ')[0]}
@@ -489,7 +527,7 @@ export default function SensorDashboard() {
             </div>
           </div>
 
-          {/* Alert level filter */}
+          {/* Level filter */}
           <div>
             <label className="text-[9px] uppercase font-black text-muted-foreground tracking-wider mb-1.5 block">Alert Level</label>
             <div className="flex gap-1">
@@ -504,7 +542,7 @@ export default function SensorDashboard() {
                   }`}
                   style={levelFilter === lv && lv !== 'all' ? {
                     backgroundColor: SENSOR_LEVEL_COLORS[lv],
-                    borderColor: SENSOR_LEVEL_COLORS[lv]
+                    borderColor: SENSOR_LEVEL_COLORS[lv],
                   } : {}}
                 >
                   {lv === 'all' ? 'All' : LEVEL_LABELS[lv]}
@@ -522,9 +560,7 @@ export default function SensorDashboard() {
               className="w-full bg-slate-900 border border-border text-slate-200 text-[10px] py-1.5 px-2 rounded-lg focus:outline-none focus:border-cyan-500 transition-all"
             >
               <option value="all">All Segments ({roads.length})</option>
-              {roads.map(r => (
-                <option key={r.id} value={r.id}>{r.name}</option>
-              ))}
+              {roads.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
             </select>
           </div>
         </div>
@@ -535,39 +571,85 @@ export default function SensorDashboard() {
             <span>Live Feeds</span>
             <span>{filteredSensors.length} showing</span>
           </div>
-
           {filteredSensors.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <Eye className="w-8 h-8 text-muted-foreground/40 mb-2" />
               <p className="text-xs font-semibold text-muted-foreground">No sensors match filters</p>
             </div>
           ) : (
-            filteredSensors.map(sensor => (
+            filteredSensors.map((sensor, i) => (
               <SensorCard
                 key={sensor.id}
                 sensor={sensor}
                 isSelected={selectedId === sensor.id}
                 onClick={() => handleSelect(sensor.id)}
+                animDelay={i * 30}
               />
             ))
           )}
         </div>
       </section>
 
-      {/* ── CENTER: Leaflet Map with sensor overlays ── */}
-      <section className="w-full h-[400px] lg:h-auto lg:absolute lg:inset-0 lg:z-0 pointer-events-auto">
-        <ErrorBoundary>
-          <MapWrapper />
-        </ErrorBoundary>
+      {/* ── CENTER: Visualization Panel ── */}
+      <section className="w-full h-[500px] lg:h-auto lg:absolute lg:inset-0 lg:z-0 pointer-events-auto flex flex-col">
+
+        {/* View toggle bar */}
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 pointer-events-auto">
+          <CenterViewToggle current={centerView} onChange={setCenterView} />
+        </div>
+
+        {/* Center panels */}
+        <div className="flex-1 relative">
+          {centerView === 'network' && (
+            <div className="absolute inset-0 flex items-center justify-center p-4 pt-16">
+              <div className="w-full max-w-[480px] h-full max-h-[600px]">
+                <ErrorBoundary>
+                  <SensorNetworkHUD />
+                </ErrorBoundary>
+              </div>
+            </div>
+          )}
+
+          {centerView === 'underground' && (
+            <div className="absolute inset-0 flex items-center justify-center p-4 pt-16">
+              <div className="w-full max-w-[480px] h-full max-h-[660px]">
+                <ErrorBoundary>
+                  <UndergroundCrossSection roadId={selectedRoadId ?? undefined} />
+                </ErrorBoundary>
+              </div>
+            </div>
+          )}
+
+          {centerView === 'heatmap' && (
+            <div className="absolute inset-0 flex items-center justify-center p-4 pt-16 overflow-y-auto">
+              <div className="w-full max-w-[560px]">
+                <div className="glass-panel rounded-xl border border-white/[0.05] p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="mono-label text-[9px] tracking-[0.18em]">SENSOR HEAT MATRIX</p>
+                      <p className="text-[10px] text-slate-400 mt-0.5">Road × Sensor Type Intensity</p>
+                    </div>
+                    <span className="mono-readout text-[8px]">{roads.length} SEGS × 5 TYPES</span>
+                  </div>
+                  <ErrorBoundary>
+                    <SensorHeatmap
+                      onCellClick={handleHeatmapCell}
+                      selectedRoadId={selectedRoadId}
+                    />
+                  </ErrorBoundary>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </section>
 
-      {/* ── RIGHT PANEL: Sensor Detail ── */}
+      {/* ── RIGHT: Sensor Detail or Legend ── */}
       {selectedSensor ? (
-        <section className="w-full lg:w-[360px] lg:absolute lg:right-4 lg:top-4 lg:bottom-4 lg:z-10 flex flex-col glass-panel rounded-xl overflow-hidden shadow-2xl pointer-events-auto animate-in slide-in-from-bottom lg:slide-in-from-right duration-250">
+        <section className="w-full lg:w-[380px] lg:absolute lg:right-4 lg:top-4 lg:bottom-4 lg:z-10 flex flex-col glass-panel rounded-xl overflow-hidden shadow-2xl pointer-events-auto animate-in slide-in-from-bottom lg:slide-in-from-right duration-250">
           <DetailPanel sensor={selectedSensor} onClose={() => setSelectedId(null)} />
         </section>
       ) : (
-        /* Map Legend for sensor view */
         <div className="hidden lg:flex lg:absolute lg:right-4 lg:top-4 lg:z-10 pointer-events-auto">
           <div className="glass-panel rounded-xl border border-border/60 p-4 w-64 space-y-3">
             <h4 className="text-[10px] uppercase font-black text-slate-300 tracking-widest">Sensor Legend</h4>
@@ -576,7 +658,7 @@ export default function SensorDashboard() {
               {ALL_LEVELS.map(lv => (
                 <div key={lv} className="flex items-center gap-2 text-[10px]">
                   <div
-                    className="w-3 h-3 rounded-full shrink-0 shadow-sm"
+                    className="w-3 h-3 rounded-full shrink-0"
                     style={{ backgroundColor: SENSOR_LEVEL_COLORS[lv], boxShadow: `0 0 6px ${SENSOR_LEVEL_COLORS[lv]}80` }}
                   />
                   <span className="text-slate-400 capitalize font-semibold">{LEVEL_LABELS[lv]}</span>
@@ -599,11 +681,11 @@ export default function SensorDashboard() {
 
             <div className="border-t border-border/40 pt-3">
               <p className="text-[9px] text-muted-foreground leading-relaxed">
-                Select any sensor node on the map or from the list to view engineering diagnostics.
+                Select any sensor from the list or heatmap to view engineering diagnostics and underground cross-section.
               </p>
             </div>
 
-            {/* Stress zone summary */}
+            {/* Stress zones quick view */}
             <div className="border-t border-border/40 pt-3 space-y-2">
               <p className="text-[9px] uppercase font-black text-slate-500 tracking-wider">Stress Zones</p>
               {stressZones.filter(z => z.dominantAlert !== 'nominal').slice(0, 4).map(z => {

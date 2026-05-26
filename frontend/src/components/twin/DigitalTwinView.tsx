@@ -9,7 +9,7 @@ import {
 import { roads, projects, contractors } from '@/data/mockData';
 import { generateSensorsForRoads, generateStressZones, SENSOR_LEVEL_COLORS } from '@/data/sensorData';
 import StressIndicator from '@/components/sensors/StressIndicator';
-import MapWrapper from '@/components/map/MapWrapper';
+import RoadInspectionScene from '@/components/3d/RoadInspectionScene';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { useStore } from '@/store/useStore';
 
@@ -439,10 +439,10 @@ export default function DigitalTwinView() {
       {/* ── Main content area: map + panels ── */}
       <div className="flex-1 relative lg:pointer-events-none min-h-0">
 
-        {/* ── Center: Full-bleed map ── */}
+        {/* ── Center: 3D Road Inspection Scene ── */}
         <div className="absolute inset-0 pointer-events-auto z-0">
           <ErrorBoundary>
-            <MapWrapper />
+            <RoadInspectionScene />
           </ErrorBoundary>
         </div>
 

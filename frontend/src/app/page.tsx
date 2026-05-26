@@ -243,73 +243,82 @@ export default function Page() {
       {/* VIEW 1: DASHBOARD OVERVIEW */}
       {activeView === 'dashboard' && (
         <div className="space-y-6 animate-in fade-in duration-300">
-          {/* Summary counters grid */}
+          {/* Summary counters grid — staggered entry */}
           <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="glass-panel hover-raise rounded-2xl p-5 flex items-center gap-4 border border-border/50">
-              <div className="p-3 rounded-xl bg-cyan-950/60 border border-cyan-800/40 text-cyan-400 shrink-0">
+
+            <div className="glass-panel hover-raise rounded-2xl p-5 flex items-center gap-4 border border-white/[0.06] animate-fade-in-up stagger-1">
+              <div className="p-2.5 rounded-xl bg-cyan-950/50 border border-cyan-800/30 text-cyan-400 shrink-0">
                 <MapPin className="w-5 h-5" />
               </div>
               <div>
                 <span className="text-label-caps block mb-1">Road Registry</span>
-                <div className="flex items-baseline">
+                <div className="flex items-baseline gap-1">
                   <span className="display-metric">{stats.totalRoads}</span>
-                  <span className="text-[9px] text-muted-foreground ml-1 font-bold uppercase tracking-widest">Segments</span>
+                  <span className="text-[8px] text-muted-foreground font-bold uppercase tracking-widest">Segs</span>
                 </div>
               </div>
             </div>
 
-            <div className="glass-panel hover-raise rounded-2xl p-5 flex items-center gap-4 border border-border/50">
-              <div className="p-3 rounded-xl bg-indigo-950/60 border border-indigo-800/40 text-indigo-400 shrink-0">
+            <div className="glass-panel hover-raise rounded-2xl p-5 flex items-center gap-4 border border-white/[0.06] animate-fade-in-up stagger-2">
+              <div className="p-2.5 rounded-xl bg-indigo-950/50 border border-indigo-800/30 text-indigo-400 shrink-0">
                 <TrendingUp className="w-5 h-5" />
               </div>
-              <div>
-                <span className="text-label-caps block mb-1">Sanctioned Audits</span>
-                <span className="display-metric text-indigo-350">{formatINR(stats.totalBudget)}</span>
+              <div className="min-w-0">
+                <span className="text-label-caps block mb-1">Sanctioned Spend</span>
+                <span className="display-metric text-indigo-350 text-[1.3rem]">{formatINR(stats.totalBudget)}</span>
               </div>
             </div>
 
-            <div className="glass-panel hover-raise rounded-2xl p-5 flex items-center gap-4 border border-border/50">
-              <div className="p-3 rounded-xl bg-red-950/60 border border-red-800/40 text-red-400 shrink-0">
-                <AlertTriangle className="w-5 h-5 animate-pulse" />
+            <div className="glass-panel hover-raise rounded-2xl p-5 flex items-center gap-4 border border-white/[0.06] animate-fade-in-up stagger-3">
+              <div className="p-2.5 rounded-xl bg-rose-950/50 border border-rose-800/30 text-rose-400 shrink-0">
+                <AlertTriangle className="w-5 h-5" />
               </div>
               <div>
                 <span className="text-label-caps block mb-1">Pending Defects</span>
-                <div className="flex items-baseline">
-                  <span className="display-metric text-red-400">{stats.activeComplaints}</span>
-                  <span className="text-[9px] text-muted-foreground ml-1 font-bold uppercase tracking-widest">Active</span>
+                <div className="flex items-baseline gap-1">
+                  <span className="display-metric text-rose-400">{stats.activeComplaints}</span>
+                  <span className="text-[8px] text-muted-foreground font-bold uppercase tracking-widest">Active</span>
                 </div>
               </div>
             </div>
 
-            <div className="glass-panel hover-raise rounded-2xl p-5 flex items-center gap-4 border border-border/50">
-              <div className="p-3 rounded-xl bg-emerald-950/60 border border-emerald-800/40 text-emerald-400 shrink-0">
+            <div className="glass-panel hover-raise rounded-2xl p-5 flex items-center gap-4 border border-white/[0.06] animate-fade-in-up stagger-4">
+              <div className="p-2.5 rounded-xl bg-emerald-950/50 border border-emerald-800/30 text-emerald-400 shrink-0">
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
                 <span className="text-label-caps block mb-1">Resolution Rate</span>
-                <div className="flex items-baseline">
+                <div className="flex items-baseline gap-1">
                   <span className="display-metric text-emerald-400">{stats.resolutionRate}%</span>
-                  <span className="text-[9px] text-muted-foreground ml-1 font-bold uppercase tracking-widest">Resolved</span>
+                  <span className="text-[8px] text-muted-foreground font-bold uppercase tracking-widest">Resolved</span>
                 </div>
               </div>
             </div>
+
           </section>
 
-          {/* Quick Info & Actions Row */}
+          {/* Sync queue toast banner */}
           {syncQueueCount > 0 && (
-            <div className="p-3.5 rounded-xl border border-cyan-800 bg-cyan-950/45 flex items-center justify-between text-xs text-cyan-400 gap-3">
-              <div className="flex items-center gap-2">
-                <RefreshCw className={`w-4 h-4 shrink-0 ${isSyncingUI ? 'animate-spin' : ''}`} />
-                <span>You have <strong>{syncQueueCount} reports</strong> pending in local storage queue. {isOnline ? 'Online connection detected.' : 'Sync is deferred.'}</span>
+            <div className="flex items-center justify-between px-4 py-3 rounded-2xl border border-cyan-800/30 bg-gradient-to-r from-cyan-950/40 to-indigo-950/20 gap-3 animate-toast-in">
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20 ${isSyncingUI ? '' : ''}`}>
+                  <RefreshCw className={`w-3.5 h-3.5 text-cyan-400 ${isSyncingUI ? 'animate-spin' : ''}`} />
+                </div>
+                <div>
+                  <p className="text-[11px] font-black text-cyan-300">{syncQueueCount} Reports Queued Offline</p>
+                  <p className="text-[9px] text-cyan-500/70 mt-0.5">
+                    {isOnline ? 'Connection active — ready to sync to civic infrastructure database.' : 'Offline — reports stored locally, will sync when online.'}
+                  </p>
+                </div>
               </div>
-              <button 
+              <button
                 onClick={handleSyncQueue}
                 disabled={!isOnline || isSyncingUI}
-                className={`px-3 py-1 rounded bg-cyan-500 font-extrabold text-slate-900 text-[10px] uppercase tracking-wide hover:bg-cyan-400 transition-all ${
-                  (!isOnline || isSyncingUI) ? 'opacity-40 cursor-not-allowed' : 'active:scale-95'
+                className={`px-3.5 py-1.5 rounded-xl bg-cyan-500 font-black text-slate-900 text-[10px] uppercase tracking-wider hover:bg-cyan-400 transition-all btn-press ${
+                  (!isOnline || isSyncingUI) ? 'opacity-40 cursor-not-allowed' : ''
                 }`}
               >
-                {isSyncingUI ? 'Syncing...' : 'Sync Now'}
+                {isSyncingUI ? 'Syncing…' : 'Sync Now'}
               </button>
             </div>
           )}

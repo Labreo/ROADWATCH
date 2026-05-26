@@ -6,90 +6,110 @@ import { useStore } from '@/store/useStore';
 import { ReactNode, useEffect } from 'react';
 import { NetworkStatusProvider } from '@/providers/NetworkStatusProvider';
 import OfflineBanner from './OfflineBanner';
-import { 
-  LayoutDashboard, 
-  Map, 
-  Globe, 
-  Camera, 
-  Menu 
+import {
+  LayoutDashboard,
+  Map,
+  Camera,
+  Globe,
+  AlertTriangle,
+  type LucideProps,
 } from 'lucide-react';
 
 interface ResponsiveShellProps {
   children: ReactNode;
 }
 
+type NavItem = {
+  id: string;
+  label: string;
+  icon: React.FC<LucideProps>;
+  action: () => void;
+  highlight?: boolean;
+};
+
 export default function ResponsiveShell({ children }: ResponsiveShellProps) {
-  const { loadCachedData, activeView, setActiveView, toggleSidebar, setIsReporting } = useStore();
+  const { loadCachedData, activeView, setActiveView, setIsReporting } = useStore();
 
   useEffect(() => {
     loadCachedData();
   }, [loadCachedData]);
 
+  const mobileNavItems: NavItem[] = [
+    { id: 'dashboard',  label: 'Home',     icon: LayoutDashboard, action: () => setActiveView('dashboard') },
+    { id: 'roads',      label: 'Registry', icon: Map,             action: () => setActiveView('roads')     },
+    { id: 'scan',       label: 'Report',   icon: Camera,          action: () => setIsReporting(true), highlight: true },
+    { id: 'twin',       label: 'Twin',     icon: Globe,           action: () => setActiveView('twin')      },
+    { id: 'complaints', label: 'Reports',  icon: AlertTriangle,   action: () => setActiveView('complaints') },
+  ];
+
   return (
     <NetworkStatusProvider>
       <div className="flex w-screen h-screen bg-background font-sans antialiased text-foreground overflow-hidden relative">
-        {/* 1. Collapsible Sidebar Navigation */}
+
+        {/* Sidebar Navigation */}
         <Sidebar />
 
-        {/* 2. Main Content Grid viewport */}
+        {/* Main viewport */}
         <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden relative">
-          {/* 2a. Header Top Bar */}
+          {/* Top Navigation */}
           <TopNav />
 
-          {/* Offline Warning & Pending uploads banner */}
+          {/* Offline banner */}
           <OfflineBanner />
 
-          {/* 2b. Core Content Section */}
-          <main className="flex-1 flex flex-col p-4 md:p-6 pb-24 lg:pb-6 min-h-0 overflow-y-auto relative bg-background">
+          {/* Content area */}
+          <main className="flex-1 flex flex-col p-4 lg:p-5 pb-28 lg:pb-5 min-h-0 overflow-y-auto relative bg-background scroll-smooth">
             {children}
           </main>
         </div>
 
-        {/* Mobile Bottom Navigation Bar */}
-        <nav className="lg:hidden fixed bottom-4 inset-x-4 z-[1008] h-16 glass-command rounded-2xl border border-border/80 flex items-center justify-around px-2 shadow-2xl">
-          {[
-            { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, action: () => setActiveView('dashboard') },
-            { id: 'roads', label: 'Registry', icon: Map, action: () => setActiveView('roads') },
-            { id: 'scan', label: 'Scan', icon: Camera, action: () => setIsReporting(true), highlight: true },
-            { id: 'twin', label: 'Twin', icon: Globe, action: () => setActiveView('twin') },
-            { id: 'more', label: 'More', icon: Menu, action: toggleSidebar }
-          ].map(item => {
-            const Icon = item.icon;
-            const isActive = activeView === item.id;
-            
-            if (item.highlight) {
+        {/* Mobile Bottom Navigation — premium pill bar */}
+        <nav
+          className="lg:hidden fixed bottom-0 inset-x-0 z-[1008] pb-safe"
+          style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+        >
+          <div className="mx-3 mb-3 h-16 glass-depth-2 rounded-2xl border border-white/[0.08] flex items-center justify-around px-2 shadow-2xl">
+            {mobileNavItems.map(item => {
+              const Icon = item.icon;
+              const isActive = activeView === item.id;
+
+              if (item.highlight) {
+                return (
+                  <button
+                    key={item.id}
+                    onClick={item.action}
+                    className="flex flex-col items-center justify-center w-13 h-13 rounded-2xl bg-gradient-to-br from-cyan-400 to-cyan-500 text-slate-950 shadow-lg shadow-cyan-400/25 btn-press -mt-5 border border-cyan-300/40"
+                    style={{ width: '3.25rem', height: '3.25rem' }}
+                    aria-label="Report road defect"
+                  >
+                    <Icon className="w-5 h-5 text-slate-950" />
+                  </button>
+                );
+              }
+
               return (
                 <button
                   key={item.id}
                   onClick={item.action}
-                  className="flex flex-col items-center justify-center w-12 h-12 rounded-xl bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-400/20 active:scale-95 transition-all cursor-pointer -mt-4 border border-cyan-300"
-                  aria-label="Scan road defect"
+                  className={`flex flex-col items-center justify-center flex-1 h-full relative transition-all duration-200 btn-press rounded-xl ${
+                    isActive ? 'text-cyan-400' : 'text-[#45455a] hover:text-slate-300'
+                  }`}
                 >
-                  <Icon className="w-5 h-5 text-slate-950" />
+                  <Icon className={`w-4.5 h-4.5 transition-transform duration-200 ${isActive ? 'scale-110' : ''}`} style={{ width: '1.05rem', height: '1.05rem' }} />
+                  <span className={`text-[8px] font-black mt-1 tracking-[0.08em] uppercase transition-colors ${isActive ? 'text-cyan-400' : 'text-[#35354a]'}`}>
+                    {item.label}
+                  </span>
+
+                  {/* Active indicator dot */}
+                  {isActive && (
+                    <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-cyan-400" />
+                  )}
                 </button>
               );
-            }
-
-            return (
-              <button
-                key={item.id}
-                onClick={item.action}
-                className={`flex flex-col items-center justify-center flex-1 h-full relative transition-all duration-200 cursor-pointer ${
-                  isActive ? 'text-cyan-400 scale-105 font-bold' : 'text-muted-foreground hover:text-slate-200'
-                }`}
-              >
-                <Icon className="w-4 h-4 shrink-0" />
-                <span className="text-[8px] font-bold mt-1 tracking-wide uppercase">{item.label}</span>
-                
-                {isActive && (
-                  <span className="absolute bottom-1 w-1 h-1 rounded-full bg-cyan-400 animate-pulse" />
-                )}
-              </button>
-            );
-          })}
+            })}
+          </div>
         </nav>
       </div>
     </NetworkStatusProvider>
   );
 }
-
