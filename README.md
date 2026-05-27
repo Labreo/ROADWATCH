@@ -1,103 +1,154 @@
 # ROADWATCH 🚧 — Civic Infrastructure Intelligence Platform
 
-**ROADWATCH** is an AI-powered, mobile-first road accountability and monitoring platform designed to bring absolute transparency to public works. The platform enables citizens to inspect road registries using simplified 3D digital twins, monitor municipal budget allocations, track blacklisted contractor scorecards, and report road defects using an offline-resilient, AI-assisted reporting flow.
-
-Designed to feel like a nationally deployable, smart-city public service initiative funded for citizen empowerment and infrastructure audit.
+**ROADWATCH** is a next-generation smart-city infrastructure accountability and transparency platform. Designed to bridge the gap between citizens, contractors, and municipal departments, the platform enables public spend tracking, automated geospatial defect routing, and real-time infrastructure diagnostics through lightweight WebGL digital twins.
 
 ---
 
-## 🏗️ System Component Architecture
+## 🏛️ Smart-City Systems Architecture (High-Level Presentation)
 
-The platform operates as a modern monorepo, decoupling a lightweight, PWA-ready Next.js client from a highly performant FastAPI REST gateway backed by a spatial database layer.
+This diagram outlines the clean, layered architecture of the ROADWATCH platform, structured for Slide 5 presentations, highlighting key smart-city subsystems, offline-first mechanisms, and geospatial intelligence.
 
 ```mermaid
 graph TB
-    subgraph Client ["Frontend Client (Next.js & React)"]
-        UI["User Interface (Tailwind CSS, Radix)"]
-        Store["State Management (Zustand, React Query)"]
-        Map["GIS Mapping Engine (Leaflet, OpenStreetMap)"]
-        SW["Service Worker (Workbox Sync Queue)"]
-        IDB[(IndexedDB Storage)]
-        
-        UI --> Store
-        UI --> Map
-        SW <--> IDB
-        Store <--> SW
+    %% Smart-City Systems Architecture
+    subgraph Presentation ["1. CITIZEN & EXPERIENCE LAYER"]
+        Citizen["Citizen / Field Inspector"]
+        PWA["Next.js Responsive Web App (PWA)"]
+        Twin["Digital Twin Visualization (R3F)"]
+        Citizen --> PWA
+        PWA --- Twin
     end
 
-    subgraph Gateway ["API Gateway & Services (FastAPI)"]
-        Router["FastAPI Router / api/v1"]
-        GIS["GIS Routing Logic (GeoAlchemy2)"]
-        LLM["AI Chatbot Orchestrator (LangChain/LlamaIndex)"]
-        RateLimit["Rate Limiter & Session Cache"]
+    subgraph Connectivity ["2. RESILIENT OFFLINE SYNC LAYER"]
+        SyncMgr["Offline Sync Manager"]
+        Compressor["In-Browser Photo Compressor (<500KB)"]
+        IDB[(IndexedDB Local Store)]
+        SW["Service Worker Background Sync"]
+        
+        PWA --> SyncMgr
+        SyncMgr --> Compressor
+        SyncMgr --> IDB
+        IDB --- SW
+    end
+
+    subgraph Cognitive ["3. AI ACCOUNTABILITY & ROUTING LAYER"]
+        Router["Complaint Routing Engine"]
+        AIAgent["AI Accountability Agent (LLM + RAG)"]
+        Analytics["Transparency & Budget Analytics Engine"]
+        
+        SW -->|Batch REST Sync| Router
+        PWA -->|Citizen Chat Query| AIAgent
+        Router --- AIAgent
+        AIAgent --- Analytics
+    end
+
+    subgraph Intelligence ["4. INFRASTRUCTURE INTELLIGENCE LAYER"]
+        GIS["GIS Proximity Service (GeoAlchemy2)"]
+        QueryEngine["Structured SQL & Geospatial Translators"]
         
         Router --> GIS
-        Router --> LLM
-        Router --> RateLimit
+        AIAgent --> QueryEngine
+        Analytics --> QueryEngine
     end
 
-    subgraph Data ["Data & Caching Layer"]
-        PostgreSQL[(PostgreSQL Database)]
-        PostGIS[(PostGIS Spatial Extension)]
-        Redis[(Redis Cache & Job Queue)]
+    subgraph Storage ["5. GEOSPATIAL & TRANSPARENCY DATABASE"]
+        DB[(PostgreSQL Database)]
+        GISDb[(PostGIS Extension)]
+        Redis[(Redis Cache & Session Store)]
         
-        PostgreSQL --- PostGIS
+        DB --- GISDb
+        GIS --> DB
+        QueryEngine --> DB
     end
 
-    subgraph Cognitive ["Cognitive & AI APIs"]
-        OpenAI["OpenAI / LLM API (Tool Calling)"]
+    %% External APIs & Integrations
+    subgraph Integrations ["EXTERNAL INTEGRATIONS"]
+        OSM["OpenStreetMap API (Leaflet)"]
+        LLM["OpenAI GPT-4o (Cognitive APIs)"]
     end
 
-    %% Network interactions
-    UI -->|HTTPS REST Queries| Router
-    SW -.->|Idempotent Background Sync| Router
-    RateLimit <--> Redis
-    GIS <--> PostgreSQL
-    LLM <--> OpenAI
-    LLM <--> PostgreSQL
+    PWA <--> OSM
+    AIAgent <--> LLM
+
+    %% Styling
+    classDef layerStyle fill:#0d1117,stroke:#30363d,stroke-width:1px;
+    classDef nodeStyle fill:#161b22,stroke:#58a6ff,stroke-width:1.5px,color:#c9d1d9;
+    classDef dbStyle fill:#0f2b3e,stroke:#38bdf8,stroke-width:1.5px,color:#e0f2fe;
+    classDef extStyle fill:#1c152a,stroke:#c084fc,stroke-width:1.5px,color:#faf5ff;
+
+    class Presentation,Connectivity,Cognitive,Intelligence,Storage layerStyle;
+    class Citizen,PWA,Twin,SyncMgr,Compressor,IDB,SW,Router,AIAgent,Analytics,GIS,QueryEngine nodeStyle;
+    class DB,GISDb,Redis dbStyle;
+    class OSM,LLM extStyle;
 ```
 
 ---
 
-## 🔄 AI-Assisted Offline reporting & Routing Flow
+## 🔄 Detailed Execution Pipeline (Technical Appendix)
 
-When a citizen reports road defects in low-connectivity areas, the system leverages a service worker sync queue backed by local IndexedDB. Upon network restoration, the backend coordinates geospatial routing and AI-based classification before updating database records.
+The sequence diagram below details the technical execution flow, showcasing how the **Resilient Offline Sync Layer** interacts with the **AI Accountability & Routing Engine** to validate, categorize, and assign complaints to municipal departments upon network restoration.
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Citizen
-    participant Client as Next.js Client
-    participant IDB as Local IndexedDB
+    actor Citizen as Citizen / Inspector
+    participant PWA as Next.js Web App
+    participant Sync as Offline Sync Manager
+    participant DB_Loc as Local IndexedDB
     participant API as FastAPI Backend
-    participant DB as PostgreSQL + PostGIS
-    participant LLM as OpenAI (GPT-4o)
+    participant Geo as GIS Proximity Service
+    participant LLM as AI Accountability Agent
+    participant DB as PostGIS DB
 
-    Citizen->>Client: Captures image & submits defect report
-    alt Is Offline?
-        Client->>Client: Compress photo (<500KB) in-browser
-        Client->>IDB: Write complaint payload with offline flag & clientTempId
-        Client-->>Citizen: Show status "Optimistically Saved (Offline Queue)"
-        Note over Client, IDB: Wait until network connection is restored...
-        IDB->>Client: Sync triggered by Service Worker
+    Citizen->>PWA: Captures defect photo & submits report
+    alt Connection Offline
+        PWA->>Sync: Forward raw complaint payload
+        Sync->>Sync: Compress photo (<500KB) in-browser
+        Sync->>DB_Loc: Write payload (clientTempId & isOfflinePending=true)
+        Sync-->>Citizen: Toast: "Saved to Offline Sync Queue"
+        Note over Sync, DB_Loc: Device re-enters network zone
+        DB_Loc->>Sync: Trigger Service Worker Background Sync
     end
-    Client->>API: POST /api/v1/complaints/sync (Batch payload)
     
-    rect rgb(20, 30, 45)
-        Note over API: Backend Defect Routing Pipeline
-        API->>DB: Check spatial intersection using ST_Contains
-        DB-->>API: Match authority boundary Polygon (e.g. City Works)
-        API->>DB: Find nearest road using ST_DWithin (radius: 20m)
-        DB-->>API: Associated road segment details
-        API->>LLM: Classify text description (Pothole/Waterlogging/etc)
-        LLM-->>API: Confirmed category classification
+    Sync->>API: POST /api/v1/complaints/sync (Batch payload)
+    
+    rect rgb(15, 23, 42)
+        Note over API: AI Accountability & Routing Engine
+        API->>Geo: Invoke Spatial Containment check
+        Geo->>DB: Query ST_Contains(geom_boundary, POINT)
+        DB-->>Geo: Return matching Authority Boundary Polygon
+        Geo->>DB: Query ST_DWithin(road_geom, POINT, radius=20m)
+        DB-->>Geo: Return nearest Road Segment metadata
+        API->>LLM: Pass text description for classification
+        LLM-->>API: Confirm Defect Category (Pothole / Waterlogging / etc.)
     end
 
-    API->>DB: Insert official complaint record & route assignment
-    API-->>Client: Sync result (200 OK with server_id & assignment status)
-    Client->>IDB: Mark synced / Purge image Blob
-    Client-->>Citizen: Toast Notification: "Complaint successfully synced & routed to City Works Department!"
+    API->>DB: Write official complaint record & route assignment
+    API-->>Sync: Sync Result (200 OK with server_id & assignment status)
+    Sync->>DB_Loc: Update synced status & purge local image Blob
+    Sync-->>Citizen: Toast: "Complaint successfully synced & routed!"
 ```
+
+---
+
+## 💡 Core Subsystems Breakdown
+
+### 1. AI Accountability Agent
+Rather than simple chatbot prompts, the **AI Accountability Agent** implements structured retrieval and reasoning to ensure governance:
+- **Structured SQL Translation**: Safely translates citizen queries into database parameter inputs using predefined Python query abstractions to prevent raw injection.
+- **Intent Discovery**: Automatically maps queries to contractor portfolios, road budgets, or authority jurisdictions.
+
+### 2. Complaint Routing Engine
+- **Spatial Containment (`ST_Contains`)**: Automatically matches defect coordinates against multi-polygon municipal boundaries to route complaints to the responsible department (e.g. City Works, Highway Authority).
+- **Proximity Association (`ST_DWithin`)**: Buffers defect points against road lines to identify the exact segment code and responsible paving contractor.
+
+### 3. Resilient Offline Sync Manager
+- **Client Compression**: Downscales camera input in-browser to conserve storage and transmission bandwidth in low-reception zones.
+- **Background Sync**: Uses a service worker queue backing Dexie.js (IndexedDB) to retry uploads automatically once a network handshake is verified.
+
+### 4. Transparency & Budget Analytics Engine
+- **Spend Ratios**: Dynamically computes budget allocation-to-spent ratios to flag contractor overruns or recurring defect clusters.
+- **Contractor Scorecard**: Tracks delay percentages and blacklisting flags derived from real-time database views.
 
 ---
 
@@ -138,19 +189,10 @@ ROADWATCH/
         │   ├── chat/                  # Snappable, draggable AI Chatbot
         │   ├── map/                   # Spatial Leaflet map wrapper
         │   └── shared/                # Responsive Shell & Bottom Drawer layouts
-        ├── hooks/                     # Custom hooks (geolocation, offline status)
+        ├── hooks/                     # Custom hooks (offline status, geolocation)
         ├── lib/                       # Dexie.js IndexedDB client & API handlers
         └── types/                     # Shared TypeScript contracts
 ```
-
----
-
-## ⚡ Architectural Principles
-
-1. **Snappable & Draggable Interaction**: The mobile interface features bottom drawers and a floating conversational assistant that can be dragged up to snap to standard view height increments (35% peek, 70% half-screen, 95% full-expanded) using Framer Motion and custom touch-event binding.
-2. **Compact Metric Representation**: To prevent text clipping or layout overflow on compact mobile devices, financial metrics are automatically formatted into readable local notations (e.g., **Cr** for Crores, **L** for Lakhs) with responsive font scaling.
-3. **Geospatial Isolation**: All spatial queries use standard PostGIS projections (`SRID 4326`) and query bounds. Auto-routing maps coordinate telemetry against authority polygon fences via `ST_Contains` and associates complaints with closest road segments via `ST_DWithin` buffers.
-4. **Resilient Hydration**: React components relying on browser-only Web APIs (e.g. `window`, `navigator`) are safely deferred until client-side hydration completes, preventing SSR mismatches and flash-of-unstyled-content (FOUC).
 
 ---
 
