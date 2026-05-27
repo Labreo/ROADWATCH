@@ -35,3 +35,10 @@ backend/*.sqlite
 # System & OS files
 .DS_Store
 Thumbs.db
+
+# Submitted files uploaded separately
+docs/
+README.md
+*.zip
+*.docx
+*.pdf
