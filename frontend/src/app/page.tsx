@@ -137,6 +137,16 @@ export default function Page() {
     }).format(value).replace('INR', '₹');
   };
 
+  const formatShortINR = (value: number) => {
+    if (value >= 10000000) {
+      return `₹${(value / 10000000).toFixed(2)} Cr`;
+    }
+    if (value >= 100000) {
+      return `₹${(value / 100000).toFixed(2)} L`;
+    }
+    return formatINR(value);
+  };
+
   // Compute Platform Metrics (dynamically from mock data and store)
   const stats = useMemo(() => {
     const totalAllocated = projects.reduce((acc, p) => acc + p.budgetAllocated, 0);
@@ -263,9 +273,11 @@ export default function Page() {
               <div className="p-2.5 rounded-xl bg-indigo-950/50 border border-indigo-800/30 text-indigo-400 shrink-0">
                 <TrendingUp className="w-5 h-5" />
               </div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <span className="text-label-caps block mb-1">Sanctioned Spend</span>
-                <span className="display-metric text-indigo-350 text-[1.3rem]">{formatINR(stats.totalBudget)}</span>
+                <span className="display-metric text-indigo-350 text-[1.4rem] lg:text-[1.8rem] tracking-tight block truncate">
+                  {formatShortINR(stats.totalBudget)}
+                </span>
               </div>
             </div>
 
@@ -638,6 +650,7 @@ export default function Page() {
               title="Road Registry Explorer"
               snapPoints={[25, 55, 85]}
               defaultSnapPoint={25}
+              hasBackdrop={false}
             >
               {/* Filtering Status Controls */}
               <div className="space-y-3 pb-3">

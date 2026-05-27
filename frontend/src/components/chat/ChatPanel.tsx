@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useDragControls } from 'framer-motion';
+import { springs } from '../shared/animations';
 import { 
   MessageSquare, 
   Send, 
@@ -140,6 +141,20 @@ function WaveformVisualizer({
 export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const dragControls = useDragControls();
+  const sheetRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+    if (typeof window === 'undefined') return;
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -806,18 +821,63 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
 
       {/* Chat Window Panel */}
       <AnimatePresence>
-        {isOpen && (
+        {isOpen && mounted ? (
           <motion.div
-            initial={{ opacity: 0, scale: 0.85, y: 50, x: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
-            exit={{ opacity: 0, scale: 0.85, y: 50, x: 20 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 260 }}
-            className={`fixed bottom-24 right-6 rounded-2xl border border-border/80 border-t-2 border-t-cyan-500/35 bg-slate-950/90 backdrop-blur-xl shadow-2xl flex flex-col overflow-hidden z-50 transition-all duration-200 ${
-              isMaximized 
-                ? 'w-[500px] h-[700px] max-w-[calc(100vw-32px)] max-h-[calc(100vh-120px)]' 
-                : 'w-96 h-[550px] max-w-[calc(100vw-32px)] max-h-[calc(100vh-120px)]'
-            }`}
+            key="chat-drawer"
+            ref={sheetRef}
+            initial={isMobile ? { y: '100%' } : { opacity: 0, scale: 0.85, y: 50, x: 20 }}
+            animate={
+              isMobile 
+                ? { y: typeof window !== 'undefined' ? window.innerHeight - (window.innerHeight * 70) / 100 : 0 }
+                : { opacity: 1, scale: 1, y: 0, x: 0 }
+            }
+            exit={isMobile ? { y: '100%' } : { opacity: 0, scale: 0.85, y: 50, x: 20 }}
+            transition={isMobile ? springs.sheet : { type: 'spring', damping: 25, stiffness: 260 }}
+            drag={isMobile ? 'y' : false}
+            dragControls={dragControls}
+            dragListener={false}
+            dragConstraints={isMobile ? { top: typeof window !== 'undefined' ? window.innerHeight - (window.innerHeight * 95) / 100 : 0, bottom: typeof window !== 'undefined' ? window.innerHeight - 50 : 0 } : undefined}
+            dragElastic={0.2}
+            dragMomentum={false}
+            onDragEnd={isMobile ? (_, info) => {
+              if (typeof window === 'undefined') return;
+              const y = info.point.y;
+              const height = window.innerHeight;
+              
+              const snapPoints = [35, 70, 95];
+              const currentPositions = snapPoints.map(pct => height - (height * pct) / 100);
+              const closest = currentPositions.reduce((prev, curr) => 
+                Math.abs(curr - y) < Math.abs(prev - y) ? curr : prev
+              );
+              
+              const lowestPosition = currentPositions[0];
+              if (y > lowestPosition + 100 || info.velocity.y > 600) {
+                setIsOpen(false);
+              } else if (sheetRef.current) {
+                sheetRef.current.style.transform = `translate3d(0, ${closest}px, 0)`;
+              }
+            } : undefined}
+            className={`fixed z-50 bg-slate-950/90 backdrop-blur-xl border border-border/80 border-t-2 border-t-cyan-500/35 shadow-2xl flex flex-col select-none transition-all duration-200
+              ${
+                isMobile 
+                  ? 'inset-x-0 top-0 h-screen rounded-t-3xl' 
+                  : `bottom-24 right-6 rounded-2xl overflow-hidden ${
+                      isMaximized 
+                        ? 'w-[500px] h-[700px] max-w-[calc(100vw-32px)] max-h-[calc(100vh-120px)]' 
+                        : 'w-96 h-[550px] max-w-[calc(100vw-32px)] max-h-[calc(100vh-120px)]'
+                    }`
+              }`}
           >
+            {/* Grab Handle Header (Touch gesture indicator for mobile) */}
+            {isMobile && (
+              <div 
+                onPointerDown={(e) => dragControls.start(e)}
+                className="w-full h-8 flex items-center justify-center cursor-ns-resize active:scale-95 transition-all touch-none shrink-0 bg-slate-900/40"
+              >
+                <div className="w-12 h-1 bg-slate-650 rounded-full opacity-80" />
+              </div>
+            )}
+
             {/* Header */}
             <div className="px-4 py-3 bg-gradient-to-r from-slate-900/60 via-cyan-950/20 to-indigo-950/20 border-b border-border/60 flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -865,7 +925,7 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
             </div>
 
             {/* Messages Box */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin">
+            <div className={`flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin ${isMobile ? 'pb-44' : ''}`}>
               {messages.map((msg, index) => {
                 const isAI = msg.role === 'assistant';
                 return (
@@ -1000,7 +1060,8 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
             </div>
 
             {/* Bottom Actions & Input */}
-            <div className="bg-slate-900/35 border-t border-border/60 py-3 space-y-2">
+            {!isMobile && (
+              <div className="bg-slate-900/35 border-t border-border/60 py-3 space-y-2">
               {suggestedPrompts.length > 0 && (
                 <div className="flex gap-1.5 overflow-x-auto px-4 pb-1 scrollbar-none select-none">
                   {suggestedPrompts.map((prompt, idx) => (
@@ -1043,6 +1104,7 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
                 </form>
               </div>
             </div>
+            )}
 
             {/* ══════════════════════════════════════════════════════════
                CHATGPT VOICE ASSISTANT OVERLAY
@@ -1159,7 +1221,60 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
             )}
 
           </motion.div>
-        )}
+        ) : null}
+
+        {isOpen && mounted && isMobile && !isVoiceMode ? (
+          <motion.div
+            key="chat-input-bar"
+            initial={{ y: '100%', opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: '100%', opacity: 0 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 260 }}
+            className="fixed bottom-0 inset-x-0 z-[1013] bg-slate-950/95 backdrop-blur-xl border-t border-border/60 py-4 pb-6 space-y-2"
+          >
+            {suggestedPrompts.length > 0 && (
+              <div className="flex gap-1.5 overflow-x-auto px-4 pb-1 scrollbar-none select-none">
+                {suggestedPrompts.map((prompt, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleSubmit(prompt)}
+                    className="shrink-0 text-[9.5px] font-black px-3 py-2 bg-slate-900/80 border border-border/80 hover:border-cyan-500/50 hover:bg-cyan-950/30 text-slate-350 hover:text-cyan-400 rounded-xl transition-all cursor-pointer whitespace-nowrap active:scale-95 shadow-sm"
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div className="px-4">
+              <form 
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSubmit(input);
+                }}
+                className="flex gap-2 relative bg-slate-900 border border-border/80 focus-within:border-cyan-500 rounded-xl px-2 py-1.5 transition-all items-center"
+              >
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Ask about repairs, budgets, audits..."
+                  className="flex-1 bg-transparent border-0 focus:outline-none text-[11px] text-slate-200 placeholder-muted-foreground pl-1.5"
+                  disabled={isLoading}
+                />
+                <button
+                  type="submit"
+                  disabled={!input.trim() || isLoading}
+                  className={`p-1.5 rounded-lg bg-gradient-to-tr from-cyan-600 to-indigo-600 text-slate-950 font-bold hover:opacity-90 active:scale-95 transition-all shrink-0 cursor-pointer ${
+                    (!input.trim() || isLoading) ? 'opacity-40 cursor-not-allowed' : ''
+                  }`}
+                >
+                  <Send className="w-3.5 h-3.5 text-slate-950" />
+                </button>
+              </form>
+            </div>
+          </motion.div>
+        ) : null}
       </AnimatePresence>
     </>
   );

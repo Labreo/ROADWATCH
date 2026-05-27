@@ -13,6 +13,7 @@ interface BottomSheetProps {
   snapPoints?: number[]; // Percentage of screen height e.g. [30, 60, 95]
   defaultSnapPoint?: number;
   desktopWidth?: string; // e.g. "360px"
+  hasBackdrop?: boolean;
 }
 
 export default function BottomSheet({
@@ -23,6 +24,7 @@ export default function BottomSheet({
   snapPoints = [25, 60, 90], // Peek, Half-screen, Fully expanded
   defaultSnapPoint = 25,
   desktopWidth = '350px',
+  hasBackdrop = true,
 }: BottomSheetProps) {
   
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -50,13 +52,15 @@ export default function BottomSheet({
       {isOpen && (
         <>
           {/* Backdrop Overlay for mobile view (Only triggers overlay close when fully expanded or for general backing click) */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="lg:hidden fixed inset-0 bg-[#000000]/40 backdrop-blur-sm z-[1010]"
-          />
+          {hasBackdrop && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={onClose}
+              className="lg:hidden fixed inset-0 bg-[#000000]/40 backdrop-blur-sm z-[1010]"
+            />
+          )}
 
           {/* Bottom Sheet Drawer Shell */}
           <motion.div
@@ -96,8 +100,8 @@ export default function BottomSheet({
             // Responsive shell design:
             // Mobile: fixed bottom sheet sliding up from bottom
             // Desktop: floats as a card overlay in the top-right/left
-            className="fixed inset-x-0 bottom-0 z-[1012] lg:z-10 rounded-t-3xl lg:rounded-2xl glass-depth-2 border border-border/80 border-t-2 border-t-cyan-500/35 lg:border-t-2 lg:border-t-cyan-500/35 lg:shadow-2xl flex flex-col max-h-[96vh] lg:max-h-[calc(100vh-2rem)] select-none pointer-events-auto
-              lg:absolute lg:top-4 lg:bottom-4 lg:right-4 lg:inset-x-auto lg:translate-y-0"
+            className="fixed inset-x-0 top-0 h-screen z-[1012] lg:z-10 rounded-t-3xl lg:rounded-2xl glass-depth-2 border border-border/80 border-t-2 border-t-cyan-500/35 lg:border-t-2 lg:border-t-cyan-500/35 lg:shadow-2xl flex flex-col select-none pointer-events-auto
+              lg:absolute lg:top-4 lg:bottom-4 lg:right-4 lg:inset-x-auto lg:translate-y-0 lg:h-auto lg:max-h-[calc(100vh-2rem)]"
             style={{ 
               width: typeof window !== 'undefined' && window.innerWidth >= 1024 ? desktopWidth : 'auto',
               boxShadow: '0 -8px 32px rgba(0,0,0,0.15), var(--shadow-premium-lg)'
