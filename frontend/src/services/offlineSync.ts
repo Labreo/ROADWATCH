@@ -5,6 +5,87 @@ export class OfflineSyncManager {
   private static maxRetries = 3;
   private static isSyncing = false;
 
+  // Compression pipeline for image assets
+  public static async compressMediaAsset(imageBlob: Blob): Promise<Blob> {
+    if (typeof window === 'undefined') return imageBlob;
+
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(imageBlob);
+      
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        
+        let { width, height } = img;
+        const maxW = 1280;
+        const maxH = 720;
+        
+        // Calculate aspect ratio scale
+        if (width > maxW || height > maxH) {
+          const ratio = Math.min(maxW / width, maxH / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+        
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Failed to get 2D context from canvas'));
+          return;
+        }
+        
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Iterative compression loop to ensure size < 500KB
+        const maxSizeBytes = 500 * 1024;
+        let quality = 0.9;
+        
+        const getBlobWithQuality = (q: number): Promise<Blob> => {
+          return new Promise((resolveBlob, rejectBlob) => {
+            canvas.toBlob(
+              (b) => {
+                if (b) {
+                  resolveBlob(b);
+                } else {
+                  rejectBlob(new Error('Canvas toBlob returned null'));
+                }
+              },
+              'image/jpeg',
+              q
+            );
+          });
+        };
+        
+        const attemptCompression = async (currentQuality: number): Promise<Blob> => {
+          try {
+            const b = await getBlobWithQuality(currentQuality);
+            if (b.size <= maxSizeBytes || currentQuality <= 0.1) {
+              return b;
+            }
+            // Reduce quality and try again
+            return attemptCompression(currentQuality - 0.1);
+          } catch (err) {
+            // If custom canvas compression errors out, fallback to current blob
+            return imageBlob;
+          }
+        };
+        
+        attemptCompression(quality)
+          .then(resolve)
+          .catch(reject);
+      };
+      
+      img.onerror = (err) => {
+        URL.revokeObjectURL(url);
+        reject(err);
+      };
+      
+      img.src = url;
+    });
+  }
+
   // Initialize listeners for network connectivity
   public static initialize() {
     if (typeof window === 'undefined') return;

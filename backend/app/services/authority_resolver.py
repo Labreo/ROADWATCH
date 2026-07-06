@@ -103,7 +103,11 @@ class AuthorityResolver:
     @staticmethod
     def get_authority_by_id(authority_id: int):
         if authority_id in AuthorityResolver._global_authorities:
-            return AuthorityResolver._global_authorities[authority_id]
+            auth = dict(AuthorityResolver._global_authorities[authority_id])
+            auth.setdefault('geom_boundary', None)
+            auth.setdefault('created_at', None)
+            auth.setdefault('updated_at', None)
+            return auth
         sql = "SELECT * FROM authorities WHERE id = ?"
         results = db.query(sql, (authority_id,))
         if results:
@@ -140,7 +144,11 @@ class AuthorityResolver:
             else:
                 auth_id = ids[1]
                 
-            return AuthorityResolver._global_authorities[auth_id]
+            auth = dict(AuthorityResolver._global_authorities[auth_id])
+            auth.setdefault('geom_boundary', None)
+            auth.setdefault('created_at', None)
+            auth.setdefault('updated_at', None)
+            return auth
 
         point_wkt = f"POINT({lon} {lat})"
         
@@ -167,7 +175,7 @@ class AuthorityResolver:
 
     @staticmethod
     def list_all_authorities():
-        sql = "SELECT id, name, department_code, contact_email, contact_phone FROM authorities"
+        sql = "SELECT id, name, department_code, contact_email, contact_phone, geom_boundary, created_at, updated_at FROM authorities"
         res = db.query(sql)
         out = []
         for r in res:
@@ -175,5 +183,9 @@ class AuthorityResolver:
             d['region_code'] = 'IN'
             out.append(d)
         for auth in AuthorityResolver._global_authorities.values():
-            out.append(auth)
+            d = dict(auth)
+            d.setdefault('geom_boundary', None)
+            d.setdefault('created_at', None)
+            d.setdefault('updated_at', None)
+            out.append(d)
         return out

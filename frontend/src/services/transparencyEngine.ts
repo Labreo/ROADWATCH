@@ -1,4 +1,46 @@
-import { Road, Project, Contractor, Complaint, RoadTransparencyData, YearlyAllocation, FinancialAnomaly, ScoreDeduction } from '@/types';
+import { Road, Project, Contractor, Complaint, RoadTransparencyData, YearlyAllocation, FinancialAnomaly, ScoreDeduction, FundSourceAllocation } from '@/types';
+
+// Upstream funding weights for the hackathon criteria
+export const FUNDING_WEIGHTS = {
+  'Central Road Infrastructure Fund': 0.45,
+  'State PWD Capital Tiers': 0.30,
+  'Municipal General Portfolios': 0.15,
+  'Taxpayer Distribution Ratios': 0.10
+} as const;
+
+/**
+ * Resolves project fund sources using explicit database sources (with names mapped to new ones)
+ * or falls back to using the exact financial weights.
+ */
+export function resolveProjectFundSources(p: Project): FundSourceAllocation[] {
+  if (p.fundSources && p.fundSources.length > 0) {
+    return p.fundSources.map(fs => {
+      let sourceName: FundSourceAllocation['source'] = 'Municipal General Portfolios';
+      if (fs.source === 'Central Road Fund' || fs.source === 'Central Road Infrastructure Fund') {
+        sourceName = 'Central Road Infrastructure Fund';
+      } else if (fs.source === 'State PWD Allocations' || fs.source === 'State PWD Capital Tiers') {
+        sourceName = 'State PWD Capital Tiers';
+      } else if (fs.source === 'Municipal General Tier' || fs.source === 'Municipal General Portfolios') {
+        sourceName = 'Municipal General Portfolios';
+      } else if (fs.source === 'International Multilateral Loans' || fs.source === 'Taxpayer Distribution Ratios') {
+        sourceName = 'Taxpayer Distribution Ratios';
+      }
+      return {
+        source: sourceName,
+        amount: fs.amount
+      };
+    });
+  }
+
+  // Fallback: If no explicit funding sources are defined, distribute based on the exact financial weights
+  const totalBudget = p.budgetAllocated;
+  return [
+    { source: 'Central Road Infrastructure Fund', amount: totalBudget * FUNDING_WEIGHTS['Central Road Infrastructure Fund'] },
+    { source: 'State PWD Capital Tiers', amount: totalBudget * FUNDING_WEIGHTS['State PWD Capital Tiers'] },
+    { source: 'Municipal General Portfolios', amount: totalBudget * FUNDING_WEIGHTS['Municipal General Portfolios'] },
+    { source: 'Taxpayer Distribution Ratios', amount: totalBudget * FUNDING_WEIGHTS['Taxpayer Distribution Ratios'] }
+  ];
+}
 
 // Format currency inside the service helper
 export const formatINR = (value: number) => {
@@ -60,7 +102,7 @@ export function calculateRoadTransparency(
   // 4. Anomaly detection & deductions
   const anomalies: FinancialAnomaly[] = [];
   const scoreDeductions: ScoreDeduction[] = [];
-  let baseScore = 100;
+  const baseScore = 100;
 
   // Anomaly A: Budget Overruns
   roadProjects.forEach(p => {
@@ -221,6 +263,28 @@ export function calculateRoadTransparency(
 
   const contractorSpendingBreakdown = Object.values(contractorBreakdownMap).sort((a, b) => b.totalReceived - a.totalReceived);
 
+  // 7. Aggregate funding sources for this road segment
+  const fundSourcesMap: { [source: string]: number } = {
+    'Central Road Infrastructure Fund': 0,
+    'State PWD Capital Tiers': 0,
+    'Municipal General Portfolios': 0,
+    'Taxpayer Distribution Ratios': 0
+  };
+
+  roadProjects.forEach(p => {
+    const resolved = resolveProjectFundSources(p);
+    resolved.forEach(fs => {
+      fundSourcesMap[fs.source] = (fundSourcesMap[fs.source] || 0) + fs.amount;
+    });
+  });
+
+  const fundSources: FundSourceAllocation[] = Object.entries(fundSourcesMap)
+    .map(([source, amount]) => ({
+      source: source as FundSourceAllocation['source'],
+      amount
+    }))
+    .filter(fs => fs.amount > 0);
+
   return {
     roadId: road.id,
     transparencyScore,
@@ -230,7 +294,8 @@ export function calculateRoadTransparency(
     totalSpent,
     maintenanceFrequency,
     anomalies,
-    contractorSpendingBreakdown
+    contractorSpendingBreakdown,
+    fundSources
   };
 }
 
@@ -285,6 +350,28 @@ export function getCitywideTransparencyData(
 
   const contractorLeaderboard = Object.values(contractorTotalsMap).sort((a, b) => b.totalReceived - a.totalReceived);
 
+  // Aggregated fund sources city-wide
+  const fundSourcesMap: { [source: string]: number } = {
+    'Central Road Infrastructure Fund': 0,
+    'State PWD Capital Tiers': 0,
+    'Municipal General Portfolios': 0,
+    'Taxpayer Distribution Ratios': 0
+  };
+
+  projects.forEach(p => {
+    const resolved = resolveProjectFundSources(p);
+    resolved.forEach(fs => {
+      fundSourcesMap[fs.source] = (fundSourcesMap[fs.source] || 0) + fs.amount;
+    });
+  });
+
+  const fundSources: FundSourceAllocation[] = Object.entries(fundSourcesMap)
+    .map(([source, amount]) => ({
+      source: source as FundSourceAllocation['source'],
+      amount
+    }))
+    .filter(fs => fs.amount > 0);
+
   return {
     totalSanctioned,
     totalSpent,
@@ -292,6 +379,7 @@ export function getCitywideTransparencyData(
     allAnomalies,
     highSeverityAnomaliesCount: highSeverityAnomalies.length,
     contractorLeaderboard,
-    roadTransparencyList
+    roadTransparencyList,
+    fundSources
   };
 }

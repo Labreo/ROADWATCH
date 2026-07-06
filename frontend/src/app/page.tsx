@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, 
   MapPin, 
@@ -81,6 +82,9 @@ export default function Page() {
     setSelectedRoadId,
     selectedComplaintId,
     setSelectedComplaintId,
+    selectedContractorId,
+    setSelectedContractorId,
+    isChatDriven,
     isOnline,
     syncQueueCount,
     setIsReporting,
@@ -93,8 +97,6 @@ export default function Page() {
     toggleSidebar
   } = useStore();
 
-  // Selected sub-entities for contractors/budget detail views
-  const [selectedContractorId, setSelectedContractorId] = useState<number | null>(null);
   const [isSyncingUI, setIsSyncingUI] = useState(false);
   const [complaintsTab, setComplaintsTab] = useState<'reports' | 'sync'>('reports');
 
@@ -102,6 +104,22 @@ export default function Page() {
   const [showLanding, setShowLanding] = useState(true);
   const [isTourActive, setIsTourActive] = useState(false);
   const [tourStep, setTourStep] = useState(1);
+
+  // Bottom Drawer state for Conversational Cockpit
+  const [drawerHeight, setDrawerHeight] = useState<number>(0);
+
+  // Sync drawer height when activeView is driven by the chat stream
+  useEffect(() => {
+    if (isChatDriven && ['twin', 'roads', 'budgets', 'contractors'].includes(activeView)) {
+      setDrawerHeight(40);
+    } else {
+      setDrawerHeight(0);
+    }
+  }, [activeView, isChatDriven]);
+
+  // Computed data for drawer
+  const drawerRoad = selectedRoadId ? roads.find(r => r.id === selectedRoadId) : null;
+  const drawerProjects = drawerRoad ? projects.filter(p => p.roadId === drawerRoad.id) : projects;
 
   // Initialize connection sync manager on mount
   useEffect(() => {
@@ -253,7 +271,7 @@ export default function Page() {
     <div className="flex flex-col gap-6 min-h-0 h-full">
 
       {/* VIEW 1: DASHBOARD OVERVIEW */}
-      {activeView === 'dashboard' && (
+      {!isChatDriven && activeView === 'dashboard' && (
         <div className="space-y-6 animate-in fade-in duration-300">
           {/* Summary counters grid — staggered entry */}
           <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -501,7 +519,7 @@ export default function Page() {
           </div>
         </div>
       )}      {/* VIEW 2: ROAD REGISTRY MAP VIEW (The primary road lookup slice) */}
-      {activeView === 'roads' && (
+      {!isChatDriven && activeView === 'roads' && (
         <div className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-hidden animate-in fade-in duration-300 relative lg:pointer-events-none">
           
           {/* ════════════ DESKTOP LAYOUT (FLOATING SIDEBARS) ════════════ */}
@@ -734,7 +752,7 @@ export default function Page() {
       )}
 
       {/* VIEW 3: CONTRACTOR TRANSPARENCY REGISTRY */}
-      {activeView === 'contractors' && (
+      {!isChatDriven && activeView === 'contractors' && (
         <div className="flex-1 flex flex-col lg:flex-row gap-6 min-h-0 overflow-hidden animate-in fade-in duration-300">
           
           {/* Main List */}
@@ -879,7 +897,7 @@ export default function Page() {
       )}
 
       {/* VIEW 4: BUDGET & EXPENDITURE AUDITS */}
-      {activeView === 'budgets' && (
+      {!isChatDriven && activeView === 'budgets' && (
         <div className="flex-1 flex flex-col lg:flex-row gap-6 min-h-0 overflow-hidden animate-in fade-in duration-300">
           
           {/* LEFT COLUMN: ACCOUNTABILITY REGISTRY */}
@@ -1286,7 +1304,7 @@ export default function Page() {
           </div>
         </div>
       )}      {/* VIEW 5: CITIZEN DEFECT REPORTS / COMPLAINTS */}
-      {activeView === 'complaints' && (
+      {!isChatDriven && activeView === 'complaints' && (
         <div className="flex-1 flex flex-col lg:flex-row gap-6 min-h-0 overflow-hidden animate-in fade-in duration-300">
           
           {/* Main List / Sync Center */}
@@ -1467,31 +1485,261 @@ export default function Page() {
       )}
 
       {/* VIEW 6: AUTHORITY OPERATIONS DASHBOARD */}
-      {activeView === 'admin' && (
+      {!isChatDriven && activeView === 'admin' && (
         <div className="flex-1 min-h-0 overflow-y-auto pr-1">
           <OperationsDashboard />
         </div>
       )}
 
       {/* VIEW 7: HISTORICAL PLAYBACK SYSTEM */}
-      {activeView === 'playback' && (
+      {!isChatDriven && activeView === 'playback' && (
         <PlaybackDashboard />
       )}
 
       {/* VIEW 8: SMART INFRASTRUCTURE SENSOR MONITOR */}
-      {activeView === 'sensors' && (
+      {!isChatDriven && activeView === 'sensors' && (
         <SensorDashboard />
       )}
 
       {/* VIEW 9: DIGITAL TWIN COMMAND CONSOLE */}
-      {activeView === 'twin' && (
+      {!isChatDriven && activeView === 'twin' && (
         <DigitalTwinView />
       )}
 
       {/* VIEW 0: CONVERSATIONAL ORCHESTRATOR SHELL */}
-      {activeView === 'chat' && (
+      {(activeView === 'chat' || isChatDriven) && (
         <ChatOrchestrator />
       )}
+
+      {/* Responsive Bottom Drawer Overlay for Chat-Driven Views */}
+      <AnimatePresence>
+        {isChatDriven && drawerHeight > 0 && (
+          <>
+            {/* Backdrop: clicking collapses the drawer */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => {
+                if (drawerHeight === 90) {
+                  setDrawerHeight(40);
+                } else {
+                  setDrawerHeight(0);
+                  setActiveView('chat');
+                }
+              }}
+              className="fixed inset-0 bg-[#000000]/60 backdrop-blur-sm z-[1008] pointer-events-auto"
+            />
+
+            {/* Bottom Drawer container */}
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{
+                y: `${100 - drawerHeight}%`
+              }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 220 }}
+              drag="y"
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={0.1}
+              onDragEnd={(_, info) => {
+                const yOffset = info.offset.y;
+                const velocityY = info.velocity.y;
+                const height = window.innerHeight;
+                
+                const currentHeightPct = 100 - (info.point.y / height) * 100;
+                
+                if (velocityY > 400) {
+                  if (drawerHeight === 90) {
+                    setDrawerHeight(40);
+                  } else {
+                    setDrawerHeight(0);
+                    setActiveView('chat');
+                  }
+                } else if (velocityY < -400) {
+                  if (drawerHeight === 40) {
+                    setDrawerHeight(90);
+                  }
+                } else {
+                  const targets = [0, 40, 90];
+                  const nearest = targets.reduce((prev, curr) => 
+                    Math.abs(curr - currentHeightPct) < Math.abs(prev - currentHeightPct) ? curr : prev
+                  );
+                  
+                  if (nearest === 0) {
+                    setDrawerHeight(0);
+                    setActiveView('chat');
+                  } else {
+                    setDrawerHeight(nearest);
+                  }
+                }
+              }}
+              className="fixed inset-x-0 bottom-0 z-[1009] rounded-t-3xl border border-border/85 border-t-2 border-t-cyan-500/40 bg-slate-950/95 shadow-2xl flex flex-col pointer-events-auto overflow-hidden"
+              style={{
+                height: `${drawerHeight}%`,
+                maxHeight: '90vh',
+                boxShadow: '0 -10px 40px rgba(0,0,0,0.5)'
+              }}
+            >
+              {/* Grab handle indicator */}
+              <div className="w-full h-8 flex items-center justify-center cursor-ns-resize shrink-0 touch-none hover:bg-white/[0.02] transition-colors">
+                <div className="w-16 h-1 bg-slate-700 rounded-full" />
+              </div>
+
+              {/* Title & Close header */}
+              <header className="px-6 py-3 border-b border-border/40 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" />
+                  <h3 className="text-xs uppercase font-extrabold tracking-wider text-slate-100">
+                    {activeView === 'twin' && '3D Digital Twin Viewer'}
+                    {activeView === 'roads' && 'Geospatial Inspection Map'}
+                    {activeView === 'budgets' && 'Civic Budget Integrity Audit'}
+                    {activeView === 'contractors' && 'Contractor Compliance Ledger'}
+                  </h3>
+                </div>
+                <button
+                  onClick={() => {
+                    setDrawerHeight(0);
+                    setActiveView('chat');
+                  }}
+                  className="p-1.5 rounded-xl border border-border hover:bg-slate-900 text-muted-foreground hover:text-slate-100 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </header>
+
+              {/* Drawer Content */}
+              <div className="flex-1 overflow-y-auto p-6 scrollbar-thin select-text">
+                {activeView === 'twin' && <DigitalTwinView />}
+                
+                {activeView === 'roads' && (
+                  <div className="w-full h-full relative min-h-[300px]">
+                    <ErrorBoundary>
+                      <MapWrapper />
+                    </ErrorBoundary>
+                  </div>
+                )}
+                
+                {activeView === 'budgets' && (
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h4 className="text-xs font-black uppercase text-slate-100">Public Capital Flow Pathway</h4>
+                        <p className="text-[10px] text-muted-foreground">
+                          {drawerRoad ? `Auditing fund flow for ${drawerRoad.name}` : "City-wide fund allocations"}
+                        </p>
+                      </div>
+                      {drawerRoad && (
+                        <span className="text-[8px] bg-slate-900 border border-border text-slate-400 px-2 py-0.5 rounded font-black uppercase">
+                          {drawerRoad.roadCode}
+                        </span>
+                      )}
+                    </div>
+                    <div className="bg-slate-950/40 border border-border/60 rounded-xl p-3">
+                      <SankeyFlowVisualizer
+                        projects={drawerProjects}
+                        contractors={contractors}
+                        authorities={authorities}
+                        road={drawerRoad || undefined}
+                      />
+                    </div>
+                    {drawerRoad && (
+                      <div className="grid grid-cols-2 gap-3 text-center">
+                        <div className="p-2.5 rounded-lg border border-border bg-slate-950/50">
+                          <span className="text-[9px] text-muted-foreground block uppercase font-bold tracking-wider mb-0.5">Sanctioned</span>
+                          <span className="text-xs font-black text-emerald-450">
+                            {formatShortINR(drawerProjects.reduce((acc, p) => acc + p.budgetAllocated, 0))}
+                          </span>
+                        </div>
+                        <div className="p-2.5 rounded-lg border border-border bg-slate-950/50">
+                          <span className="text-[9px] text-muted-foreground block uppercase font-bold tracking-wider mb-0.5">Expended</span>
+                          <span className="text-xs font-black text-slate-200">
+                            {formatShortINR(drawerProjects.reduce((acc, p) => acc + p.budgetSpent, 0))}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {activeView === 'contractors' && (
+                  <div className="space-y-4">
+                    {(() => {
+                      const contractor = contractors.find(c => c.id === selectedContractorId);
+                      if (!contractor) {
+                        return (
+                          <div className="space-y-3">
+                            <h4 className="text-xs font-black uppercase text-slate-100">Contractor Registry</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              {contractors.map(c => (
+                                <div key={c.id} onClick={() => setSelectedContractorId(c.id)} className="p-3.5 bg-slate-955 border border-border/60 rounded-xl cursor-pointer hover:border-cyan-500/50 hover:bg-slate-900/20 transition-all flex justify-between items-center">
+                                  <div>
+                                    <span className="text-xs font-bold text-slate-250 block">{c.name}</span>
+                                    <span className="text-[9px] text-muted-foreground mt-0.5 block">Lic: {c.licenseNumber}</span>
+                                  </div>
+                                  <span className="text-[10px] text-amber-500 font-extrabold">★ {c.rating.toFixed(2)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      }
+                      const activeWorks = projects.filter(p => p.contractorId === contractor.id);
+                      const totalSanctioned = activeWorks.reduce((acc, p) => acc + p.budgetAllocated, 0);
+                      const totalSpent = activeWorks.reduce((acc, p) => acc + p.budgetSpent, 0);
+                      return (
+                        <div className="space-y-4">
+                          <div className="flex justify-between items-start border-b border-border/40 pb-2">
+                            <div>
+                              <h4 className="text-xs font-black uppercase text-slate-100">Contractor Safety Audit</h4>
+                              <h3 className="text-sm font-extrabold text-cyan-400 mt-0.5">{contractor.name}</h3>
+                            </div>
+                            <button onClick={() => setSelectedContractorId(null)} className="text-[9px] uppercase font-black text-cyan-455 hover:underline">
+                              &larr; Back to List
+                            </button>
+                          </div>
+                          {contractor.blacklisted && (
+                            <div className="p-3 rounded-lg border border-red-900 bg-red-950/20 text-[10px] text-red-400 font-semibold leading-relaxed">
+                              <strong>Integrity Warning:</strong> Blacklisted for 3 years due to repeated compaction failures.
+                            </div>
+                          )}
+                          <div className="grid grid-cols-2 gap-3 text-center">
+                            <div className="p-2.5 rounded-lg border border-border bg-slate-950/50">
+                              <span className="text-[9px] text-muted-foreground block uppercase font-bold tracking-wider mb-0.5">Works Value</span>
+                              <span className="text-xs font-black text-emerald-450">{formatINR(totalSanctioned)}</span>
+                            </div>
+                            <div className="p-2.5 rounded-lg border border-border bg-slate-950/50">
+                              <span className="text-[9px] text-muted-foreground block uppercase font-bold tracking-wider mb-0.5">Total Outflow</span>
+                              <span className="text-xs font-black text-slate-200">{formatINR(totalSpent)}</span>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <h5 className="text-[10px] uppercase font-bold text-slate-400">Contract Bindings ({activeWorks.length})</h5>
+                            <div className="space-y-2 max-h-[180px] overflow-y-auto pr-1">
+                              {activeWorks.map(w => {
+                                const roadObj = roads.find(r => r.id === w.roadId);
+                                return (
+                                  <div key={w.id} className="p-2.5 bg-slate-950/40 rounded border border-border/40 text-[10px] space-y-1">
+                                    <p className="font-bold text-slate-200 leading-snug">{w.title}</p>
+                                    <div className="flex justify-between items-center text-[9px] text-muted-foreground mt-0.5">
+                                      <span>Road: {roadObj ? roadObj.name : 'Unknown'}</span>
+                                      <span className="capitalize text-slate-400">{w.status}</span>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Complaint wizard overlay */}
       <ComplaintWizard />

@@ -9,6 +9,8 @@ export interface RegionTemplate {
   regionName: string;
   currency: string;
   currencySymbol: string;
+  locale: string;
+  formatCurrency: (value: number, short?: boolean) => string;
   fieldManagerTitle: string;
   formatManagerName: (name: string) => string;
   tiers: {
@@ -25,6 +27,19 @@ export const globalTemplates: Record<string, RegionTemplate> = {
     regionName: 'India',
     currency: 'INR',
     currencySymbol: '₹',
+    locale: 'en-IN',
+    formatCurrency: (value: number, short?: boolean) => {
+      const formatted = new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        maximumFractionDigits: 0
+      }).format(value).replace('INR', '₹');
+      if (short) {
+        if (value >= 10000000) return `₹${(value / 10000000).toFixed(2)} Cr`;
+        if (value >= 100000) return `₹${(value / 100000).toFixed(2)} L`;
+      }
+      return formatted;
+    },
     fieldManagerTitle: 'Executive Engineer',
     formatManagerName: (name: string) => {
       const clean = name.replace(/^(Er\.|Eng\.|Superintendent)\s*/i, '').trim();
@@ -33,11 +48,11 @@ export const globalTemplates: Record<string, RegionTemplate> = {
     tiers: {
       municipal: {
         classification: 'Municipal Road',
-        agency: 'City Municipal Corporation',
+        agency: 'City Municipal Corporation (MCGM)',
         managerTitle: 'Executive Engineer'
       },
       state_highway: {
-        classification: 'State Highway',
+        classification: 'Major District Road',
         agency: 'State Public Works Department (PWD)',
         managerTitle: 'Division Chief'
       },
@@ -58,7 +73,20 @@ export const globalTemplates: Record<string, RegionTemplate> = {
     regionName: 'United Kingdom',
     currency: 'GBP',
     currencySymbol: '£',
-    fieldManagerTitle: 'Road Manager',
+    locale: 'en-GB',
+    formatCurrency: (value: number, short?: boolean) => {
+      const formatted = new Intl.NumberFormat('en-GB', {
+        style: 'currency',
+        currency: 'GBP',
+        maximumFractionDigits: 0
+      }).format(value);
+      if (short) {
+        if (value >= 1000000000) return `£${(value / 1000000000).toFixed(2)} B`;
+        if (value >= 1000000) return `£${(value / 1000000).toFixed(2)} M`;
+      }
+      return formatted;
+    },
+    fieldManagerTitle: 'Highways Fleet Manager',
     formatManagerName: (name: string) => {
       const clean = name.replace(/^(Er\.|Eng\.|Superintendent)\s*/i, '').replace(/\s*\(C\.Eng\)$/i, '').trim();
       return `${clean} (C.Eng)`;
@@ -71,8 +99,8 @@ export const globalTemplates: Record<string, RegionTemplate> = {
       },
       state_highway: {
         classification: 'A-Road / Primary Route',
-        agency: 'County Council Highway Authority',
-        managerTitle: 'Section Engineer'
+        agency: 'Local Councils / County Council Highway Authority',
+        managerTitle: 'Highways Fleet Manager'
       },
       national_highway: {
         classification: 'Motorway / Trunk Road',
@@ -91,6 +119,19 @@ export const globalTemplates: Record<string, RegionTemplate> = {
     regionName: 'United States',
     currency: 'USD',
     currencySymbol: '$',
+    locale: 'en-US',
+    formatCurrency: (value: number, short?: boolean) => {
+      const formatted = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0
+      }).format(value);
+      if (short) {
+        if (value >= 1000000000) return `$${(value / 1000000000).toFixed(2)} B`;
+        if (value >= 1000000) return `$${(value / 1000000).toFixed(2)} M`;
+      }
+      return formatted;
+    },
     fieldManagerTitle: 'Highway Superintendent',
     formatManagerName: (name: string) => {
       const clean = name.replace(/^(Er\.|Eng\.|Superintendent)\s*/i, '').replace(/,\s*P\.E\.$/i, '').trim();
@@ -98,7 +139,7 @@ export const globalTemplates: Record<string, RegionTemplate> = {
     },
     tiers: {
       municipal: {
-        classification: 'City Street / County Road',
+        classification: 'City Street / County Route',
         agency: 'Department of Public Works (DPW)',
         managerTitle: 'Superintendent of Streets'
       },
@@ -124,6 +165,18 @@ export const globalTemplates: Record<string, RegionTemplate> = {
     regionName: 'Kenya',
     currency: 'KES',
     currencySymbol: 'KSh',
+    locale: 'en-KE',
+    formatCurrency: (value: number, short?: boolean) => {
+      const formatted = new Intl.NumberFormat('en-KE', {
+        style: 'currency',
+        currency: 'KES',
+        maximumFractionDigits: 0
+      }).format(value);
+      if (short) {
+        if (value >= 1000000) return `KSh ${(value / 1000000).toFixed(2)} M`;
+      }
+      return formatted;
+    },
     fieldManagerTitle: 'Regional Manager',
     formatManagerName: (name: string) => {
       const clean = name.replace(/^(Er\.|Eng\.|Superintendent)\s*/i, '').trim();

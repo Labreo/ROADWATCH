@@ -55,111 +55,283 @@ async def chat_endpoint(request: ChatRequest):
     return StreamingResponse(event_generator(), media_type="application/x-ndjson")
 
 
+try:
+    from PIL import Image
+    from PIL.ExifTags import TAGS, GPSTAGS
+except ImportError:
+    Image = None
+
+def extract_exif_gps(image_bytes: bytes):
+    if Image is None:
+        return None
+    try:
+        img = Image.open(io.BytesIO(image_bytes))
+        exif = img._getexif()
+        if not exif:
+            return None
+        
+        gps_info = {}
+        for tag, value in exif.items():
+            decoded = TAGS.get(tag, tag)
+            if decoded == 'GPSInfo':
+                for t in value:
+                    sub_decoded = GPSTAGS.get(t, t)
+                    gps_info[sub_decoded] = value[t]
+        
+        if 'GPSLatitude' in gps_info and 'GPSLatitudeRef' in gps_info and \
+           'GPSLongitude' in gps_info and 'GPSLongitudeRef' in gps_info:
+            
+            def convert_to_degrees(value):
+                d = float(value[0])
+                m = float(value[1])
+                s = float(value[2])
+                return d + (m / 60.0) + (s / 3600.0)
+            
+            lat = convert_to_degrees(gps_info['GPSLatitude'])
+            if gps_info['GPSLatitudeRef'] != 'N':
+                lat = -lat
+                
+            lon = convert_to_degrees(gps_info['GPSLongitude'])
+            if gps_info['GPSLongitudeRef'] != 'E':
+                lon = -lon
+                
+            return {"latitude": lat, "longitude": lon}
+    except Exception as e:
+        print(f"Error extracting backend GPS EXIF: {e}")
+    return None
+
+import io
+
 @router.post("/chat/analyze-photo")
 async def analyze_photo_endpoint(
     image: UploadFile = File(...),
-    latitude: float = Form(...),
-    longitude: float = Form(...)
+    gps_coords: Optional[str] = Form(None),
+    latitude: Optional[float] = Form(None),
+    longitude: Optional[float] = Form(None)
 ):
     """
     Exposes photo analysis endpoint. Decodes the image, runs Concentrate API evaluation,
     resolves responsible authorities & roads, and registers it inside the mock SQLite database.
-    Returns a unified validation record mapping to the frontend Complaint state contracts.
+    Returns a streaming response of NDJSON packets.
     """
-    try:
-        # Read the uploaded image binary
-        image_bytes = await image.read()
+    async def event_generator():
+        resolved_lat = None
+        resolved_lon = None
+        image_bytes = b""
         
-        # Run vision damage evaluation pipeline
-        evaluator = RoadDamageEvaluator()
-        analysis = evaluator.evaluate_damage(image_bytes, latitude, longitude)
-        
-        # Resolve geographic routing (authority and closest road segment)
-        authority = AuthorityResolver.resolve_authority_for_coordinates(longitude, latitude)
-        road = StructuredRoadRetriever.get_closest_road(longitude, latitude)
-        
-        assigned_authority_id = authority["id"] if authority else 4 # fallback to PWD
-        road_id = road["id"] if road else None
-        road_name = road["name"] if road else "Unmapped Segment"
-        
-        # Format draft details
-        category = analysis["defect_type"]
-        category_title = category.replace("_", " ").title()
-        title = f"Citizen Report: {category_title} on {road_name}"
-        
-        desc_parts = [
-            analysis["description"],
-            f"Estimated affected surface area: {analysis['surface_area_sqm']} sqm.",
-            f"Estimated volume: {analysis['volume_cum']} cum."
-        ]
-        if analysis["proximity_accidents"]:
-            nearest_acc = analysis["proximity_accidents"][0]
-            desc_parts.append(
-                f"Note: Located {nearest_acc['distance_meters']}m from a historical {nearest_acc['severity']} severity accident."
-            )
-        description = " ".join(desc_parts)
-        
-        # Write to SQLite Database to ensure persistence (without mutation errors)
-        geom_wkt = f"POINT({longitude} {latitude})"
-        created_at_iso = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
-        
-        sql = """
-        INSERT INTO complaints (title, description, category, geom, status, image_url, assigned_authority_id, road_id, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """
-        params = (
-            title,
-            description,
-            category,
-            geom_wkt,
-            "pending",
-            f"/uploads/{image.filename}",
-            assigned_authority_id,
-            road_id,
-            created_at_iso,
-            created_at_iso
-        )
-        
-        new_id = db.execute(sql, params)
-        if new_id is None:
-            new_id = 9999 # mock ID fallback
+        try:
+            # Yield status event
+            yield json.dumps({"type": "status", "content": "Extracting metadata..."}) + "\n"
             
-        # Structure draft complaint record matching frontend Complaint state contracts
-        draft_complaint = {
-            "id": new_id,
-            "clientTempId": f"RW-AUTO-{new_id}",
-            "title": title,
-            "description": description,
-            "category": category,
-            "geometry": {
-                "type": "Point",
-                "coordinates": [longitude, latitude]
-            },
-            "status": "pending",
-            "assignedAuthorityId": assigned_authority_id,
-            "roadId": road_id,
-            "createdAt": created_at_iso,
-            "imageUrl": f"/uploads/{image.filename}",
-            "imagePreview": f"/uploads/{image.filename}"
-        }
-        
-        return {
-            "success": True,
-            "analysis": {
-                "defect_type": analysis["defect_type"],
-                "confidence": analysis["confidence"],
-                "surface_area_sqm": analysis["surface_area_sqm"],
-                "volume_cum": analysis["volume_cum"],
-                "description": analysis["description"],
-                "proximity_accidents": analysis["proximity_accidents"],
-                "simulated_payload": analysis["simulated_payload"]
-            },
-            "draft_complaint": draft_complaint
-        }
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return {
-            "success": False,
-            "error": str(e)
-        }
+            # Read the uploaded image binary
+            try:
+                await image.seek(0)
+                image_bytes = await image.read()
+                await image.seek(0)
+            except Exception as read_err:
+                print(f"Error reading image bytes: {read_err}")
+                
+            # 1. Resolve coordinates
+            if gps_coords:
+                try:
+                    coords = json.loads(gps_coords)
+                    if isinstance(coords, list) and len(coords) >= 2:
+                        resolved_lon = float(coords[0])
+                        resolved_lat = float(coords[1])
+                except Exception:
+                    pass
+
+            if resolved_lat is None and latitude is not None:
+                try:
+                    resolved_lat = float(latitude)
+                except Exception:
+                    pass
+            if resolved_lon is None and longitude is not None:
+                try:
+                    resolved_lon = float(longitude)
+                except Exception:
+                    pass
+
+            # Try parsing EXIF from raw image binary on the backend
+            if (resolved_lat is None or resolved_lon is None) and image_bytes:
+                try:
+                    exif_gps = extract_exif_gps(image_bytes)
+                    if exif_gps:
+                        resolved_lat = exif_gps["latitude"]
+                        resolved_lon = exif_gps["longitude"]
+                except Exception:
+                    pass
+
+            # Last resort fallback coordinates (Mumbai default)
+            if resolved_lat is None or resolved_lon is None:
+                resolved_lat = 19.0760
+                resolved_lon = 72.8777
+
+            # Yield coordinate resolution event
+            yield json.dumps({
+                "type": "telemetry",
+                "latitude": resolved_lat,
+                "longitude": resolved_lon
+            }) + "\n"
+            
+            yield json.dumps({"type": "status", "content": "Analyzing image via Concentrate AI..."}) + "\n"
+
+            # 2. Run vision damage evaluation pipeline streaming
+            evaluator = RoadDamageEvaluator()
+            
+            full_ai_response = ""
+            async for chunk in evaluator.evaluate_damage_stream(image_bytes, resolved_lat, resolved_lon):
+                full_ai_response += chunk
+                yield json.dumps({"type": "content", "content": chunk}) + "\n"
+                
+            yield json.dumps({"type": "status", "content": "Persisting complaint report..."}) + "\n"
+
+            # 3. Parse JSON response from the model
+            cleaned_response = full_ai_response.strip()
+            if cleaned_response.startswith("```"):
+                lines = cleaned_response.splitlines()
+                if lines[0].startswith("```"):
+                    lines = lines[1:]
+                if lines and lines[-1].strip() == "```":
+                    lines = lines[:-1]
+                cleaned_response = "\n".join(lines).strip()
+            
+            try:
+                analysis = json.loads(cleaned_response)
+            except Exception as json_err:
+                print(f"Failed to parse Concentrate AI response JSON: {json_err}. Raw: {full_ai_response}")
+                analysis = {
+                    "defectType": "pothole",
+                    "volumetricMetrics": {
+                        "estimatedDepthCm": 12.0,
+                        "estimatedWidthM": 0.6,
+                        "severityScore": 5
+                    },
+                    "recommendedAction": f"SCHEDULE_REPAIR: Set route priority medium. Target coordinates: [{resolved_lon}, {resolved_lat}]."
+                }
+
+            # 4. Resolve geographic routing (authority and closest road segment)
+            authority = AuthorityResolver.resolve_authority_for_coordinates(resolved_lon, resolved_lat)
+            road = StructuredRoadRetriever.get_closest_road(resolved_lon, resolved_lat)
+            
+            assigned_authority_id = authority["id"] if authority else 4 # fallback to PWD
+            road_id = road["id"] if road else None
+            road_name = road["name"] if road else "Unmapped Segment"
+            
+            # Format draft details
+            category = analysis.get("defectType", "pothole")
+            category_title = category.replace("_", " ").title()
+            title = f"Citizen Report: {category_title} on {road_name}"
+            
+            metrics = analysis.get("volumetricMetrics", {})
+            depth = metrics.get("estimatedDepthCm", 0.0)
+            width = metrics.get("estimatedWidthM", 0.0)
+            severity = metrics.get("severityScore", 5)
+            
+            description = (
+                f"Defect type: {category_title}. "
+                f"Estimated depth: {depth} cm. "
+                f"Estimated width: {width} m. "
+                f"Severity score: {severity}/10. "
+                f"Recommended action: {analysis.get('recommendedAction', '')}."
+            )
+            
+            # Write to SQLite Database to ensure persistence
+            geom_wkt = f"POINT({resolved_lon} {resolved_lat})"
+            created_at_iso = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+            
+            sql = """
+            INSERT INTO complaints (title, description, category, geom, status, image_url, assigned_authority_id, road_id, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """
+            filename = image.filename if hasattr(image, 'filename') and image.filename else "upload.jpg"
+            params = (
+                title,
+                description,
+                category,
+                geom_wkt,
+                "pending",
+                f"/uploads/{filename}",
+                assigned_authority_id,
+                road_id,
+                created_at_iso,
+                created_at_iso
+            )
+            
+            try:
+                new_id = db.execute(sql, params)
+            except Exception as db_err:
+                print(f"Database insertion failed: {db_err}")
+                new_id = None
+                
+            if new_id is None:
+                new_id = 9999 # mock ID fallback
+                
+            # Structure draft complaint record matching frontend Complaint state contracts
+            draft_complaint = {
+                "id": new_id,
+                "clientTempId": f"RW-AUTO-{new_id}",
+                "title": title,
+                "description": description,
+                "category": category,
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [resolved_lon, resolved_lat]
+                },
+                "status": "pending",
+                "assignedAuthorityId": assigned_authority_id,
+                "roadId": road_id,
+                "createdAt": created_at_iso,
+                "imageUrl": f"/uploads/{filename}",
+                "imagePreview": f"/uploads/{filename}"
+            }
+            
+            # Yield final metadata
+            yield json.dumps({
+                "type": "metadata",
+                "success": True,
+                "analysis": {
+                    "defect_type": category,
+                    "confidence": float(severity / 10.0),
+                    "depth_cm": depth,
+                    "width_m": width,
+                    "recommended_action": analysis.get('recommendedAction', ''),
+                    "description": description
+                },
+                "draft_complaint": draft_complaint
+            }) + "\n"
+            
+        except Exception as outer_err:
+            import traceback
+            traceback.print_exc()
+            yield json.dumps({
+                "type": "error",
+                "content": str(outer_err)
+            }) + "\n"
+            
+            created_at_iso = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+            fallback_complaint = {
+                "id": 9999,
+                "clientTempId": "RW-AUTO-9999",
+                "title": "Citizen Report: Pothole on Unmapped Segment",
+                "description": f"Failed to analyze image. Raw error: {str(outer_err)}",
+                "category": "pothole",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [72.8777, 19.0760]
+                },
+                "status": "pending",
+                "assignedAuthorityId": 4,
+                "roadId": None,
+                "createdAt": created_at_iso,
+                "imageUrl": "/uploads/error.jpg",
+                "imagePreview": "/uploads/error.jpg"
+            }
+            yield json.dumps({
+                "type": "metadata",
+                "success": False,
+                "error": str(outer_err),
+                "draft_complaint": fallback_complaint
+            }) + "\n"
+
+    return StreamingResponse(event_generator(), media_type="application/x-ndjson")

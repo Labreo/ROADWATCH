@@ -44,7 +44,7 @@ export interface Road {
 }
 
 export interface FundSourceAllocation {
-  source: 'Central Road Fund' | 'State PWD Allocations' | 'Municipal General Tier' | 'International Multilateral Loans';
+  source: 'Central Road Infrastructure Fund' | 'State PWD Capital Tiers' | 'Municipal General Portfolios' | 'Taxpayer Distribution Ratios' | 'Central Road Fund' | 'State PWD Allocations' | 'Municipal General Tier' | 'International Multilateral Loans';
   amount: number;
 }
 
@@ -144,4 +144,5 @@ export interface RoadTransparencyData {
     totalReceived: number;
     projectsCount: number;
   }[];
+  fundSources?: FundSourceAllocation[];
 }

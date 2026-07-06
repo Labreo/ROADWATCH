@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { RoadStatus, Complaint, SyncQueueItem, Road } from '@/types';
 import { complaints as mockComplaints, roads as mockRoads } from '@/data/mockData';
 import { CachedRoadRepository, SyncLog } from '@/services/cachedRoadRepository';
+import { OfflineSyncManager } from '@/services/offlineSync';
 import { playbackSteps } from '@/data/historicalData';
 import { generateStressZones } from '@/data/sensorData';
 
@@ -24,11 +25,15 @@ interface AppState {
   setSelectedRoadId: (id: number | null) => void;
   selectedComplaintId: number | null;
   setSelectedComplaintId: (id: number | null) => void;
+  selectedContractorId: number | null;
+  setSelectedContractorId: (id: number | null) => void;
 
   // View Navigation
   activeView: AppView;
   setActiveView: (view: AppView) => void;
   dispatchChatAction: (action: { type: string; payload: any }) => void;
+  isChatDriven: boolean;
+  setIsChatDriven: (val: boolean) => void;
 
   // Online / Offline Capability & Local Queue
   isOnline: boolean;
@@ -43,7 +48,7 @@ interface AppState {
   loadCachedData: () => Promise<void>;
   cacheAllRoadsOffline: () => Promise<void>;
   clearCachedRoads: () => Promise<void>;
-  queueComplaint: (complaintData: Omit<Complaint, 'id' | 'createdAt'>) => Complaint;
+  queueComplaint: (complaintData: Omit<Complaint, 'id' | 'createdAt'>) => Promise<Complaint>;
   processSyncQueue: () => Promise<void>;
   retrySyncItem: (id: string) => Promise<void>;
   discardSyncItem: (id: string) => Promise<void>;
@@ -145,45 +150,87 @@ export const useStore = create<AppState>((set, get) => {
     },
     selectedComplaintId: null,
     setSelectedComplaintId: (id) => set({ selectedComplaintId: id }),
+    selectedContractorId: null,
+    setSelectedContractorId: (id) => set({ selectedContractorId: id }),
 
     // Navigation
     activeView: 'chat',
-    setActiveView: (view) => set({ activeView: view, selectedRoadId: null, selectedComplaintId: null }),
+    setActiveView: (view) => set({ activeView: view, selectedRoadId: null, selectedComplaintId: null, selectedContractorId: null, isChatDriven: false }),
+    isChatDriven: false,
+    setIsChatDriven: (val) => set({ isChatDriven: val }),
+
     dispatchChatAction: (action) => {
       const { type, payload } = action;
       if (!payload) return;
-      
+
+      const eventType = type || payload.type || payload.view;
+
       set((state) => {
-        const updates: Partial<AppState> = {};
-        
-        if (payload.view) {
-          const v = payload.view;
-          if (v === 'map' || v === 'roads') {
-            updates.activeView = 'roads';
-          } else if (['dashboard', 'contractors', 'budgets', 'complaints', 'admin', 'playback', 'sensors', 'twin', 'chat'].includes(v)) {
-            updates.activeView = v;
+        const updates: Partial<AppState> = {
+          isChatDriven: true,
+        };
+
+        if (eventType === 'TRIGGER_DIGITAL_TWIN' || payload.view === 'twin') {
+          updates.activeView = 'twin';
+          const roadIdVal = payload.roadId !== undefined ? payload.roadId : payload.selectedRoadId;
+          if (roadIdVal !== undefined) {
+            updates.selectedRoadId = roadIdVal;
+            if (roadIdVal !== null) {
+              const zones = generateStressZones(mockRoads as any);
+              const zone = zones.find(z => z.roadId === roadIdVal);
+              updates.uStructuralStressIntensity = zone ? zone.stressIndex / 100 : 0.0;
+            } else {
+              updates.uStructuralStressIntensity = 0.0;
+            }
           }
-        } else if (payload.activeView) {
-          const v = payload.activeView;
-          if (v === 'map' || v === 'roads') {
-            updates.activeView = 'roads';
-          } else if (['dashboard', 'contractors', 'budgets', 'complaints', 'admin', 'playback', 'sensors', 'twin', 'chat'].includes(v)) {
-            updates.activeView = v;
+        } else if (eventType === 'FOCUS_GEOSPATIAL_MAP' || payload.view === 'map' || payload.view === 'roads') {
+          updates.activeView = 'roads';
+          const roadIdVal = payload.roadId !== undefined ? payload.roadId : payload.selectedRoadId;
+          if (roadIdVal !== undefined) {
+            updates.selectedRoadId = roadIdVal;
+          }
+          let center = payload.coordinates || payload.center;
+          if (!center && roadIdVal !== undefined && roadIdVal !== null) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const road = mockRoads.find(r => r.id === roadIdVal) as any;
+            if (road && road.geometry && road.geometry.coordinates && road.geometry.coordinates.length > 0) {
+              center = road.geometry.coordinates[0];
+            }
+          }
+          if (center) {
+            updates.mapViewport = {
+              center,
+              zoom: payload.zoom || 14,
+            };
+          }
+        } else if (eventType === 'MOUNT_BUDGET_SANKEY' || payload.view === 'budgets') {
+          updates.activeView = 'budgets';
+          const roadIdVal = payload.roadId !== undefined ? payload.roadId : payload.selectedRoadId;
+          if (roadIdVal !== undefined) {
+            updates.selectedRoadId = roadIdVal;
+          }
+        } else if (eventType === 'RENDER_CONTRACTOR_AUDIT' || payload.view === 'contractors') {
+          updates.activeView = 'contractors';
+          const contractorIdVal = payload.contractorId !== undefined ? payload.contractorId : payload.selectedContractorId;
+          if (contractorIdVal !== undefined) {
+            updates.selectedContractorId = contractorIdVal;
+          }
+        } else {
+          // Fallback legacy navigation payload
+          if (payload.view) {
+            const v = payload.view;
+            if (v === 'map' || v === 'roads') {
+              updates.activeView = 'roads';
+            } else if (['dashboard', 'contractors', 'budgets', 'complaints', 'admin', 'playback', 'sensors', 'twin', 'chat'].includes(v)) {
+              updates.activeView = v;
+            }
+          }
+          const roadIdVal = payload.roadId !== undefined ? payload.roadId : payload.selectedRoadId;
+          if (roadIdVal !== undefined) {
+            updates.selectedRoadId = roadIdVal;
           }
         }
-        
-        const roadIdVal = payload.roadId !== undefined ? payload.roadId : payload.selectedRoadId;
-        if (roadIdVal !== undefined) {
-          updates.selectedRoadId = roadIdVal;
-          if (roadIdVal !== null) {
-            const zones = generateStressZones(mockRoads as any);
-            const zone = zones.find(z => z.roadId === roadIdVal);
-            updates.uStructuralStressIntensity = zone ? zone.stressIndex / 100 : 0.0;
-          } else {
-            updates.uStructuralStressIntensity = 0.0;
-          }
-        }
-        
+
         if (payload.complaintId !== undefined) {
           updates.selectedComplaintId = payload.complaintId;
         } else if (payload.selectedComplaintId !== undefined) {
@@ -195,7 +242,7 @@ export const useStore = create<AppState>((set, get) => {
         } else if (payload.coordinates) {
           updates.canvasAction = { type: 'FOCUS_COORDINATES', coordinates: payload.coordinates };
         }
-        
+
         return updates;
       });
     },
@@ -343,17 +390,37 @@ export const useStore = create<AppState>((set, get) => {
       get().updateComplaint(repairData.complaintId, { status: 'in_progress' });
     },
 
-    queueComplaint: (complaintData) => {
+    queueComplaint: async (complaintData) => {
       const generatedId = Math.floor(100000 + Math.random() * 900000);
       const generatedCreatedAt = new Date().toISOString();
       const tempTicketId = `RW-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+
+      let processedImagePreview = complaintData.imagePreview;
+      if (processedImagePreview && processedImagePreview.startsWith('data:image')) {
+        try {
+          const response = await fetch(processedImagePreview);
+          const blob = await response.blob();
+          
+          const compressedBlob = await OfflineSyncManager.compressMediaAsset(blob);
+          
+          processedImagePreview = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(compressedBlob);
+          });
+        } catch (err) {
+          console.error('Image compression failed, using original:', err);
+        }
+      }
 
       const newComplaint: Complaint = {
         ...complaintData,
         id: generatedId,
         createdAt: generatedCreatedAt,
         clientTempId: tempTicketId,
-        status: 'pending'
+        status: 'pending',
+        imagePreview: processedImagePreview
       };
 
       const { isOnline: onlineState, offlineQueue, addComplaint } = get();
@@ -369,7 +436,7 @@ export const useStore = create<AppState>((set, get) => {
           payload: newComplaint,
           timestamp: generatedCreatedAt,
           status: 'pending',
-          imagePreview: complaintData.imagePreview
+          imagePreview: processedImagePreview
         };
 
         const updatedQueue = [...offlineQueue, syncItem];
@@ -410,29 +477,56 @@ export const useStore = create<AppState>((set, get) => {
         // Simulate network latency
         await new Promise(resolve => setTimeout(resolve, 1200));
 
-        // 1. Check for simulated conflict
+        let responseStatus = 200;
         const isConflict = 
           item.payload.title?.toLowerCase().includes('conflict') ||
           item.payload.description?.toLowerCase().includes('conflict');
 
-        if (isConflict) {
+        try {
+          const res = await fetch('http://localhost:8000/api/v1/complaints', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(item.payload)
+          });
+          responseStatus = res.status;
+        } catch (e) {
+          // If connection fails/no route, fallback to simulated status code
+          responseStatus = isConflict ? 409 : 200;
+        }
+
+        // Catch 409 data conflict status code
+        if (responseStatus === 409) {
           failedCount++;
           errorOccurredMsg = 'Conflict detected: A similar report is already active in this jurisdiction.';
           
-          // Add to conflicts list if not already there
+          const serverItem: Complaint = {
+            ...item.payload,
+            id: Math.floor(200000 + Math.random() * 900000),
+            title: `[Existing] ${item.payload.title}`,
+            description: `This report was submitted by another citizen and is already under PWD review (Duplicate detected by authority rules).`,
+            status: 'in_progress',
+            createdAt: new Date(Date.now() - 86400000 * 2).toISOString() // 2 days ago
+          };
+
+          // Log structural payload differences
+          const payloadDiffs: Record<string, { local: any; server: any }> = {};
+          const allKeys = Array.from(new Set([...Object.keys(item.payload), ...Object.keys(serverItem)]));
+          for (const key of allKeys) {
+            const localVal = (item.payload as any)[key];
+            const serverVal = (serverItem as any)[key];
+            if (JSON.stringify(localVal) !== JSON.stringify(serverVal)) {
+              payloadDiffs[key] = { local: localVal, server: serverVal };
+            }
+          }
+          console.warn('[Conflict 409 Intercepted] Structural payload differences:', payloadDiffs);
+
+          // Mount conflict directly to reactive conflicts array
           const existingConflicts = get().conflicts;
           if (!existingConflicts.some(c => c.id === item.id)) {
-            const serverItem: Complaint = {
-              ...item.payload,
-              id: Math.floor(200000 + Math.random() * 900000),
-              title: `[Existing] ${item.payload.title}`,
-              description: `This report was submitted by another citizen on ${new Date(Date.now() - 86400000).toLocaleDateString()} and is already under PWD review.`,
-              status: 'in_progress',
-              createdAt: new Date(Date.now() - 86400000 * 2).toISOString() // 2 days ago
-            };
             set({ conflicts: [...existingConflicts, { id: item.id, localItem: item, serverItem }] });
           }
 
+          // Mark item as failed in offline queue
           const failedItem: SyncQueueItem = {
             ...item,
             status: 'failed',
@@ -448,7 +542,8 @@ export const useStore = create<AppState>((set, get) => {
             result: 'failed'
           });
 
-          continue;
+          // Immediately halt execution of the processing loop
+          break;
         }
 
         // 2. Simulate 15% chance of random municipal gateway error to show retry resilience
@@ -537,22 +632,47 @@ export const useStore = create<AppState>((set, get) => {
       // Simulate latency
       await new Promise(resolve => setTimeout(resolve, 1500));
 
+      let responseStatus = 200;
       const isConflict = 
         item.payload.title?.toLowerCase().includes('conflict') ||
         item.payload.description?.toLowerCase().includes('conflict');
 
-      if (isConflict) {
+      try {
+        const res = await fetch('http://localhost:8000/api/v1/complaints', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(item.payload)
+        });
+        responseStatus = res.status;
+      } catch (e) {
+        responseStatus = isConflict ? 409 : 200;
+      }
+
+      if (responseStatus === 409) {
         // Handle conflict
+        const serverItem: Complaint = {
+          ...item.payload,
+          id: Math.floor(200000 + Math.random() * 900000),
+          title: `[Existing] ${item.payload.title}`,
+          description: `This report was submitted by another citizen and is already under PWD review (Duplicate detected by authority rules).`,
+          status: 'in_progress',
+          createdAt: new Date(Date.now() - 86400000 * 2).toISOString()
+        };
+
+        // Log structural payload differences
+        const payloadDiffs: Record<string, { local: any; server: any }> = {};
+        const allKeys = Array.from(new Set([...Object.keys(item.payload), ...Object.keys(serverItem)]));
+        for (const key of allKeys) {
+          const localVal = (item.payload as any)[key];
+          const serverVal = (serverItem as any)[key];
+          if (JSON.stringify(localVal) !== JSON.stringify(serverVal)) {
+            payloadDiffs[key] = { local: localVal, server: serverVal };
+          }
+        }
+        console.warn('[Conflict 409 Intercepted on Retry] Structural payload differences:', payloadDiffs);
+
         const existingConflicts = get().conflicts;
         if (!existingConflicts.some(c => c.id === item.id)) {
-          const serverItem: Complaint = {
-            ...item.payload,
-            id: Math.floor(200000 + Math.random() * 900000),
-            title: `[Existing] ${item.payload.title}`,
-            description: `This report was submitted by another citizen on ${new Date(Date.now() - 86400000).toLocaleDateString()} and is already under PWD review.`,
-            status: 'in_progress',
-            createdAt: new Date(Date.now() - 86400000 * 2).toISOString()
-          };
           set({ conflicts: [...existingConflicts, { id: item.id, localItem: item, serverItem }] });
         }
 

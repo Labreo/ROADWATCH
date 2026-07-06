@@ -264,8 +264,8 @@ export const projects: Project[] = [
     targetEndDate: '2026-06-30',
     delayDays: 0,
     fundSources: [
-      { source: 'Central Road Fund', amount: 140000000.00 },
-      { source: 'International Multilateral Loans', amount: 100000000.00 }
+      { source: 'Central Road Infrastructure Fund', amount: 140000000.00 },
+      { source: 'Taxpayer Distribution Ratios', amount: 100000000.00 }
     ]
   },
   {
@@ -282,7 +282,7 @@ export const projects: Project[] = [
     actualEndDate: '2025-11-12',
     delayDays: 12,
     fundSources: [
-      { source: 'State PWD Allocations', amount: 18000000.00 }
+      { source: 'State PWD Capital Tiers', amount: 18000000.00 }
     ]
   },
   {
@@ -298,7 +298,7 @@ export const projects: Project[] = [
     targetEndDate: '2025-05-10',
     delayDays: 378,
     fundSources: [
-      { source: 'Municipal General Tier', amount: 95000000.00 }
+      { source: 'Municipal General Portfolios', amount: 95000000.00 }
     ]
   },
   {
@@ -314,7 +314,7 @@ export const projects: Project[] = [
     targetEndDate: '2026-08-31',
     delayDays: 0,
     fundSources: [
-      { source: 'Municipal General Tier', amount: 35000000.00 }
+      { source: 'Municipal General Portfolios', amount: 35000000.00 }
     ]
   },
   {
@@ -330,8 +330,8 @@ export const projects: Project[] = [
     targetEndDate: '2026-09-30',
     delayDays: 0,
     fundSources: [
-      { source: 'Municipal General Tier', amount: 100000000.00 },
-      { source: 'International Multilateral Loans', amount: 45000000.00 }
+      { source: 'Municipal General Portfolios', amount: 100000000.00 },
+      { source: 'Taxpayer Distribution Ratios', amount: 45000000.00 }
     ]
   },
   {
@@ -347,7 +347,7 @@ export const projects: Project[] = [
     targetEndDate: '2025-11-01',
     delayDays: 203,
     fundSources: [
-      { source: 'Municipal General Tier', amount: 62000000.00 }
+      { source: 'Municipal General Portfolios', amount: 62000000.00 }
     ]
   },
   {
@@ -364,7 +364,7 @@ export const projects: Project[] = [
     actualEndDate: '2023-12-10',
     delayDays: 0,
     fundSources: [
-      { source: 'State PWD Allocations', amount: 85000000.00 }
+      { source: 'State PWD Capital Tiers', amount: 85000000.00 }
     ]
   },
   {
@@ -381,8 +381,8 @@ export const projects: Project[] = [
     actualEndDate: '2025-01-20',
     delayDays: 0,
     fundSources: [
-      { source: 'Central Road Fund', amount: 50000000.00 },
-      { source: 'Municipal General Tier', amount: 60000000.00 }
+      { source: 'Central Road Infrastructure Fund', amount: 50000000.00 },
+      { source: 'Municipal General Portfolios', amount: 60000000.00 }
     ]
   },
   {
@@ -399,7 +399,7 @@ export const projects: Project[] = [
     actualEndDate: '2025-06-28',
     delayDays: 0,
     fundSources: [
-      { source: 'State PWD Allocations', amount: 12500000.00 }
+      { source: 'State PWD Capital Tiers', amount: 12500000.00 }
     ]
   },
   {
@@ -415,7 +415,7 @@ export const projects: Project[] = [
     targetEndDate: '2026-05-31',
     delayDays: 0,
     fundSources: [
-      { source: 'State PWD Allocations', amount: 45000000.00 }
+      { source: 'State PWD Capital Tiers', amount: 45000000.00 }
     ]
   },
   {
@@ -432,8 +432,8 @@ export const projects: Project[] = [
     actualEndDate: '2024-12-25',
     delayDays: 0,
     fundSources: [
-      { source: 'Central Road Fund', amount: 90000000.00 },
-      { source: 'International Multilateral Loans', amount: 100000000.00 }
+      { source: 'Central Road Infrastructure Fund', amount: 90000000.00 },
+      { source: 'Taxpayer Distribution Ratios', amount: 100000000.00 }
     ]
   },
   {
@@ -449,7 +449,7 @@ export const projects: Project[] = [
     targetEndDate: '2026-11-30',
     delayDays: 0,
     fundSources: [
-      { source: 'Central Road Fund', amount: 80000000.00 }
+      { source: 'Central Road Infrastructure Fund', amount: 80000000.00 }
     ]
   }
 ];

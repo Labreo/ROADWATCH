@@ -1,6 +1,6 @@
 import { authorities, getAuthority, roads } from '@/data/mockData';
 import { Authority } from '@/types';
-import { globalTemplates, globalPolygonRecords, RegionTemplate } from '@/data/globalTemplates';
+import { globalTemplates, globalPolygonRecords } from '@/data/globalTemplates';
 
 export interface RoutingResult {
   authorityId: number;
@@ -195,8 +195,20 @@ export function routeComplaint(
   const point: [number, number] = [longitude, latitude];
   const trail: string[] = ['Initiating geo-routing query...'];
 
-  // Rule 1: Region Detection & International Routing Check
-  const regionCode = resolveRegionByCoordinates(longitude, latitude);
+  // Intercept coordinate and check if outside Mumbai/India bounding box polygons
+  const isInsideMumbai = longitude >= 72.60 && longitude <= 73.15 && latitude >= 18.70 && latitude <= 19.45;
+  const isInsideIndia = isPointInPolygon(point, globalPolygonRecords.IN.coordinates[0]);
+
+  let regionCode = 'IN';
+  if (!isInsideMumbai || !isInsideIndia) {
+    if (isPointInPolygon(point, globalPolygonRecords.US.coordinates[0])) {
+      regionCode = 'US';
+    } else if (isPointInPolygon(point, globalPolygonRecords.GB.coordinates[0])) {
+      regionCode = 'GB';
+    } else if (isPointInPolygon(point, globalPolygonRecords.KE.coordinates[0])) {
+      regionCode = 'KE';
+    }
+  }
 
   if (regionCode !== 'IN') {
     trail.push(`Coordinates identified outside domestic boundaries. Active region: ${regionCode}`);

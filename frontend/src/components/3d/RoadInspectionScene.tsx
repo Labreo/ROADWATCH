@@ -5,6 +5,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { useStore } from '@/store/useStore';
+import { useCameraInterpolation } from '../twin/DigitalTwinView';
 
 // Pre-load model to prevent latency spikes during view activation
 useGLTF.preload('/3d/roadInspection.glb');
@@ -53,11 +54,12 @@ function SensorPoint({ position, label, details, status }: SensorPointProps) {
 
   return (
     <group position={position}>
-      <mesh ref={haloRef}>
+      <mesh ref={haloRef} frustumCulled={true}>
         <sphereGeometry args={[0.13, 16, 16]} />
         <meshBasicMaterial color={color} transparent opacity={hovered ? 0.35 : 0.15} />
       </mesh>
       <mesh
+        frustumCulled={true}
         onPointerOver={(e) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = 'pointer'; }}
         onPointerOut={(e)  => { e.stopPropagation(); setHovered(false); document.body.style.cursor = 'default'; }}
       >
@@ -99,7 +101,7 @@ function DrainagePipe({ start, end, color }: { start: [number,number,number]; en
   const length = Math.sqrt(dx * dx);
 
   return (
-    <mesh position={[midX, midY, midZ]} rotation={[0, 0, Math.PI / 2]}>
+    <mesh position={[midX, midY, midZ]} rotation={[0, 0, Math.PI / 2]} frustumCulled={true}>
       <cylinderGeometry args={[0.035, 0.035, length, 8]} />
       <meshStandardMaterial
         color={color}
@@ -129,7 +131,7 @@ function FlowParticle({ pipe, color, offset }: { pipe: typeof PIPE_CONFIGS[0]; c
   });
 
   return (
-    <mesh ref={ref}>
+    <mesh ref={ref} frustumCulled={true}>
       <sphereGeometry args={[0.028, 8, 8]} />
       <meshBasicMaterial color={color} transparent opacity={0.8} toneMapped={false} />
     </mesh>
@@ -170,7 +172,7 @@ function RepairLayer() {
   return (
     <group>
       {REPAIR_PATCHES.map((patch, i) => (
-        <mesh key={i} position={patch.position}>
+        <mesh key={i} position={patch.position} frustumCulled={true}>
           <boxGeometry args={patch.size} />
           <meshStandardMaterial
             color="#34d399"
@@ -185,7 +187,7 @@ function RepairLayer() {
       ))}
       {/* Repair patch wireframe outlines for visual clarity */}
       {REPAIR_PATCHES.map((patch, i) => (
-        <mesh key={`wf-${i}`} position={patch.position}>
+        <mesh key={`wf-${i}`} position={patch.position} frustumCulled={true}>
           <boxGeometry args={[patch.size[0] + 0.01, patch.size[1] + 0.01, patch.size[2] + 0.01]} />
           <meshBasicMaterial color="#34d399" transparent opacity={0.35} wireframe />
         </mesh>
@@ -225,22 +227,22 @@ function PotholeRing({ position, delay }: { position: [number,number,number]; de
   return (
     <group position={position}>
       {/* Pothole cavity (depressed dark area) */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0]}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0]} frustumCulled={true}>
         <circleGeometry args={[0.18, 16]} />
         <meshStandardMaterial color="#0a0a0a" roughness={1} transparent opacity={0.85} />
       </mesh>
       {/* Crack ring 1 */}
-      <mesh ref={ring1Ref} rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh ref={ring1Ref} rotation={[-Math.PI / 2, 0, 0]} frustumCulled={true}>
         <ringGeometry args={[0.17, 0.21, 24]} />
         <meshBasicMaterial color="#f43f5e" transparent opacity={0.5} side={THREE.DoubleSide} />
       </mesh>
       {/* Crack ring 2 (staggered) */}
-      <mesh ref={ring2Ref} rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh ref={ring2Ref} rotation={[-Math.PI / 2, 0, 0]} frustumCulled={true}>
         <ringGeometry args={[0.17, 0.21, 24]} />
         <meshBasicMaterial color="#f43f5e" transparent opacity={0.5} side={THREE.DoubleSide} />
       </mesh>
       {/* Central glowing core */}
-      <mesh position={[0, 0.01, 0]}>
+      <mesh position={[0, 0.01, 0]} frustumCulled={true}>
         <sphereGeometry args={[0.06, 12, 12]} />
         <meshBasicMaterial color="#f43f5e" transparent opacity={0.4} toneMapped={false} />
       </mesh>
@@ -286,7 +288,7 @@ function StressWave({ position, delay }: { position: [number,number,number]; del
   return (
     <group position={position}>
       {refs.map((ref, i) => (
-        <mesh key={i} ref={ref} rotation={[-Math.PI / 2, 0, 0]}>
+        <mesh key={i} ref={ref} rotation={[-Math.PI / 2, 0, 0]} frustumCulled={true}>
           <ringGeometry args={[0.3, 0.36, 32]} />
           <meshBasicMaterial color="#f59e0b" transparent opacity={0.4} side={THREE.DoubleSide} />
         </mesh>
@@ -334,6 +336,7 @@ function PavementModel({ layers }: { layers: LayerState }) {
       if (node instanceof THREE.Mesh) {
         node.castShadow = true;
         node.receiveShadow = true;
+        node.frustumCulled = true;
         if (node.material && 'color' in node.material) {
           const mat = node.material as THREE.MeshStandardMaterial;
           mat.roughness = 0.88;
@@ -347,7 +350,7 @@ function PavementModel({ layers }: { layers: LayerState }) {
             // Inject custom uniforms and varyings into vertex shader
             shader.vertexShader = `
               uniform float uTime;
-              uniform float uStructuralStressIntensity;
+              uniform highp float uStructuralStressIntensity;
               varying vec3 vWorldPosition;
               varying float vWaveIntensity;
             ` + shader.vertexShader;
@@ -377,7 +380,7 @@ function PavementModel({ layers }: { layers: LayerState }) {
             // Inject custom uniforms and varyings into fragment shader
             shader.fragmentShader = `
               uniform float uTime;
-              uniform float uStructuralStressIntensity;
+              uniform highp float uStructuralStressIntensity;
               varying vec3 vWorldPosition;
               varying float vWaveIntensity;
             ` + shader.fragmentShader;
@@ -453,58 +456,7 @@ interface CinematicCameraProps {
 }
 
 function CinematicCamera({ controlsRef }: CinematicCameraProps) {
-  const { camera } = useThree();
-  const mouse = useRef({ x: 0, y: 0 });
-  const canvasAction = useStore(state => state.canvasAction);
-
-  // Default camera target & position parameters
-  const defaultTarget = useMemo(() => new THREE.Vector3(0, -0.25, 0), []);
-  const defaultCamPos = useMemo(() => new THREE.Vector3(0, 3.2, 4), []);
-
-  const targetLookAt = useRef(new THREE.Vector3().copy(defaultTarget));
-  const targetCamPos = useRef(new THREE.Vector3().copy(defaultCamPos));
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      mouse.current.x = (e.clientX / window.innerWidth) * 2 - 1;
-      mouse.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
-  useEffect(() => {
-    if (canvasAction && canvasAction.coordinates) {
-      const [cx, cy, cz] = canvasAction.coordinates;
-      targetLookAt.current.set(cx, cy, cz);
-      // Place camera offset relative to target to cleanly frame the anomaly
-      targetCamPos.current.set(cx, cy + 1.5, cz + 2.2);
-    } else {
-      targetLookAt.current.copy(defaultTarget);
-      targetCamPos.current.copy(defaultCamPos);
-    }
-  }, [canvasAction, defaultTarget, defaultCamPos]);
-
-  useFrame(() => {
-    const lerpSpeed = 0.05;
-
-    // Smoothly pan camera position
-    const desiredCamPos = new THREE.Vector3().copy(targetCamPos.current);
-    // Add subtle ambient mouse tracking for premium parallax depth
-    desiredCamPos.x += mouse.current.x * 0.7;
-    desiredCamPos.y += mouse.current.y * 0.5;
-
-    camera.position.lerp(desiredCamPos, lerpSpeed);
-
-    // Smoothly focus OrbitControls target or lookAt viewport
-    if (controlsRef.current) {
-      controlsRef.current.target.lerp(targetLookAt.current, lerpSpeed);
-      controlsRef.current.update();
-    } else {
-      camera.lookAt(targetLookAt.current);
-    }
-  });
-
+  useCameraInterpolation(controlsRef);
   return null;
 }
 
@@ -649,9 +601,26 @@ function LayerToggleHUD({ layers, onToggle }: LayerToggleProps) {
   );
 }
 
+// ── WebGL Scene Ref Binder ───────────────────────────────────
+
+function SceneRefBinder({ sceneRef }: { sceneRef?: React.MutableRefObject<THREE.Scene | null> }) {
+  const { scene } = useThree();
+  useEffect(() => {
+    if (sceneRef) {
+      sceneRef.current = scene;
+    }
+    return () => {
+      if (sceneRef) {
+        sceneRef.current = null;
+      }
+    };
+  }, [scene, sceneRef]);
+  return null;
+}
+
 // ── Root Export ──────────────────────────────────────────────
 
-export default function RoadInspectionScene() {
+export default function RoadInspectionScene({ sceneRef }: { sceneRef?: React.MutableRefObject<THREE.Scene | null> }) {
   const [layers, setLayers] = useState<LayerState>({
     sensors:  true,
     drainage: true,
@@ -661,11 +630,23 @@ export default function RoadInspectionScene() {
   });
   
   const [lowPower, setLowPower] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const controlsRef = useRef<any>(null);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768 || /Mobi|Android/i.test(navigator.userAgent));
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const toggleLayer = (key: keyof LayerState) => {
     setLayers(prev => ({ ...prev, [key]: !prev[key] }));
   };
+
+  const canvasKey = `${lowPower ? 'low' : 'high'}-${isMobile ? 'mobile' : 'desktop'}`;
 
   return (
     <div className="w-full h-full relative select-none">
@@ -673,32 +654,41 @@ export default function RoadInspectionScene() {
       <LayerToggleHUD layers={layers} onToggle={toggleLayer} />
 
       {/* Latency Warning HUD */}
-      {lowPower && (
+      {(lowPower || isMobile) && (
         <div className="absolute top-4 right-4 z-20 bg-rose-950/80 backdrop-blur-md border border-rose-500/30 px-3 py-1.5 rounded-lg pointer-events-none animate-pulse">
           <span className="text-[8px] font-black uppercase tracking-widest text-rose-350 flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-            Performance Budget Enabled (AA Off, camera far plane -30%)
+            {isMobile 
+              ? 'Mobile Optimization Active (AA Off, Far Plane Clamped, Shadows Disabled)'
+              : 'Performance Budget Enabled (AA Off, camera far plane -30%)'
+            }
           </span>
         </div>
       )}
 
       {/* 3D Canvas */}
       <Canvas
-        key={lowPower ? 'low-power' : 'high-power'}
-        shadows={lowPower ? false : { type: THREE.PCFShadowMap }}
-        camera={{ position: [0, 3.2, 4], fov: 45, far: lowPower ? 70 : 100 }}
-        gl={{ antialias: !lowPower, powerPreference: "high-performance" }}
+        key={canvasKey}
+        shadows={!(lowPower || isMobile) ? { type: THREE.PCFShadowMap } : false}
+        camera={{ position: [0, 3.2, 4], fov: 45, far: isMobile ? 30 : (lowPower ? 70 : 100) }}
+        gl={{ 
+          antialias: !(lowPower || isMobile), 
+          powerPreference: "high-performance",
+          precision: isMobile ? "mediump" : "highp"
+        }}
         className="w-full h-full"
       >
+        <SceneRefBinder sceneRef={sceneRef} />
+
         {/* Lighting */}
         <ambientLight intensity={0.22} />
         <hemisphereLight color="#1e1b4b" groundColor="#09090b" intensity={0.4} />
         <directionalLight
           position={[6, 8, 4]}
-          intensity={lowPower ? 0.9 : 1.2}
-          castShadow={!lowPower}
-          shadow-mapSize-width={512}
-          shadow-mapSize-height={512}
+          intensity={(lowPower || isMobile) ? 0.9 : 1.2}
+          castShadow={!(lowPower || isMobile)}
+          shadow-mapSize-width={256}
+          shadow-mapSize-height={256}
           shadow-bias={-0.0001}
         />
         <pointLight position={[-4, 4, -4]} intensity={0.6} color="#38bdf8" />
@@ -724,7 +714,7 @@ export default function RoadInspectionScene() {
           enablePan={false}
           maxPolarAngle={Math.PI / 2 - 0.05}
           minDistance={2.5}
-          maxDistance={8}
+          maxDistance={isMobile ? 6 : 8}
         />
       </Canvas>
 

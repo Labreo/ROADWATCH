@@ -221,3 +221,129 @@ class RoadDamageEvaluator:
              math.sin(dlon / 2) ** 2)
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
         return R * c
+
+    async def evaluate_damage_stream(self, image_bytes: bytes, latitude: float, longitude: float):
+        """
+        Asynchronously streams the vision analysis from Concentrate AI.
+        Falls back to local simulated stream if API key is mock, missing, or if call fails.
+        """
+        import base64
+        import json
+        import asyncio
+        import httpx
+
+        # Determine if we should attempt a real API call
+        is_mock_key = not self.config.api_key or self.config.api_key.startswith("mock")
+        
+        # If we have a valid key, try to stream from Concentrate AI
+        if not is_mock_key:
+            try:
+                base64_image = base64.b64encode(image_bytes).decode('utf-8')
+                
+                # Check config model or default to gemini-3.5-flash
+                model_name = self.config.model_name
+                if model_name == "gemini-1.5-pro":  # upgrade legacy default config
+                    model_name = "gemini-3.5-flash"
+                
+                payload = {
+                    "model": model_name,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": (
+                                "You are an expert municipal infrastructure inspector for the ROADWATCH platform.\n"
+                                "Your task is to analyze the uploaded image of road/infrastructure damage and output a strict, deterministic JSON object.\n"
+                                "Do NOT wrap the output in markdown formatting (like ```json or ```). Return raw JSON only.\n"
+                                "The JSON must have the following structure:\n"
+                                "{\n"
+                                "  \"defectType\": \"pothole\" | \"waterlogging\" | \"paving_defect\" | \"missing_signage\",\n"
+                                "  \"volumetricMetrics\": {\n"
+                                "    \"estimatedDepthCm\": number,\n"
+                                "    \"estimatedWidthM\": number,\n"
+                                "    \"severityScore\": number\n"
+                                "  },\n"
+                                "  \"recommendedAction\": \"string describing exact action/attributes to bind\"\n"
+                                "}"
+                            )
+                        },
+                        {
+                            "role": "user",
+                            "content": [
+                                {
+                                    "type": "text",
+                                    "text": f"GPS Telemetry: Lat {latitude}, Lon {longitude}. Perform road damage extraction and return the JSON object."
+                                },
+                                {
+                                    "type": "image_url",
+                                    "image_url": {
+                                        "url": f"data:image/jpeg;base64,{base64_image}"
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "response_format": {"type": "json_object"},
+                    "temperature": 0.0,
+                    "stream": True
+                }
+
+                headers = {
+                    "Authorization": f"Bearer {self.config.api_key}",
+                    "Content-Type": "application/json"
+                }
+
+                url = "https://api.concentrate.ai/v1/chat/completions"
+                async with httpx.AsyncClient(timeout=20.0) as client:
+                    async with client.stream("POST", url, json=payload, headers=headers) as response:
+                        if response.status_code == 200:
+                            async for line in response.iter_lines():
+                                if line.startswith("data: "):
+                                    data_str = line[6:].strip()
+                                    if data_str == "[DONE]":
+                                        break
+                                    try:
+                                        chunk_data = json.loads(data_str)
+                                        delta = chunk_data.get("choices", [{}])[0].get("delta", {})
+                                        content = delta.get("content", "")
+                                        if content:
+                                            yield content
+                                    except Exception:
+                                        pass
+                            return
+                        else:
+                            print(f"Concentrate API returned error {response.status_code}. Falling back to simulation.")
+            except Exception as e:
+                print(f"Concentrate API connection failed: {e}. Falling back to simulation.")
+
+        # FALLBACK: Simulated multi-modal evaluation stream
+        analysis = self.evaluate_damage(image_bytes, latitude, longitude)
+        defect_type = analysis.get("defect_type", "pothole")
+        
+        # Calculate volumetric metrics from fallback data
+        surface_area = analysis.get("surface_area_sqm", 1.0)
+        volume = analysis.get("volume_cum", 0.1)
+        confidence = analysis.get("confidence", 0.85)
+
+        depth_cm = round(10.0 + (volume * 100.0), 1)
+        width_m = round(math.sqrt(surface_area), 2)
+        severity = min(10, max(1, int(confidence * 10.0)))
+
+        recommended_action = f"SCHEDULE_REPAIR: Set route priority high. Target coordinate boundary coordinates: [{longitude}, {latitude}]."
+        if defect_type == "missing_signage":
+            recommended_action = f"REPLACE_SIGNAGE: Schedule asset management deployment at coordinate: [{longitude}, {latitude}]."
+
+        simulated_json = {
+            "defectType": defect_type,
+            "volumetricMetrics": {
+                "estimatedDepthCm": depth_cm,
+                "estimatedWidthM": width_m,
+                "severityScore": severity
+            },
+            "recommendedAction": recommended_action
+        }
+
+        json_str = json.dumps(simulated_json, indent=2)
+        chunk_size = 12
+        for i in range(0, len(json_str), chunk_size):
+            yield json_str[i:i+chunk_size]
+            await asyncio.sleep(0.01)

@@ -412,7 +412,7 @@ export default function ComplaintWizard() {
   }, [step, coordinates, associatedRoadId]);
 
   // Submit Handler
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!routingInfo) return;
 
     // Generate diagnostic data-url image preview
@@ -432,7 +432,7 @@ export default function ComplaintWizard() {
       imagePreview: base64Preview || undefined
     };
 
-    const ticket = queueComplaint(complaintData);
+    const ticket = await queueComplaint(complaintData);
     setTicketResult(ticket);
     setStep(5);
   };

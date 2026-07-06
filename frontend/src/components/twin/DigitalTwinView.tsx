@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useMemo, useEffect, useRef } from 'react';
+import { useFrame, useThree } from '@react-three/fiber';
+import * as THREE from 'three';
 import {
   Activity, Cpu, Radio, Layers, AlertTriangle,
   MapPin, TrendingUp, TrendingDown, Minus, ChevronRight,
@@ -461,12 +463,57 @@ function IntelligencePanel({
   );
 }
 
+// ── Camera Orchestration Hook ────────────────────────────────
+export function useCameraInterpolation(controlsRef: React.RefObject<any>) {
+  const { camera } = useThree();
+  const canvasAction = useStore(state => state.canvasAction);
+
+  // Default camera target & position parameters
+  const defaultTarget = useMemo(() => new THREE.Vector3(0, -0.25, 0), []);
+  const defaultCamPos = useMemo(() => new THREE.Vector3(0, 3.2, 4), []);
+
+  const targetLookAt = useRef(new THREE.Vector3().copy(defaultTarget));
+  const targetCamPos = useRef(new THREE.Vector3().copy(defaultCamPos));
+
+  useEffect(() => {
+    if (canvasAction && canvasAction.coordinates) {
+      const [cx, cy, cz] = canvasAction.coordinates;
+      targetLookAt.current.set(cx, cy, cz);
+      // Place camera offset relative to target to cleanly frame the anomaly
+      targetCamPos.current.set(cx, cy + 1.5, cz + 2.2);
+    } else {
+      targetLookAt.current.copy(defaultTarget);
+      targetCamPos.current.copy(defaultCamPos);
+    }
+  }, [canvasAction, defaultTarget, defaultCamPos]);
+
+  useFrame(() => {
+    const lerpSpeed = 0.05;
+
+    // Smoothly pan camera position
+    camera.position.lerp(targetCamPos.current, lerpSpeed);
+
+    // Smoothly focus/orient camera using Quaternion.slerp
+    const tempMatrix = new THREE.Matrix4();
+    tempMatrix.lookAt(camera.position, targetLookAt.current, camera.up);
+    const targetQuaternion = new THREE.Quaternion().setFromRotationMatrix(tempMatrix);
+    camera.quaternion.slerp(targetQuaternion, lerpSpeed);
+
+    // Smoothly focus OrbitControls target
+    if (controlsRef.current) {
+      controlsRef.current.target.lerp(targetLookAt.current, lerpSpeed);
+      controlsRef.current.update();
+    }
+  });
+}
+
 // ── Main View ────────────────────────────────────────────────
 
 export default function DigitalTwinView() {
   const { setSelectedRoadId, canvasAction, setCanvasAction } = useStore();
   const [selectedRoad, setSelectedRoad] = useState<Road>(roads[0]);
   const clock = useClock();
+  const sceneRef = useRef<THREE.Scene | null>(null);
 
   // Sync local selection to global store for map
   const handleSelectRoad = (road: Road) => {
@@ -474,11 +521,48 @@ export default function DigitalTwinView() {
     setSelectedRoadId(road.id);
   };
 
-  // Initialize map to first road and clean up canvas actions on unmount
+  // Initialize map to first road and clean up canvas actions & release WebGL memory on unmount
   useEffect(() => {
     setSelectedRoadId(roads[0].id);
     return () => {
       setCanvasAction(null);
+      
+      const scene = sceneRef.current;
+      if (scene) {
+        console.log("DigitalTwinView unmount: executing absolute explicit memory disposal cycle...");
+        scene.traverse((object) => {
+          if (object instanceof THREE.Mesh) {
+            // Dispose Geometry
+            if (object.geometry) {
+              console.log(`DigitalTwinView dispose: releasing geometry for ${object.name || 'mesh'}`);
+              object.geometry.dispose();
+            }
+
+            // Dispose Materials & custom shaders
+            if (object.material) {
+              const disposeMaterial = (mat: THREE.Material) => {
+                console.log(`DigitalTwinView dispose: releasing material ${mat.name || mat.type}`);
+                mat.dispose();
+
+                // Dispose associated textures
+                for (const key in mat) {
+                  const prop = (mat as any)[key];
+                  if (prop && typeof prop === 'object' && prop.isTexture) {
+                    console.log(`DigitalTwinView dispose: releasing texture ${key}`);
+                    prop.dispose();
+                  }
+                }
+              };
+
+              if (Array.isArray(object.material)) {
+                object.material.forEach(disposeMaterial);
+              } else {
+                disposeMaterial(object.material);
+              }
+            }
+          }
+        });
+      }
     };
   }, [setSelectedRoadId, setCanvasAction]);
 
@@ -494,7 +578,7 @@ export default function DigitalTwinView() {
         {/* ── Center: 3D Road Inspection Scene ── */}
         <div className="absolute inset-0 pointer-events-auto z-0">
           <ErrorBoundary>
-            <RoadInspectionScene />
+            <RoadInspectionScene sceneRef={sceneRef} />
           </ErrorBoundary>
         </div>
 
