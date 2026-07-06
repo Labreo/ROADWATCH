@@ -26,6 +26,7 @@ import {
 import { Contractor, Project, Road } from '@/types';
 import RoadHealthScorecard from './RoadHealthScorecard';
 import InfrastructureDiagnostics from './InfrastructureDiagnostics';
+import EscalationSLAAlert from '@/components/complaints/EscalationSLAAlert';
 
 // Subsurface Cross-section Helpers
 const UTILITY_TYPES = [
@@ -425,6 +426,39 @@ export default function RoadDetailsPanel() {
 
           {complaints.length > 0 ? (
             <>
+              {/* SLA Escalation Summary Banner */}
+              {(() => {
+                const active = complaints.filter(c => c.status !== 'resolved' && c.status !== 'rejected');
+                const breached = active.filter(c => {
+                  const dt = (Date.now() - new Date(c.createdAt).getTime()) / 3600000;
+                  return dt > 72;
+                });
+                const elevated = active.filter(c => {
+                  const dt = (Date.now() - new Date(c.createdAt).getTime()) / 3600000;
+                  return dt > 48 && dt <= 72;
+                });
+                if (breached.length === 0 && elevated.length === 0) return null;
+                return (
+                  <div className={`rounded-lg border p-3 space-y-1 ${
+                    breached.length > 0
+                      ? 'border-rose-500/30 bg-rose-950/15 animate-pulse'
+                      : 'border-amber-500/20 bg-amber-950/10'
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[9px] font-extrabold uppercase tracking-wider text-rose-400">
+                        {breached.length > 0 ? `SLA BREACH: ${breached.length} complaint${breached.length > 1 ? 's' : ''} exceed 72h` : `SLA WARNING: ${elevated.length} complaint${elevated.length > 1 ? 's' : ''} near threshold`}
+                      </span>
+                      <span className="mono-readout text-[10px] text-slate-400">Action Required</span>
+                    </div>
+                    {breached.length > 0 && (
+                      <p className="text-[9px] text-rose-300 leading-relaxed">
+                        These complaints should be escalated to the Municipal Commissioner immediately.
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
+
               {/* Defect Reports Analytical Summary Grid */}
               <div className="grid grid-cols-3 gap-2 text-center bg-slate-950/40 p-3 rounded-xl border border-border/45">
                 <div className="space-y-0.5">
@@ -498,6 +532,7 @@ export default function RoadDetailsPanel() {
                   <h4 className="text-xs font-bold text-slate-200">{c.title}</h4>
                   <p className="text-[10px] text-muted-foreground leading-normal line-clamp-2">{c.description}</p>
                   
+                  <EscalationSLAAlert complaint={c} compact />
                   <div className="mono-readout text-[9px] text-[#55555f] text-right">
                     Reported on: {new Date(c.createdAt).toLocaleDateString('en-IN')}
                   </div>

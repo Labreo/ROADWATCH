@@ -1,3 +1,4 @@
+import os
 import httpx
 import json
 import asyncio
@@ -142,11 +143,14 @@ class RetrievalEngine:
                     "status": resolved_road['status'],
                     "length": resolved_road['length_km']
                 })
+                road_geom = resolved_road.get('geom', '')
+                road_coord_str = f"- Spatial Geometry: {road_geom}" if road_geom else ""
                 context_facts.append(
                     f"Road Segment: {resolved_road['name']} ({resolved_road['road_code']})\n"
                     f"- Length: {resolved_road['length_km']} km\n"
                     f"- Relaying/Paving Status: {resolved_road['status']}\n"
-                    f"- Supervising Department: {resolved_road['authority_name']} ({resolved_road['authority_code']})"
+                    f"- Supervising Department: {resolved_road['authority_name']} ({resolved_road['authority_code']})\n"
+                    f"{road_coord_str}"
                 )
                 
                 # Fetch projects & budgets
@@ -257,10 +261,13 @@ class RetrievalEngine:
                     "name": resolved_authority['name'],
                     "code": resolved_authority['department_code']
                 })
+                auth_geom = resolved_authority.get('geom_boundary', '')
+                auth_coord_str = f"- Jurisdiction Boundary: {auth_geom}" if auth_geom else ""
                 context_facts.append(
                     f"Supervising Authority: {resolved_authority['name']} ({resolved_authority['department_code']})\n"
                     f"- Email: {resolved_authority['contact_email']}\n"
-                    f"- Phone: {resolved_authority['contact_phone']}"
+                    f"- Phone: {resolved_authority['contact_phone']}\n"
+                    f"{auth_coord_str}"
                 )
                 
                 # Contextual prompts
@@ -304,186 +311,109 @@ class RetrievalEngine:
 
     @classmethod
     async def stream_response(cls, system_prompt: str, user_message: str, history: list = []):
-        """
-        Attempts to call the local Ollama instance (using llama3).
-        Falls back to a fully deterministic, template-based response generator if Ollama is offline.
-        Yields chunks of text.
-        """
-        ollama_url = "http://localhost:11434/api/chat"
-        
-        # Build prompt messages for Ollama API
+        api_key = os.environ.get("CONCENTRATE_API_KEY", "")
+        if not api_key:
+            fallback_text = cls.generate_deterministic_fallback(system_prompt, user_message)
+            chunk_size = 8
+            for i in range(0, len(fallback_text), chunk_size):
+                yield fallback_text[i:i+chunk_size]
+                await asyncio.sleep(0.02)
+            return
+
         messages = [{"role": "system", "content": system_prompt}]
-        
-        # Add conversation history
-        for h in history[:-1]: # exclude the latest message which we append separately
+        for h in history[:-1]:
             messages.append({"role": h["role"], "content": h["content"]})
-            
         messages.append({"role": "user", "content": user_message})
 
-        try:
-            async with httpx.AsyncClient(timeout=5.0) as client:
-                # We request llama3 as it's installed
-                payload = {
-                    "model": "llama3",
-                    "messages": messages,
-                    "stream": True,
-                    "options": {
-                        "temperature": 0.0  # Zero temperature to keep it deterministic
-                    }
-                }
-                
-                async with client.stream("POST", ollama_url, json=payload) as response:
-                    if response.status_code == 200:
-                        async for line in response.iter_lines():
-                            if line:
-                                data = json.loads(line)
-                                chunk = data.get("message", {}).get("content", "")
-                                if chunk:
-                                    yield chunk
-                        return # Success
-                    else:
-                        print(f"Ollama returned status {response.status_code}. Falling back to template engine.")
-        except Exception as e:
-            print(f"Ollama connection error: {e}. Falling back to template engine.")
+        payload = {
+            "model": "gemini-3.5-flash",
+            "messages": messages,
+            "temperature": 0.0,
+            "stream": True
+        }
 
-        # FALLBACK: Deterministic, rule-based response streaming
-        # This executes character-by-character or chunk-by-chunk to simulate streaming
-        fallback_text = cls.generate_deterministic_fallback(system_prompt, user_message)
-        
-        # Stream fallback text in chunks
-        chunk_size = 8
-        for i in range(0, len(fallback_text), chunk_size):
-            yield fallback_text[i:i+chunk_size]
-            await asyncio.sleep(0.02) # Fast, clean streaming effect
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            async with client.stream("POST", "https://api.concentrate.ai/v1/chat/completions", json=payload, headers=headers) as response:
+                if response.status_code != 200:
+                    error_text = await response.aread()
+                    print(f"Concentrate API error {response.status_code}: {error_text.decode(errors='replace')}")
+                    fallback_text = cls.generate_deterministic_fallback(system_prompt, user_message)
+                    chunk_size = 8
+                    for i in range(0, len(fallback_text), chunk_size):
+                        yield fallback_text[i:i+chunk_size]
+                        await asyncio.sleep(0.02)
+                    return
+
+                async for line in response.iter_lines():
+                    if line.startswith("data: "):
+                        data_str = line[6:].strip()
+                        if data_str == "[DONE]":
+                            break
+                        try:
+                            chunk_data = json.loads(data_str)
+                            delta = chunk_data.get("choices", [{}])[0].get("delta", {})
+                            content = delta.get("content", "")
+                            if content:
+                                yield content
+                        except Exception:
+                            pass
 
     @classmethod
     def generate_deterministic_fallback(cls, system_prompt: str, user_message: str) -> str:
-        """
-        Generates a premium, objective response strictly using database records.
-        """
-        msg_lower = user_message.lower()
         road_id, contractor_id, authority_id = cls.extract_entities(user_message)
-        
-        # 1. Road Specific Fallbacks
+        msg_lower = user_message.lower()
+
         if road_id:
             road = StructuredRoadRetriever.get_road_by_id(road_id)
+            if not road:
+                return "I do not have that specific road record in my database."
             projects = StructuredRoadRetriever.get_road_projects(road_id)
             complaints = StructuredRoadRetriever.get_road_complaints(road_id)
-            
-            # Format projects & budget
-            proj_info = ""
-            total_allocated = 0
-            total_spent = 0
+
+            parts = [f"**{road['name']}** ({road['road_code']}) — {road['length_km']} km, status: {road['status'].replace('_', ' ')}. Supervising authority: {road['authority_name']} ({road['authority_code']})."]
             if projects:
-                proj_info += "\n\n**Financial Audit Details:**\n"
+                parts.append("\n**Budgets & Contracts:**")
                 for p in projects:
-                    total_allocated += p['budget_allocated']
-                    total_spent += p['budget_spent']
-                    status_emoji = "🚧" if p['status'] == 'in_progress' else "✅" if p['status'] == 'completed' else "🛑"
-                    proj_info += f"- **{p['title']}** ({status_emoji} {p['status'].replace('_', ' ').capitalize()})\n"
-                    proj_info += f"  * Contractor: **{p['contractor_name']}** (Rating: {p['contractor_rating']}/5.00)\n"
-                    proj_info += f"  * Budget: Allocated ₹{p['budget_allocated']:,.0f} | Expended: ₹{p['budget_spent']:,.0f}\n"
-                    if p['delay_days'] > 0:
-                        proj_info += f"  * **Delay Warning**: Delayed by {p['delay_days']} days.\n"
-            
-            # Format complaints
-            complaint_info = ""
+                    parts.append(f"- {p['title']}: ₹{p['budget_allocated']:,.0f} allocated, ₹{p['budget_spent']:,.0f} spent. Contractor: {p['contractor_name']} (rating {p['contractor_rating']}/5). Status: {p['status']}. Delays: {p['delay_days']} days.")
             if complaints:
-                active_complaints = [c for c in complaints if c['status'] != 'resolved']
-                complaint_info = f"\n\n**Citizen Complaint Status:**\nThere are **{len(complaints)} reports** logged. "
-                if active_complaints:
-                    complaint_info += f"Currently **{len(active_complaints)} reports are unresolved** (e.g., *{active_complaints[0]['title']}* marked as *{active_complaints[0]['status']}*)."
-                else:
-                    complaint_info += "All complaints logged have been successfully resolved."
-            
-            if "budget" in msg_lower or "spent" in msg_lower or "money" in msg_lower:
-                return (
-                    f"According to public records, **{road['name']}** ({road['road_code']}) has a total allocated budget of **₹{total_allocated:,.0f}** "
-                    f"across {len(projects)} sanctioned projects. Out of this, **₹{total_spent:,.0f}** has been expended to date.\n"
-                    f"The supervising authority is the **{road['authority_name']}** ({road['authority_code']})."
-                    f"{proj_info}"
-                )
-                
-            if "contractor" in msg_lower or "repaired" in msg_lower or "who" in msg_lower:
-                contractors_list = [p['contractor_name'] for p in projects]
-                contractors_str = ", ".join(list(set(contractors_list)))
-                return (
-                    f"The contractor responsible for works on **{road['name']}** is **{contractors_str}**.\n"
-                    f"This road segment is supervised by the **{road['authority_name']}** ({road['authority_code']}) "
-                    f"and is currently classified as **{road['status'].replace('_', ' ')}**."
-                    f"{proj_info}"
-                )
-                
-            # Default road response
-            return (
-                f"The **{road['name']}** ({road['road_code']}) is a segment of **{road['length_km']} km** "
-                f"under the jurisdiction of the **{road['authority_name']}** ({road['authority_code']}).\n"
-                f"The segment's current relaying status is **{road['status'].replace('_', ' ')}**."
-                f"{proj_info}{complaint_info}"
-            )
-            
-        # 2. Contractor Specific Fallbacks
+                parts.append(f"\n**Complaints:** {len(complaints)} logged ({len([c for c in complaints if c['status'] != 'resolved'])} unresolved).")
+            return "\n".join(parts)
+
         if contractor_id:
             contractor = StructuredRoadRetriever.get_contractor_by_name(
                 [c for c, cid in CONTRACTOR_ALIASES.items() if cid == contractor_id][0]
             )
-            c_projects = StructuredRoadRetriever.get_contractor_projects(contractor_id)
-            
-            blacklisted_str = "🔴 **Blacklisted**" if contractor['blacklisted'] else "🟢 **Active (Good Standing)**"
-            reason_str = f"\n* **Reason**: {contractor['blacklisted_reason']}" if contractor['blacklisted'] else ""
-            
-            proj_str = ""
-            if c_projects:
-                proj_str += "\n\n**Sanctioned Projects Registry:**\n"
-                for p in c_projects:
-                    proj_str += f"- **{p['title']}** on {p['road_name']} (Budget: ₹{p['budget_allocated']:,.0f}, Status: {p['status']})\n"
-                    
+            if not contractor:
+                return "I do not have that specific contractor record in my database."
+            status_str = "Blacklisted" if contractor['blacklisted'] else "Active (Good Standing)"
             return (
-                f"**Contractor Audit: {contractor['name']}** (License: `{contractor['license_number']}`)\n"
-                f"- **Status**: {blacklisted_str}{reason_str}\n"
-                f"- **Accountability Score / Rating**: {contractor['rating']}/5.00\n"
-                f"- **Performance**: Completed {contractor['projects_completed']} projects, with {contractor['projects_delayed']} recorded delays.\n"
-                f"- **Contact Details**: {contractor['contact_email']} | {contractor['contact_phone']}"
-                f"{proj_str}"
+                f"**{contractor['name']}** (License: {contractor['license_number']})\n"
+                f"- Status: {status_str}\n"
+                f"- Rating: {contractor['rating']}/5.00\n"
+                f"- Completed: {contractor['projects_completed']} | Delayed: {contractor['projects_delayed']}\n"
+                f"- Contact: {contractor['contact_email']} | {contractor['contact_phone']}"
             )
 
-        # 3. Authority Specific Fallbacks
         if authority_id:
             auth = AuthorityResolver.get_authority_by_id(authority_id)
+            if not auth:
+                return "I do not have that specific authority record in my database."
             return (
-                f"**Supervising Authority Details:**\n"
-                f"- **Entity Name**: {auth['name']} (`{auth['department_code']}`)\n"
-                f"- **Contact Email**: [{auth['contact_email']}](mailto:{auth['contact_email']})\n"
-                f"- **Contact Hotline**: {auth['contact_phone']}\n"
-                f"This department supervises road segments and handles citizen complaints in its boundary polygon."
+                f"**{auth['name']}** ({auth['department_code']})\n"
+                f"- Contact: {auth.get('contact_email', 'N/A')} | {auth.get('contact_phone', 'N/A')}"
             )
 
-        # 4. Intent Specific Fallbacks
-        if intent == "report_escalation":
-            return (
-                "You can file a new road defect complaint directly on ROADWATCH:\n"
-                "1. Click the **Mock Report Defect** button in the Defect Registry tab.\n"
-                "2. The system automatically fetches your GPS coordinates, suggests the closest road segment, "
-                "and routes the report to the responsible ward authority boundary.\n"
-                "3. If offline, the report stores in IndexedDB and syncs automatically when connection is restored."
-            )
-            
-        if intent == "contractor_lookup" and "blacklisted" in msg_lower:
-            # List blacklisted contractors
-            sql = "SELECT name, blacklisted_reason FROM contractors WHERE blacklisted = 1"
-            blacklisted = db.query(sql)
-            res = "**Integrity Audit - Blacklisted Contractors:**\n"
-            for b in blacklisted:
-                res += f"- **{b['name']}**\n  * *Reason*: {b['blacklisted_reason']}\n"
-            return res
-
-        # 5. Generic Help Response
         return (
-            "I am the ROADWATCH AI accountability chatbot. I provide real-time public records audit facts "
+            "I am the ROADWATCH AI accountability chatbot. I provide public records audit facts "
             "about roads, budgets, delayed contracts, and municipal authorities.\n\n"
-            "Try asking questions like:\n"
-            "- *Who is the contractor for S.V. Road?*\n"
-            "- *Is Omega Infrastructure blacklisted?*\n"
-            "- *How much budget is spent on Link Road?*\n"
-            "- *Which authority manages the Western Express Highway?*"
+            "Try asking:\n"
+            "- Who is the contractor for S.V. Road?\n"
+            "- Is Omega Infrastructure blacklisted?\n"
+            "- How much budget is spent on Link Road?\n"
+            "- Which authority manages the Western Express Highway?"
         )

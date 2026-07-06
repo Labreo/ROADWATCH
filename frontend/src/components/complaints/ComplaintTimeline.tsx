@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Complaint } from '@/types';
 import { routeComplaint } from '@/services/routingEngine';
+import EscalationSLAAlert from './EscalationSLAAlert';
 
 interface ComplaintTimelineProps {
   complaint: Complaint;
@@ -79,6 +80,9 @@ export default function ComplaintTimeline({ complaint }: ComplaintTimelineProps)
           <span>GPS: {latitude.toFixed(5)}, {longitude.toFixed(5)}</span>
         </div>
       </div>
+
+      {/* SLA Escalation Tracking */}
+      <EscalationSLAAlert complaint={complaint} />
 
       {/* Timeline flow */}
       <div className="relative pl-6 space-y-6 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-800">

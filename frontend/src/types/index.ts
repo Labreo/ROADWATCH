@@ -1,6 +1,7 @@
 export type RoadStatus = 'good' | 'fair' | 'poor' | 'under_construction';
 export type ComplaintCategory = 'pothole' | 'paving_defect' | 'waterlogging' | 'debris' | 'missing_signage';
 export type ComplaintStatus = 'pending' | 'routed' | 'in_progress' | 'resolved' | 'rejected';
+export type EscalationLevel = 0 | 1 | 2;
 export type ProjectStatus = 'planned' | 'in_progress' | 'completed' | 'halted' | 'cancelled';
 
 export interface Authority {
@@ -75,6 +76,7 @@ export interface Complaint {
     coordinates: [number, number]; // [longitude, latitude]
   };
   status: ComplaintStatus;
+  escalationLevel?: EscalationLevel;
   assignedAuthorityId: number;
   roadId?: number;
   createdAt: string;

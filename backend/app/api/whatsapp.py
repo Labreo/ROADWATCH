@@ -185,8 +185,8 @@ async def whatsapp_webhook(payload: WhatsAppWebhookPayload):
     created_at_iso = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
     
     sql = """
-    INSERT INTO complaints (title, description, category, geom, status, image_url, assigned_authority_id, road_id, created_at, updated_at)
-    VALUES (?, ?, ?, ST_GeomFromText(?, 4326), ?, ?, ?, ?, ?, ?)
+    INSERT INTO complaints (title, description, category, geom, status, escalation_level, image_url, assigned_authority_id, road_id, created_at, updated_at)
+    VALUES (?, ?, ?, ST_GeomFromText(?, 4326), ?, 0, ?, ?, ?, ?, ?)
     """
     params = (
         title,

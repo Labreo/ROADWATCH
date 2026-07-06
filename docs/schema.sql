@@ -93,6 +93,7 @@ CREATE TABLE complaints (
     category VARCHAR(50) NOT NULL CHECK (category IN ('pothole', 'paving_defect', 'waterlogging', 'debris', 'missing_signage')),
     geom GEOMETRY(Point, 4326) NOT NULL, -- Precise coordinate location
     status VARCHAR(50) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'routed', 'in_progress', 'resolved', 'rejected')),
+    escalation_level INT DEFAULT 0 CHECK (escalation_level IN (0, 1, 2)),
     image_url VARCHAR(512),
     assigned_authority_id INT REFERENCES authorities(id) ON DELETE SET NULL,
     road_id INT REFERENCES roads(id) ON DELETE SET NULL, -- Spatial match to nearest road segment

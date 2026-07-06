@@ -113,5 +113,56 @@ class Database:
         finally:
             conn.close()
 
+    def init_database(self, schema_path: str = "docs/schema.sql", seed_path: str = "docs/mock_data.sql"):
+        """
+        Initializes the database schema and seeds it if tables are empty.
+        Reads schema.sql and mock_data.sql from the project docs directory.
+        Safe to call multiple times — only runs if tables are empty or missing.
+        """
+        try:
+            conn = self.engine.raw_connection()
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'authorities')")
+                table_exists = cursor.fetchone()[0]
+                if table_exists:
+                    cursor.execute("SELECT COUNT(*) FROM authorities")
+                    count = cursor.fetchone()[0]
+                    if count > 0:
+                        conn.close()
+                        print("Database already seeded, skipping initialization.")
+                        return
+
+                base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+                schema_file = os.path.join(base_dir, schema_path)
+                seed_file = os.path.join(base_dir, seed_path)
+
+                if os.path.exists(schema_file):
+                    print(f"Executing schema: {schema_file}")
+                    with open(schema_file, 'r') as f:
+                        schema_sql = f.read()
+                    cursor.execute(schema_sql)
+                    conn.commit()
+                    print("Schema applied successfully.")
+                else:
+                    print(f"Schema file not found at {schema_file}, skipping.")
+
+                if os.path.exists(seed_file) and (not table_exists):
+                    print(f"Executing seed data: {seed_file}")
+                    with open(seed_file, 'r') as f:
+                        seed_sql = f.read()
+                    cursor.execute(seed_sql)
+                    conn.commit()
+                    print("Seed data inserted successfully.")
+            conn.close()
+        except Exception as e:
+            print(f"Database initialization error (non-fatal): {e}")
+            try:
+                conn.rollback()
+            except Exception:
+                pass
+
+
 # Singleton instance of database
 db = Database()
+# Auto-initialize schema and seed data on module load
+db.init_database()

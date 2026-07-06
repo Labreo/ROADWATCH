@@ -115,6 +115,7 @@ export default function ChatOrchestrator() {
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
+  const sessionIdRef = useRef('session-' + Math.random().toString(36).substring(2, 11));
 
   useEffect(() => {
     setMounted(true);
@@ -206,108 +207,6 @@ export default function ChatOrchestrator() {
     return calculateRoadTransparency(road, projects, contractors, complaintsList);
   }, [selectedRoadId, complaintsList]);
 
-  // Simulated AI Stream
-  const simulateStreamingResponse = async (textToSend: string) => {
-    const lowerQuery = textToSend.toLowerCase();
-    
-    let responseText = "";
-    let citations: Citation[] = [];
-    let suggestedActions: { type: string; target_id: number; label: string }[] = [];
-    let evidence: { title: string; items: string[] }[] = [];
-    let nextPrompts: string[] = [];
-
-    // Check query categories
-    const isTwinQuery = lowerQuery.includes('twin') || lowerQuery.includes('3d') || lowerQuery.includes('telemetry') || lowerQuery.includes('simulation');
-    const isMapQuery = lowerQuery.includes('map') || lowerQuery.includes('locate') || lowerQuery.includes('show sv') || lowerQuery.includes('show s.v.');
-    const isContractorQuery = lowerQuery.includes('omega') || lowerQuery.includes('contractor') || lowerQuery.includes('who repaired');
-    const isBudgetQuery = lowerQuery.includes('budget') || lowerQuery.includes('spend') || lowerQuery.includes('money') || lowerQuery.includes('cost') || lowerQuery.includes('verify budget');
-    const isDamageQuery = lowerQuery.includes('damage') || lowerQuery.includes('pothole') || lowerQuery.includes('poor') || lowerQuery.includes('broken');
-
-    if (isTwinQuery) {
-      responseText = "Connecting to the **Digital Twin Command Console** for S.V. Road. I am initializing the spatial grid overlay and loading live accelerometer diagnostics. Here, we can run virtual simulation models and overlay real-time structural load limits. {\"view\": \"twin\", \"roadId\": 1}";
-      citations = [{ type: 'road', id: 1, name: 'S.V. Road (Santacruz to Bandra)', code: 'SVR-LD01', status: 'poor', length: 4.8 }];
-      evidence = [{ title: "Digital Twin Telemetry", items: ["IMU scan status: Synchronized", "Structural stress limit: 84% capacity", "Subsurface moisture: 42% (Normal)"] }];
-      nextPrompts = ["Show SV Road on map", "Verify budgets for SV Road", "Show Omega Infrastructure"];
-    } else if (isMapQuery) {
-      responseText = "Surfacing **S.V. Road (Santacruz to Bandra)** directly on the geospatial Map panel. Toggling the localized GIS complaints log so you can view pins for all active paving defects. {\"view\": \"map\", \"roadId\": 1}";
-      citations = [{ type: 'road', id: 1, name: 'S.V. Road (Santacruz to Bandra)', code: 'SVR-LD01', status: 'poor', length: 4.8 }];
-      nextPrompts = ["Launch the digital twin", "Verify budgets for SV Road", "Why is S.V. Road damaged again?"];
-    } else if (isContractorQuery) {
-      responseText = "Omega Infrastructure Ltd. is marked with a **poor safety rating of 1.85/5.00** and has been blacklisted for 3 years due to repeated sub-base soil compaction failures. Toggling the Contractor registry card so you can review the full audit findings. {\"view\": \"contractors\", \"contractorId\": 3}";
-      citations = [{ type: 'contractor', id: 3, name: 'Omega Infrastructure Ltd.', rating: 1.85, blacklisted: true }];
-      nextPrompts = ["Why is S.V. Road damaged again?", "Verify budgets for SV Road", "Show SV Road on map"];
-    } else if (isBudgetQuery) {
-      responseText = "Opening the **Accountability Ledger and Budget Audit Card** for S.V. Road. Total public spend is ₹4.72 Crores against ₹4.8 Crores sanctioned (98.4%). However, a 14% unapproved material cost variance has been flagged. {\"view\": \"budgets\", \"roadId\": 1}";
-      citations = [
-        { type: 'road', id: 1, name: 'S.V. Road (Santacruz to Bandra)', code: 'SVR-LD01', status: 'poor', length: 4.8 },
-        { type: 'contractor', id: 3, name: 'Omega Infrastructure Ltd.', rating: 1.85, blacklisted: true }
-      ];
-      evidence = [{ title: "Sanction Ledger", items: ["Sanctioned budget: ₹4.80 Cr", "Outflow ledger: ₹4.72 Cr", "Audit tag: Flagged for Vigilance review"] }];
-      nextPrompts = ["Why is S.V. Road damaged again?", "Show Omega Infrastructure", "Launch the digital twin"];
-    } else if (isDamageQuery) {
-      responseText = "S.V. Road is currently flagged with a **poor health score (32/100)**. Soil compaction reports show density at only **62%** (minimum is 80%). Unapproved utility trenching in late 2025 has let water strip the binders. {\"view\": \"map\", \"roadId\": 1}";
-      citations = [{ type: 'road', id: 1, name: 'S.V. Road (Santacruz to Bandra)', code: 'SVR-LD01', status: 'poor', length: 4.8 }];
-      suggestedActions = [{ type: 'report_complaint_on_road', target_id: 1, label: "Log Civic Complaint" }];
-      evidence = [{ title: "Sub-Base Compaction Deficits", items: ["Sub-base compaction: 62% (Required >80%)", "Asphalt stripping: Severe (8.5% aggregate absorption)"] }];
-      nextPrompts = ["Verify budgets for SV Road", "Show Omega Infrastructure", "Launch the digital twin"];
-    } else {
-      responseText = "Checking the municipal data. S.V. Road is the lowest-scoring segment in Ward H-West due to recurring pothole complaints and budget variances. Let me know if you would like to inspect the map, digital twin, or contractor audit records. {\"view\": \"map\", \"roadId\": 1}";
-      nextPrompts = ["Why is S.V. Road damaged again?", "Launch the digital twin", "Verify budgets for SV Road"];
-    }
-
-    // Stream word-by-word
-    const words = responseText.split(" ");
-    let currentContent = "";
-    for (let i = 0; i < words.length; i++) {
-      currentContent += (i === 0 ? "" : " ") + words[i];
-
-      // Check for action token in real-time
-      const match = currentContent.match(/\{"view":\s*"[^"]*".*?\}/);
-      let contentToDisplay = currentContent;
-      
-      if (match) {
-        try {
-          const parsed = JSON.parse(match[0]);
-          if (parsed.view) {
-            dispatchChatAction({ type: 'NAVIGATE', payload: parsed });
-            setContextView(parsed.view === 'roads' ? 'map' : parsed.view);
-            if (parsed.contractorId) {
-              setSelectedContractorId(parsed.contractorId);
-            }
-          }
-          contentToDisplay = currentContent.replace(match[0], '');
-        } catch (e) {}
-      }
-
-      setMessages(prev => {
-        const updated = [...prev];
-        const last = updated[updated.length - 1];
-        if (last && last.role === 'assistant') {
-          last.content = contentToDisplay;
-        }
-        return updated;
-      });
-
-      await new Promise(resolve => setTimeout(resolve, 20));
-    }
-
-    // Finalize assistant metadata
-    setMessages(prev => {
-      const updated = [...prev];
-      const last = updated[updated.length - 1];
-      if (last && last.role === 'assistant') {
-        last.citations = citations;
-        last.suggestedActions = suggestedActions;
-        last.evidence = evidence;
-      }
-      return updated;
-    });
-
-    if (nextPrompts.length > 0) {
-      setSuggestedPrompts(nextPrompts);
-    }
-  };
-
   const handleSubmit = async (textToSend: string) => {
     if (!textToSend.trim() || isLoading) return;
 
@@ -317,17 +216,27 @@ export default function ChatOrchestrator() {
     setMessages(prev => [...prev, { role: 'user', content: textToSend }]);
     setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
 
-    if (!isBackendOnline) {
-      await simulateStreamingResponse(textToSend);
-      setIsLoading(false);
-      return;
-    }
+    let userLat: number | undefined;
+    let userLon: number | undefined;
+
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 3000 });
+      });
+      userLat = position.coords.latitude;
+      userLon = position.coords.longitude;
+    } catch (e) {}
 
     try {
       const response = await fetch("http://localhost:8000/api/v1/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: textToSend })
+        body: JSON.stringify({
+          message: textToSend,
+          session_id: sessionIdRef.current,
+          latitude: userLat,
+          longitude: userLon
+        })
       });
 
       if (!response.body) throw new Error("No response body");
@@ -352,17 +261,18 @@ export default function ChatOrchestrator() {
               if (data.type === 'content') {
                 fullResponse += data.content;
 
-                // Live check for JSON token
                 const match = fullResponse.match(/\{"view":\s*"[^"]*".*?\}/);
                 let contentToDisplay = fullResponse;
-                
+
                 if (match) {
-                  const parsed = JSON.parse(match[0]);
-                  if (parsed.view) {
-                    dispatchChatAction({ type: 'NAVIGATE', payload: parsed });
-                    setContextView(parsed.view === 'roads' ? 'map' : parsed.view);
-                    if (parsed.contractorId) setSelectedContractorId(parsed.contractorId);
-                  }
+                  try {
+                    const parsed = JSON.parse(match[0]);
+                    if (parsed.view) {
+                      dispatchChatAction({ type: 'NAVIGATE', payload: parsed });
+                      setContextView(parsed.view === 'roads' ? 'map' : parsed.view);
+                      if (parsed.contractorId) setSelectedContractorId(parsed.contractorId);
+                    }
+                  } catch (e) {}
                   contentToDisplay = fullResponse.replace(match[0], '');
                 }
 
@@ -384,13 +294,24 @@ export default function ChatOrchestrator() {
                   }
                   return updated;
                 });
+                if (data.suggested_prompts) {
+                  setSuggestedPrompts(data.suggested_prompts);
+                }
               }
             } catch (err) {}
           }
         }
       }
     } catch (error) {
-      await simulateStreamingResponse(textToSend);
+      console.error("Chat stream error:", error);
+      setMessages(prev => {
+        const updated = [...prev];
+        const last = updated[updated.length - 1];
+        if (last && last.role === 'assistant') {
+          last.content = "**Connection Error:** Unable to reach the server. Please check your connection and try again.";
+        }
+        return updated;
+      });
     } finally {
       setIsLoading(false);
     }

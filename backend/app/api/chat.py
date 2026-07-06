@@ -202,11 +202,8 @@ async def analyze_photo_endpoint(
                 print(f"Failed to parse Concentrate AI response JSON: {json_err}. Raw: {full_ai_response}")
                 analysis = {
                     "defectType": "pothole",
-                    "volumetricMetrics": {
-                        "estimatedDepthCm": 12.0,
-                        "estimatedWidthM": 0.6,
-                        "severityScore": 5
-                    },
+                    "estimatedDepthCm": 12.0,
+                    "estimatedWidthM": 0.6,
                     "recommendedAction": f"SCHEDULE_REPAIR: Set route priority medium. Target coordinates: [{resolved_lon}, {resolved_lat}]."
                 }
 
@@ -214,25 +211,22 @@ async def analyze_photo_endpoint(
             authority = AuthorityResolver.resolve_authority_for_coordinates(resolved_lon, resolved_lat)
             road = StructuredRoadRetriever.get_closest_road(resolved_lon, resolved_lat)
             
-            assigned_authority_id = authority["id"] if authority else 4 # fallback to PWD
+            assigned_authority_id = authority["id"] if authority else 4
             road_id = road["id"] if road else None
             road_name = road["name"] if road else "Unmapped Segment"
             
-            # Format draft details
             category = analysis.get("defectType", "pothole")
             category_title = category.replace("_", " ").title()
             title = f"Citizen Report: {category_title} on {road_name}"
             
-            metrics = analysis.get("volumetricMetrics", {})
-            depth = metrics.get("estimatedDepthCm", 0.0)
-            width = metrics.get("estimatedWidthM", 0.0)
-            severity = metrics.get("severityScore", 5)
+            depth = analysis.get("estimatedDepthCm", 0.0)
+            width = analysis.get("estimatedWidthM", 0.0)
+            severity = 5
             
             description = (
                 f"Defect type: {category_title}. "
                 f"Estimated depth: {depth} cm. "
                 f"Estimated width: {width} m. "
-                f"Severity score: {severity}/10. "
                 f"Recommended action: {analysis.get('recommendedAction', '')}."
             )
             
@@ -241,8 +235,8 @@ async def analyze_photo_endpoint(
             created_at_iso = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
             
             sql = """
-            INSERT INTO complaints (title, description, category, geom, status, image_url, assigned_authority_id, road_id, created_at, updated_at)
-            VALUES (?, ?, ?, ST_GeomFromText(?, 4326), ?, ?, ?, ?, ?, ?)
+            INSERT INTO complaints (title, description, category, geom, status, escalation_level, image_url, assigned_authority_id, road_id, created_at, updated_at)
+            VALUES (?, ?, ?, ST_GeomFromText(?, 4326), ?, 0, ?, ?, ?, ?, ?)
             """
             filename = image.filename if hasattr(image, 'filename') and image.filename else "upload.jpg"
             params = (
@@ -292,7 +286,6 @@ async def analyze_photo_endpoint(
                 "success": True,
                 "analysis": {
                     "defect_type": category,
-                    "confidence": float(severity / 10.0),
                     "depth_cm": depth,
                     "width_m": width,
                     "recommended_action": analysis.get('recommendedAction', ''),

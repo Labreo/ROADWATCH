@@ -202,7 +202,7 @@ VALUES
 -- =========================================================================
 -- 5. SEED COMPLAINTS (20 Records)
 -- =========================================================================
-INSERT INTO complaints (client_temp_id, title, description, category, geom, status, image_url, assigned_authority_id, road_id)
+INSERT INTO complaints (client_temp_id, title, description, category, geom, status, escalation_level, image_url, assigned_authority_id, road_id)
 VALUES
 -- Complaint 1 (WEH - Pothole)
 (
@@ -212,6 +212,7 @@ VALUES
     'pothole',
     ST_GeomFromText('POINT(72.8531 19.1190)', 4326),
     'in_progress',
+    0,
     'https://images.roadwatch.civic/complaints/pothole_andheri.jpg',
     5, -- NHAI
     1  -- WEH
@@ -224,6 +225,7 @@ VALUES
     'missing_signage',
     ST_GeomFromText('POINT(72.8580 19.1720)', 4326),
     'resolved',
+    0,
     'https://images.roadwatch.civic/complaints/missing_sign_weh.jpg',
     5, -- NHAI
     1  -- WEH
@@ -236,6 +238,7 @@ VALUES
     'paving_defect',
     ST_GeomFromText('POINT(72.8356 19.0620)', 4326),
     'pending',
+    0,
     NULL,
     1, -- Ward K-West
     3  -- SV Road
@@ -248,6 +251,7 @@ VALUES
     'waterlogging',
     ST_GeomFromText('POINT(72.8362 19.0980)', 4326),
     'in_progress',
+    1,
     'https://images.roadwatch.civic/complaints/waterlog_sv_station.jpg',
     1, -- Ward K-West
     3  -- SV Road
@@ -260,6 +264,7 @@ VALUES
     'debris',
     ST_GeomFromText('POINT(72.8272 19.1260)', 4326),
     'routed',
+    0,
     'https://images.roadwatch.civic/complaints/debris_link_rd.jpg',
     1, -- Ward K-West
     4  -- Link Road
@@ -272,6 +277,7 @@ VALUES
     'pothole',
     ST_GeomFromText('POINT(72.8982 19.0850)', 4326),
     'in_progress',
+    0,
     'https://images.roadwatch.civic/complaints/crater_lbs_kurla.jpg',
     3, -- Ward H-East
     5  -- LBS Marg
@@ -284,6 +290,7 @@ VALUES
     'waterlogging',
     ST_GeomFromText('POINT(72.9030 19.1020)', 4326),
     'pending',
+    2,
     NULL,
     3, -- Ward H-East
     5  -- LBS Marg
@@ -296,6 +303,7 @@ VALUES
     'pothole',
     ST_GeomFromText('POINT(72.9345 19.1080)', 4326),
     'resolved',
+    0,
     'https://images.roadwatch.civic/complaints/pothole_eeh_vik.jpg',
     4, -- PWD
     2  -- EEH
@@ -308,6 +316,7 @@ VALUES
     'debris',
     ST_GeomFromText('POINT(72.9465 19.1710)', 4326),
     'routed',
+    0,
     NULL,
     4, -- PWD
     2  -- EEH
@@ -320,6 +329,7 @@ VALUES
     'missing_signage',
     ST_GeomFromText('POINT(72.8262 18.9860)', 4326),
     'resolved',
+    0,
     'https://images.roadwatch.civic/complaints/fallen_sign_sbm.jpg',
     2, -- Ward F-North
     6  -- Senapati Bapat Marg
@@ -332,6 +342,7 @@ VALUES
     'paving_defect',
     ST_GeomFromText('POINT(72.8502 18.9960)', 4326),
     'pending',
+    1,
     NULL,
     2, -- Ward F-North
     7  -- Dr. Ambedkar Road
@@ -344,6 +355,7 @@ VALUES
     'pothole',
     ST_GeomFromText('POINT(72.8820 19.1285)', 4326),
     'in_progress',
+    0,
     'https://images.roadwatch.civic/complaints/pothole_jvlr_pillar12.jpg',
     4, -- PWD
     8  -- JVLR
@@ -356,6 +368,7 @@ VALUES
     'paving_defect',
     ST_GeomFromText('POINT(72.8795 19.0695)', 4326),
     'pending',
+    0,
     NULL,
     4, -- PWD
     9  -- SCLR
@@ -368,6 +381,7 @@ VALUES
     'debris',
     ST_GeomFromText('POINT(72.9315 19.2525)', 4326),
     'resolved',
+    0,
     'https://images.roadwatch.civic/complaints/spilled_gravel_gb.jpg',
     4, -- PWD
     10 -- Ghodbunder Road
@@ -380,6 +394,7 @@ VALUES
     'paving_defect',
     ST_GeomFromText('POINT(72.8211 18.9325)', 4326),
     'resolved',
+    0,
     NULL,
     2, -- Ward F-North
     11 -- Marine Drive
@@ -392,6 +407,7 @@ VALUES
     'pothole',
     ST_GeomFromText('POINT(72.9250 19.0415)', 4326),
     'in_progress',
+    0,
     'https://images.roadwatch.civic/complaints/mankhurd_highway_crater.jpg',
     5, -- NHAI
     12 -- Sion-Panvel Highway
@@ -404,6 +420,7 @@ VALUES
     'pothole',
     ST_GeomFromText('POINT(72.8592 19.1865)', 4326),
     'rejected', -- Rejected since duplicate of ongoing highway work
+    0,
     'https://images.roadwatch.civic/complaints/malad_flyover_pothole.jpg',
     5, -- NHAI
     1  -- WEH
@@ -416,6 +433,7 @@ VALUES
     'waterlogging',
     ST_GeomFromText('POINT(72.8312 19.1835)', 4326),
     'pending',
+    0,
     NULL,
     1, -- Ward K-West
     4  -- Link Road
@@ -428,6 +446,7 @@ VALUES
     'debris',
     ST_GeomFromText('POINT(72.9348 19.1975)', 4326),
     'routed',
+    0,
     'https://images.roadwatch.civic/complaints/lbs_pipes_bhandup.jpg',
     3, -- Ward H-East
     5  -- LBS Marg
@@ -440,6 +459,7 @@ VALUES
     'missing_signage',
     ST_GeomFromText('POINT(72.9982 19.0402)', 4326),
     'pending',
+    0,
     NULL,
     5, -- NHAI
     12 -- Sion-Panvel Highway
