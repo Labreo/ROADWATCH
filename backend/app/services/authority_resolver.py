@@ -155,7 +155,7 @@ class AuthorityResolver:
         # We query authorities where boundary contains the point
         sql = """
         SELECT * FROM authorities 
-        WHERE ST_Contains(geom_boundary, ?) = 1
+        WHERE ST_Contains(geom_boundary, ST_GeomFromText(?, 4326)) = true
         """
         results = db.query(sql, (point_wkt,))
         if not results:

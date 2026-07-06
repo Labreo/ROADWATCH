@@ -28,33 +28,20 @@ class StructuredRoadRetriever:
     def get_closest_road(lon: float, lat: float, max_distance: float = 0.005):
         """
         Finds the closest road segment to a given longitude and latitude.
-        Uses SQLite registered ST_DWithin function.
+        Uses PostGIS ST_DWithin and ST_Distance to compute the closest road segment.
         """
-        # We query all roads, and filter by distance in SQLite using custom ST_DWithin
         point_wkt = f"POINT({lon} {lat})"
         sql = """
-        SELECT r.*, a.name as authority_name, a.department_code as authority_code 
+        SELECT r.*, a.name as authority_name, a.department_code as authority_code,
+               ST_Distance(r.geom, ST_GeomFromText(?, 4326)) as distance
         FROM roads r
         LEFT JOIN authorities a ON r.authority_id = a.id
-        WHERE ST_DWithin(r.geom, ?, ?) = 1
+        WHERE ST_DWithin(r.geom, ST_GeomFromText(?, 4326), ?) = true
+        ORDER BY distance ASC
+        LIMIT 1
         """
-        # Let's run query and find the closest one by calculating distance in python as a secondary check
-        results = db.query(sql, (point_wkt, max_distance))
-        if not results:
-            return None
-            
-        # Calculate precise distances in Python to sort
-        from app.services.database import parse_wkt, point_to_linestring_distance
-        closest_road = None
-        min_dist = float('inf')
-        for r in results:
-            geom = parse_wkt(r['geom'])
-            if geom and geom[0] == 'LINESTRING':
-                dist = point_to_linestring_distance(lon, lat, geom[1])
-                if dist < min_dist:
-                    min_dist = dist
-                    closest_road = r
-        return closest_road
+        results = db.query(sql, (point_wkt, point_wkt, max_distance))
+        return results[0] if results else None
 
     @staticmethod
     def get_road_projects(road_id: int):

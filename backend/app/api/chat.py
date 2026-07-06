@@ -236,13 +236,13 @@ async def analyze_photo_endpoint(
                 f"Recommended action: {analysis.get('recommendedAction', '')}."
             )
             
-            # Write to SQLite Database to ensure persistence
+            # Write to Spatial Database to ensure persistence
             geom_wkt = f"POINT({resolved_lon} {resolved_lat})"
             created_at_iso = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
             
             sql = """
             INSERT INTO complaints (title, description, category, geom, status, image_url, assigned_authority_id, road_id, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ST_GeomFromText(?, 4326), ?, ?, ?, ?, ?, ?)
             """
             filename = image.filename if hasattr(image, 'filename') and image.filename else "upload.jpg"
             params = (
