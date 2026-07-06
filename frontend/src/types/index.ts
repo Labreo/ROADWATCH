@@ -43,6 +43,11 @@ export interface Road {
   };
 }
 
+export interface FundSourceAllocation {
+  source: 'Central Road Fund' | 'State PWD Allocations' | 'Municipal General Tier' | 'International Multilateral Loans';
+  amount: number;
+}
+
 export interface Project {
   id: number;
   title: string;
@@ -56,6 +61,7 @@ export interface Project {
   targetEndDate: string;
   actualEndDate?: string | null;
   delayDays: number;
+  fundSources?: FundSourceAllocation[];
 }
 
 export interface Complaint {
@@ -111,7 +117,7 @@ export interface YearlyAllocation {
 
 export interface FinancialAnomaly {
   id: string;
-  type: 'repeated_repair' | 'budget_overrun' | 'high_maintenance_frequency' | 'low_contractor_rating';
+  type: 'repeated_repair' | 'budget_overrun' | 'high_maintenance_frequency' | 'low_contractor_rating' | 'contractor_variance';
   severity: 'low' | 'medium' | 'high';
   description: string;
   detectedAt: string;

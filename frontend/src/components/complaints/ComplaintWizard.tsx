@@ -830,7 +830,7 @@ export default function ComplaintWizard() {
                   <div className="p-3.5 rounded-xl border border-white/[0.04] bg-white/[0.01] space-y-2">
                     <div className="flex justify-between items-start gap-1">
                       <div>
-                        <span className="mono-label text-[7px] text-cyan-400 block mb-1">Ward Executive</span>
+                        <span className="mono-label text-[7px] text-cyan-400 block mb-1">{routingInfo.fieldManagerTitle || 'Ward Executive'}</span>
                         <h4 className="text-[11px] font-black text-slate-200 leading-none">{routingInfo.executiveEngineer}</h4>
                         <p className="text-[9px] text-[#55555f] mt-1">{routingInfo.authorityName}</p>
                       </div>

@@ -2,17 +2,13 @@
 
 import { useStore, AppView } from '@/store/useStore';
 import {
-  LayoutDashboard,
+  MessageSquare,
   Map,
   HardHat,
   Coins,
-  AlertTriangle,
   ChevronLeft,
   ChevronRight,
   Shield,
-  History,
-  Radio,
-  Globe,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -68,29 +64,13 @@ export default function Sidebar() {
 
   const navSections = [
     {
-      label: 'Intelligence',
+      label: 'Navigation',
       items: [
-        { id: 'dashboard' as AppView, label: 'Dashboard',     icon: LayoutDashboard },
-        { id: 'roads'     as AppView, label: 'Road Registry', icon: Map             },
-        { id: 'sensors'   as AppView, label: 'Sensor Monitor',icon: Radio           },
-        { id: 'twin'      as AppView, label: 'Digital Twin',  icon: Globe           },
-      ]
-    },
-    {
-      label: 'Accountability',
-      items: [
-        { id: 'contractors' as AppView, label: 'Contractors',   icon: HardHat      },
-        { id: 'budgets'     as AppView, label: 'Budget Audits', icon: Coins        },
-        { id: 'playback'    as AppView, label: 'Time Playback', icon: History      },
-        { id: 'complaints'  as AppView, label: 'Citizen Reports',icon: AlertTriangle,
-          badge: syncQueueCount > 0 ? syncQueueCount : undefined },
-      ]
-    },
-    {
-      label: 'System',
-      items: [
-        { id: 'admin' as AppView, label: 'Operations Center', icon: Shield },
-      ]
+        { id: 'chat'        as AppView, label: 'Chat Assistant',    icon: MessageSquare, badge: syncQueueCount > 0 ? syncQueueCount : undefined },
+        { id: 'roads'       as AppView, label: 'Geospatial Map',    icon: Map },
+        { id: 'budgets'     as AppView, label: 'Budget Compliance', icon: Coins },
+        { id: 'contractors' as AppView, label: 'Contractor Scores', icon: HardHat },
+      ] as { id: AppView; label: string; icon: any; badge?: string | number }[]
     }
   ];
 

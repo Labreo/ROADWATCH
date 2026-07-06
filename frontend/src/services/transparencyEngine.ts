@@ -83,6 +83,27 @@ export function calculateRoadTransparency(
       });
     }
 
+    // Anomaly Check: Contractor Variance (deviations past 15%)
+    if (p.budgetAllocated > 0) {
+      const varianceRatio = Math.abs((p.budgetSpent / p.budgetAllocated) - 1);
+      if (varianceRatio > 0.15) {
+        const pct = Math.round(varianceRatio * 100);
+        anomalies.push({
+          id: `anomaly-variance-${p.id}`,
+          type: 'contractor_variance',
+          severity: 'high',
+          description: `High contractor variance risk: Spend-to-allocation ratio deviates by ${pct}% (Allocated: ${formatINR(p.budgetAllocated)}, Spent: ${formatINR(p.budgetSpent)}).`,
+          detectedAt: p.actualEndDate || p.startDate
+        });
+
+        scoreDeductions.push({
+          points: 15,
+          reason: `High contractor variance deviation (${pct}%) on project: ${p.title}`,
+          category: 'budget'
+        });
+      }
+    }
+
     // Delay penalty
     if (p.delayDays > 0) {
       scoreDeductions.push({

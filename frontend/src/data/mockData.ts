@@ -251,18 +251,207 @@ export const roads: Road[] = [
 
 // 12 Projects (budget data, link roads and contractors)
 export const projects: Project[] = [
-  { id: 101, title: 'WEH Flyover Resurfacing & Structural Grouting', roadId: 1, contractorId: 1, authorityId: 5, budgetAllocated: 240000000.00, budgetSpent: 185000000.00, status: 'in_progress', startDate: '2025-06-01', targetEndDate: '2026-06-30', delayDays: 0 },
-  { id: 102, title: 'EEH Pothole Remediation Campaign 2025', roadId: 2, contractorId: 2, authorityId: 4, budgetAllocated: 18000000.00, budgetSpent: 19200000.00, status: 'completed', startDate: '2025-09-01', targetEndDate: '2025-10-31', actualEndDate: '2025-11-12', delayDays: 12 },
-  { id: 103, title: 'SV Road Drainage Trenching and Microtunnelling', roadId: 3, contractorId: 10, authorityId: 1, budgetAllocated: 95000000.00, budgetSpent: 45000000.00, status: 'halted', startDate: '2024-05-10', targetEndDate: '2025-05-10', delayDays: 378 },
-  { id: 104, title: 'SV Road Emergency Asphalt Laying', roadId: 3, contractorId: 3, authorityId: 1, budgetAllocated: 35000000.00, budgetSpent: 12000000.00, status: 'in_progress', startDate: '2026-03-01', targetEndDate: '2026-08-31', delayDays: 0 },
-  { id: 105, title: 'Link Road Concrete Pavement Upgrade Ph. 2', roadId: 4, contractorId: 6, authorityId: 1, budgetAllocated: 145000000.00, budgetSpent: 75000000.00, status: 'in_progress', startDate: '2025-10-15', targetEndDate: '2026-09-30', delayDays: 0 },
-  { id: 106, title: 'LBS Marg Sewer Line Laying and Patching', roadId: 5, contractorId: 4, authorityId: 3, budgetAllocated: 62000000.00, budgetSpent: 60000000.00, status: 'in_progress', startDate: '2024-11-01', targetEndDate: '2025-11-01', delayDays: 203 },
-  { id: 107, title: 'Senapati Bapat Marg Micro-silica concrete topping', roadId: 6, contractorId: 3, authorityId: 2, budgetAllocated: 85000000.00, budgetSpent: 84200000.00, status: 'completed', startDate: '2023-01-15', targetEndDate: '2023-12-15', actualEndDate: '2023-12-10', delayDays: 0 },
-  { id: 108, title: 'Dr. Ambedkar Road Junction Redesign & Lane Widening', roadId: 7, contractorId: 8, authorityId: 2, budgetAllocated: 110000000.00, budgetSpent: 108000000.00, status: 'completed', startDate: '2024-02-01', targetEndDate: '2025-01-31', actualEndDate: '2025-01-20', delayDays: 0 },
-  { id: 109, title: 'JVLR Pothole Repair and Guardrail installation', roadId: 8, contractorId: 5, authorityId: 4, budgetAllocated: 12500000.00, budgetSpent: 12500000.00, status: 'completed', startDate: '2025-05-01', targetEndDate: '2025-06-30', actualEndDate: '2025-06-28', delayDays: 0 },
-  { id: 110, title: 'SCLR Connector Joint Replacement & Waterproofing', roadId: 9, contractorId: 7, authorityId: 4, budgetAllocated: 45000000.00, budgetSpent: 22000000.00, status: 'in_progress', startDate: '2025-11-01', targetEndDate: '2026-05-31', delayDays: 0 },
-  { id: 111, title: 'Ghodbunder Road Mast-Asphalt Overlay', roadId: 10, contractorId: 8, authorityId: 4, budgetAllocated: 190000000.00, budgetSpent: 187000000.00, status: 'completed', startDate: '2024-03-01', targetEndDate: '2024-12-31', actualEndDate: '2024-12-25', delayDays: 0 },
-  { id: 112, title: 'Sion-Panvel Expressway Maintenance & Repair', roadId: 12, contractorId: 11, authorityId: 5, budgetAllocated: 80000000.00, budgetSpent: 31000000.00, status: 'in_progress', startDate: '2025-12-01', targetEndDate: '2026-11-30', delayDays: 0 }
+  {
+    id: 101,
+    title: 'WEH Flyover Resurfacing & Structural Grouting',
+    roadId: 1,
+    contractorId: 1,
+    authorityId: 5,
+    budgetAllocated: 240000000.00,
+    budgetSpent: 185000000.00,
+    status: 'in_progress',
+    startDate: '2025-06-01',
+    targetEndDate: '2026-06-30',
+    delayDays: 0,
+    fundSources: [
+      { source: 'Central Road Fund', amount: 140000000.00 },
+      { source: 'International Multilateral Loans', amount: 100000000.00 }
+    ]
+  },
+  {
+    id: 102,
+    title: 'EEH Pothole Remediation Campaign 2025',
+    roadId: 2,
+    contractorId: 2,
+    authorityId: 4,
+    budgetAllocated: 18000000.00,
+    budgetSpent: 19200000.00,
+    status: 'completed',
+    startDate: '2025-09-01',
+    targetEndDate: '2025-10-31',
+    actualEndDate: '2025-11-12',
+    delayDays: 12,
+    fundSources: [
+      { source: 'State PWD Allocations', amount: 18000000.00 }
+    ]
+  },
+  {
+    id: 103,
+    title: 'SV Road Drainage Trenching and Microtunnelling',
+    roadId: 3,
+    contractorId: 10,
+    authorityId: 1,
+    budgetAllocated: 95000000.00,
+    budgetSpent: 45000000.00,
+    status: 'halted',
+    startDate: '2024-05-10',
+    targetEndDate: '2025-05-10',
+    delayDays: 378,
+    fundSources: [
+      { source: 'Municipal General Tier', amount: 95000000.00 }
+    ]
+  },
+  {
+    id: 104,
+    title: 'SV Road Emergency Asphalt Laying',
+    roadId: 3,
+    contractorId: 3,
+    authorityId: 1,
+    budgetAllocated: 35000000.00,
+    budgetSpent: 12000000.00,
+    status: 'in_progress',
+    startDate: '2026-03-01',
+    targetEndDate: '2026-08-31',
+    delayDays: 0,
+    fundSources: [
+      { source: 'Municipal General Tier', amount: 35000000.00 }
+    ]
+  },
+  {
+    id: 105,
+    title: 'Link Road Concrete Pavement Upgrade Ph. 2',
+    roadId: 4,
+    contractorId: 6,
+    authorityId: 1,
+    budgetAllocated: 145000000.00,
+    budgetSpent: 75000000.00,
+    status: 'in_progress',
+    startDate: '2025-10-15',
+    targetEndDate: '2026-09-30',
+    delayDays: 0,
+    fundSources: [
+      { source: 'Municipal General Tier', amount: 100000000.00 },
+      { source: 'International Multilateral Loans', amount: 45000000.00 }
+    ]
+  },
+  {
+    id: 106,
+    title: 'LBS Marg Sewer Line Laying and Patching',
+    roadId: 5,
+    contractorId: 4,
+    authorityId: 3,
+    budgetAllocated: 62000000.00,
+    budgetSpent: 60000000.00,
+    status: 'in_progress',
+    startDate: '2024-11-01',
+    targetEndDate: '2025-11-01',
+    delayDays: 203,
+    fundSources: [
+      { source: 'Municipal General Tier', amount: 62000000.00 }
+    ]
+  },
+  {
+    id: 107,
+    title: 'Senapati Bapat Marg Micro-silica concrete topping',
+    roadId: 6,
+    contractorId: 3,
+    authorityId: 2,
+    budgetAllocated: 85000000.00,
+    budgetSpent: 84200000.00,
+    status: 'completed',
+    startDate: '2023-01-15',
+    targetEndDate: '2023-12-15',
+    actualEndDate: '2023-12-10',
+    delayDays: 0,
+    fundSources: [
+      { source: 'State PWD Allocations', amount: 85000000.00 }
+    ]
+  },
+  {
+    id: 108,
+    title: 'Dr. Ambedkar Road Junction Redesign & Lane Widening',
+    roadId: 7,
+    contractorId: 8,
+    authorityId: 2,
+    budgetAllocated: 110000000.00,
+    budgetSpent: 108000000.00,
+    status: 'completed',
+    startDate: '2024-02-01',
+    targetEndDate: '2025-01-31',
+    actualEndDate: '2025-01-20',
+    delayDays: 0,
+    fundSources: [
+      { source: 'Central Road Fund', amount: 50000000.00 },
+      { source: 'Municipal General Tier', amount: 60000000.00 }
+    ]
+  },
+  {
+    id: 109,
+    title: 'JVLR Pothole Repair and Guardrail installation',
+    roadId: 8,
+    contractorId: 5,
+    authorityId: 4,
+    budgetAllocated: 12500000.00,
+    budgetSpent: 12500000.00,
+    status: 'completed',
+    startDate: '2025-05-01',
+    targetEndDate: '2025-06-30',
+    actualEndDate: '2025-06-28',
+    delayDays: 0,
+    fundSources: [
+      { source: 'State PWD Allocations', amount: 12500000.00 }
+    ]
+  },
+  {
+    id: 110,
+    title: 'SCLR Connector Joint Replacement & Waterproofing',
+    roadId: 9,
+    contractorId: 7,
+    authorityId: 4,
+    budgetAllocated: 45000000.00,
+    budgetSpent: 22000000.00,
+    status: 'in_progress',
+    startDate: '2025-11-01',
+    targetEndDate: '2026-05-31',
+    delayDays: 0,
+    fundSources: [
+      { source: 'State PWD Allocations', amount: 45000000.00 }
+    ]
+  },
+  {
+    id: 111,
+    title: 'Ghodbunder Road Mast-Asphalt Overlay',
+    roadId: 10,
+    contractorId: 8,
+    authorityId: 4,
+    budgetAllocated: 190000000.00,
+    budgetSpent: 187000000.00,
+    status: 'completed',
+    startDate: '2024-03-01',
+    targetEndDate: '2024-12-31',
+    actualEndDate: '2024-12-25',
+    delayDays: 0,
+    fundSources: [
+      { source: 'Central Road Fund', amount: 90000000.00 },
+      { source: 'International Multilateral Loans', amount: 100000000.00 }
+    ]
+  },
+  {
+    id: 112,
+    title: 'Sion-Panvel Expressway Maintenance & Repair',
+    roadId: 12,
+    contractorId: 11,
+    authorityId: 5,
+    budgetAllocated: 80000000.00,
+    budgetSpent: 31000000.00,
+    status: 'in_progress',
+    startDate: '2025-12-01',
+    targetEndDate: '2026-11-30',
+    delayDays: 0,
+    fundSources: [
+      { source: 'Central Road Fund', amount: 80000000.00 }
+    ]
+  }
 ];
 
 // 20 Complaints

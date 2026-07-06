@@ -3,8 +3,9 @@ import { RoadStatus, Complaint, SyncQueueItem, Road } from '@/types';
 import { complaints as mockComplaints, roads as mockRoads } from '@/data/mockData';
 import { CachedRoadRepository, SyncLog } from '@/services/cachedRoadRepository';
 import { playbackSteps } from '@/data/historicalData';
+import { generateStressZones } from '@/data/sensorData';
 
-export type AppView = 'dashboard' | 'roads' | 'contractors' | 'budgets' | 'complaints' | 'admin' | 'playback' | 'sensors' | 'twin';
+export type AppView = 'dashboard' | 'roads' | 'contractors' | 'budgets' | 'complaints' | 'admin' | 'playback' | 'sensors' | 'twin' | 'chat';
 
 interface AppState {
   // Sidebar State
@@ -27,6 +28,7 @@ interface AppState {
   // View Navigation
   activeView: AppView;
   setActiveView: (view: AppView) => void;
+  dispatchChatAction: (action: { type: string; payload: any }) => void;
 
   // Online / Offline Capability & Local Queue
   isOnline: boolean;
@@ -88,6 +90,12 @@ interface AppState {
   // Map Camera Control Viewport
   mapViewport: { center: [number, number]; zoom: number } | null;
   setMapViewport: (viewport: { center: [number, number]; zoom: number } | null) => void;
+
+  // WebGL & Telemetry State
+  canvasAction: { type: string; coordinates?: [number, number, number]; [key: string]: any } | null;
+  setCanvasAction: (action: { type: string; coordinates?: [number, number, number]; [key: string]: any } | null) => void;
+  uStructuralStressIntensity: number;
+  setUStructuralStressIntensity: (val: number) => void;
 }
 
 // Helper to load custom complaints from LocalStorage
@@ -121,13 +129,76 @@ export const useStore = create<AppState>((set, get) => {
 
     // Selected Entities
     selectedRoadId: null,
-    setSelectedRoadId: (id) => set({ selectedRoadId: id }),
+    setSelectedRoadId: (id) => {
+      set({ selectedRoadId: id });
+      if (id !== null) {
+        const zones = generateStressZones(mockRoads as any);
+        const zone = zones.find(z => z.roadId === id);
+        if (zone) {
+          set({ uStructuralStressIntensity: zone.stressIndex / 100 });
+        } else {
+          set({ uStructuralStressIntensity: 0.0 });
+        }
+      } else {
+        set({ uStructuralStressIntensity: 0.0 });
+      }
+    },
     selectedComplaintId: null,
     setSelectedComplaintId: (id) => set({ selectedComplaintId: id }),
 
     // Navigation
-    activeView: 'roads',
+    activeView: 'chat',
     setActiveView: (view) => set({ activeView: view, selectedRoadId: null, selectedComplaintId: null }),
+    dispatchChatAction: (action) => {
+      const { type, payload } = action;
+      if (!payload) return;
+      
+      set((state) => {
+        const updates: Partial<AppState> = {};
+        
+        if (payload.view) {
+          const v = payload.view;
+          if (v === 'map' || v === 'roads') {
+            updates.activeView = 'roads';
+          } else if (['dashboard', 'contractors', 'budgets', 'complaints', 'admin', 'playback', 'sensors', 'twin', 'chat'].includes(v)) {
+            updates.activeView = v;
+          }
+        } else if (payload.activeView) {
+          const v = payload.activeView;
+          if (v === 'map' || v === 'roads') {
+            updates.activeView = 'roads';
+          } else if (['dashboard', 'contractors', 'budgets', 'complaints', 'admin', 'playback', 'sensors', 'twin', 'chat'].includes(v)) {
+            updates.activeView = v;
+          }
+        }
+        
+        const roadIdVal = payload.roadId !== undefined ? payload.roadId : payload.selectedRoadId;
+        if (roadIdVal !== undefined) {
+          updates.selectedRoadId = roadIdVal;
+          if (roadIdVal !== null) {
+            const zones = generateStressZones(mockRoads as any);
+            const zone = zones.find(z => z.roadId === roadIdVal);
+            updates.uStructuralStressIntensity = zone ? zone.stressIndex / 100 : 0.0;
+          } else {
+            updates.uStructuralStressIntensity = 0.0;
+          }
+        }
+        
+        if (payload.complaintId !== undefined) {
+          updates.selectedComplaintId = payload.complaintId;
+        } else if (payload.selectedComplaintId !== undefined) {
+          updates.selectedComplaintId = payload.selectedComplaintId;
+        }
+
+        if (payload.canvasAction) {
+          updates.canvasAction = payload.canvasAction;
+        } else if (payload.coordinates) {
+          updates.canvasAction = { type: 'FOCUS_COORDINATES', coordinates: payload.coordinates };
+        }
+        
+        return updates;
+      });
+    },
 
     // Playback State
     currentPlaybackStepId: '2026-Q2',
@@ -156,6 +227,20 @@ export const useStore = create<AppState>((set, get) => {
     // Map Viewport
     mapViewport: null,
     setMapViewport: (viewport) => set({ mapViewport: viewport }),
+
+    // WebGL / Telemetry
+    canvasAction: null,
+    setCanvasAction: (action) => set({ canvasAction: action }),
+    uStructuralStressIntensity: (() => {
+      const firstRoad = mockRoads[0];
+      if (firstRoad) {
+        const zones = generateStressZones(mockRoads as any);
+        const zone = zones.find(z => z.roadId === firstRoad.id);
+        return zone ? zone.stressIndex / 100 : 0.0;
+      }
+      return 0.0;
+    })(),
+    setUStructuralStressIntensity: (val) => set({ uStructuralStressIntensity: val }),
 
     // Network / Offline Queue
     isOnline: typeof window !== 'undefined' ? window.navigator.onLine : true,

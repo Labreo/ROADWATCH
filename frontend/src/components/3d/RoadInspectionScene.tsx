@@ -4,6 +4,7 @@ import React, { useRef, useState, useEffect, useMemo, Suspense } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Html } from '@react-three/drei';
 import * as THREE from 'three';
+import { useStore } from '@/store/useStore';
 
 // Pre-load model to prevent latency spikes during view activation
 useGLTF.preload('/3d/roadInspection.glb');
@@ -309,12 +310,23 @@ function StressLayer() {
 function PavementModel({ layers }: { layers: LayerState }) {
   const { scene } = useGLTF('/3d/roadInspection.glb');
   const groupRef = useRef<THREE.Group>(null);
+  const uStructuralStressIntensity = useStore(state => state.uStructuralStressIntensity);
+
+  const uniformsRef = useRef({
+    uTime: { value: 0 },
+    uStructuralStressIntensity: { value: 0.0 }
+  });
+
+  useEffect(() => {
+    uniformsRef.current.uStructuralStressIntensity.value = uStructuralStressIntensity;
+  }, [uStructuralStressIntensity]);
 
   useFrame((state) => {
     if (groupRef.current) {
       groupRef.current.position.y = Math.sin(state.clock.getElapsedTime() * 1.1) * 0.12 - 0.3;
       groupRef.current.rotation.y = state.clock.getElapsedTime() * 0.08;
     }
+    uniformsRef.current.uTime.value = state.clock.getElapsedTime();
   });
 
   useEffect(() => {
@@ -326,6 +338,72 @@ function PavementModel({ layers }: { layers: LayerState }) {
           const mat = node.material as THREE.MeshStandardMaterial;
           mat.roughness = 0.88;
           mat.metalness = 0.15;
+
+          // Inject custom shader pass
+          mat.onBeforeCompile = (shader) => {
+            shader.uniforms.uTime = uniformsRef.current.uTime;
+            shader.uniforms.uStructuralStressIntensity = uniformsRef.current.uStructuralStressIntensity;
+
+            // Inject custom uniforms and varyings into vertex shader
+            shader.vertexShader = `
+              uniform float uTime;
+              uniform float uStructuralStressIntensity;
+              varying vec3 vWorldPosition;
+              varying float vWaveIntensity;
+            ` + shader.vertexShader;
+
+            // Inject vertex displacement ripples in the vertex shader
+            shader.vertexShader = shader.vertexShader.replace(
+              '#include <begin_vertex>',
+              `
+              #include <begin_vertex>
+              
+              // Calculate world position to create a global wave field
+              vec4 worldPos = modelMatrix * vec4(position, 1.0);
+              
+              // Ripples centered around the model origin xz
+              float dist = length(worldPos.xz);
+              float wave = sin(dist * 14.0 - uTime * 6.5);
+              
+              // Displace vertices along the vertical Y-axis proportional to stress intensity
+              float displacement = wave * 0.03 * uStructuralStressIntensity;
+              transformed.y += displacement;
+              
+              vWorldPosition = worldPos.xyz;
+              vWaveIntensity = wave;
+              `
+            );
+
+            // Inject custom uniforms and varyings into fragment shader
+            shader.fragmentShader = `
+              uniform float uTime;
+              uniform float uStructuralStressIntensity;
+              varying vec3 vWorldPosition;
+              varying float vWaveIntensity;
+            ` + shader.fragmentShader;
+
+            // Inject red coloration pulses in damage zones
+            shader.fragmentShader = shader.fragmentShader.replace(
+              '#include <opaque_fragment>',
+              `
+              #include <opaque_fragment>
+              
+              // Coloration pulses red in damage zones based on stress intensity and wave phase
+              float pulse = 0.5 + 0.5 * sin(uTime * 8.0);
+              float rippleGlow = smoothstep(0.3, 1.0, vWaveIntensity);
+              
+              // Red stress coloration color
+              vec3 stressColor = vec3(0.95, 0.08, 0.08);
+              
+              // Mix the stress color overlay based on global intensity and pulse behavior
+              float mixAmt = uStructuralStressIntensity * (0.35 + 0.65 * pulse * rippleGlow);
+              
+              gl_FragColor.rgb = mix(gl_FragColor.rgb, stressColor, mixAmt * 0.8);
+              `
+            );
+          };
+
+          mat.needsUpdate = true;
         }
       }
     });
@@ -368,11 +446,23 @@ function PavementModel({ layers }: { layers: LayerState }) {
   );
 }
 
-// ── Cinematic Camera ─────────────────────────────────────────
+// ── Cinematic Camera with Telemetry Panning & Focus ─────────
 
-function CinematicCamera() {
+interface CinematicCameraProps {
+  controlsRef: React.RefObject<any>;
+}
+
+function CinematicCamera({ controlsRef }: CinematicCameraProps) {
   const { camera } = useThree();
   const mouse = useRef({ x: 0, y: 0 });
+  const canvasAction = useStore(state => state.canvasAction);
+
+  // Default camera target & position parameters
+  const defaultTarget = useMemo(() => new THREE.Vector3(0, -0.25, 0), []);
+  const defaultCamPos = useMemo(() => new THREE.Vector3(0, 3.2, 4), []);
+
+  const targetLookAt = useRef(new THREE.Vector3().copy(defaultTarget));
+  const targetCamPos = useRef(new THREE.Vector3().copy(defaultCamPos));
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -383,11 +473,114 @@ function CinematicCamera() {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
+  useEffect(() => {
+    if (canvasAction && canvasAction.coordinates) {
+      const [cx, cy, cz] = canvasAction.coordinates;
+      targetLookAt.current.set(cx, cy, cz);
+      // Place camera offset relative to target to cleanly frame the anomaly
+      targetCamPos.current.set(cx, cy + 1.5, cz + 2.2);
+    } else {
+      targetLookAt.current.copy(defaultTarget);
+      targetCamPos.current.copy(defaultCamPos);
+    }
+  }, [canvasAction, defaultTarget, defaultCamPos]);
+
   useFrame(() => {
-    camera.position.x += (mouse.current.x * 1.8 - camera.position.x) * 0.04;
-    camera.position.y += (mouse.current.y * 1.2 + 3.2 - camera.position.y) * 0.04;
-    camera.lookAt(0, -0.25, 0);
+    const lerpSpeed = 0.05;
+
+    // Smoothly pan camera position
+    const desiredCamPos = new THREE.Vector3().copy(targetCamPos.current);
+    // Add subtle ambient mouse tracking for premium parallax depth
+    desiredCamPos.x += mouse.current.x * 0.7;
+    desiredCamPos.y += mouse.current.y * 0.5;
+
+    camera.position.lerp(desiredCamPos, lerpSpeed);
+
+    // Smoothly focus OrbitControls target or lookAt viewport
+    if (controlsRef.current) {
+      controlsRef.current.target.lerp(targetLookAt.current, lerpSpeed);
+      controlsRef.current.update();
+    } else {
+      camera.lookAt(targetLookAt.current);
+    }
   });
+
+  return null;
+}
+
+// ── Mobile Frame Budget Performance Monitor ─────────────────
+
+function PerformanceMonitor({ onBottleneck }: { onBottleneck: () => void }) {
+  const lastTime = useRef(performance.now());
+  const frameTimes = useRef<number[]>([]);
+  const triggered = useRef(false);
+
+  useFrame(() => {
+    if (triggered.current) return;
+
+    const now = performance.now();
+    const delta = now - lastTime.current;
+    lastTime.current = now;
+
+    // Track frame intervals over a sliding window
+    frameTimes.current.push(delta);
+    if (frameTimes.current.length > 60) {
+      frameTimes.current.shift();
+      const avgFrameTime = frameTimes.current.reduce((sum, t) => sum + t, 0) / frameTimes.current.length;
+
+      // Latency threshold: avg frame time > 33.3ms (below 30 FPS frame budget)
+      if (avgFrameTime > 33.3) {
+        triggered.current = true;
+        onBottleneck();
+      }
+    }
+  });
+
+  return null;
+}
+
+// ── WebGL Robust Scene Cleanup / GPU Memory Disposer ───────
+
+function SceneDisposer() {
+  const { scene } = useThree();
+
+  useEffect(() => {
+    return () => {
+      console.log("SceneDisposer: Unmounting. Traversing scene graph to release GPU resources...");
+      scene.traverse((object) => {
+        if (object instanceof THREE.Mesh) {
+          // Explicitly dispose Geometry
+          if (object.geometry) {
+            console.log(`SceneDisposer: Disposing geometry for object: ${object.name || 'unnamed'}`);
+            object.geometry.dispose();
+          }
+
+          // Explicitly dispose Materials & Custom Shader pipelines
+          if (object.material) {
+            const disposeMaterial = (mat: THREE.Material) => {
+              console.log(`SceneDisposer: Disposing material: ${mat.name || mat.type}`);
+              mat.dispose();
+
+              // Traverse and clean up textures associated with material maps
+              for (const key in mat) {
+                const prop = (mat as any)[key];
+                if (prop && typeof prop === 'object' && prop.isTexture) {
+                  console.log(`SceneDisposer: Disposing texture: ${key}`);
+                  prop.dispose();
+                }
+              }
+            };
+
+            if (Array.isArray(object.material)) {
+              object.material.forEach(disposeMaterial);
+            } else {
+              disposeMaterial(object.material);
+            }
+          }
+        }
+      });
+    };
+  }, [scene]);
 
   return null;
 }
@@ -466,6 +659,9 @@ export default function RoadInspectionScene() {
     potholes: true,
     stress:   false,
   });
+  
+  const [lowPower, setLowPower] = useState(false);
+  const controlsRef = useRef<any>(null);
 
   const toggleLayer = (key: keyof LayerState) => {
     setLayers(prev => ({ ...prev, [key]: !prev[key] }));
@@ -476,10 +672,22 @@ export default function RoadInspectionScene() {
       {/* Layer toggle HUD */}
       <LayerToggleHUD layers={layers} onToggle={toggleLayer} />
 
+      {/* Latency Warning HUD */}
+      {lowPower && (
+        <div className="absolute top-4 right-4 z-20 bg-rose-950/80 backdrop-blur-md border border-rose-500/30 px-3 py-1.5 rounded-lg pointer-events-none animate-pulse">
+          <span className="text-[8px] font-black uppercase tracking-widest text-rose-350 flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+            Performance Budget Enabled (AA Off, camera far plane -30%)
+          </span>
+        </div>
+      )}
+
       {/* 3D Canvas */}
       <Canvas
-        shadows={{ type: THREE.PCFShadowMap }}
-        camera={{ position: [0, 3.2, 4], fov: 45 }}
+        key={lowPower ? 'low-power' : 'high-power'}
+        shadows={lowPower ? false : { type: THREE.PCFShadowMap }}
+        camera={{ position: [0, 3.2, 4], fov: 45, far: lowPower ? 70 : 100 }}
+        gl={{ antialias: !lowPower, powerPreference: "high-performance" }}
         className="w-full h-full"
       >
         {/* Lighting */}
@@ -487,10 +695,10 @@ export default function RoadInspectionScene() {
         <hemisphereLight color="#1e1b4b" groundColor="#09090b" intensity={0.4} />
         <directionalLight
           position={[6, 8, 4]}
-          intensity={1.2}
-          castShadow
-          shadow-mapSize-width={1024}
-          shadow-mapSize-height={1024}
+          intensity={lowPower ? 0.9 : 1.2}
+          castShadow={!lowPower}
+          shadow-mapSize-width={512}
+          shadow-mapSize-height={512}
           shadow-bias={-0.0001}
         />
         <pointLight position={[-4, 4, -4]} intensity={0.6} color="#38bdf8" />
@@ -501,9 +709,17 @@ export default function RoadInspectionScene() {
           <PavementModel layers={layers} />
         </Suspense>
 
-        <CinematicCamera />
+        <CinematicCamera controlsRef={controlsRef} />
+        
+        <PerformanceMonitor onBottleneck={() => {
+          console.warn("RoadInspectionScene: Performance dropped below budget. Enabling low power configuration.");
+          setLowPower(true);
+        }} />
+        
+        <SceneDisposer />
 
         <OrbitControls
+          ref={controlsRef}
           enableZoom={true}
           enablePan={false}
           maxPolarAngle={Math.PI / 2 - 0.05}

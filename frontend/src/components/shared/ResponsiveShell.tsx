@@ -7,11 +7,10 @@ import { ReactNode, useEffect } from 'react';
 import { NetworkStatusProvider } from '@/providers/NetworkStatusProvider';
 import OfflineBanner from './OfflineBanner';
 import {
-  LayoutDashboard,
+  MessageSquare,
   Map,
-  Camera,
-  Globe,
-  AlertTriangle,
+  Coins,
+  HardHat,
   type LucideProps,
 } from 'lucide-react';
 
@@ -35,11 +34,10 @@ export default function ResponsiveShell({ children }: ResponsiveShellProps) {
   }, [loadCachedData]);
 
   const mobileNavItems: NavItem[] = [
-    { id: 'dashboard',  label: 'Home',     icon: LayoutDashboard, action: () => setActiveView('dashboard') },
-    { id: 'roads',      label: 'Registry', icon: Map,             action: () => setActiveView('roads')     },
-    { id: 'scan',       label: 'Report',   icon: Camera,          action: () => setIsReporting(true), highlight: true },
-    { id: 'twin',       label: 'Twin',     icon: Globe,           action: () => setActiveView('twin')      },
-    { id: 'complaints', label: 'Reports',  icon: AlertTriangle,   action: () => setActiveView('complaints') },
+    { id: 'chat',        label: 'Chat',        icon: MessageSquare, action: () => setActiveView('chat')        },
+    { id: 'roads',       label: 'Map',         icon: Map,           action: () => setActiveView('roads')       },
+    { id: 'budgets',     label: 'Budgets',     icon: Coins,         action: () => setActiveView('budgets')     },
+    { id: 'contractors', label: 'Contractors', icon: HardHat,       action: () => setActiveView('contractors') },
   ];
 
   return (

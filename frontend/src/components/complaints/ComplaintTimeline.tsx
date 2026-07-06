@@ -12,29 +12,16 @@ import {
   Phone,
   FileSpreadsheet
 } from 'lucide-react';
-import { Complaint, Authority } from '@/types';
-import { getAuthority } from '@/data/mockData';
-
-// Executive Engineer contact information mapping
-const executiveEngineers: Record<number, { name: string; email: string; phone: string }> = {
-  1: { name: 'Er. Ramesh Sawant', email: 'ee.kw@mcgm.gov.in', phone: '+91-22-2623-0101' },
-  2: { name: 'Er. Anil Deshmukh', email: 'ee.fn@mcgm.gov.in', phone: '+91-22-2402-1102' },
-  3: { name: 'Er. Sandeep Patil', email: 'ee.he@mcgm.gov.in', phone: '+91-22-2618-2203' },
-  4: { name: 'Er. Vijay Kadam (Division Chief)', email: 'se.mumbai@pwd.gov.in', phone: '+91-22-2202-3304' },
-  5: { name: 'Er. Yashwant Rao (Project Director)', email: 'romumbai@nhai.org', phone: '+91-22-2756-4405' }
-};
+import { Complaint } from '@/types';
+import { routeComplaint } from '@/services/routingEngine';
 
 interface ComplaintTimelineProps {
   complaint: Complaint;
 }
 
 export default function ComplaintTimeline({ complaint }: ComplaintTimelineProps) {
-  const authority = getAuthority(complaint.assignedAuthorityId);
-  const engineer = executiveEngineers[complaint.assignedAuthorityId] || {
-    name: 'Municipal Commissioner Office',
-    email: 'commissioner@mcgm.gov.in',
-    phone: '+91-22-2262-0251'
-  };
+  const [longitude, latitude] = complaint.geometry.coordinates;
+  const routing = routeComplaint(longitude, latitude, complaint.roadId);
 
   // Helper to format date
   const formatDate = (isoString: string, offsetDays = 0) => {
@@ -89,7 +76,7 @@ export default function ComplaintTimeline({ complaint }: ComplaintTimelineProps)
         
         <div className="border-t border-border/30 pt-2.5 mt-2.5 flex justify-between items-center text-[9px] text-muted-foreground font-mono">
           <span>Ticket ID: {complaint.clientTempId || `RW-2026-${complaint.id}`}</span>
-          <span>GPS: {complaint.geometry.coordinates[1].toFixed(5)}, {complaint.geometry.coordinates[0].toFixed(5)}</span>
+          <span>GPS: {latitude.toFixed(5)}, {longitude.toFixed(5)}</span>
         </div>
       </div>
 
@@ -149,8 +136,9 @@ export default function ComplaintTimeline({ complaint }: ComplaintTimelineProps)
                   Coordinates parsed through boundary shapefiles. Assigned responsible government unit:
                 </p>
                 <div className="p-2.5 rounded bg-slate-950 border border-border/40 text-[9.5px]">
-                  <p className="font-extrabold text-slate-350">{authority?.name}</p>
-                  <p className="text-muted-foreground mt-0.5">Code: {authority?.departmentCode}</p>
+                  <p className="font-extrabold text-slate-350">{routing.authorityName}</p>
+                  <p className="text-muted-foreground mt-0.5">Code: {routing.departmentCode}</p>
+                  <p className="text-slate-500 text-[8.5px] mt-1 uppercase font-mono">Region: {routing.regionName}</p>
                 </div>
               </div>
             ) : (
@@ -175,7 +163,7 @@ export default function ComplaintTimeline({ complaint }: ComplaintTimelineProps)
             <h5 className={`text-[11px] font-extrabold uppercase tracking-wider ${
               isAssigned ? 'text-slate-200' : 'text-slate-500'
             }`}>
-              Assigned Executive Engineer
+              Assigned {routing.fieldManagerTitle}
             </h5>
             {isAssigned ? (
               <div className="space-y-2">
@@ -183,10 +171,10 @@ export default function ComplaintTimeline({ complaint }: ComplaintTimelineProps)
                   Defect logged into local engineer board. Responsible point of contact:
                 </p>
                 <div className="p-2.5 rounded bg-slate-950 border border-border/40 text-[9.5px] space-y-1.5">
-                  <h6 className="font-extrabold text-slate-300">{engineer.name}</h6>
+                  <h6 className="font-extrabold text-slate-300">{routing.executiveEngineer}</h6>
                   <div className="flex flex-col gap-1 text-slate-400 font-medium">
-                    <span className="flex items-center gap-1.5"><Mail className="w-3 h-3 text-zinc-550" /> {engineer.email}</span>
-                    <span className="flex items-center gap-1.5"><Phone className="w-3 h-3 text-zinc-550" /> {engineer.phone}</span>
+                    <span className="flex items-center gap-1.5"><Mail className="w-3 h-3 text-zinc-550" /> {routing.contactEmail}</span>
+                    <span className="flex items-center gap-1.5"><Phone className="w-3 h-3 text-zinc-550" /> {routing.contactPhone}</span>
                   </div>
                 </div>
               </div>
@@ -235,7 +223,7 @@ export default function ComplaintTimeline({ complaint }: ComplaintTimelineProps)
                   ? 'The contractor has completed overlay operations. Citizen validator checks are successful.'
                   : isInProgress 
                   ? 'Work order issued to contractor. Inspection engineers dispatched to coordinates.' 
-                  : 'SLA timer initiated. MCGM/PWD standards state repairs must initiate within 48 hours.'}
+                  : `SLA timer initiated. ${routing.competentAgency} standards state repairs must initiate within 48 hours.`}
               </p>
               {(isInProgress || isResolved) && (
                 <span className="text-[9px] font-mono text-slate-500 block">

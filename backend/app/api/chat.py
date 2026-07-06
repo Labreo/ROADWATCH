@@ -1,9 +1,14 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, File, UploadFile, Form
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional
 import json
+from datetime import datetime
 from app.services.retrieval_engine import RetrievalEngine, sessions_memory
+from app.services.vision_pipeline import RoadDamageEvaluator
+from app.services.authority_resolver import AuthorityResolver
+from app.services.road_retriever import StructuredRoadRetriever
+from app.services.database import db
 
 router = APIRouter()
 
@@ -48,3 +53,113 @@ async def chat_endpoint(request: ChatRequest):
         }) + "\n"
         
     return StreamingResponse(event_generator(), media_type="application/x-ndjson")
+
+
+@router.post("/chat/analyze-photo")
+async def analyze_photo_endpoint(
+    image: UploadFile = File(...),
+    latitude: float = Form(...),
+    longitude: float = Form(...)
+):
+    """
+    Exposes photo analysis endpoint. Decodes the image, runs Concentrate API evaluation,
+    resolves responsible authorities & roads, and registers it inside the mock SQLite database.
+    Returns a unified validation record mapping to the frontend Complaint state contracts.
+    """
+    try:
+        # Read the uploaded image binary
+        image_bytes = await image.read()
+        
+        # Run vision damage evaluation pipeline
+        evaluator = RoadDamageEvaluator()
+        analysis = evaluator.evaluate_damage(image_bytes, latitude, longitude)
+        
+        # Resolve geographic routing (authority and closest road segment)
+        authority = AuthorityResolver.resolve_authority_for_coordinates(longitude, latitude)
+        road = StructuredRoadRetriever.get_closest_road(longitude, latitude)
+        
+        assigned_authority_id = authority["id"] if authority else 4 # fallback to PWD
+        road_id = road["id"] if road else None
+        road_name = road["name"] if road else "Unmapped Segment"
+        
+        # Format draft details
+        category = analysis["defect_type"]
+        category_title = category.replace("_", " ").title()
+        title = f"Citizen Report: {category_title} on {road_name}"
+        
+        desc_parts = [
+            analysis["description"],
+            f"Estimated affected surface area: {analysis['surface_area_sqm']} sqm.",
+            f"Estimated volume: {analysis['volume_cum']} cum."
+        ]
+        if analysis["proximity_accidents"]:
+            nearest_acc = analysis["proximity_accidents"][0]
+            desc_parts.append(
+                f"Note: Located {nearest_acc['distance_meters']}m from a historical {nearest_acc['severity']} severity accident."
+            )
+        description = " ".join(desc_parts)
+        
+        # Write to SQLite Database to ensure persistence (without mutation errors)
+        geom_wkt = f"POINT({longitude} {latitude})"
+        created_at_iso = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+        
+        sql = """
+        INSERT INTO complaints (title, description, category, geom, status, image_url, assigned_authority_id, road_id, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """
+        params = (
+            title,
+            description,
+            category,
+            geom_wkt,
+            "pending",
+            f"/uploads/{image.filename}",
+            assigned_authority_id,
+            road_id,
+            created_at_iso,
+            created_at_iso
+        )
+        
+        new_id = db.execute(sql, params)
+        if new_id is None:
+            new_id = 9999 # mock ID fallback
+            
+        # Structure draft complaint record matching frontend Complaint state contracts
+        draft_complaint = {
+            "id": new_id,
+            "clientTempId": f"RW-AUTO-{new_id}",
+            "title": title,
+            "description": description,
+            "category": category,
+            "geometry": {
+                "type": "Point",
+                "coordinates": [longitude, latitude]
+            },
+            "status": "pending",
+            "assignedAuthorityId": assigned_authority_id,
+            "roadId": road_id,
+            "createdAt": created_at_iso,
+            "imageUrl": f"/uploads/{image.filename}",
+            "imagePreview": f"/uploads/{image.filename}"
+        }
+        
+        return {
+            "success": True,
+            "analysis": {
+                "defect_type": analysis["defect_type"],
+                "confidence": analysis["confidence"],
+                "surface_area_sqm": analysis["surface_area_sqm"],
+                "volume_cum": analysis["volume_cum"],
+                "description": analysis["description"],
+                "proximity_accidents": analysis["proximity_accidents"],
+                "simulated_payload": analysis["simulated_payload"]
+            },
+            "draft_complaint": draft_complaint
+        }
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return {
+            "success": False,
+            "error": str(e)
+        }

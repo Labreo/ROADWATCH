@@ -262,7 +262,15 @@ function TerrainProfile({ road }: { road: Road }) {
   );
 }
 
-function IntelligencePanel({ road }: { road: Road }) {
+function IntelligencePanel({
+  road,
+  canvasAction,
+  setCanvasAction
+}: {
+  road: Road;
+  canvasAction: any;
+  setCanvasAction: (action: any) => void;
+}) {
   const allSensors = useMemo(() => generateSensorsForRoads(roads as any), []);
   const zones = useMemo(() => generateStressZones(roads as any), []);
   const roadSensors = allSensors.filter(s => s.roadId === road.id);
@@ -329,6 +337,47 @@ function IntelligencePanel({ road }: { road: Road }) {
             />
           </div>
         )}
+
+        {/* 3D Telemetry Relays (Camera focusing) */}
+        <div className="space-y-2">
+          <div className="mono-label text-[9px]">WebGL CAMERA TELEMETRY RELAYS</div>
+          <div className="grid grid-cols-1 gap-1">
+            {[
+              { label: "Telemetry Node A-01", coords: [-1.1, 0.25, 0.6] as [number,number,number] },
+              { label: "Telemetry Node B-04", coords: [0.1, 0.35, -0.8] as [number,number,number] },
+              { label: "Telemetry Node C-02", coords: [1.2, 0.15, 0.3] as [number,number,number] },
+              { label: "Pothole Wave Alpha", coords: [0.3, 0.0, 0.5] as [number,number,number] },
+              { label: "Stress Zone Beta", coords: [-0.5, 0.02, 0.1] as [number,number,number] }
+            ].map((anomaly, idx) => {
+              const active = canvasAction && canvasAction.coordinates && 
+                             Math.abs(canvasAction.coordinates[0] - anomaly.coords[0]) < 0.01 &&
+                             Math.abs(canvasAction.coordinates[1] - anomaly.coords[1]) < 0.01 &&
+                             Math.abs(canvasAction.coordinates[2] - anomaly.coords[2]) < 0.01;
+              return (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    if (active) {
+                      setCanvasAction(null);
+                    } else {
+                      setCanvasAction({ type: 'FOCUS_ANOMALY', coordinates: anomaly.coords });
+                    }
+                  }}
+                  className={`w-full text-left px-2.5 py-1.5 rounded border text-[9px] font-black uppercase tracking-wider transition-all duration-200 ${
+                    active 
+                      ? 'bg-cyan-500/10 border-cyan-500/50 text-cyan-400 font-bold'
+                      : 'bg-white/[0.01] border-white/[0.04] text-slate-400 hover:bg-white/[0.03] hover:border-white/[0.08]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span>{anomaly.label}</span>
+                    <span className="text-[7px] text-[#55555f] font-normal">{anomaly.coords.map(c => c.toFixed(1)).join(', ')}</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
         {/* Terrain profile */}
         <TerrainProfile road={road} />
@@ -415,7 +464,7 @@ function IntelligencePanel({ road }: { road: Road }) {
 // ── Main View ────────────────────────────────────────────────
 
 export default function DigitalTwinView() {
-  const { setSelectedRoadId } = useStore();
+  const { setSelectedRoadId, canvasAction, setCanvasAction } = useStore();
   const [selectedRoad, setSelectedRoad] = useState<Road>(roads[0]);
   const clock = useClock();
 
@@ -425,10 +474,13 @@ export default function DigitalTwinView() {
     setSelectedRoadId(road.id);
   };
 
-  // Initialize map to first road
+  // Initialize map to first road and clean up canvas actions on unmount
   useEffect(() => {
     setSelectedRoadId(roads[0].id);
-  }, [setSelectedRoadId]);
+    return () => {
+      setCanvasAction(null);
+    };
+  }, [setSelectedRoadId, setCanvasAction]);
 
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden animate-in fade-in duration-300 relative">
@@ -459,7 +511,11 @@ export default function DigitalTwinView() {
 
         {/* ── Right panel: Intelligence ── */}
         <section className="absolute right-4 top-[52px] bottom-4 w-[300px] z-10 flex flex-col pointer-events-auto hidden lg:flex">
-          <IntelligencePanel road={selectedRoad} />
+          <IntelligencePanel 
+            road={selectedRoad}
+            canvasAction={canvasAction}
+            setCanvasAction={setCanvasAction}
+          />
         </section>
 
         {/* ── Mobile: stacked panels below map ── */}
@@ -481,6 +537,44 @@ export default function DigitalTwinView() {
               ))}
             </div>
             <div className="text-xs font-bold text-slate-200">{selectedRoad.name}</div>
+            
+            {/* Mobile focus controls */}
+            <div className="space-y-1.5">
+              <div className="mono-label text-[8px] text-cyan-400">CAMERA TELEMETRY FOCUS RELAYS</div>
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  { label: "Node A-01", coords: [-1.1, 0.25, 0.6] as [number,number,number] },
+                  { label: "Node B-04", coords: [0.1, 0.35, -0.8] as [number,number,number] },
+                  { label: "Node C-02", coords: [1.2, 0.15, 0.3] as [number,number,number] },
+                  { label: "Pothole", coords: [0.3, 0.0, 0.5] as [number,number,number] }
+                ].map((anomaly, idx) => {
+                  const active = canvasAction && canvasAction.coordinates && 
+                                 Math.abs(canvasAction.coordinates[0] - anomaly.coords[0]) < 0.01 &&
+                                 Math.abs(canvasAction.coordinates[1] - anomaly.coords[1]) < 0.01 &&
+                                 Math.abs(canvasAction.coordinates[2] - anomaly.coords[2]) < 0.01;
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        if (active) {
+                          setCanvasAction(null);
+                        } else {
+                          setCanvasAction({ type: 'FOCUS_ANOMALY', coordinates: anomaly.coords });
+                        }
+                      }}
+                      className={`px-2.5 py-1 rounded text-[8px] font-black uppercase transition-all ${
+                        active
+                          ? 'border-cyan-500/50 bg-cyan-500/10 text-cyan-400'
+                          : 'border-white/[0.06] text-[#55555f] hover:border-white/[0.12]'
+                      }`}
+                    >
+                      {anomaly.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             <TerrainProfile road={selectedRoad} />
           </div>
         </div>

@@ -50,6 +50,7 @@ import ComplaintTimeline from '@/components/complaints/ComplaintTimeline';
 import ComplaintWizard from '@/components/complaints/ComplaintWizard';
 import SyncCenter from '@/components/transparency/SyncCenter';
 import ChatPanel from '@/components/chat/ChatPanel';
+import ChatOrchestrator from '@/components/chat/ChatOrchestrator';
 import OperationsDashboard from '@/components/operations/OperationsDashboard';
 import LandingHero from '@/components/demo/LandingHero';
 import DemoTourGuide from '@/components/demo/DemoTourGuide';
@@ -66,6 +67,7 @@ import RepairFrequencyHeatmap from '@/components/transparency/RepairFrequencyHea
 import BudgetTimeline from '@/components/transparency/BudgetTimeline';
 import ContractorHistoryCard from '@/components/transparency/ContractorHistoryCard';
 import TransparencyScoreCard from '@/components/transparency/TransparencyScoreCard';
+import SankeyFlowVisualizer from '@/components/transparency/SankeyFlowVisualizer';
 
 export default function Page() {
   const { 
@@ -1045,6 +1047,21 @@ export default function Page() {
                   />
                 </div>
 
+                {/* City-Wide Public Capital Flow Pathway */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center border-b border-border/40 pb-1.5">
+                    <h4 className="text-[10px] text-slate-250 uppercase font-black tracking-widest">Public Capital Flow Pathway</h4>
+                    <span className="text-[8px] bg-slate-900 border border-border text-slate-450 px-2 py-0.2 rounded font-black uppercase tracking-wider">
+                      City-Wide Fund Flow
+                    </span>
+                  </div>
+                  <SankeyFlowVisualizer
+                    projects={projects}
+                    contractors={contractors}
+                    authorities={authorities}
+                  />
+                </div>
+
                 {/* Grid row 3: Contractor leaderboards & Active Anomalies Log */}
                 <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
                   {/* Contractor leaderboards */}
@@ -1185,6 +1202,22 @@ export default function Page() {
 
                     {/* Dashboard Grid 1: Score gauge card */}
                     <TransparencyScoreCard score={data.transparencyScore} deductions={data.scoreDeductions} />
+
+                    {/* Segment Public Capital Flow Pathway */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center border-b border-border/40 pb-1.5">
+                        <h4 className="text-[10px] text-slate-200 uppercase font-black tracking-widest">Public Capital Flow Pathway</h4>
+                        <span className="text-[8px] bg-slate-900 border border-border text-slate-450 px-2 py-0.2 rounded font-black uppercase tracking-wider">
+                          Upstream Funding Tracker
+                        </span>
+                      </div>
+                      <SankeyFlowVisualizer
+                        projects={roadProjects}
+                        contractors={contractors}
+                        authorities={authorities}
+                        road={road}
+                      />
+                    </div>
 
                     {/* Dashboard Grid 2: Comparisons & Heatmaps */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -1455,11 +1488,13 @@ export default function Page() {
         <DigitalTwinView />
       )}
 
+      {/* VIEW 0: CONVERSATIONAL ORCHESTRATOR SHELL */}
+      {activeView === 'chat' && (
+        <ChatOrchestrator />
+      )}
+
       {/* Complaint wizard overlay */}
       <ComplaintWizard />
-
-      {/* Floating AI Chatbot Assistant */}
-      <ChatPanel onSelectContractor={setSelectedContractorId} />
 
       {/* Interactive Tour Guide Dock */}
       {isTourActive && (
