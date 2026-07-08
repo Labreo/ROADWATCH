@@ -1,16 +1,17 @@
 'use client';
 
-import { 
-  CheckCircle2, 
-  Clock, 
-  MapPin, 
-  Sparkles, 
-  UserCheck, 
-  HardHat, 
+import {
+  CheckCircle2,
+  Clock,
+  MapPin,
+  Sparkles,
+  UserCheck,
+  HardHat,
   AlertTriangle,
   Mail,
   Phone,
-  FileSpreadsheet
+  FileSpreadsheet,
+  ArrowRight
 } from 'lucide-react';
 import { Complaint } from '@/types';
 import { routeComplaint } from '@/services/routingEngine';
@@ -58,11 +59,20 @@ export default function ComplaintTimeline({ complaint }: ComplaintTimelineProps)
       {/* Overview Card */}
       <div className="p-4 rounded-xl border border-border bg-slate-900/30 space-y-2">
         <div className="flex justify-between items-start">
-          <div>
-            <span className="text-[9px] font-black uppercase text-zinc-300 bg-zinc-900 border border-zinc-800/80 px-2 py-0.5 rounded tracking-wider">
-              {complaint.category.replace('_', ' ')}
-            </span>
-            <h4 className="text-xs font-black text-slate-200 mt-1.5 leading-tight">{complaint.title}</h4>
+          <div className="space-y-1">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-[9px] font-black uppercase text-zinc-300 bg-zinc-900 border border-zinc-800/80 px-2 py-0.5 rounded tracking-wider">
+                {complaint.category.replace('_', ' ')}
+              </span>
+              <span className={`text-[8px] font-black uppercase border px-1.5 py-0.5 rounded ${
+                (complaint.priority ?? 3) >= 4 ? 'text-rose-400 border-rose-800 bg-rose-950/40' :
+                (complaint.priority ?? 3) >= 3 ? 'text-cyan-400 border-cyan-900 bg-cyan-950/40' :
+                'text-slate-500 border-slate-800 bg-slate-900'
+              }`}>
+                P{complaint.priority ?? 3}
+              </span>
+            </div>
+            <h4 className="text-xs font-black text-slate-200 leading-tight">{complaint.title}</h4>
           </div>
           <span className={`text-[9px] font-black uppercase border px-2 py-0.5 rounded ${
             isResolved ? 'text-emerald-400 border-emerald-950 bg-emerald-950/40' :
@@ -182,6 +192,14 @@ export default function ComplaintTimeline({ complaint }: ComplaintTimelineProps)
                     <span className="flex items-center gap-1.5"><Phone className="w-3 h-3 text-zinc-550" /> {routing.contactPhone}</span>
                   </div>
                 </div>
+                {/* Reassignment events */}
+                {complaint.declinedAuthorityIds && complaint.declinedAuthorityIds.length > 0 && (
+                  <div className="p-2 rounded border border-amber-500/20 bg-amber-950/10 text-[9px] space-y-1">
+                    <span className="font-extrabold uppercase text-amber-400 flex items-center gap-1">
+                      <ArrowRight className="w-3 h-3" /> Reassigned {complaint.declinedAuthorityIds.length}x
+                    </span>
+                  </div>
+                )}
               </div>
             ) : (
               <p className="text-[10px] text-slate-500 italic">Waiting for authority assignment...</p>

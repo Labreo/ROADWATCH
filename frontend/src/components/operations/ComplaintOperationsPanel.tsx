@@ -1,34 +1,60 @@
+'use client';
+
 import React, { useState, useMemo } from 'react';
-import { 
-  AlertTriangle, 
-  ChevronRight, 
-  ShieldAlert, 
-  MapPin, 
-  Activity, 
-  Building2, 
+import {
+  AlertTriangle,
+  ChevronRight,
+  ShieldAlert,
+  MapPin,
+  Activity,
+  Building2,
   CheckCircle,
   HelpCircle,
   ThumbsDown,
   RefreshCw,
-  Sparkles
+  Sparkles,
+  ArrowRight
 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { authorities, roads } from '@/data/mockData';
 import { Complaint, ComplaintStatus } from '@/types';
 import { getActiveTemplate } from '@/services/regionAwareFormat';
 
+const PRIORITY_COLORS: Record<number, string> = {
+  1: 'text-slate-500 border-slate-800 bg-slate-900',
+  2: 'text-zinc-400 border-zinc-800 bg-zinc-900',
+  3: 'text-cyan-400 border-cyan-900 bg-cyan-950/40',
+  4: 'text-amber-400 border-amber-900 bg-amber-950/40',
+  5: 'text-rose-400 border-rose-800 bg-rose-950/40',
+};
+
+const PRIORITY_LABELS: Record<number, string> = {
+  1: 'Low',
+  2: 'Med',
+  3: 'High',
+  4: 'Urgent',
+  5: 'Critical',
+};
+
 interface ComplaintOperationsPanelProps {
   selectedComplaintId: number | null;
   onSelectComplaint: (id: number | null) => void;
 }
 
-export default function ComplaintOperationsPanel({ 
-  selectedComplaintId, 
-  onSelectComplaint 
+export default function ComplaintOperationsPanel({
+  selectedComplaintId,
+  onSelectComplaint
 }: ComplaintOperationsPanelProps) {
-  const { complaintsList, updateComplaint } = useStore();
+  const { complaintsList, updateComplaint, getSortedComplaintQueue, declineComplaintAssignment } = useStore();
   const [authorityFilter, setAuthorityFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [declineReason, setDeclineReason] = useState('');
+  const [showDeclineModal, setShowDeclineModal] = useState(false);
+
+  // Priority-sorted queue
+  const sortedQueue = useMemo(() => {
+    try { return getSortedComplaintQueue(); } catch { return complaintsList; }
+  }, [complaintsList, getSortedComplaintQueue]);
 
   // Selected complaint lookup
   const selectedComplaint = useMemo(() => {
@@ -38,21 +64,20 @@ export default function ComplaintOperationsPanel({
   // Dynamic duplicate/recurring issue detection
   const recurringCount = useMemo(() => {
     if (!selectedComplaint || !selectedComplaint.roadId) return 0;
-    // Count other complaints on the same road segment
     return complaintsList.filter(
       c => c.roadId === selectedComplaint.roadId && c.id !== selectedComplaint.id
     ).length;
   }, [selectedComplaint, complaintsList]);
 
-  // Filtered List
+  // Filtered List (from sorted queue)
   const filteredComplaints = useMemo(() => {
-    return complaintsList.filter(c => {
-      const matchesAuth = authorityFilter === 'all' || 
+    return sortedQueue.filter(c => {
+      const matchesAuth = authorityFilter === 'all' ||
         (c.assignedAuthorityId !== undefined && c.assignedAuthorityId.toString() === authorityFilter);
       const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
       return matchesAuth && matchesStatus;
     });
-  }, [complaintsList, authorityFilter, statusFilter]);
+  }, [sortedQueue, authorityFilter, statusFilter]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -76,24 +101,33 @@ export default function ComplaintOperationsPanel({
     }
   };
 
+  const handleDecline = async () => {
+    if (!selectedComplaint) return;
+    await declineComplaintAssignment(selectedComplaint.id!, selectedComplaint.assignedAuthorityId, declineReason);
+    setShowDeclineModal(false);
+    setDeclineReason('');
+    onSelectComplaint(null);
+  };
+
   return (
     <div className="glass-panel border border-border/80 rounded-xl p-5 bg-slate-950/40 flex flex-col lg:flex-row gap-5 h-full min-h-0">
-      
-      {/* Left Column: Complaint Queue List */}
+
+      {/* Left Column: Complaints Queue (Priority Sorted) */}
       <div className="w-full lg:w-[350px] shrink-0 flex flex-col space-y-3 min-h-0">
         <div className="flex items-center justify-between border-b border-border/40 pb-2">
           <div className="flex items-center gap-2">
             <Activity className="w-4 h-4 text-zinc-500" />
             <h3 className="text-xs uppercase font-black tracking-widest text-slate-200">
-              Operations Queue ({filteredComplaints.length})
+              Priority Queue ({filteredComplaints.length})
             </h3>
           </div>
+          <Sparkles className="w-3.5 h-3.5 text-cyan-500/70" />
         </div>
 
         {/* Filters */}
         <div className="grid grid-cols-2 gap-2 text-[10px]">
           <div>
-            <label className="text-[8px] uppercase font-bold text-muted-foreground block mb-1">Supervising Agency</label>
+            <label className="text-[8px] uppercase font-bold text-muted-foreground block mb-1">Agency</label>
             <select
               value={authorityFilter}
               onChange={(e) => setAuthorityFilter(e.target.value)}
@@ -106,7 +140,7 @@ export default function ComplaintOperationsPanel({
             </select>
           </div>
           <div>
-            <label className="text-[8px] uppercase font-bold text-muted-foreground block mb-1">Ticket Status</label>
+            <label className="text-[8px] uppercase font-bold text-muted-foreground block mb-1">Status</label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
@@ -122,17 +156,19 @@ export default function ComplaintOperationsPanel({
           </div>
         </div>
 
-        {/* Scrollable list */}
+        {/* Scrollable list with priority badges */}
         <div className="flex-1 overflow-y-auto pr-1 space-y-2 scrollbar-thin">
           {filteredComplaints.map(c => {
             const isSelected = selectedComplaintId === c.id;
             const road = c.roadId ? roads.find(r => r.id === c.roadId) : null;
+            const priority = c.priority ?? 3;
+            const escLevel = c.escalationLevel ?? 0;
             return (
               <div
                 key={c.id}
                 onClick={() => onSelectComplaint(c.id || null)}
                 className={`p-3 rounded-xl border text-left cursor-pointer transition-all ${
-                  isSelected 
+                  isSelected
                     ? 'bg-zinc-900 border-zinc-700/60 shadow-sm shadow-zinc-950/40'
                     : 'bg-slate-950/60 border-border/50 hover:bg-slate-900/40'
                 }`}
@@ -141,9 +177,19 @@ export default function ComplaintOperationsPanel({
                   <span className="text-[8px] font-black uppercase text-slate-400 tracking-wider">
                     {c.category.replace('_', ' ')}
                   </span>
-                  <span className={`text-[7px] font-black uppercase border px-1 rounded ${getStatusColor(c.status)}`}>
-                    {c.status}
-                  </span>
+                  <div className="flex gap-1 items-center">
+                    <span className={`text-[7px] font-black uppercase border px-1 rounded ${getStatusColor(c.status)}`}>
+                      {c.status}
+                    </span>
+                    <span className={`text-[7px] font-black uppercase border px-1 rounded ${PRIORITY_COLORS[priority] || PRIORITY_COLORS[3]}`}>
+                      P{priority}
+                    </span>
+                    {escLevel > 0 && (
+                      <span className="text-[7px] font-black uppercase border border-rose-800 bg-rose-950/40 text-rose-400 px-1 rounded">
+                        E{escLevel}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <h4 className="text-xs font-bold text-slate-200 line-clamp-1">{c.title}</h4>
                 <div className="flex justify-between items-center text-[9px] text-muted-foreground mt-2 border-t border-border/20 pt-1.5 font-medium">
@@ -159,7 +205,7 @@ export default function ComplaintOperationsPanel({
         </div>
       </div>
 
-      {/* Right Column: Detailed Triage & Operations Panel */}
+      {/* Right Column: Detail Panel */}
       <div className="flex-1 flex flex-col justify-between min-h-0 bg-slate-900/10 border border-border/40 rounded-xl p-4">
         {selectedComplaint ? (
           <div className="space-y-4 overflow-y-auto pr-1 scrollbar-thin flex-1 flex flex-col justify-between">
@@ -168,10 +214,13 @@ export default function ComplaintOperationsPanel({
                 <div>
                   <div className="flex items-center gap-1.5 mb-1 flex-wrap">
                     <span className="text-[8px] font-black uppercase bg-slate-900 border border-border text-slate-400 px-2 py-0.5 rounded tracking-wider">
-                      Ticket ID: #{selectedComplaint.id}
+                      #{selectedComplaint.id}
                     </span>
                     <span className={`text-[8px] font-black uppercase border px-2 py-0.5 rounded tracking-wider ${getStatusColor(selectedComplaint.status)}`}>
                       {selectedComplaint.status}
+                    </span>
+                    <span className={`text-[8px] font-black uppercase border px-2 py-0.5 rounded tracking-wider ${PRIORITY_COLORS[selectedComplaint.priority ?? 3]}`}>
+                      Priority {selectedComplaint.priority ?? 3}
                     </span>
                   </div>
                   <h3 className="text-sm font-extrabold text-slate-200 leading-snug">
@@ -182,7 +231,7 @@ export default function ComplaintOperationsPanel({
                   onClick={() => onSelectComplaint(null)}
                   className="text-[9px] font-black text-zinc-400 hover:text-zinc-200 hover:underline uppercase tracking-wide shrink-0"
                 >
-                  Clear Selection
+                  Clear
                 </button>
               </div>
 
@@ -192,7 +241,7 @@ export default function ComplaintOperationsPanel({
                   <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5 animate-pulse" />
                   <div>
                     <span className="font-extrabold uppercase block mb-0.5">Recurring Segment Alert</span>
-                    There are **{recurringCount} other reports** logged on this same segment. The system has automatically flagged this location as a potential structural defect hotspot.
+                    There are **{recurringCount} other reports** logged on this same segment.
                   </div>
                 </div>
               )}
@@ -200,37 +249,37 @@ export default function ComplaintOperationsPanel({
               {/* Description */}
               <div className="space-y-1">
                 <span className="text-[8px] text-muted-foreground uppercase font-black tracking-widest block">
-                  Report Description
+                  Description
                 </span>
                 <p className="text-[11px] leading-relaxed text-slate-300 bg-slate-950/45 p-3 rounded-lg border border-border/30 font-medium">
                   {selectedComplaint.description}
                 </p>
               </div>
 
-              {/* Triage Settings */}
+              {/* Actions */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-border/20">
-                
-                {/* Re-route Authority */}
+
+                {/* Reassign Authority */}
                 <div className="space-y-1.5">
                   <span className="text-[8px] text-muted-foreground uppercase font-black tracking-widest block flex items-center gap-1">
-                    <Building2 className="w-3 h-3 text-zinc-500" /> Reassign Maintaining Agency
+                    <Building2 className="w-3 h-3 text-zinc-500" /> Reassign Agency
                   </span>
                   <select
                     value={selectedComplaint.assignedAuthorityId || ''}
                     onChange={(e) => handleUpdateAuthority(Number(e.target.value))}
                     className="w-full bg-slate-900 border border-border rounded-xl px-3 py-2 text-[10px] text-slate-200 font-semibold focus:outline-none"
                   >
-                    <option value="" disabled>Select Agency</option>
+                    <option value="" disabled>Select</option>
                     {authorities.map(a => (
                       <option key={a.id} value={a.id}>{a.name} ({a.departmentCode})</option>
                     ))}
                   </select>
                 </div>
 
-                {/* Status Triage */}
+                {/* Status & Decline */}
                 <div className="space-y-1.5">
                   <span className="text-[8px] text-muted-foreground uppercase font-black tracking-widest block">
-                    Administrative Actions
+                    Actions
                   </span>
                   <div className="flex gap-1.5 flex-wrap">
                     <button
@@ -241,34 +290,63 @@ export default function ComplaintOperationsPanel({
                       <CheckCircle className="w-3.5 h-3.5" /> Resolve
                     </button>
                     <button
-                      onClick={() => handleUpdateStatus('rejected')}
+                      onClick={() => setShowDeclineModal(true)}
                       disabled={selectedComplaint.status === 'rejected'}
-                      className="flex-1 py-1.5 rounded-lg border border-red-900/60 bg-red-950/10 text-red-400 hover:bg-red-950/25 text-[9px] font-bold uppercase transition-all flex items-center justify-center gap-1 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="flex-1 py-1.5 rounded-lg border border-rose-900/60 bg-rose-950/10 text-rose-400 hover:bg-rose-950/25 text-[9px] font-bold uppercase transition-all flex items-center justify-center gap-1 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                     >
-                      <ThumbsDown className="w-3.5 h-3.5" /> Reject
+                      <ArrowRight className="w-3.5 h-3.5" /> Decline
                     </button>
                   </div>
                 </div>
-
               </div>
             </div>
 
-            {/* Instruction Footer */}
             <div className="text-[8.5px] text-muted-foreground bg-slate-950/25 p-2.5 rounded-lg border border-border/20 text-center select-none mt-4 font-medium leading-relaxed">
-              Updating the maintaining agency or status instantly reconciles in the central transparency ledger and sends status push updates to the reporting citizen.
+              Priority queue ordered by: priority DESC, escalation level DESC, oldest first.
             </div>
           </div>
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center select-none">
             <HelpCircle className="w-7 h-7 text-zinc-600 mb-2" />
-            <h4 className="text-[10px] font-bold text-slate-200 uppercase tracking-wider mb-1">Administrative Triage View</h4>
+            <h4 className="text-[10px] font-bold text-slate-200 uppercase tracking-wider mb-1">Priority Queue View</h4>
             <p className="text-[9px] text-muted-foreground leading-relaxed max-w-[240px]">
-              Select a citizen report from the queue to run spatial duplicate audits, override maintenance routing, reassign departments, or close tickets.
+              Select a complaint from the priority-sorted queue to audit, reassign, or resolve.
             </p>
           </div>
         )}
       </div>
 
+      {/* Decline Modal */}
+      {showDeclineModal && selectedComplaint && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-border/60 rounded-xl p-5 w-full max-w-sm space-y-3">
+            <h3 className="text-xs font-black uppercase tracking-widest text-slate-200">Decline Assignment</h3>
+            <p className="text-[10px] text-slate-400">
+              Complaint #{selectedComplaint.id} will be rerouted to the next available authority.
+            </p>
+            <textarea
+              placeholder="Reason for declining (optional)"
+              value={declineReason}
+              onChange={(e) => setDeclineReason(e.target.value)}
+              className="w-full bg-slate-950 border border-border rounded-lg px-3 py-2 text-[10px] text-slate-300 font-medium focus:outline-none resize-none h-20"
+            />
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setShowDeclineModal(false)}
+                className="px-3 py-1.5 rounded-lg border border-border text-[9px] font-bold uppercase text-slate-400 hover:bg-slate-800 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDecline}
+                className="px-3 py-1.5 rounded-lg border border-rose-900 bg-rose-950/20 text-rose-400 hover:bg-rose-950/40 text-[9px] font-bold uppercase cursor-pointer"
+              >
+                Confirm Decline
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

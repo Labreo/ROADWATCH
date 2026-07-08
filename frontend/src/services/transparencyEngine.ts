@@ -16,6 +16,13 @@ export const FUNDING_WEIGHTS = {
 export function resolveProjectFundSources(p: Project): FundSourceAllocation[] {
   if (p.fundSources && p.fundSources.length > 0) {
     return p.fundSources.map(fs => {
+      const canonical = new Set([
+        'Central Road Infrastructure Fund',
+        'State PWD Capital Tiers',
+        'Municipal General Portfolios',
+        'Taxpayer Distribution Ratios',
+      ]);
+      if (canonical.has(fs.source)) return fs;
       let sourceName: FundSourceAllocation['source'] = 'Municipal General Portfolios';
       if (fs.source === 'Central Road Fund' || fs.source === 'Central Road Infrastructure Fund') {
         sourceName = 'Central Road Infrastructure Fund';
@@ -26,10 +33,7 @@ export function resolveProjectFundSources(p: Project): FundSourceAllocation[] {
       } else if (fs.source === 'International Multilateral Loans' || fs.source === 'Taxpayer Distribution Ratios') {
         sourceName = 'Taxpayer Distribution Ratios';
       }
-      return {
-        source: sourceName,
-        amount: fs.amount
-      };
+      return { source: sourceName, amount: fs.amount };
     });
   }
 
@@ -183,7 +187,34 @@ export function calculateRoadTransparency(
     }
   });
 
-  // Anomaly B: Repeated Repairs (Early surface failures)
+  // Anomaly C: Cost-per-km outlier detection
+  if (road.lengthKm > 0) {
+    const perKmCosts = roadProjects
+      .filter(p => p.budgetSpent > 0)
+      .map(p => ({ project: p, perKm: p.budgetSpent / road.lengthKm }));
+    if (perKmCosts.length >= 2) {
+      const avgPerKm = perKmCosts.reduce((s, c) => s + c.perKm, 0) / perKmCosts.length;
+      perKmCosts.forEach(({ project: p, perKm }) => {
+        if (perKm > avgPerKm * 1.5) {
+          const pct = Math.round(((perKm - avgPerKm) / avgPerKm) * 100);
+          anomalies.push({
+            id: `anomaly-costperkm-${p.id}`,
+            type: 'budget_overrun',
+            severity: pct > 50 ? 'high' : 'medium',
+            description: `Cost-per-km (${formatCurrency(perKm)}/km) is ${pct}% above road average of ${formatCurrency(avgPerKm)}/km on "${p.title}".`,
+            detectedAt: p.actualEndDate || p.startDate,
+          });
+          scoreDeductions.push({
+            points: 10,
+            reason: `High cost-per-km: ₹${perKm.toLocaleString()}/km vs ₹${avgPerKm.toLocaleString()}/km avg on "${p.title}"`,
+            category: 'budget',
+          });
+        }
+      });
+    }
+  }
+
+  // Anomaly D: Repeated Repairs (Early surface failures)
   // Sort projects chronologically by start date
   const sortedProjects = [...roadProjects].sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
   for (let i = 0; i < sortedProjects.length - 1; i++) {

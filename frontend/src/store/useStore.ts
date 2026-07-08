@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { RoadStatus, Complaint, SyncQueueItem, Road } from '@/types';
+import { RoadStatus, Complaint, SyncQueueItem, Road, NotificationItem } from '@/types';
 import { complaints as mockComplaints, roads as mockRoads } from '@/data/mockData';
 import { CachedRoadRepository, SyncLog } from '@/services/cachedRoadRepository';
 import { OfflineSyncManager } from '@/services/offlineSync';
@@ -62,6 +62,16 @@ interface AppState {
   complaintsList: Complaint[];
   addComplaint: (complaint: Complaint) => void;
   updateComplaint: (id: number, updates: Partial<Complaint>) => void;
+  getSortedComplaintQueue: () => Complaint[]; // Priority-sorted queue
+
+  // Notifications
+  notifications: NotificationItem[];
+  addNotification: (notification: NotificationItem) => void;
+  markNotificationRead: (id: string) => void;
+  clearNotifications: () => void;
+
+  // Reassignment / Decline
+  declineComplaintAssignment: (complaintId: number, authorityId: number, reason?: string) => Promise<{ status: string; newAuthorityId?: number } | null>;
   
   // Scheduled Repairs
   scheduledRepairs: {
@@ -361,11 +371,11 @@ export const useStore = create<AppState>((set, get) => {
     },
     updateComplaint: (id, updates) => {
       set((state) => ({
-        complaintsList: state.complaintsList.map(c => 
+        complaintsList: state.complaintsList.map(c =>
           c.id === id ? { ...c, ...updates } : c
         )
       }));
-      
+
       // Save custom complaints to local storage if edited
       if (typeof window !== 'undefined') {
         const { complaintsList } = get();
@@ -373,6 +383,94 @@ export const useStore = create<AppState>((set, get) => {
           c => !mockComplaints.some(mc => mc.id === c.id)
         );
         window.localStorage.setItem('roadwatch_custom_complaints', JSON.stringify(custom));
+      }
+    },
+    getSortedComplaintQueue: () => {
+      return [...get().complaintsList]
+        .filter(c => c.status !== 'resolved' && c.status !== 'rejected')
+        .sort((a, b) => {
+          // Sort by priority DESC, escalation_level DESC, created_at ASC
+          const aPriority = a.priority || 3;
+          const bPriority = b.priority || 3;
+          if (bPriority !== aPriority) return bPriority - aPriority;
+
+          const aEsc = a.escalationLevel || 0;
+          const bEsc = b.escalationLevel || 0;
+          if (bEsc !== aEsc) return bEsc - aEsc;
+
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        });
+    },
+
+    // Notifications
+    notifications: [],
+    addNotification: (notification) => {
+      set((state) => ({
+        notifications: [notification, ...state.notifications].slice(0, 100), // Keep last 100
+      }));
+    },
+    markNotificationRead: (id) => {
+      set((state) => ({
+        notifications: state.notifications.map(n =>
+          n.id === id ? { ...n, read: true } : n
+        ),
+      }));
+    },
+    clearNotifications: () => set({ notifications: [] }),
+
+    // Reassignment / Decline
+    declineComplaintAssignment: async (complaintId, authorityId, reason) => {
+      try {
+        const res = await fetch(
+          `http://localhost:8000/api/v1/complaints/${complaintId}/decline`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ authorityId, reason }),
+          }
+        );
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.detail || 'Decline failed');
+        }
+        const data = await res.json();
+
+        // Update local state
+        if (data.status === 'reassigned') {
+          get().updateComplaint(complaintId, {
+            assignedAuthorityId: data.new_authority_id,
+            declinedAuthorityIds: data.declined_authority_ids,
+          });
+          get().addNotification({
+            id: `notif-${Date.now()}`,
+            title: 'Complaint Reassigned',
+            message: `Reassigned to authority #${data.new_authority_id}`,
+            timestamp: new Date().toISOString(),
+            read: false,
+            type: 'info',
+            eventType: 'complaint.declined',
+            complaintId,
+          });
+        } else if (data.status === 'rejected') {
+          get().updateComplaint(complaintId, {
+            status: 'rejected',
+            declinedAuthorityIds: data.declined_authority_ids,
+          });
+          get().addNotification({
+            id: `notif-${Date.now()}`,
+            title: 'Complaint Rejected',
+            message: 'All authorities declined — complaint rejected.',
+            timestamp: new Date().toISOString(),
+            read: false,
+            type: 'alert',
+            eventType: 'complaint.declined',
+            complaintId,
+          });
+        }
+        return data;
+      } catch (err) {
+        console.error('Decline complaint failed:', err);
+        return null;
       }
     },
 

@@ -40,25 +40,36 @@ class AuthorityResolver:
         return results[0] if results else None
 
     @staticmethod
-    def resolve_authority_for_coordinates(lon: float, lat: float):
+    def resolve_authority_for_coordinates(lon: float, lat: float, exclude_authority_ids: list = None):
         """
         Resolves authority across ALL regions using PostGIS ST_Contains.
         1. Queries regions table bounding boxes for fast country filter
         2. Queries authorities where ST_Contains(geom_boundary, point) is true
         3. Smallest boundary wins (most granular jurisdiction)
         4. Falls back to region default if no boundary match
+        5. Skips authorities in exclude_authority_ids (for reassignment)
         """
+        if exclude_authority_ids is None:
+            exclude_authority_ids = []
+
         region = AuthorityResolver.get_region_for_coordinates(lon, lat)
         region_code = region['code'] if region else 'IN'
 
         point_wkt = f"POINT({lon} {lat})"
 
-        sql = """
+        # Build exclusion clause
+        exclude_clause = ""
+        if exclude_authority_ids:
+            placeholders = ",".join(str(int(x)) for x in exclude_authority_ids)
+            exclude_clause = f" AND a.id NOT IN ({placeholders})"
+
+        sql = f"""
         SELECT a.*, r.name as region_name, r.default_currency, r.locale, r.phone_format
         FROM authorities a
         LEFT JOIN regions r ON a.region_code = r.code
         WHERE ST_Contains(a.geom_boundary, ST_GeomFromText(%s, 4326)) = true
           AND a.geom_boundary IS NOT NULL
+          {exclude_clause}
         ORDER BY ST_Area(a.geom_boundary) ASC
         LIMIT 1
         """
@@ -68,11 +79,12 @@ class AuthorityResolver:
             res.setdefault('region_code', region_code)
             return res
 
-        sql = """
+        sql = f"""
         SELECT a.*, r.name as region_name, r.default_currency, r.locale, r.phone_format
         FROM authorities a
         LEFT JOIN regions r ON a.region_code = r.code
         WHERE a.region_code = %s
+          {exclude_clause}
         ORDER BY a.id ASC
         LIMIT 1
         """
@@ -82,12 +94,14 @@ class AuthorityResolver:
             res.setdefault('region_code', region_code)
             return res
 
-        last_sql = "SELECT * FROM authorities WHERE id = 4"
-        final = db.query(last_sql)
-        if final:
-            res = dict(final[0])
-            res['region_code'] = 'IN'
-            return res
+        # Final fallback — skip if excluded
+        final_sql = "SELECT * FROM authorities WHERE id = 4"
+        if 4 not in exclude_authority_ids:
+            final = db.query(final_sql)
+            if final:
+                res = dict(final[0])
+                res['region_code'] = 'IN'
+                return res
 
         return {
             'id': 4, 'name': 'State Public Works Department - Mumbai Division',

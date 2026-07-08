@@ -45,6 +45,7 @@ export interface Road {
 }
 
 export interface FundSourceAllocation {
+  id?: number;
   source: 'Central Road Infrastructure Fund' | 'State PWD Capital Tiers' | 'Municipal General Portfolios' | 'Taxpayer Distribution Ratios' | 'Central Road Fund' | 'State PWD Allocations' | 'Municipal General Tier' | 'International Multilateral Loans';
   amount: number;
 }
@@ -65,6 +66,90 @@ export interface Project {
   fundSources?: FundSourceAllocation[];
 }
 
+export interface FundSource {
+  id: number;
+  projectId: number;
+  sourceName: string;
+  amount: number;
+  createdAt: string;
+}
+
+export interface BudgetVariance {
+  id: number;
+  projectId: number;
+  originalBudget: number;
+  revisedBudget?: number | null;
+  varianceAmount: number;
+  variancePct?: number | null;
+  reason: string;
+  approvedBy?: string | null;
+  approvalDate?: string | null;
+  approvalDocumentUrl?: string | null;
+  createdAt: string;
+}
+
+export type MilestoneStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
+
+export interface ProjectMilestone {
+  id: number;
+  projectId: number;
+  title: string;
+  description?: string | null;
+  amount: number;
+  status: MilestoneStatus;
+  dueDate?: string | null;
+  completionDate?: string | null;
+  verifiedBy?: string | null;
+  paymentReleaseDate?: string | null;
+  notes?: string | null;
+  createdAt: string;
+}
+
+export type ContingencyStatus = 'available' | 'partially_utilized' | 'fully_utilized' | 'exhausted';
+
+export interface ContingencyReserve {
+  id: number;
+  projectId: number;
+  allocatedAmount: number;
+  utilizedAmount: number;
+  status: ContingencyStatus;
+  approvalRequired: boolean;
+  releaseNotes?: string | null;
+  createdAt: string;
+}
+
+export type ApprovalStatus = 'pending' | 'approved' | 'rejected';
+
+export interface ApprovalRecord {
+  id: number;
+  entityType: 'variance' | 'contingency' | 'milestone' | 'project';
+  entityId: number;
+  action: string;
+  requestedBy?: string | null;
+  approvedBy?: string | null;
+  approvedAt?: string | null;
+  status: ApprovalStatus;
+  comments?: string | null;
+  createdAt: string;
+}
+
+export interface CostPerKmRow {
+  projectId: number;
+  title: string;
+  roadId: number;
+  roadName: string;
+  lengthKm: number;
+  budgetAllocated: number;
+  budgetSpent: number;
+  allocatedPerKm: number;
+  spentPerKm: number;
+  overrunPerKm: number;
+  status: ProjectStatus;
+  contractorId: number;
+  contractorName: string;
+  flagReason?: string;
+}
+
 export interface Complaint {
   id: number;
   clientTempId?: string;
@@ -77,6 +162,11 @@ export interface Complaint {
   };
   status: ComplaintStatus;
   escalationLevel?: EscalationLevel;
+  priority?: number;          // 1 (low) - 5 (high)
+  slaBreachedAt?: string;     // ISO timestamp when SLA was breached
+  lastEscalatedAt?: string;   // ISO timestamp of last escalation
+  targetResolutionHours?: number;  // Default 48
+  declinedAuthorityIds?: number[]; // Track declined reassignments
   assignedAuthorityId: number;
   roadId?: number;
   createdAt: string;
@@ -99,6 +189,8 @@ export interface NotificationItem {
   timestamp: string;
   read: boolean;
   type: 'info' | 'warning' | 'alert' | 'success';
+  eventType?: 'complaint.assigned' | 'complaint.escalated' | 'complaint.declined' | 'sla.breach';
+  complaintId?: number;
 }
 
 export interface SyncQueueItem {

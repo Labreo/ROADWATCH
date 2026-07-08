@@ -1,57 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Clock, AlertTriangle, ChevronRight, Building2, Phone, Mail, ShieldAlert, UserCheck, Siren } from 'lucide-react';
+import { Clock, AlertTriangle, ChevronRight, Building2, Phone, Mail, ShieldAlert, UserCheck } from 'lucide-react';
 import { Complaint, EscalationLevel } from '@/types';
-
-interface CommissionerContact {
-  title: string;
-  name: string;
-  email: string;
-  phone: string;
-  department: string;
-}
-
-function getCommissionerContact(authorityId: number): CommissionerContact {
-  const registry: Record<number, CommissionerContact> = {
-    1: {
-      title: 'Municipal Commissioner',
-      name: 'Rajesh Kumar Sharma',
-      email: 'commiss.kwest@mcgm.gov.in',
-      phone: '+91-22-2623-5000',
-      department: 'MCGM - Ward K-West'
-    },
-    2: {
-      title: 'Municipal Commissioner',
-      name: 'Anita Deshpande',
-      email: 'commiss.fnorth@mcgm.gov.in',
-      phone: '+91-22-2402-6000',
-      department: 'MCGM - Ward F-North'
-    },
-    3: {
-      title: 'Municipal Commissioner',
-      name: 'Suresh Patil',
-      email: 'commiss.heast@mcgm.gov.in',
-      phone: '+91-22-2618-7000',
-      department: 'MCGM - Ward H-East'
-    },
-    4: {
-      title: 'Chief Engineer',
-      name: 'Vikram Joshi',
-      email: 'ce.mumbai@pwd.gov.in',
-      phone: '+91-22-2202-8000',
-      department: 'State PWD - Mumbai Division'
-    },
-    5: {
-      title: 'Regional Officer',
-      name: 'Arun Mehta',
-      email: 'ro.mumbai@nhai.org',
-      phone: '+91-22-2756-9000',
-      department: 'NHAI - RO Mumbai'
-    }
-  };
-  return registry[authorityId] || registry[1];
-}
 
 interface EscalationSLAAlertProps {
   complaint: Complaint;
@@ -60,7 +11,7 @@ interface EscalationSLAAlertProps {
 
 export default function EscalationSLAAlert({ complaint, compact }: EscalationSLAAlertProps) {
   const [deltaHours, setDeltaHours] = useState(0);
-  const [currentLevel, setCurrentLevel] = useState<EscalationLevel>(0);
+  const currentLevel = (complaint.escalationLevel ?? 0) as EscalationLevel;
 
   useEffect(() => {
     const created = new Date(complaint.createdAt).getTime();
@@ -68,19 +19,12 @@ export default function EscalationSLAAlert({ complaint, compact }: EscalationSLA
     const dt = Math.max(0, (now - created) / 3600000);
     setDeltaHours(dt);
 
-    if (complaint.status === 'resolved' || complaint.status === 'rejected') {
-      setCurrentLevel(0);
-      return;
-    }
+    const interval = setInterval(() => {
+      setDeltaHours(Math.max(0, (Date.now() - created) / 3600000));
+    }, 60000);
 
-    if (dt > 72) {
-      setCurrentLevel(2);
-    } else if (dt > 48) {
-      setCurrentLevel(1);
-    } else {
-      setCurrentLevel(0);
-    }
-  }, [complaint.createdAt, complaint.status]);
+    return () => clearInterval(interval);
+  }, [complaint.createdAt]);
 
   const isBreached = currentLevel === 2;
   const isElevated = currentLevel === 1;
@@ -88,8 +32,6 @@ export default function EscalationSLAAlert({ complaint, compact }: EscalationSLA
   const hoursDisplay = deltaHours.toFixed(1);
   const daysDisplay = (deltaHours / 24).toFixed(1);
   const progress72 = Math.min(100, (deltaHours / 72) * 100);
-
-  const commissioner = getCommissionerContact(complaint.assignedAuthorityId);
 
   const levelLabel = (() => {
     if (isBreached) return 'SLA BREACH - LEVEL 2 ESCALATION';
@@ -193,21 +135,16 @@ export default function EscalationSLAAlert({ complaint, compact }: EscalationSLA
         })}
       </div>
 
-      {/* Breach Escalation Card */}
-      {isBreached && (
+      {/* Authority Contact — fetched from backend data */}
+      {isBreached && complaint.assignedAuthorityId && (
         <div className="rounded-lg border border-rose-500/30 bg-rose-950/15 p-3 space-y-2">
           <div className="flex items-center gap-2 text-rose-400">
             <AlertTriangle className="w-4 h-4" />
-            <span className="text-[10px] font-extrabold uppercase tracking-wider">Municipal Commissioner Escalation</span>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider">Authority Escalation Required</span>
           </div>
-          <div className="space-y-1.5 pl-6">
-            <p className="text-[11px] font-bold text-slate-200">{commissioner.name}</p>
-            <p className="text-[9px] text-slate-400">{commissioner.title}</p>
-            <div className="flex flex-col gap-1 text-[9px] text-slate-400 font-medium">
-              <span className="flex items-center gap-1.5"><Building2 className="w-3 h-3 text-rose-500/70" /> {commissioner.department}</span>
-              <span className="flex items-center gap-1.5"><Mail className="w-3 h-3 text-rose-500/70" /> {commissioner.email}</span>
-              <span className="flex items-center gap-1.5"><Phone className="w-3 h-3 text-rose-500/70" /> {commissioner.phone}</span>
-            </div>
+          <div className="pl-6 text-[9px] text-slate-400 font-medium">
+            <p>Complaint #{complaint.id} has breached SLA.</p>
+            <p>Contact assigned authority directly via operations dashboard.</p>
           </div>
         </div>
       )}
@@ -217,7 +154,7 @@ export default function EscalationSLAAlert({ complaint, compact }: EscalationSLA
         <div className="rounded-lg border border-amber-500/20 bg-amber-950/10 p-2.5 flex items-start gap-2">
           <ChevronRight className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
           <p className="text-[9px] text-amber-300 leading-relaxed font-medium">
-            SLA approaching breach threshold. Complaint has been active for over 48 hours. Escalation to Executive Engineer is recommended if not resolved within 24 hours.
+            SLA approaching breach threshold. Complaint escalated to Level 1. Auto-escalation to Level 2 will trigger if unresolved.
           </p>
         </div>
       )}

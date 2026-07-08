@@ -2,7 +2,7 @@
 -- Ensure schema.sql is executed first to create tables.
 
 -- Clear existing data (optional, for clean run)
-TRUNCATE TABLE complaints, projects, roads, contractors, authorities RESTART IDENTITY CASCADE;
+TRUNCATE TABLE complaints, projects, roads, contractors, authorities, fund_sources, budget_variance_reasons, project_milestones, contingency_reserves, approval_trail RESTART IDENTITY CASCADE;
 
 -- =========================================================================
 -- 0. SEED REGIONS
@@ -853,3 +853,166 @@ VALUES
     14, -- NCC-ROADS
     26 -- Lang''ata Road
 );
+
+-- =========================================================================
+-- BACKFILL CONTRACTOR CODES (for existing contractors)
+-- ORDER must match INSERT order in sections 2 and 7
+-- Indian contractors (id 1-12) + International (id 13-21)
+-- =========================================================================
+UPDATE contractors SET contractor_code = 'CON-00001', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 1;
+UPDATE contractors SET contractor_code = 'CON-00002', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 2;
+UPDATE contractors SET contractor_code = 'CON-00003', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 3;
+UPDATE contractors SET contractor_code = 'CON-00004', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 4;
+UPDATE contractors SET contractor_code = 'CON-00005', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 5;
+UPDATE contractors SET contractor_code = 'CON-00006', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 6;
+UPDATE contractors SET contractor_code = 'CON-00007', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 7;
+UPDATE contractors SET contractor_code = 'CON-00008', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 8;
+UPDATE contractors SET contractor_code = 'CON-00009', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 9;
+UPDATE contractors SET contractor_code = 'CON-00010', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 10;
+UPDATE contractors SET contractor_code = 'CON-00011', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 11;
+UPDATE contractors SET contractor_code = 'CON-00012', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 12;
+UPDATE contractors SET contractor_code = 'CON-00013', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 13;
+UPDATE contractors SET contractor_code = 'CON-00014', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 14;
+UPDATE contractors SET contractor_code = 'CON-00015', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 15;
+UPDATE contractors SET contractor_code = 'CON-00016', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 16;
+UPDATE contractors SET contractor_code = 'CON-00017', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 17;
+UPDATE contractors SET contractor_code = 'CON-00018', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 18;
+UPDATE contractors SET contractor_code = 'CON-00019', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 19;
+UPDATE contractors SET contractor_code = 'CON-00020', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 20;
+UPDATE contractors SET contractor_code = 'CON-00021', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 21;
+
+-- =========================================================================
+-- SEED AUDIT LOG (sample entries for testing)
+-- =========================================================================
+INSERT INTO audit_log (table_name, record_id, action, old_values, new_values, changed_by)
+VALUES
+('complaints', 1, 'INSERT', NULL, '{"title":"Severe Potholes near Andheri Flyover","category":"pothole","status":"routed"}', 'system'),
+('complaints', 1, 'UPDATE', '{"status":"routed"}', '{"title":"Severe Potholes near Andheri Flyover","category":"pothole","status":"in_progress"}', 'operator_mcgm'),
+('complaints', 1, 'UPDATE', '{"status":"in_progress"}', '{"title":"Severe Potholes near Andheri Flyover","category":"pothole","status":"resolved"}', 'operator_mcgm'),
+('projects', 1, 'INSERT', NULL, '{"title":"WEH Resurfacing Phase 1","status":"planned"}', 'system'),
+('projects', 1, 'UPDATE', '{"status":"planned"}', '{"title":"WEH Resurfacing Phase 1","status":"in_progress"}', 'admin'),
+('contractors', 10, 'UPDATE', '{"name":"Omega Infrastructure Inc","rating":2.50}', '{"name":"Omega Infrastructure Inc","rating":1.80,"blacklisted":true}', 'auditor'),
+('roads', 1, 'UPDATE', '{"name":"Western Express Highway","status":"fair"}', '{"name":"Western Express Highway","status":"under_construction"}', 'system');
+
+-- =========================================================================
+-- SEED ROAD DEFECT HISTORY (sample snapshots for testing)
+-- =========================================================================
+INSERT INTO road_defect_history (road_id, snapshot_date, status_at_time, complaint_count, project_count, source)
+VALUES
+(1, '2025-06-01', 'under_construction', 3, 1, 'complaint'),
+(1, '2025-09-15', 'under_construction', 5, 1, 'complaint'),
+(1, '2026-01-10', 'under_construction', 4, 1, 'complaint'),
+(3, '2025-07-01', 'poor', 8, 2, 'complaint'),
+(3, '2025-11-20', 'poor', 12, 2, 'complaint'),
+(5, '2025-05-10', 'fair', 2, 0, 'complaint'),
+(5, '2026-02-15', 'fair', 3, 1, 'project');
+
+-- =========================================================================
+-- SEED FUND SOURCES (per-project funding allocations)
+-- =========================================================================
+INSERT INTO fund_sources (project_id, source_name, amount) VALUES
+-- WEH Flyover: 240Cr — mostly central + state
+(1, 'Central Road Fund', 140000000.00),
+(1, 'State PWD Allocations', 70000000.00),
+(1, 'Municipal General Tier', 30000000.00),
+-- EEH Pothole: 1.8Cr — local
+(2, 'Municipal General Portfolios', 10800000.00),
+(2, 'State PWD Capital Tiers', 7200000.00),
+-- SV Road Drainage: 9.5Cr — halted
+(3, 'State PWD Allocations', 50000000.00),
+(3, 'Municipal General Portfolios', 30000000.00),
+(3, 'Taxpayer Distribution Ratios', 15000000.00),
+-- SV Road Asphalt: 3.5Cr — new contractor
+(4, 'Municipal General Portfolios', 20000000.00),
+(4, 'State PWD Capital Tiers', 15000000.00),
+-- Link Road Concrete: 14.5Cr
+(5, 'Central Road Infrastructure Fund', 80000000.00),
+(5, 'State PWD Capital Tiers', 40000000.00),
+(5, 'Municipal General Portfolios', 25000000.00),
+-- LBS Marg Sewer: 6.2Cr
+(6, 'State PWD Allocations', 32000000.00),
+(6, 'Municipal General Portfolios', 18000000.00),
+(6, 'Taxpayer Distribution Ratios', 12000000.00),
+-- Senapati Bapat Marg: 8.5Cr
+(7, 'Central Road Fund', 50000000.00),
+(7, 'State PWD Allocations', 35000000.00),
+-- Dr. Ambedkar Road: 11Cr
+(8, 'Central Road Infrastructure Fund', 60000000.00),
+(8, 'State PWD Capital Tiers', 30000000.00),
+(8, 'Municipal General Portfolios', 20000000.00),
+-- JVLR: 1.25Cr
+(9, 'Municipal General Portfolios', 7500000.00),
+(9, 'State PWD Capital Tiers', 5000000.00),
+-- SCLR: 4.5Cr
+(10, 'State PWD Allocations', 25000000.00),
+(10, 'Municipal General Portfolios', 12000000.00),
+(10, 'Central Road Fund', 8000000.00),
+-- Ghodbunder Road: 19Cr
+(11, 'Central Road Infrastructure Fund', 100000000.00),
+(11, 'State PWD Capital Tiers', 60000000.00),
+(11, 'Municipal General Portfolios', 30000000.00),
+-- Sion-Panvel: 8Cr
+(12, 'Central Road Fund', 50000000.00),
+(12, 'State PWD Allocations', 30000000.00);
+
+-- =========================================================================
+-- SEED BUDGET VARIANCE REASONS
+-- =========================================================================
+INSERT INTO budget_variance_reasons (project_id, original_budget, revised_budget, variance_amount, variance_pct, reason, approved_by, approval_date)
+VALUES
+-- EEH Pothole: 1.8Cr allocated, 1.92Cr spent — material cost spike
+(2, 18000000.00, 19200000.00, 1200000.00, 6.67, 'Unforeseen asphalt price hike due to Q4 2025 global bitumen shortage. Additional quantity required for deep-patch zones discovered during milling.', 'Rajesh Kumar (Chief Engineer, PWD)', '2025-10-15'),
+-- LBS Marg: 6.2Cr allocated, 6Cr spent — slight underrun but showing approved variance
+(6, 62000000.00, 60000000.00, -2000000.00, -3.23, 'Final sewer alignment optimization reduced trench length by 120m. Savings redirected to junction box upgrades per site instruction.', 'Anita Deshmukh (Project Director, MCGM)', '2025-08-20'),
+-- SV Road halted: 9.5Cr allocated, 4.5Cr spent — major underrun due to halt
+(3, 95000000.00, 45000000.00, -50000000.00, -52.63, 'Work halted due to contractor blacklisting (substandard material). Balance reallocated to emergency asphalt contract.', 'PWD Tender Review Committee', '2025-06-01');
+
+-- =========================================================================
+-- SEED PROJECT MILESTONES
+-- =========================================================================
+INSERT INTO project_milestones (project_id, title, description, amount, status, due_date, completion_date, verified_by, payment_release_date, notes) VALUES
+-- WEH Flyover milestones (6 milestones)
+(1, 'Design & Survey', 'Detailed engineering survey and structural assessment of existing flyover', 24000000.00, 'completed', '2025-07-15', '2025-07-10', 'NHAI Engineering Wing', '2025-08-01', 'Survey revealed additional grouting needed at pier G4'),
+(1, 'Traffic Diversion Setup', 'Install temporary barriers, signage, and alternate route markings', 12000000.00, 'completed', '2025-08-01', '2025-07-28', 'Traffic Police Dept', '2025-08-15', 'No major delays during setup'),
+(1, 'Structural Grouting Phase 1', 'Grouting of pier caps and deck soffits — spans 1-8', 50000000.00, 'completed', '2025-11-30', '2025-11-25', 'NHAI Quality Control', '2025-12-15', '15% material saved via optimized mix design'),
+(1, 'Resurfacing — Northbound', 'Milling and overlay of northbound carriageway (6.2 km)', 60000000.00, 'in_progress', '2026-03-31', NULL, NULL, NULL, NULL),
+(1, 'Resurfacing — Southbound', 'Milling and overlay of southbound carriageway (6.2 km)', 64000000.00, 'pending', '2026-05-31', NULL, NULL, NULL, NULL),
+(1, 'Final Inspection & Handover', 'Quality audit, defect rectification, and project close-out', 30000000.00, 'pending', '2026-06-30', NULL, NULL, NULL, NULL),
+-- EEH Pothole Remediation (3 milestones)
+(2, 'Pothole Mapping & Classification', 'Drone survey and manual inspection of all potholes on EEH', 3000000.00, 'completed', '2025-09-10', '2025-09-08', 'PWD Road Inspections', '2025-09-20', 'Identified 47 potholes, 12 deep-patch zones'),
+(2, 'Patching & Resurfacing', 'Hot-mix asphalt patching of all identified defects (incl. material escalation)', 13200000.00, 'completed', '2025-10-15', '2025-10-30', 'PWD Quality Control', '2025-11-10', 'Bitumen price hike added ₹1.2M — approved via contingency'),
+(2, 'Quality Verification', 'Core sampling and ride quality assessment', 3000000.00, 'completed', '2025-10-31', '2025-11-12', 'Independent Auditor: IIT Bombay', '2025-11-20', '3 cores failed density test — reworked'),
+-- SV Road Drainage (halted, partial milestones)
+(3, 'Feasibility & Route Survey', 'Utility mapping and soil investigation for microtunnelling', 5000000.00, 'completed', '2024-06-15', '2024-06-10', 'MCGM Drainage Dept', '2024-07-01', NULL),
+(3, 'Pipe Procurement', 'Procurement of 1200mm RCC pipes and trench support system', 15000000.00, 'completed', '2024-08-30', '2024-09-15', 'Store Verification', '2024-10-01', 'Supplier delivery delayed 15 days'),
+(3, 'Trenching Phase 1', 'Trench excavation and shoring for first 800m', 20000000.00, 'halted', '2024-12-31', NULL, NULL, NULL, 'Halted due to contractor blacklisting'),
+-- Ghodbunder Road Overlay (completed, 3 milestones)
+(11, 'Surface Preparation', 'Milling, crack sealing, and tack coat application (20km)', 40000000.00, 'completed', '2024-05-15', '2024-05-12', 'PWD Superintending Engineer', '2024-06-01', NULL),
+(11, 'Mast-Asphalt Laying', 'Mast-asphalt overlay in 2 lifts (40mm + 30mm)', 130000000.00, 'completed', '2024-10-31', '2024-10-25', 'PWD Quality Control', '2024-11-15', NULL),
+(11, 'Road Markings & Safety', 'Thermoplastic markings, reflectors, and crash barrier installation', 20000000.00, 'completed', '2024-12-15', '2024-12-20', 'Traffic Police Dept', '2024-12-28', '5-day delay due to rain'),
+-- SCLR Joint Replacement (3 milestones)
+(10, 'Joint Assessment & Procurement', 'Inspection of all 24 expansion joints and procurement of replacements', 8000000.00, 'completed', '2025-12-01', '2025-11-28', 'PWD Bridges Division', '2025-12-15', '3 joints beyond repair — full replacement'),
+(10, 'Joint Replacement', 'Remove and replace expansion joints (spans 12-24)', 25000000.00, 'in_progress', '2026-03-31', NULL, NULL, NULL, NULL),
+(10, 'Waterproofing & QC', 'Waterproof membrane application and load testing', 12000000.00, 'pending', '2026-05-31', NULL, NULL, NULL, NULL);
+
+-- =========================================================================
+-- SEED CONTINGENCY RESERVES
+-- =========================================================================
+INSERT INTO contingency_reserves (project_id, allocated_amount, utilized_amount, status, approval_required, release_notes) VALUES
+(1, 24000000.00, 5000000.00, 'partially_utilized', TRUE, '₹50L released for additional grouting at pier G4 discovered during structural survey'),
+(2, 900000.00, 900000.00, 'fully_utilized', TRUE, 'Full contingency used for asphalt price escalation — market rate exceeded estimate by 8%'),
+(11, 19000000.00, 0.00, 'available', TRUE, 'Standard 10% contingency — unutilized as project completed under budget'),
+(5, 14500000.00, 0.00, 'available', TRUE, 'Contingency held for potential utility relocation costs during pavement upgrade'),
+(7, 4250000.00, 4200000.00, 'fully_utilized', TRUE, '₹42L released for micro-silica additive cost overrun — material imported from Germany'),
+(10, 4500000.00, 1500000.00, 'partially_utilized', TRUE, '₹15L used for emergency procurement of 3 additional expansion joints'),
+(12, 8000000.00, 0.00, 'available', TRUE, NULL);
+
+-- =========================================================================
+-- SEED APPROVAL TRAIL
+-- =========================================================================
+INSERT INTO approval_trail (entity_type, entity_id, action, requested_by, approved_by, approved_at, status, comments) VALUES
+('contingency', 2, 'contingency_release', 'Site Engineer (EEH)', 'Rajesh Kumar (Chief Engineer)', '2025-10-10 10:30:00+05:30', 'approved', 'Approved — asphalt price escalation within contingency policy limits'),
+('contingency', 5, 'contingency_release', 'Project Manager (Senapati Bapat)', 'Anita Deshmukh (Project Director)', '2024-06-15 14:00:00+05:30', 'approved', 'Micro-silica import cost confirmed by 3 quotes. Release approved.'),
+('variance', 1, 'budget_variance', 'Contractor (Apex Constructions)', 'Rajesh Kumar (Chief Engineer)', '2025-10-15 16:00:00+05:30', 'approved', 'Bitumen price index clause invoked per contract clause 14.2'),
+('variance', 2, 'budget_underrun', 'Project Manager (LBS Marg)', 'Anita Deshmukh (Project Director)', '2025-08-20 11:00:00+05:30', 'approved', 'Savings from optimized alignment — acceptable rerouting per site instruction SI-042'),
+('contingency', 6, 'contingency_release', 'Bridges Division Engineer (SCLR)', 'PWD Chief Engineer', '2026-01-10 09:45:00+05:30', 'approved', '3 additional expansion joints needed — original survey missed corrosion damage under bearing plates');

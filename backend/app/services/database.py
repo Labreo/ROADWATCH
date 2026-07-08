@@ -2,6 +2,7 @@ import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from sqlalchemy import create_engine
+from app.services.audit_context import get_audit_user
 
 # Database Connection Settings
 db_user = os.environ.get("POSTGRES_USER", "postgres")
@@ -66,6 +67,7 @@ class Database:
         conn = self.engine.raw_connection()
         try:
             with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+                cursor.execute("SET app.changed_by = %s", (get_audit_user(),))
                 cursor.execute(sql, params)
                 try:
                     results = cursor.fetchall()
@@ -100,6 +102,7 @@ class Database:
         conn = self.engine.raw_connection()
         try:
             with conn.cursor() as cursor:
+                cursor.execute("SET app.changed_by = %s", (get_audit_user(),))
                 cursor.execute(sql, params)
                 inserted_id = None
                 if is_insert:
@@ -112,6 +115,18 @@ class Database:
             return None
         finally:
             conn.close()
+
+    def init_pg_trgm(self):
+        """Enable pg_trgm extension for text similarity queries."""
+        try:
+            conn = self.engine.raw_connection()
+            with conn.cursor() as cursor:
+                cursor.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm")
+                conn.commit()
+                print("pg_trgm extension enabled.")
+            conn.close()
+        except Exception as e:
+            print(f"pg_trgm init error (non-fatal): {e}")
 
     def init_database(self, schema_path: str = "docs/schema.sql", seed_path: str = "docs/mock_data.sql"):
         """
@@ -165,4 +180,5 @@ class Database:
 # Singleton instance of database
 db = Database()
 # Auto-initialize schema and seed data on module load
+db.init_pg_trgm()
 db.init_database()

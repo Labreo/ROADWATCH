@@ -9,6 +9,7 @@ from app.services.vision_pipeline import RoadDamageEvaluator
 from app.services.authority_resolver import AuthorityResolver
 from app.services.road_retriever import StructuredRoadRetriever
 from app.services.database import db
+from app.services.sla_service import compute_priority
 
 router = APIRouter()
 
@@ -234,9 +235,10 @@ async def analyze_photo_endpoint(
             created_at_iso = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
             
             sql = """
-            INSERT INTO complaints (title, description, category, geom, status, escalation_level, image_url, assigned_authority_id, road_id, created_at, updated_at)
-            VALUES (?, ?, ?, ST_GeomFromText(?, 4326), ?, 0, ?, ?, ?, ?, ?)
+            INSERT INTO complaints (title, description, category, geom, status, escalation_level, priority, target_resolution_hours, image_url, assigned_authority_id, road_id, created_at, updated_at)
+            VALUES (?, ?, ?, ST_GeomFromText(?, 4326), ?, 0, ?, 48, ?, ?, ?, ?, ?)
             """
+            priority = compute_priority(category)
             filename = image.filename if hasattr(image, 'filename') and image.filename else "upload.jpg"
             params = (
                 title,
@@ -244,6 +246,7 @@ async def analyze_photo_endpoint(
                 category,
                 geom_wkt,
                 "pending",
+                priority,
                 f"/uploads/{filename}",
                 assigned_authority_id,
                 road_id,

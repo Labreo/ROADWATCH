@@ -2,18 +2,19 @@ import os
 import json
 import httpx
 import random
-import asyncio
 from datetime import datetime
-from typing import Optional, Union, Any, List
+from typing import Optional, Union, Any
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 from app.services.vision_pipeline import RoadDamageEvaluator
 from app.services.authority_resolver import AuthorityResolver
 from app.services.road_retriever import StructuredRoadRetriever
 from app.services.database import db
+from app.services.event_bus import broadcast_log, log_listeners
+from app.services.validators import validate_latitude, validate_longitude
 from app.api.chat import extract_exif_gps
 
 router = APIRouter()
@@ -27,22 +28,19 @@ class WhatsAppWebhookPayload(BaseModel):
     From: Optional[str] = None
     To: Optional[str] = None
 
-# In-memory queues for streaming logs to EventSource connections
-log_listeners: List[asyncio.Queue] = []
+    @field_validator("Latitude")
+    @classmethod
+    def check_lat(cls, v):
+        if v is not None:
+            validate_latitude(float(v))
+        return v
 
-async def broadcast_log(log_type: str, message: str, complaint: Any = None):
-    """
-    Helper to dispatch live logs to all active log streaming listeners.
-    """
-    timestamp = datetime.now().strftime("%H:%M:%S")
-    payload = {
-        "timestamp": timestamp,
-        "type": log_type,
-        "message": message,
-        "complaint": complaint
-    }
-    for queue in log_listeners:
-        await queue.put(payload)
+    @field_validator("Longitude")
+    @classmethod
+    def check_lon(cls, v):
+        if v is not None:
+            validate_longitude(float(v))
+        return v
 
 async def download_media(url: str) -> bytes:
     """
@@ -250,25 +248,6 @@ async def stream_logs():
     """
     Exposes an EventSource (SSE) operational logs stream to push logs live to the frontend.
     """
-    queue = asyncio.Queue()
-    log_listeners.append(queue)
-    
-    async def event_generator():
-        try:
-            # Yield initial connection confirmation
-            conn_msg = {
-                "timestamp": datetime.now().strftime("%H:%M:%S"),
-                "type": "info",
-                "message": "Real-time connection to PostGIS operations node established."
-            }
-            yield f"data: {json.dumps(conn_msg)}\n\n"
-            
-            while True:
-                log_data = await queue.get()
-                yield f"data: {json.dumps(log_data)}\n\n"
-        except asyncio.CancelledError:
-            pass
-        finally:
-            log_listeners.remove(queue)
+    from app.services.event_bus import event_generator as sse_generator
 
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
+    return StreamingResponse(sse_generator(), media_type="text/event-stream")
