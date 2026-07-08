@@ -14,6 +14,7 @@ import StressIndicator from '@/components/sensors/StressIndicator';
 import RoadInspectionScene from '@/components/3d/RoadInspectionScene';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { useStore } from '@/store/useStore';
+import { formatCurrency } from '@/services/regionAwareFormat';
 
 // ── Types
 type Road = typeof roads[0];
@@ -290,9 +291,7 @@ function IntelligencePanel({
   const statusLabel = alertLevel === 'critical' ? 'CRITICAL' : alertLevel === 'elevated' ? 'ELEVATED' : 'NOMINAL';
   const statusColor = SENSOR_LEVEL_COLORS[alertLevel];
 
-  const formatINR = (v: number) =>
-    new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })
-      .format(v).replace('INR', '₹');
+
 
   const budgetPct = primaryProject
     ? Math.min(100, Math.round((primaryProject.budgetSpent / primaryProject.budgetAllocated) * 100))
@@ -411,7 +410,7 @@ function IntelligencePanel({
             <div className="space-y-1.5">
               <div className="flex justify-between items-baseline">
                 <span className="mono-label text-[8px]">ALLOCATED</span>
-                <span className="mono-readout text-[10px]">{formatINR(primaryProject.budgetAllocated)}</span>
+                <span className="mono-readout text-[10px]">{formatCurrency(primaryProject.budgetAllocated)}</span>
               </div>
               <div className="w-full h-1 bg-white/[0.05] rounded-full overflow-hidden">
                 <div
@@ -424,7 +423,7 @@ function IntelligencePanel({
               </div>
               <div className="flex justify-between">
                 <span className="mono-label text-[8px]">UTILIZED: {budgetPct}%</span>
-                <span className="mono-readout text-[9px]">{formatINR(primaryProject.budgetSpent)}</span>
+                <span className="mono-readout text-[9px]">{formatCurrency(primaryProject.budgetSpent)}</span>
               </div>
             </div>
           </div>

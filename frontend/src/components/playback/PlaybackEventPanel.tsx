@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '@/store/useStore';
 import { getHistoricalRoadState, getEventsUpToStep, TimelineEvent } from '@/data/historicalData';
 import { getRoad } from '@/data/mockData';
+import { formatCurrency } from '@/services/regionAwareFormat';
 import { 
   X,
   Calendar,
@@ -46,14 +47,7 @@ export default function PlaybackEventPanel() {
   const histState = getHistoricalRoadState(selectedRoadId, currentPlaybackStepId);
   const events = getEventsUpToStep(selectedRoadId, currentPlaybackStepId);
 
-  // Format currency
-  const formatINR = (value: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(value).replace('INR', '₹');
-  };
+
 
   const getEventIcon = (type: string) => {
     switch (type) {
@@ -161,7 +155,7 @@ export default function PlaybackEventPanel() {
                 <span>Budget Spent:</span>
               </span>
               <span className="font-bold text-slate-200">
-                {histState.budgetSpent > 0 ? formatINR(histState.budgetSpent) : '₹0'}
+                {histState.budgetSpent > 0 ? formatCurrency(histState.budgetSpent) : '₹0'}
               </span>
             </div>
 
@@ -241,7 +235,7 @@ export default function PlaybackEventPanel() {
                                 {e.budgetAllocated && (
                                   <div>
                                     <span className="text-slate-400 block font-semibold mb-0.5">Budget Action</span>
-                                    <span className="text-emerald-400 font-bold">{formatINR(e.budgetAllocated)}</span>
+                                    <span className="text-emerald-400 font-bold">{formatCurrency(e.budgetAllocated)}</span>
                                   </div>
                                 )}
                                 {e.complaintsCount && (

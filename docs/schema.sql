@@ -4,6 +4,20 @@
 -- Enable PostGIS extension if not already enabled
 CREATE EXTENSION IF NOT EXISTS postgis;
 
+-- 0. Regions Config Table
+-- Stores country/region metadata for multi-region support
+CREATE TABLE regions (
+    code VARCHAR(2) PRIMARY KEY,         -- 'IN', 'US', 'GB', 'KE'
+    name VARCHAR(100) NOT NULL,           -- 'India', 'United States', etc.
+    default_currency VARCHAR(3) NOT NULL, -- 'INR', 'USD', 'GBP', 'KES'
+    locale VARCHAR(10) NOT NULL,          -- 'en-IN', 'en-US', 'en-GB', 'en-KE'
+    phone_format VARCHAR(50),             -- e.g., '+91-XX-XXXXXXXX'
+    bounding_box GEOMETRY(Polygon, 4326), -- Country bounding box for fast region filter
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_regions_bbox ON regions USING GIST (bounding_box);
+
 -- 1. Authorities Table
 -- Represents government entities, municipal corporations, or local departments
 CREATE TABLE authorities (
@@ -12,6 +26,7 @@ CREATE TABLE authorities (
     department_code VARCHAR(50) NOT NULL UNIQUE,
     contact_email VARCHAR(255) NOT NULL,
     contact_phone VARCHAR(50),
+    region_code VARCHAR(2) REFERENCES regions(code) ON DELETE SET NULL,
     geom_boundary GEOMETRY(Polygon, 4326), -- Administrative jurisdiction boundary
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -19,6 +34,7 @@ CREATE TABLE authorities (
 
 -- Index for spatial queries on authority boundaries
 CREATE INDEX idx_authorities_geom ON authorities USING GIST (geom_boundary);
+CREATE INDEX idx_authorities_region ON authorities(region_code);
 
 
 -- 2. Contractors Table
@@ -121,3 +137,6 @@ CREATE TRIGGER update_contractors_modtime BEFORE UPDATE ON contractors FOR EACH 
 CREATE TRIGGER update_roads_modtime BEFORE UPDATE ON roads FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_projects_modtime BEFORE UPDATE ON projects FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_complaints_modtime BEFORE UPDATE ON complaints FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- 7. Trigger for updating regions updated_at (if we add the column later)
+-- regions table has no updated_at column currently

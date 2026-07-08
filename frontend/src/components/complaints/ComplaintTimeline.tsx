@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Complaint } from '@/types';
 import { routeComplaint } from '@/services/routingEngine';
+import { getActiveTemplate } from '@/services/regionAwareFormat';
 import EscalationSLAAlert from './EscalationSLAAlert';
 
 interface ComplaintTimelineProps {
@@ -30,7 +31,7 @@ export default function ComplaintTimeline({ complaint }: ComplaintTimelineProps)
     if (offsetDays > 0) {
       d.setDate(d.getDate() + offsetDays);
     }
-    return d.toLocaleDateString('en-IN', {
+    return d.toLocaleDateString(getActiveTemplate().locale, {
       day: 'numeric',
       month: 'short',
       year: 'numeric',

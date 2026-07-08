@@ -41,19 +41,10 @@ interface SankeyLink {
   column?: number;
 }
 
-// Indian currency formatting helper matching requirements (e.g. ₹4.50 Cr or ₹75.00 L)
+// Currency formatting using region-aware template
+import { formatCurrency } from '@/services/regionAwareFormat';
 export function formatFlowAmount(val: number): string {
-  if (val >= 10000000) {
-    return `₹${(val / 10000000).toFixed(2)} Cr`;
-  }
-  if (val >= 100000) {
-    return `₹${(val / 100000).toFixed(2)} L`;
-  }
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 0
-  }).format(val).replace('INR', '₹').trim();
+  return formatCurrency(val, true);
 }
 
 /**

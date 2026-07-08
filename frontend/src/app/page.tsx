@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { formatCurrency, getActiveTemplate } from '@/services/regionAwareFormat';
 import { 
   Search, 
   MapPin, 
@@ -148,24 +149,9 @@ export default function Page() {
     }
   }, [activeView, setPlaybackPlaying]);
 
-  // Format currency helper
-  const formatINR = (value: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(value).replace('INR', '₹');
-  };
 
-  const formatShortINR = (value: number) => {
-    if (value >= 10000000) {
-      return `₹${(value / 10000000).toFixed(2)} Cr`;
-    }
-    if (value >= 100000) {
-      return `₹${(value / 100000).toFixed(2)} L`;
-    }
-    return formatINR(value);
-  };
+
+  const formatShortINR = (value: number) => formatCurrency(value, true);
 
   // Compute Platform Metrics (dynamically from mock data and store)
   const stats = useMemo(() => {
@@ -597,7 +583,7 @@ export default function Page() {
                           <MapPin className="w-3 h-3 text-zinc-550" />
                           {road.lengthKm} km
                         </span>
-                        <span className="text-[9px] text-slate-455">Last Paved: {new Date(road.lastRelayingDate).toLocaleDateString('en-IN', { year: '2-digit', month: '2-digit' })}</span>
+                        <span className="text-[9px] text-slate-455">Last Paved: {new Date(road.lastRelayingDate).toLocaleDateString(getActiveTemplate().locale, { year: '2-digit', month: '2-digit' })}</span>
                       </div>
                     </div>
                   );
@@ -848,11 +834,11 @@ export default function Page() {
                     <div className="grid grid-cols-2 gap-3 text-center">
                       <div className="p-2.5 rounded-lg border border-border bg-slate-950/50">
                         <span className="text-[9px] text-muted-foreground block uppercase font-bold tracking-wider mb-0.5">Works Value</span>
-                        <span className="text-xs font-black text-emerald-400">{formatINR(totalSanctioned)}</span>
+                        <span className="text-xs font-black text-emerald-400">{formatCurrency(totalSanctioned)}</span>
                       </div>
                       <div className="p-2.5 rounded-lg border border-border bg-slate-950/50">
                         <span className="text-[9px] text-muted-foreground block uppercase font-bold tracking-wider mb-0.5">Total Outflow</span>
-                        <span className="text-xs font-black text-slate-200">{formatINR(totalSpent)}</span>
+                        <span className="text-xs font-black text-slate-200">{formatCurrency(totalSpent)}</span>
                       </div>
                     </div>
 
@@ -1013,13 +999,13 @@ export default function Page() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="glass-panel p-4 rounded-xl border border-border/60 bg-slate-950/25">
                     <span className="text-[9px] text-muted-foreground block uppercase font-bold tracking-widest">Total Sanctioned Grants</span>
-                    <span className="text-base font-black text-emerald-450 mt-1 block">{formatINR(citywideTransparency.totalSanctioned)}</span>
+                    <span className="text-base font-black text-emerald-450 mt-1 block">{formatCurrency(citywideTransparency.totalSanctioned)}</span>
                     <span className="text-[8px] text-muted-foreground block mt-1">Capital public fund budget allocations</span>
                   </div>
 
                   <div className="glass-panel p-4 rounded-xl border border-border/60 bg-slate-950/25">
                     <span className="text-[9px] text-muted-foreground block uppercase font-bold tracking-widest">Total Expended Funds</span>
-                    <span className="text-base font-black text-slate-200 mt-1 block">{formatINR(citywideTransparency.totalSpent)}</span>
+                    <span className="text-base font-black text-slate-200 mt-1 block">{formatCurrency(citywideTransparency.totalSpent)}</span>
                     <span className="text-[8px] text-muted-foreground block mt-1">
                       Utilization: {Math.round((citywideTransparency.totalSpent / citywideTransparency.totalSanctioned) * 100)}% of budget
                     </span>
@@ -1108,7 +1094,7 @@ export default function Page() {
                                 <div>{c.name}</div>
                                 <div className="text-[8px] font-bold text-amber-500 mt-0.5">Rating: {c.rating.toFixed(2)}/5.0</div>
                               </td>
-                              <td className="py-2.5 text-right font-bold text-slate-300">{formatINR(c.totalReceived)}</td>
+                              <td className="py-2.5 text-right font-bold text-slate-300">{formatCurrency(c.totalReceived)}</td>
                               <td className="py-2.5 text-center font-bold text-slate-350">{c.projects}</td>
                               <td className="py-2.5 text-center">
                                 {c.blacklisted ? (
@@ -1214,7 +1200,7 @@ export default function Page() {
                         <span className={`text-[9px] font-extrabold uppercase border px-2 py-0.5 rounded tracking-wide ${getStatusTextClass(road.status)}`}>
                           {road.status.replace('_', ' ')}
                         </span>
-                        <span className="text-[9px] text-muted-foreground font-semibold">Last Relayed: {new Date(road.lastRelayingDate).toLocaleDateString('en-IN', { year: 'numeric', month: 'short' })}</span>
+                        <span className="text-[9px] text-muted-foreground font-semibold">Last Relayed: {new Date(road.lastRelayingDate).toLocaleDateString(getActiveTemplate().locale, { year: 'numeric', month: 'short' })}</span>
                       </div>
                     </div>
 
@@ -1285,7 +1271,7 @@ export default function Page() {
                               <h5 className="font-black text-slate-200 leading-snug">{c.title}</h5>
                               <p className="text-muted-foreground leading-normal font-medium">{c.description}</p>
                               <div className="text-[8px] text-slate-500 text-right font-medium">
-                                Submitted: {new Date(c.createdAt).toLocaleDateString('en-IN')}
+                                Submitted: {new Date(c.createdAt).toLocaleDateString(getActiveTemplate().locale)}
                               </div>
                             </div>
                           ))}
@@ -1706,11 +1692,11 @@ export default function Page() {
                           <div className="grid grid-cols-2 gap-3 text-center">
                             <div className="p-2.5 rounded-lg border border-border bg-slate-950/50">
                               <span className="text-[9px] text-muted-foreground block uppercase font-bold tracking-wider mb-0.5">Works Value</span>
-                              <span className="text-xs font-black text-emerald-450">{formatINR(totalSanctioned)}</span>
+                              <span className="text-xs font-black text-emerald-450">{formatCurrency(totalSanctioned)}</span>
                             </div>
                             <div className="p-2.5 rounded-lg border border-border bg-slate-950/50">
                               <span className="text-[9px] text-muted-foreground block uppercase font-bold tracking-wider mb-0.5">Total Outflow</span>
-                              <span className="text-xs font-black text-slate-200">{formatINR(totalSpent)}</span>
+                              <span className="text-xs font-black text-slate-200">{formatCurrency(totalSpent)}</span>
                             </div>
                           </div>
                           <div className="space-y-2">

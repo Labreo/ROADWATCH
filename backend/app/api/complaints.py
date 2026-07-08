@@ -3,6 +3,7 @@ from typing import Optional, List
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from app.services.database import db
+from app.services.authority_resolver import AuthorityResolver
 
 router = APIRouter()
 
@@ -79,8 +80,12 @@ async def create_complaint(payload: ComplaintPayload):
     if new_id is None:
         raise HTTPException(status_code=500, detail="Failed to insert complaint record.")
 
+    region = AuthorityResolver.get_region_for_coordinates(lon, lat)
+    region_code = region['code'] if region else 'IN'
+
     return {
         "id": new_id,
         "status": "routed",
+        "region_code": region_code,
         "message": "Complaint registered and routed successfully."
     }

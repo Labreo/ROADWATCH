@@ -1,4 +1,5 @@
 import { Road, Project, Contractor, Complaint, RoadTransparencyData, YearlyAllocation, FinancialAnomaly, ScoreDeduction, FundSourceAllocation } from '@/types';
+import { formatCurrency } from './regionAwareFormat';
 
 // Upstream funding weights for the hackathon criteria
 export const FUNDING_WEIGHTS = {
@@ -42,14 +43,8 @@ export function resolveProjectFundSources(p: Project): FundSourceAllocation[] {
   ];
 }
 
-// Format currency inside the service helper
-export const formatINR = (value: number) => {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 0
-  }).format(value).replace('INR', '₹');
-};
+// Format currency using region-aware template
+export const formatINR = (value: number) => formatCurrency(value);
 
 /**
  * Calculates transparency details and flags anomalies for a single road segment.

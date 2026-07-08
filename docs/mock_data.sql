@@ -5,44 +5,164 @@
 TRUNCATE TABLE complaints, projects, roads, contractors, authorities RESTART IDENTITY CASCADE;
 
 -- =========================================================================
--- 1. SEED AUTHORITIES (5 Records)
+-- 0. SEED REGIONS
 -- =========================================================================
-INSERT INTO authorities (name, department_code, contact_email, contact_phone, geom_boundary)
+INSERT INTO regions (code, name, default_currency, locale, phone_format, bounding_box) VALUES
+('IN', 'India', 'INR', 'en-IN', '+91-XX-XXXXXXXX', ST_GeomFromText('POLYGON((68.1 6.8, 97.4 6.8, 97.4 35.7, 68.1 35.7, 68.1 6.8))', 4326)),
+('US', 'United States', 'USD', 'en-US', '+1-XXX-XXX-XXXX', ST_GeomFromText('POLYGON((-125.0 24.5, -66.9 24.5, -66.9 49.4, -125.0 49.4, -125.0 24.5))', 4326)),
+('GB', 'United Kingdom', 'GBP', 'en-GB', '+44-XX-XXXXXXXX', ST_GeomFromText('POLYGON((-8.6 49.8, 1.8 49.8, 1.8 60.9, -8.6 60.9, -8.6 49.8))', 4326)),
+('KE', 'Kenya', 'KES', 'en-KE', '+254-XX-XXXXXXX', ST_GeomFromText('POLYGON((33.8 -4.7, 41.9 -4.7, 41.9 5.5, 33.8 5.5, 33.8 -4.7))', 4326));
+
+-- =========================================================================
+-- 1. SEED AUTHORITIES (5 Records — India only; international added separately)
+-- =========================================================================
+INSERT INTO authorities (name, department_code, contact_email, contact_phone, region_code, geom_boundary)
 VALUES
 (
     'City Municipal Corporation - Ward K-West', 
     'MCGM-KW', 
     'ward.kw@mcgm.gov.in', 
-    '+91-22-2623-0000', 
+    '+91-22-2623-0000',
+    'IN',
     ST_GeomFromText('POLYGON((72.80 19.10, 72.87 19.10, 72.87 19.22, 72.80 19.22, 72.80 19.10))', 4326)
 ),
 (
     'City Municipal Corporation - Ward F-North', 
     'MCGM-FN', 
     'ward.fn@mcgm.gov.in', 
-    '+91-22-2402-1111', 
+    '+91-22-2402-1111',
+    'IN',
     ST_GeomFromText('POLYGON((72.80 18.90, 72.88 18.90, 72.88 19.03, 72.80 19.03, 72.80 18.90))', 4326)
 ),
 (
     'City Municipal Corporation - Ward H-East', 
     'MCGM-HE', 
     'ward.he@mcgm.gov.in', 
-    '+91-22-2618-2222', 
+    '+91-22-2618-2222',
+    'IN',
     ST_GeomFromText('POLYGON((72.87 19.00, 72.95 19.00, 72.95 19.10, 72.87 19.10, 72.87 19.00))', 4326)
 ),
 (
     'State Public Works Department - Mumbai Division', 
     'PWD-MUM', 
     'se.mumbai@pwd.gov.in', 
-    '+91-22-2202-3333', 
+    '+91-22-2202-3333',
+    'IN',
     ST_GeomFromText('POLYGON((72.70 18.80, 73.05 18.80, 73.05 19.30, 72.70 19.30, 72.70 18.80))', 4326)
 ),
 (
     'National Highways Authority of India - RO Mumbai', 
     'NHAI-ROM', 
     'romumbai@nhai.org', 
-    '+91-22-2756-4444', 
+    '+91-22-2756-4444',
+    'IN',
     ST_GeomFromText('POLYGON((72.60 18.70, 73.15 18.70, 73.15 19.45, 72.60 19.45, 72.60 18.70))', 4326)
+);
+
+-- =========================================================================
+-- 1b. SEED INTERNATIONAL AUTHORITIES (US, GB, KE)
+-- =========================================================================
+-- US: Detroit area authorities
+INSERT INTO authorities (name, department_code, contact_email, contact_phone, region_code, geom_boundary) VALUES
+(
+    'Detroit Department of Public Works (DPW)',
+    'DPW-DET',
+    'dpw.dispatch@detroitmi.gov',
+    '+1-313-224-3901',
+    'US',
+    ST_GeomFromText('POLYGON((-83.15 42.25, -82.95 42.25, -82.95 42.42, -83.15 42.42, -83.15 42.25))', 4326)
+),
+(
+    'Michigan Department of Transportation (MDOT)',
+    'MDOT-LAN',
+    'mdot-info@michigan.gov',
+    '+1-517-373-2064',
+    'US',
+    ST_GeomFromText('POLYGON((-84.50 41.70, -82.50 41.70, -82.50 43.50, -84.50 43.50, -84.50 41.70))', 4326)
+),
+(
+    'Federal Highway Administration (FHWA) - Michigan Division',
+    'FHWA-MI',
+    'michigan.fhwa@dot.gov',
+    '+1-517-706-3100',
+    'US',
+    ST_GeomFromText('POLYGON((-90.0 41.5, -82.0 41.5, -82.0 47.5, -90.0 47.5, -90.0 41.5))', 4326)
+),
+(
+    'Michigan County Road Commission Association',
+    'CRCA-MI',
+    'info@crcami.org',
+    '+1-517-484-9355',
+    'US',
+    NULL
+);
+-- GB: London / Camden area authorities
+INSERT INTO authorities (name, department_code, contact_email, contact_phone, region_code, geom_boundary) VALUES
+(
+    'Camden Borough Council - Highways Division',
+    'CBC-HIGHWAYS',
+    'highways@camden.gov.uk',
+    '+44-20-7974-4444',
+    'GB',
+    ST_GeomFromText('POLYGON((-0.20 51.52, -0.10 51.52, -0.10 51.57, -0.20 51.57, -0.20 51.52))', 4326)
+),
+(
+    'London Highways Joint Committee',
+    'LHJC-LON',
+    'enquiries@lhjc.org.uk',
+    '+44-20-7934-9999',
+    'GB',
+    ST_GeomFromText('POLYGON((-0.35 51.38, 0.05 51.38, 0.05 51.65, -0.35 51.65, -0.35 51.38))', 4326)
+),
+(
+    'National Highways - South East Division',
+    'NH-SE',
+    'info@nationalhighways.co.uk',
+    '+44-300-123-5000',
+    'GB',
+    ST_GeomFromText('POLYGON((-1.50 50.80, 1.00 50.80, 1.00 52.50, -1.50 52.50, -1.50 50.80))', 4326)
+),
+(
+    'Local Highway Authority Default',
+    'LHA-UK',
+    'enquiries@lha.gov.uk',
+    '+44-20-7000-0000',
+    'GB',
+    NULL
+);
+-- KE: Nairobi area authorities
+INSERT INTO authorities (name, department_code, contact_email, contact_phone, region_code, geom_boundary) VALUES
+(
+    'Nairobi City County - Department of Roads & Transport',
+    'NCC-ROADS',
+    'roads@nairobi.go.ke',
+    '+254-20-2224281',
+    'KE',
+    ST_GeomFromText('POLYGON((36.70 -1.38, 36.95 -1.38, 36.95 -1.18, 36.70 -1.18, 36.70 -1.38))', 4326)
+),
+(
+    'Kenya Urban Roads Authority (KURA)',
+    'KURA-HQ',
+    'info@kura.go.ke',
+    '+254-20-8013844',
+    'KE',
+    ST_GeomFromText('POLYGON((36.50 -1.60, 37.20 -1.60, 37.20 -0.90, 36.50 -0.90, 36.50 -1.60))', 4326)
+),
+(
+    'Kenya National Highways Authority (KeNHA)',
+    'KeNHA-HQ',
+    'dg@kenha.co.ke',
+    '+254-20-4971200',
+    'KE',
+    ST_GeomFromText('POLYGON((33.5 -4.5, 42.0 -4.5, 42.0 5.0, 33.5 5.0, 33.5 -4.5))', 4326)
+),
+(
+    'County Department of Infrastructure',
+    'CDI-KE',
+    'infrastructure@county.go.ke',
+    '+254-20-1111111',
+    'KE',
+    NULL
 );
 
 
@@ -463,4 +583,273 @@ VALUES
     NULL,
     5, -- NHAI
     12 -- Sion-Panvel Highway
+);
+
+-- =========================================================================
+-- 6. INTERNATIONAL CONTRACTORS (US, GB, KE)
+-- =========================================================================
+INSERT INTO contractors (name, license_number, registration_date, contact_email, contact_phone, rating, projects_completed, projects_delayed, blacklisted, blacklisted_reason)
+VALUES
+-- US Contractors
+('Great Lakes Infrastructure LLC', 'LIC-US-2018-001', '2018-03-15', 'bids@greatlakesinfra.com', '+1-313-555-0101', 4.30, 35, 2, FALSE, NULL),
+('Michigan Paving Company', 'LIC-US-2019-002', '2019-07-22', 'ops@michiganpaving.com', '+1-313-555-0102', 3.90, 22, 3, FALSE, NULL),
+('Detroit Roads Alliance', 'LIC-US-2020-003', '2020-01-10', 'contracts@detroitroads.org', '+1-313-555-0103', 2.50, 10, 5, TRUE, 'Failure to complete I-94 resurfacing within contract timeline; substandard asphalt quality.'),
+
+-- GB Contractors
+('Thames Highway Contractors Ltd', 'LIC-GB-2016-001', '2016-11-01', 'tenders@thameshighways.co.uk', '+44-20-7946-0101', 4.50, 48, 1, FALSE, NULL),
+('Camden Civils & Paving', 'LIC-GB-2021-002', '2021-02-14', 'projects@camdencivils.co.uk', '+44-20-7946-0102', 4.10, 12, 1, FALSE, NULL),
+('London Asphalt Solutions', 'LIC-GB-2017-003', '2017-09-05', 'info@londonasphalt.co.uk', '+44-20-7946-0103', 3.60, 28, 6, FALSE, NULL),
+
+-- KE Contractors
+('Nairobi Road Builders Ltd', 'LIC-KE-2015-001', '2015-05-20', 'info@nairobiroadbuilders.co.ke', '+254-20-555-0101', 4.20, 30, 3, FALSE, NULL),
+('Kenya Infrastructure Group', 'LIC-KE-2018-002', '2018-08-12', 'tenders@kenyainfra.co.ke', '+254-20-555-0102', 3.80, 18, 4, FALSE, NULL),
+('Mombasa Roadworks Ltd', 'LIC-KE-2020-003', '2020-03-30', 'projects@mombasaroadworks.co.ke', '+254-20-555-0103', 2.80, 8, 5, FALSE, NULL);
+
+-- =========================================================================
+-- 7. INTERNATIONAL ROADS (US, GB, KE)
+-- =========================================================================
+INSERT INTO roads (name, road_code, status, length_km, authority_id, geom)
+VALUES
+-- US: Detroit area roads
+(
+    'I-94 (Edsel Ford Freeway)', 
+    'US-I94',
+    'fair', 
+    45.20, 
+    8, -- FHWA-MI
+    ST_GeomFromText('LINESTRING(-83.1500 42.3500, -83.1000 42.3550, -83.0500 42.3600, -82.9900 42.3650, -82.9400 42.3700)', 4326)
+),
+(
+    'M-10 (Lodge Freeway)', 
+    'US-M10',
+    'poor', 
+    21.50, 
+    8, -- FHWA-MI
+    ST_GeomFromText('LINESTRING(-83.1200 42.3200, -83.1150 42.3500, -83.1100 42.3800, -83.1050 42.4100)', 4326)
+),
+(
+    'Woodward Avenue', 
+    'US-M1',
+    'good', 
+    27.00, 
+    7, -- MDOT
+    ST_GeomFromText('LINESTRING(-83.0800 42.3500, -83.0750 42.3800, -83.0700 42.4100, -83.0650 42.4400)', 4326)
+),
+(
+    'Gratiot Avenue', 
+    'US-M3',
+    'fair', 
+    35.80, 
+    7, -- MDOT
+    ST_GeomFromText('LINESTRING(-82.9800 42.3500, -82.9700 42.3800, -82.9600 42.4100, -82.9500 42.4400)', 4326)
+),
+(
+    'Michigan Avenue', 
+    'US-M12',
+    'under_construction', 
+    18.60, 
+    6, -- DPW-DET
+    ST_GeomFromText('LINESTRING(-83.1200 42.3300, -83.1000 42.3350, -83.0800 42.3400, -83.0600 42.3450)', 4326)
+),
+
+-- GB: London / Camden area roads
+(
+    'A41 (Camden High Street)', 
+    'GB-A41',
+    'fair', 
+    8.50, 
+    10, -- CBC-HIGHWAYS
+    ST_GeomFromText('LINESTRING(-0.1500 51.5300, -0.1450 51.5400, -0.1400 51.5500, -0.1350 51.5600)', 4326)
+),
+(
+    'A502 (Parkway / Finchley Road)', 
+    'GB-A502',
+    'good', 
+    6.20, 
+    11, -- LHJC-LON
+    ST_GeomFromText('LINESTRING(-0.1700 51.5350, -0.1650 51.5450, -0.1600 51.5550, -0.1550 51.5650)', 4326)
+),
+(
+    'Euston Road (A501)', 
+    'GB-A501',
+    'poor', 
+    3.80, 
+    12, -- NH-SE
+    ST_GeomFromText('LINESTRING(-0.1400 51.5250, -0.1300 51.5270, -0.1200 51.5280, -0.1100 51.5300)', 4326)
+),
+(
+    'Camden High Street', 
+    'GB-CAMDEN-HS',
+    'fair', 
+    2.10, 
+    10, -- CBC-HIGHWAYS
+    ST_GeomFromText('LINESTRING(-0.1420 51.5340, -0.1410 51.5420, -0.1400 51.5500)', 4326)
+),
+
+-- KE: Nairobi area roads
+(
+    'Uhuru Highway', 
+    'KE-A104',
+    'fair', 
+    8.00, 
+    16, -- KeNHA-HQ
+    ST_GeomFromText('LINESTRING(36.8200 -1.2800, 36.8150 -1.2900, 36.8100 -1.3000, 36.8050 -1.3100)', 4326)
+),
+(
+    'Mombasa Road (A109)', 
+    'KE-A109',
+    'poor', 
+    15.00, 
+    16, -- KeNHA-HQ
+    ST_GeomFromText('LINESTRING(36.8500 -1.3000, 36.8700 -1.3100, 36.8900 -1.3200, 36.9100 -1.3250)', 4326)
+),
+(
+    'Thika Superhighway (A2)', 
+    'KE-A2',
+    'good', 
+    12.50, 
+    15, -- KURA-HQ
+    ST_GeomFromText('LINESTRING(36.8300 -1.2700, 36.8400 -1.2600, 36.8500 -1.2500, 36.8600 -1.2400)', 4326)
+),
+(
+    'Jogoo Road', 
+    'KE-B301',
+    'fair', 
+    6.80, 
+    14, -- NCC-ROADS
+    ST_GeomFromText('LINESTRING(36.8600 -1.2900, 36.8700 -1.2950, 36.8800 -1.3000, 36.8900 -1.3050)', 4326)
+),
+(
+    'Lang''ata Road', 
+    'KE-C401',
+    'under_construction', 
+    10.20, 
+    14, -- NCC-ROADS
+    ST_GeomFromText('LINESTRING(36.7800 -1.3200, 36.7900 -1.3150, 36.8000 -1.3100, 36.8100 -1.3050)', 4326)
+);
+
+-- =========================================================================
+-- 8. INTERNATIONAL PROJECTS (US, GB, KE)
+-- =========================================================================
+INSERT INTO projects (title, road_id, contractor_id, authority_id, budget_allocated, budget_spent, status, start_date, target_end_date, actual_end_date, delay_days)
+VALUES
+-- US Projects
+('I-94 Resurfacing & Bridge Repairs', 13, 13, 8, 45000000.00, 28000000.00, 'in_progress', '2025-06-01', '2026-12-31', NULL, 0),
+('M-10 Freeway Pothole Remediation', 14, 14, 8, 8500000.00, 8500000.00, 'completed', '2025-03-01', '2025-08-31', '2025-09-15', 15),
+('Woodward Avenue Streetscape Phase 2', 15, 13, 7, 12000000.00, 5000000.00, 'in_progress', '2025-11-01', '2026-10-31', NULL, 0),
+('Michigan Avenue Drainage Upgrade', 17, 15, 6, 6500000.00, 6500000.00, 'completed', '2024-01-15', '2024-12-31', '2024-12-15', 0),
+
+-- GB Projects
+('Camden High Street Safety Improvements', 18, 17, 10, 3500000.00, 2100000.00, 'in_progress', '2025-09-01', '2026-06-30', NULL, 0),
+('A502 Finchley Road Carriageway Repair', 19, 16, 11, 4800000.00, 4600000.00, 'completed', '2025-04-01', '2025-10-31', '2025-10-28', 0),
+('Euston Road Bus Lane Resurfacing', 20, 18, 12, 2200000.00, 800000.00, 'in_progress', '2026-01-15', '2026-07-31', NULL, 0),
+
+-- KE Projects
+('Uhuru Highway Bridge Expansion Joint Repair', 22, 19, 16, 85000000.00, 55000000.00, 'in_progress', '2025-08-01', '2026-08-31', NULL, 0),
+('Mombasa Road Drainage Channel Desilting', 23, 20, 16, 25000000.00, 24000000.00, 'completed', '2025-02-01', '2025-07-31', '2025-08-10', 10),
+('Lang''ata Road Widening & Overlay', 26, 21, 14, 120000000.00, 45000000.00, 'in_progress', '2025-10-01', '2027-03-31', NULL, 0);
+
+-- =========================================================================
+-- 9. INTERNATIONAL COMPLAINTS (US, GB, KE)
+-- =========================================================================
+INSERT INTO complaints (client_temp_id, title, description, category, geom, status, escalation_level, image_url, assigned_authority_id, road_id)
+VALUES
+-- US Complaints (I-94, Woodward Ave, Michigan Ave)
+(
+    '7f7f7f7f-1001-4000-8000-100000000001',
+    'Deep potholes on I-94 near Dearborn',
+    'Multiple 6-inch deep potholes in the right lane causing tire blowouts.',
+    'pothole',
+    ST_GeomFromText('POINT(-83.1000 42.3550)', 4326),
+    'in_progress',
+    0,
+    NULL,
+    8, -- FHWA-MI
+    13 -- I-94
+),
+(
+    '7f7f7f7f-1001-4000-8000-100000000002',
+    'Missing lane markings on Woodward Ave',
+    'Lane divider paint has completely worn off between 7 Mile and 8 Mile Road.',
+    'missing_signage',
+    ST_GeomFromText('POINT(-83.0750 42.3800)', 4326),
+    'pending',
+    0,
+    NULL,
+    7, -- MDOT
+    15 -- Woodward Ave
+),
+(
+    '7f7f7f7f-1001-4000-8000-100000000003',
+    'Water pooling on Michigan Ave underpass',
+    'Storm drain is clogged causing 6-inch standing water across all lanes.',
+    'waterlogging',
+    ST_GeomFromText('POINT(-83.0900 42.3380)', 4326),
+    'routed',
+    1,
+    NULL,
+    6, -- DPW-DET
+    17 -- Michigan Ave
+),
+-- GB Complaints (Camden High Street, Euston Road)
+(
+    '7f7f7f7f-1001-4000-8000-200000000001',
+    'Sunken manhole cover on Camden High Street',
+    'Manhole cover has sunk 4cm below road surface creating hazard for cyclists.',
+    'paving_defect',
+    ST_GeomFromText('POINT(-0.1420 51.5400)', 4326),
+    'in_progress',
+    0,
+    NULL,
+    10, -- CBC-HIGHWAYS
+    18 -- A41 / Camden High Street
+),
+(
+    '7f7f7f7f-1001-4000-8000-200000000002',
+    'Uneven asphalt patches on Euston Road',
+    'Multiple patches from utility works creating bumpy surface for buses.',
+    'paving_defect',
+    ST_GeomFromText('POINT(-0.1250 51.5280)', 4326),
+    'pending',
+    0,
+    NULL,
+    12, -- NH-SE
+    20 -- Euston Road
+),
+-- KE Complaints (Mombasa Road, Jogoo Road)
+(
+    '7f7f7f7f-1001-4000-8000-300000000001',
+    'Large crater on Mombasa Road near Industrial Area',
+    'Deep crater spanning half the lane, causing traffic to merge dangerously.',
+    'pothole',
+    ST_GeomFromText('POINT(36.8800 -1.3150)', 4326),
+    'in_progress',
+    1,
+    NULL,
+    16, -- KeNHA-HQ
+    23 -- Mombasa Road
+),
+(
+    '7f7f7f7f-1001-4000-8000-300000000002',
+    'Flooded underpass on Jogoo Road',
+    'Heavy rain has flooded the Makadara underpass to waist height.',
+    'waterlogging',
+    ST_GeomFromText('POINT(36.8750 -1.2970)', 4326),
+    'routed',
+    2,
+    NULL,
+    14, -- NCC-ROADS
+    25 -- Jogoo Road
+),
+(
+    '7f7f7f7f-1001-4000-8000-300000000003',
+    'Debris from construction on Lang''ata Road',
+    'Construction debris and gravel scattered across the road near Carnivore junction.',
+    'debris',
+    ST_GeomFromText('POINT(36.7950 -1.3120)', 4326),
+    'pending',
+    0,
+    NULL,
+    14, -- NCC-ROADS
+    26 -- Lang''ata Road
 );

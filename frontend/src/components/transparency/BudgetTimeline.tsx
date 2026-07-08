@@ -4,6 +4,7 @@ import React from 'react';
 import { Project, Contractor } from '@/types';
 import { Calendar, User, Clock, AlertCircle, CheckCircle2, Pause, ArrowUpRight } from 'lucide-react';
 import { formatINR } from '@/services/transparencyEngine';
+import { getActiveTemplate } from '@/services/regionAwareFormat';
 
 interface BudgetTimelineProps {
   projects: Project[];
@@ -61,11 +62,11 @@ export default function BudgetTimeline({ projects, contractors }: BudgetTimeline
           const isOver = p.budgetSpent > p.budgetAllocated;
           const excess = p.budgetSpent - p.budgetAllocated;
 
-          const startLabel = new Date(p.startDate).toLocaleDateString('en-IN', { year: 'numeric', month: 'short' });
+          const startLabel = new Date(p.startDate).toLocaleDateString(getActiveTemplate().locale, { year: 'numeric', month: 'short' });
           const endLabel = p.actualEndDate 
-            ? new Date(p.actualEndDate).toLocaleDateString('en-IN', { year: 'numeric', month: 'short' })
+            ? new Date(p.actualEndDate).toLocaleDateString(getActiveTemplate().locale, { year: 'numeric', month: 'short' })
             : p.status === 'completed' 
-              ? new Date(p.targetEndDate).toLocaleDateString('en-IN', { year: 'numeric', month: 'short' })
+              ? new Date(p.targetEndDate).toLocaleDateString(getActiveTemplate().locale, { year: 'numeric', month: 'short' })
               : 'Present';
 
           return (

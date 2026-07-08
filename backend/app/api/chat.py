@@ -162,10 +162,9 @@ async def analyze_photo_endpoint(
                 except Exception:
                     pass
 
-            # Last resort fallback coordinates (Mumbai default)
-            if resolved_lat is None or resolved_lon is None:
-                resolved_lat = 19.0760
-                resolved_lon = 72.8777
+            # Last resort fallback — no coordinates could be resolved from image or form params
+            # Let the downstream code proceed with None; the complaint will be marked unresolved
+            # and no spatial authority routing will be attempted
 
             # Yield coordinate resolution event
             yield json.dumps({

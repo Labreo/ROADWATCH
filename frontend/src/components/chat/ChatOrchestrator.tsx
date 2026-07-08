@@ -38,6 +38,7 @@ import {
 } from '@/data/mockData';
 import { Road, Contractor, Project, Complaint } from '@/types';
 import { calculateRoadTransparency, getScoreGrade, getCitywideTransparencyData } from '@/services/transparencyEngine';
+import { formatCurrency } from '@/services/regionAwareFormat';
 
 // Subcomponents
 import MapWrapper from '@/components/map/MapWrapper';
@@ -180,20 +181,9 @@ export default function ChatOrchestrator() {
     };
   }, []);
 
-  // Format currency helpers
-  const formatINR = (value: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(value).replace('INR', '₹');
-  };
 
-  const formatShortINR = (value: number) => {
-    if (value >= 10000000) return `₹${(value / 10000000).toFixed(2)} Cr`;
-    if (value >= 100000) return `₹${(value / 100000).toFixed(2)} L`;
-    return formatINR(value);
-  };
+
+  const formatShortINR = (value: number) => formatCurrency(value, true);
 
   // Transparency details memoization
   const citywideTransparency = useMemo(() => {
@@ -729,11 +719,11 @@ export default function ChatOrchestrator() {
                         <div className="grid grid-cols-3 gap-4">
                           <div className="glass-panel p-4 rounded-2xl border border-white/[0.05]">
                             <span className="text-[9px] text-muted-foreground block uppercase font-bold tracking-widest">Sanctioned</span>
-                            <span className="text-sm font-black text-emerald-450 mt-1 block">{formatINR(citywideTransparency.totalSanctioned)}</span>
+                            <span className="text-sm font-black text-emerald-450 mt-1 block">{formatCurrency(citywideTransparency.totalSanctioned)}</span>
                           </div>
                           <div className="glass-panel p-4 rounded-2xl border border-white/[0.05]">
                             <span className="text-[9px] text-muted-foreground block uppercase font-bold tracking-widest">Expended</span>
-                            <span className="text-sm font-black text-slate-200 mt-1 block">{formatINR(citywideTransparency.totalSpent)}</span>
+                            <span className="text-sm font-black text-slate-200 mt-1 block">{formatCurrency(citywideTransparency.totalSpent)}</span>
                           </div>
                           <div className="glass-panel p-4 rounded-2xl border border-white/[0.05]">
                             <span className="text-[9px] text-muted-foreground block uppercase font-bold tracking-widest">Average Score</span>
@@ -803,11 +793,11 @@ export default function ChatOrchestrator() {
                             <div className="grid grid-cols-2 gap-3 text-center">
                               <div className="p-3 bg-slate-900/40 border border-white/[0.05] rounded-xl">
                                 <span className="text-[9px] text-muted-foreground block uppercase font-bold tracking-wider">Sanctioned Value</span>
-                                <span className="text-xs font-black text-emerald-450 mt-1 block">{formatINR(totalSanctioned)}</span>
+                                <span className="text-xs font-black text-emerald-450 mt-1 block">{formatCurrency(totalSanctioned)}</span>
                               </div>
                               <div className="p-3 bg-slate-900/40 border border-white/[0.05] rounded-xl">
                                 <span className="text-[9px] text-muted-foreground block uppercase font-bold tracking-wider">Spent Outflow</span>
-                                <span className="text-xs font-black text-slate-200 mt-1 block">{formatINR(totalSpent)}</span>
+                                <span className="text-xs font-black text-slate-200 mt-1 block">{formatCurrency(totalSpent)}</span>
                               </div>
                             </div>
 
@@ -997,11 +987,11 @@ export default function ChatOrchestrator() {
                     <div className="grid grid-cols-2 gap-3">
                       <div className="glass-panel p-3 rounded-xl border border-white/[0.05]">
                         <span className="text-[8px] text-muted-foreground block uppercase font-bold">Sanctioned</span>
-                        <span className="text-xs font-black text-emerald-450">{formatINR(citywideTransparency.totalSanctioned)}</span>
+                        <span className="text-xs font-black text-emerald-450">{formatCurrency(citywideTransparency.totalSanctioned)}</span>
                       </div>
                       <div className="glass-panel p-3 rounded-xl border border-white/[0.05]">
                         <span className="text-[8px] text-muted-foreground block uppercase font-bold">Expended</span>
-                        <span className="text-xs font-black text-slate-200">{formatINR(citywideTransparency.totalSpent)}</span>
+                        <span className="text-xs font-black text-slate-200">{formatCurrency(citywideTransparency.totalSpent)}</span>
                       </div>
                     </div>
                     <div className="bg-slate-900/35 p-3.5 border border-white/[0.04] rounded-2xl">

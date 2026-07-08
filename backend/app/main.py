@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.chat import router as chat_router
 from app.api.whatsapp import router as whatsapp_router
 from app.api.complaints import router as complaints_router
+from app.api.regions import router as regions_router
 
 app = FastAPI(
     title="ROADWATCH API",
@@ -23,6 +24,7 @@ app.add_middleware(
 app.include_router(chat_router, prefix="/api/v1")
 app.include_router(whatsapp_router, prefix="/api/v1")
 app.include_router(complaints_router, prefix="/api/v1")
+app.include_router(regions_router, prefix="/api/v1")
 
 @app.get("/")
 async def root():

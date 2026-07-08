@@ -27,6 +27,7 @@ import { Contractor, Project, Road } from '@/types';
 import RoadHealthScorecard from './RoadHealthScorecard';
 import InfrastructureDiagnostics from './InfrastructureDiagnostics';
 import EscalationSLAAlert from '@/components/complaints/EscalationSLAAlert';
+import { formatCurrency, getActiveTemplate } from '@/services/regionAwareFormat';
 
 // Subsurface Cross-section Helpers
 const UTILITY_TYPES = [
@@ -133,14 +134,7 @@ export default function RoadDetailsPanel() {
     ? getContractor(primaryProject.contractorId) 
     : undefined;
 
-  // Format currency
-  const formatINR = (value: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(value).replace('INR', '₹');
-  };
+
 
   // Calculate budget statistics
   const budgetAllocated = primaryProject?.budgetAllocated || 0;
@@ -240,7 +234,7 @@ export default function RoadDetailsPanel() {
               <span className="mono-label text-[9px]">Last Relaying Date</span>
             </div>
             <p className="mono-readout text-xs font-bold text-slate-200">
-              {new Date(road.lastRelayingDate).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })}
+              {new Date(road.lastRelayingDate).toLocaleDateString(getActiveTemplate().locale, { year: 'numeric', month: 'short', day: 'numeric' })}
             </p>
             <p className="mono-label text-[8px] mt-1">Asphalt lifetime check</p>
           </div>
@@ -261,11 +255,11 @@ export default function RoadDetailsPanel() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <span className="mono-label text-[9px] block mb-0.5">Sanctioned Amount</span>
-                <span className="mono-readout text-sm font-bold text-emerald-400">{formatINR(budgetAllocated)}</span>
+                <span className="mono-readout text-sm font-bold text-emerald-400">{formatCurrency(budgetAllocated)}</span>
               </div>
               <div>
                 <span className="mono-label text-[9px] block mb-0.5">Spent Amount</span>
-                <span className="mono-readout text-sm font-bold text-slate-200">{formatINR(budgetSpent)}</span>
+                <span className="mono-readout text-sm font-bold text-slate-200">{formatCurrency(budgetSpent)}</span>
               </div>
             </div>
 
@@ -395,8 +389,8 @@ export default function RoadDetailsPanel() {
                       </p>
                       
                       <div className="grid grid-cols-2 gap-2 text-[9px] text-slate-450 border-t border-border/20 pt-1 mt-1">
-                        <span>Cost: <span className="mono-readout text-[9px] text-slate-200 font-bold">{formatINR(p.budgetSpent)}</span></span>
-                        <span className="text-right">Start: {new Date(p.startDate).toLocaleDateString('en-IN', { year: 'numeric', month: 'short' })}</span>
+                        <span>Cost: <span className="mono-readout text-[9px] text-slate-200 font-bold">{formatCurrency(p.budgetSpent)}</span></span>
+                        <span className="text-right">Start: {new Date(p.startDate).toLocaleDateString(getActiveTemplate().locale, { year: 'numeric', month: 'short' })}</span>
                       </div>
 
                       {p.delayDays > 0 && (

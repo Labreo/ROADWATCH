@@ -15,6 +15,7 @@ import {
 import { useStore } from '@/store/useStore';
 import { authorities, roads } from '@/data/mockData';
 import { Complaint, ComplaintStatus } from '@/types';
+import { getActiveTemplate } from '@/services/regionAwareFormat';
 
 interface ComplaintOperationsPanelProps {
   selectedComplaintId: number | null;
@@ -150,7 +151,7 @@ export default function ComplaintOperationsPanel({
                     <MapPin className="w-2.5 h-2.5 text-zinc-500 shrink-0" />
                     {road ? road.name : 'Coordinates'}
                   </span>
-                  <span>{new Date(c.createdAt || '').toLocaleDateString('en-IN', { month: '2-digit', day: '2-digit' })}</span>
+                  <span>{new Date(c.createdAt || '').toLocaleDateString(getActiveTemplate().locale, { month: '2-digit', day: '2-digit' })}</span>
                 </div>
               </div>
             );
