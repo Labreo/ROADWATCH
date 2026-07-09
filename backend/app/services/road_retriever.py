@@ -210,3 +210,114 @@ class StructuredRoadRetriever:
         """
         results = db.query(sql)
         return results[0] if results else None
+
+    @staticmethod
+    def get_road_project_milestones(road_id: int):
+        sql = """
+        SELECT
+            p.title AS project_title,
+            pm.title AS milestone_title,
+            pm.description,
+            pm.amount,
+            pm.status,
+            pm.due_date,
+            pm.completion_date,
+            pm.verified_by,
+            pm.payment_release_date
+        FROM project_milestones pm
+        JOIN projects p ON pm.project_id = p.id
+        JOIN roads r ON p.road_id = r.id
+        WHERE r.id = ?
+        ORDER BY pm.due_date ASC
+        """
+        return db.query(sql, (road_id,))
+
+    @staticmethod
+    def get_road_contingency_reserves(road_id: int):
+        sql = """
+        SELECT
+            p.title AS project_title,
+            cr.allocated_amount,
+            cr.utilized_amount,
+            cr.status,
+            cr.release_notes
+        FROM contingency_reserves cr
+        JOIN projects p ON cr.project_id = p.id
+        JOIN roads r ON p.road_id = r.id
+        WHERE r.id = ?
+        ORDER BY cr.allocated_amount DESC
+        """
+        return db.query(sql, (road_id,))
+
+    @staticmethod
+    def get_road_contingency_summary(road_id: int):
+        sql = """
+        SELECT
+            COALESCE(SUM(cr.allocated_amount), 0) AS total_allocated,
+            COALESCE(SUM(cr.utilized_amount), 0) AS total_utilized,
+            COUNT(cr.id) AS release_count,
+            COALESCE(SUM(cr.utilized_amount) * 100.0 / NULLIF(SUM(cr.allocated_amount), 0), 0) AS utilization_pct
+        FROM contingency_reserves cr
+        JOIN projects p ON cr.project_id = p.id
+        JOIN roads r ON p.road_id = r.id
+        WHERE r.id = ?
+        """
+        results = db.query(sql, (road_id,))
+        return results[0] if results else None
+
+    @staticmethod
+    def get_road_contingency_statuses(road_id: int):
+        sql = """
+        SELECT
+            cr.status,
+            COUNT(cr.id) AS count,
+            COALESCE(SUM(cr.allocated_amount), 0) AS total_allocated,
+            COALESCE(SUM(cr.utilized_amount), 0) AS total_utilized
+        FROM contingency_reserves cr
+        JOIN projects p ON cr.project_id = p.id
+        JOIN roads r ON p.road_id = r.id
+        WHERE r.id = ?
+        GROUP BY cr.status
+        ORDER BY total_allocated DESC
+        """
+        return db.query(sql, (road_id,))
+
+    @staticmethod
+    def get_road_approval_trail(road_id: int):
+        sql = """
+        SELECT
+            at.entity_type,
+            at.action,
+            at.requested_by,
+            at.approved_by,
+            at.approved_at,
+            at.status,
+            at.comments
+        FROM approval_trail at
+        JOIN projects p ON at.entity_id = p.id
+        JOIN roads r ON p.road_id = r.id
+        WHERE r.id = ?
+        ORDER BY at.approved_at DESC NULLS LAST, at.created_at DESC
+        """
+        return db.query(sql, (road_id,))
+
+    @staticmethod
+    def get_road_approval_summary(road_id: int):
+        sql = """
+        SELECT
+            at.entity_type,
+            at.action,
+            at.requested_by,
+            at.approved_by,
+            at.approved_at,
+            at.status,
+            at.comments,
+            p.title AS project_title
+        FROM approval_trail at
+        JOIN projects p ON at.entity_id = p.id
+        JOIN roads r ON p.road_id = r.id
+        WHERE r.id = ?
+        ORDER BY at.approved_at DESC NULLS LAST, at.created_at DESC
+        LIMIT 10
+        """
+        return db.query(sql, (road_id,))

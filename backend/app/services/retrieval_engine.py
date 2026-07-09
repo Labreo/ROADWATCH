@@ -121,6 +121,12 @@ class RetrievalEngine:
             if closest_auth:
                 authority_id = closest_auth['id']
                 
+        # 4. Query Structured Facts
+        context_facts = []
+        citations = []
+        suggested_actions = []
+        suggested_prompts = []
+
         # Resolve routing details (always do this if coords available)
         routing_details = None
         if lat is not None and lon is not None:
@@ -128,12 +134,30 @@ class RetrievalEngine:
             road_name_for_routing = resolved_road_for_routing['name'] if resolved_road_for_routing else None
             routing_details = AuthorityResolver.resolve_with_routing_details(lon, lat, road_name_for_routing)
 
-        # 4. Query Structured Facts
-        context_facts = []
-        citations = []
-        suggested_actions = []
-        suggested_prompts = []
-        
+            # Include routing confidence in context_facts when routing_details is built
+            if routing_details:
+                conf = routing_details.get('routing_confidence', 'UNKNOWN')
+                auth_name = routing_details.get('authority_name', 'Unknown')
+                area_pct = routing_details.get('area_match_percentage')
+                boundary_dist = routing_details.get('boundary_distance_meters')
+
+                # Build a human-readable confidence statement
+                if conf == 'HIGH':
+                    dist_str = f"at {boundary_dist:.0f}m from boundary edge" if boundary_dist is not None else "within boundary"
+                    area_str = f" ({area_pct:.1f}% overlap area)" if area_pct is not None else ""
+                    confidence_statement = (
+                        f"Routing Confidence: HIGH (exact boundary match — {dist_str}{area_str})"
+                    )
+                elif conf == 'MEDIUM':
+                    confidence_statement = (
+                        f"Routing Confidence: MEDIUM (matched to region-level default authority — {auth_name})"
+                    )
+                else:  # LOW
+                    confidence_statement = (
+                        f"Routing Confidence: LOW (hardcoded fallback — no authoritative boundary match found. Defaulting to {auth_name})"
+                    )
+                context_facts.append(confidence_statement)
+
         # Fetch data based on resolved entities
         resolved_road = None
         resolved_contractor = None
@@ -268,6 +292,57 @@ class RetrievalEngine:
                                 f"    - Approved by: {v['approved_by']} on {v['approval_date']}"
                             )
                         context_facts.append("\n".join(var_lines))
+
+                    # Milestone context
+                    milestones = StructuredRoadRetriever.get_road_project_milestones(road_id)
+                    if milestones:
+                        ms_lines = ["Project Milestones:"]
+                        for m in milestones:
+                            completion = f"completed on {m['completion_date']}" if m['completion_date'] else "not yet completed"
+                            payment = f"payment released on {m['payment_release_date']}" if m['payment_release_date'] else "payment pending"
+                            verified = f"verified by {m['verified_by']}" if m['verified_by'] else "not yet verified"
+                            ms_lines.append(
+                                f"  * Project: {m['project_title']}\n"
+                                f"    - Milestone: {m['milestone_title']}\n"
+                                f"    - Description: {m['description']}\n"
+                                f"    - Amount: ₹{m['amount']:,.0f}\n"
+                                f"    - Status: {m['status']}\n"
+                                f"    - Due: {m['due_date']} | {completion}\n"
+                                f"    - {verified} | {payment}"
+                            )
+                        context_facts.append("\n".join(ms_lines))
+
+                    # Contingency context
+                    contingencies = StructuredRoadRetriever.get_road_contingency_reserves(road_id)
+                    if contingencies:
+                        cn_lines = ["Contingency Reserves:"]
+                        for c in contingencies:
+                            cn_lines.append(
+                                f"  * Project: {c['project_title']}\n"
+                                f"    - Allocated: ₹{c['allocated_amount']:,.0f}\n"
+                                f"    - Utilized: ₹{c['utilized_amount']:,.0f}\n"
+                                f"    - Status: {c['status']}\n"
+                                f"    - Notes: {c['release_notes']}"
+                            )
+                        context_facts.append("\n".join(cn_lines))
+
+                    # Approval trail context
+                    approvals = StructuredRoadRetriever.get_road_approval_trail(road_id)
+                    if approvals:
+                        ap_lines = ["Approval Trail:"]
+                        for a in approvals[:5]:  # limit to 5 most recent
+                            approved_at = a['approved_at'] if a['approved_at'] else 'pending'
+                            ap_lines.append(
+                                f"  * Entity: {a['entity_type']} | Action: {a['action']}\n"
+                                f"    - Requested by: {a['requested_by']}\n"
+                                f"    - Approved by: {a['approved_by']}\n"
+                                f"    - Approved at: {approved_at}\n"
+                                f"    - Status: {a['status']}\n"
+                                f"    - Comments: {a['comments']}"
+                            )
+                        if len(approvals) > 5:
+                            ap_lines.append(f"  * ... and {len(approvals) - 5} more approval records")
+                        context_facts.append("\n".join(ap_lines))
 
                     suggested_prompts.append(f"How does {resolved_road['name']} compare to other roads on cost-per-km?")
                     suggested_prompts.append(f"What is the funding breakdown for {resolved_road['name']}?")
@@ -537,6 +612,33 @@ class RetrievalEngine:
                 if variances:
                     v = variances[0]
                     parts.append(f"**Variance Reason:** {v['reason']} (approved by {v['approved_by']})")
+                # Contingency utilization
+                cont_summary = StructuredRoadRetriever.get_road_contingency_summary(road_id)
+                if cont_summary and cont_summary['total_allocated'] > 0:
+                    parts.append(
+                        f"**Contingency Reserves:** ₹{cont_summary['total_allocated']:,.0f} allocated, "
+                        f"₹{cont_summary['total_utilized']:,.0f} utilized "
+                        f"({cont_summary['utilization_pct']:.1f}% drawdown, {cont_summary['release_count']} release(s))."
+                    )
+                    # Per-status breakdown
+                    cont_statuses = StructuredRoadRetriever.get_road_contingency_statuses(road_id)
+                    if cont_statuses:
+                        status_strs = [
+                            f"{s['status']}: {s['count']} reserve(s) totalling ₹{s['total_allocated']:,.0f}"
+                            for s in cont_statuses
+                        ]
+                        parts.append(f"  Status breakdown: {' | '.join(status_strs)}")
+                # Approval trail summary
+                approvals = StructuredRoadRetriever.get_road_approval_summary(road_id)
+                if approvals:
+                    ap_lines = ["**Recent Approvals:**"]
+                    for a in approvals[:5]:
+                        approved_at = a['approved_at'] if a['approved_at'] else 'pending'
+                        ap_lines.append(
+                            f"- {a['action']} on {a['entity_type']} ({a['project_title']}): "
+                            f"requested by {a['requested_by']}, {a['status']} at {approved_at}"
+                        )
+                    parts.append("\n".join(ap_lines))
                 # Projects
                 if projects:
                     parts.append("**Projects:**")

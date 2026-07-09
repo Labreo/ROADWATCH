@@ -111,6 +111,7 @@ class AuthorityResolver:
         if results:
             res = dict(results[0])
             res.setdefault('region_code', region_code)
+            res['match_type'] = 'exact_boundary'
             return res
 
         sql = f"""
@@ -126,6 +127,7 @@ class AuthorityResolver:
         if fallback:
             res = dict(fallback[0])
             res.setdefault('region_code', region_code)
+            res['match_type'] = 'region_fallback'
             return res
 
         # Final fallback — skip if excluded
@@ -135,14 +137,125 @@ class AuthorityResolver:
             if final:
                 res = dict(final[0])
                 res['region_code'] = 'IN'
+                res['match_type'] = 'hardcoded_fallback'
                 return res
 
         return {
             'id': 4, 'name': 'State Public Works Department - Mumbai Division',
             'department_code': 'PWD-MUM', 'contact_email': 'se.mumbai@pwd.gov.in',
             'contact_phone': '+91-22-2202-3333', 'region_code': 'IN',
-            'geom_boundary': None, 'created_at': None, 'updated_at': None
+            'geom_boundary': None, 'created_at': None, 'updated_at': None,
+            'match_type': 'hardcoded_fallback'
         }
+
+    @staticmethod
+    def resolve_authority_with_auto_reassign(lon: float, lat: float, declined_authority_ids: list = None) -> dict:
+        """
+        Resolves authority excluding already-declined authorities.
+        If no authority is found (all excluded), escalates to region-level default.
+        Returns the new authority + a 'reason_for_reassign' field explaining why.
+        """
+        if declined_authority_ids is None:
+            declined_authority_ids = []
+
+        original_count = len(declined_authority_ids)
+
+        authority = AuthorityResolver.resolve_authority_for_coordinates(
+            lon, lat, exclude_authority_ids=declined_authority_ids
+        )
+
+        is_escalation = original_count > 0
+        is_fallback = False
+
+        if not authority or not authority.get('id'):
+            # Fallback to region-level default authority
+            region = AuthorityResolver.get_region_for_coordinates(lon, lat)
+            region_code = region['code'] if region else 'IN'
+
+            sql = """
+            SELECT a.*, r.name as region_name, r.default_currency, r.locale, r.phone_format
+            FROM authorities a
+            LEFT JOIN regions r ON a.region_code = r.code
+            WHERE a.region_code = %s
+            ORDER BY a.id ASC
+            LIMIT 1
+            """
+            results = db.query(sql, (region_code,))
+            if results:
+                authority = dict(results[0])
+                authority.setdefault('region_code', region_code)
+                authority['match_type'] = 'region_fallback'
+                is_fallback = True
+            else:
+                # Ultimate fallback — hardcoded default
+                authority = {
+                    'id': 4, 'name': 'State Public Works Department - Mumbai Division',
+                    'department_code': 'PWD-MUM', 'contact_email': 'se.mumbai@pwd.gov.in',
+                    'contact_phone': '+91-22-2202-3333', 'region_code': 'IN',
+                    'geom_boundary': None, 'created_at': None, 'updated_at': None,
+                    'match_type': 'hardcoded_fallback'
+                }
+                is_fallback = True
+
+        # Build reason_for_reassign
+        if is_fallback:
+            reason = (
+                f"All previously assigned authorities have declined this complaint. "
+                f"Escalated to region-level default: {authority.get('name', 'Unknown')}."
+            )
+        elif is_escalation:
+            declined_names = []
+            for aid in declined_authority_ids:
+                a = AuthorityResolver.get_authority_by_id(aid)
+                declined_names.append(a['name'] if a else f"Authority #{aid}")
+            reason = (
+                f"Reassigned from {', '.join(declined_names)}. "
+                f"New authority: {authority.get('name', 'Unknown')}."
+            )
+        else:
+            reason = f"Initial authority assignment: {authority.get('name', 'Unknown')}."
+
+        authority['reason_for_reassign'] = reason
+        return authority
+
+    @staticmethod
+    def _calculate_spatial_metrics(lon: float, lat: float, authority_id: int, buffer_radius_m: int = 100) -> dict:
+        """
+        Calculate spatial metrics for authority routing confidence.
+        - boundary_distance_meters: distance in meters from point to nearest boundary edge
+        - area_match_percentage: what percentage of a 100m buffer around the point
+          overlaps with the authority boundary
+        """
+        point_wkt = f"POINT({lon} {lat})"
+        sql = """
+        SELECT
+            ROUND(ST_Distance(
+                ST_GeomFromText(%s, 4326)::geography,
+                ST_Boundary(a.geom_boundary)::geography
+            )::numeric, 2) AS boundary_distance_meters,
+            CASE
+                WHEN ST_Contains(a.geom_boundary, ST_GeomFromText(%s, 4326))
+                THEN ROUND(
+                    (ST_Area(ST_Intersection(
+                        ST_Buffer(ST_GeomFromText(%s, 4326)::geography, %s)::geometry,
+                        a.geom_boundary
+                    )) / NULLIF(ST_Area(ST_Buffer(ST_GeomFromText(%s, 4326)::geography, %s)::geometry), 0)) * 100::numeric, 2
+                )
+                ELSE 0.0
+            END AS area_match_percentage
+        FROM authorities a
+        WHERE a.id = %s AND a.geom_boundary IS NOT NULL
+        """
+        params = (point_wkt, point_wkt, point_wkt, buffer_radius_m, point_wkt, buffer_radius_m, authority_id)
+        results = db.query(sql, params)
+
+        if results and results[0].get('boundary_distance_meters') is not None:
+            return {
+                'area_match_percentage': float(results[0]['area_match_percentage']),
+                'boundary_distance_meters': float(results[0]['boundary_distance_meters']),
+            }
+
+        return {'area_match_percentage': None, 'boundary_distance_meters': None}
 
     @staticmethod
     def resolve_with_routing_details(lon: float, lat: float, road_name: str = None) -> dict:
@@ -150,14 +263,19 @@ class AuthorityResolver:
         authority = AuthorityResolver.resolve_authority_for_coordinates(lon, lat)
         region = AuthorityResolver.get_region_for_coordinates(lon, lat)
         region_name = region.get('name') if region else None
-        return AuthorityResolver.build_routing_details(authority, road_name, region_name)
+        return AuthorityResolver.build_routing_details(authority, road_name, region_name, lon, lat)
 
     @staticmethod
-    def build_routing_details(authority: dict, road_name: str = None, region_name: str = None) -> dict:
+    def build_routing_details(authority: dict, road_name: str = None, region_name: str = None, lon: float = None, lat: float = None) -> dict:
         """
         Build a human-readable routing_details payload from resolved authority.
         Includes executive engineer info, fallback for unknown authorities.
-        Returns dict with authority_name, executive_engineer_name, designation, contact, reason_for_routing.
+        Now includes routing_confidence, area_match_percentage, boundary_distance_meters.
+
+        Confidence levels:
+          - HIGH: exact ST_Contains boundary match
+          - MEDIUM: fallback to region-level default
+          - LOW: hardcoded fallback (no authoritative boundary match)
         """
         auth_id = authority.get('id', 4)
         eng = EXECUTIVE_ENGINEERS.get(auth_id, {
@@ -169,6 +287,23 @@ class AuthorityResolver:
 
         region = region_name or authority.get('region_name', authority.get('region_code', 'the region'))
         dept = authority.get('name', 'Department of Public Works')
+
+        # Determine match type and confidence
+        match_type = authority.get('match_type', 'region_fallback')
+        if match_type == 'exact_boundary':
+            routing_confidence = 'HIGH'
+        elif match_type == 'region_fallback':
+            routing_confidence = 'MEDIUM'
+        else:  # hardcoded_fallback
+            routing_confidence = 'LOW'
+
+        # Calculate spatial metrics when coordinates are available
+        area_match_percentage = None
+        boundary_distance_meters = None
+        if lon is not None and lat is not None and match_type == 'exact_boundary':
+            metrics = AuthorityResolver._calculate_spatial_metrics(lon, lat, auth_id)
+            area_match_percentage = metrics['area_match_percentage']
+            boundary_distance_meters = metrics['boundary_distance_meters']
 
         if road_name:
             reasons = [
@@ -189,7 +324,10 @@ class AuthorityResolver:
             "contact": eng['contact'],
             "email": eng['email'],
             "region": region,
-            "reason_for_routing": " ".join(reasons)
+            "reason_for_routing": " ".join(reasons),
+            "routing_confidence": routing_confidence,
+            "area_match_percentage": area_match_percentage,
+            "boundary_distance_meters": boundary_distance_meters
         }
 
     @staticmethod
