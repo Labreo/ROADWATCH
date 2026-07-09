@@ -46,20 +46,18 @@ class SlaService:
         """
         Query all active complaints that have breached their SLA threshold
         and escalate them one level.
+        Region-aware: resolves complaint region from assigned authority and
+        matches against region-specific sla_config.
         """
-        # Find complaints ready for escalation
-        # escalation_level 0 -> check Level 1 thresholds
-        # escalation_level 1 -> check Level 2 thresholds
-        # escalation_level 2 -> already at max, skip
         now = datetime.utcnow()
 
         for current_level in (0, 1):
             target_level = current_level + 1
 
-            # Get SLA configs for this level
+            # Get SLA configs for this level (all regions)
             configs = db.query(
                 "SELECT id, category, escalation_hours, escalation_level, "
-                "escalate_to_authority_id, notify_template "
+                "escalate_to_authority_id, notify_template, region_code "
                 "FROM sla_config WHERE escalation_level = ?",
                 (target_level,),
             )
@@ -67,20 +65,18 @@ class SlaService:
             if not configs:
                 continue
 
-            # Build lookup: category -> config
-            cat_configs: dict[Optional[str], dict] = {}
+            # Build lookup: (region_code, category) -> config
+            cat_configs: dict[tuple[Optional[str], Optional[str]], dict] = {}
             for cfg in configs:
-                cat_configs[cfg["category"]] = cfg
+                cat_configs[(cfg["region_code"], cfg["category"])] = cfg
 
-            # Fallback config (NULL category)
-            fallback = cat_configs.get(None)
-
-            # Query complaints eligible for this escalation
+            # Query complaints eligible for this escalation, joined with region
             complaints = db.query(
                 "SELECT c.id, c.title, c.category, c.status, c.escalation_level, "
                 "c.priority, c.assigned_authority_id, c.created_at, c.updated_at, "
-                "c.description "
+                "c.description, a.region_code "
                 "FROM complaints c "
+                "LEFT JOIN authorities a ON c.assigned_authority_id = a.id "
                 "WHERE c.status IN ('pending', 'routed', 'in_progress') "
                 "AND c.escalation_level = ? "
                 "ORDER BY c.created_at ASC",
@@ -88,17 +84,19 @@ class SlaService:
             )
 
             for complaint in complaints:
-                cfg = cat_configs.get(complaint["category"], fallback)
+                region_code = complaint.get("region_code") or "IN"
+                # Try: exact (region, category) match first
+                cfg = cat_configs.get((region_code, complaint["category"]))
                 if not cfg:
-                    continue
-
-                # Check if enough hours have passed since last update
-                updated_at = complaint.get("updated_at") or complaint["created_at"]
-                if isinstance(updated_at, str):
-                    updated_at = datetime.fromisoformat(updated_at.replace("Z", "+00:00"))
-                hours_elapsed = (now - updated_at.replace(tzinfo=None)).total_seconds() / 3600
-
-                if hours_elapsed < cfg["escalation_hours"]:
+                    # Fallback: region-specific NULL category
+                    cfg = cat_configs.get((region_code, None))
+                if not cfg:
+                    # Global fallback: no region, exact category
+                    cfg = cat_configs.get((None, complaint["category"]))
+                if not cfg:
+                    # Ultimate fallback: no region, NULL category
+                    cfg = cat_configs.get((None, None))
+                if not cfg:
                     continue
 
                 # Escalate!

@@ -11,7 +11,11 @@ function SkeletonBlock({ className }: { className: string }) {
 // ── 1. Dashboard stat card skeletons ─────────────────────────
 export function DashboardStatsSkeleton() {
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 shrink-0 select-none">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 shrink-0 select-none"
+      role="status"
+      aria-busy="true"
+      aria-label="Loading dashboard statistics"
+    >
       {[...Array(4)].map((_, i) => (
         <div
           key={i}
@@ -33,7 +37,11 @@ export function DashboardStatsSkeleton() {
 // ── 2. Road list skeletons ────────────────────────────────────
 export function RoadCardSkeleton() {
   return (
-    <div className="space-y-2 select-none">
+    <div className="space-y-2 select-none"
+      role="status"
+      aria-busy="true"
+      aria-label="Loading road data"
+    >
       {[...Array(5)].map((_, i) => (
         <div
           key={i}
@@ -58,7 +66,11 @@ export function RoadCardSkeleton() {
 // ── 3. Detail panel skeleton ──────────────────────────────────
 export function DetailPanelSkeleton() {
   return (
-    <div className="w-full h-full flex flex-col bg-slate-950/95 border-l border-white/[0.04] overflow-hidden select-none">
+    <div className="w-full h-full flex flex-col bg-slate-950/95 border-l border-white/[0.04] overflow-hidden select-none"
+      role="status"
+      aria-busy="true"
+      aria-label="Loading detail panel"
+    >
       {/* Header */}
       <div className="p-5 border-b border-white/[0.04] space-y-3.5">
         <div className="flex items-center gap-2">
@@ -119,7 +131,11 @@ export function DetailPanelSkeleton() {
 // ── 4. Map overlay skeleton ───────────────────────────────────
 export function MapOverlaySkeleton() {
   return (
-    <div className="w-full h-full flex items-center justify-center select-none pointer-events-none">
+    <div className="w-full h-full flex items-center justify-center select-none pointer-events-none"
+      role="status"
+      aria-busy="true"
+      aria-label="Loading map layer"
+    >
       <div className="flex flex-col items-center gap-3">
         <div className="w-10 h-10 rounded-full border-2 border-cyan-500/20 border-t-cyan-500 animate-spin" />
         <span className="text-[9px] font-black uppercase tracking-widest text-[#45455a] animate-pulse">

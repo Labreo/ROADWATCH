@@ -6,7 +6,7 @@ class AuthorityResolver:
     def get_region_for_coordinates(lon: float, lat: float):
         point_wkt = f"POINT({lon} {lat})"
         sql = """
-        SELECT code, name, default_currency, locale, phone_format
+        SELECT code, name, default_currency, locale, phone_format, timezone
         FROM regions
         WHERE ST_Contains(bounding_box, ST_GeomFromText(%s, 4326)) = true
         ORDER BY ST_Area(bounding_box) ASC
@@ -19,13 +19,13 @@ class AuthorityResolver:
 
     @staticmethod
     def get_region_by_code(code: str):
-        sql = "SELECT code, name, default_currency, locale, phone_format FROM regions WHERE code = %s"
+        sql = "SELECT code, name, default_currency, locale, phone_format, timezone FROM regions WHERE code = %s"
         results = db.query(sql, (code,))
         return results[0] if results else None
 
     @staticmethod
     def list_all_regions():
-        return db.query("SELECT code, name, default_currency, locale, phone_format FROM regions ORDER BY code")
+        return db.query("SELECT code, name, default_currency, locale, phone_format, timezone FROM regions ORDER BY code")
 
     @staticmethod
     def get_authority_by_id(authority_id: int):

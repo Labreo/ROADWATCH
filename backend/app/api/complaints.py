@@ -7,6 +7,7 @@ from app.services.authority_resolver import AuthorityResolver
 from app.services.sla_service import compute_priority
 from app.services.notification_service import NotificationService
 from app.services.validators import ValidatedComplaintPayload
+from app.services.cross_region_router import CrossRegionRouter
 
 router = APIRouter()
 
@@ -92,6 +93,26 @@ async def create_complaint(payload: ComplaintPayload):
     created_at = payload.createdAt or datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
     priority = compute_priority(payload.category)
 
+    # --- Cross-region routing check ---
+    cross_region_info = None
+    if payload.roadId:
+        cross_region_info = CrossRegionRouter.resolve_cross_region_complaint(
+            lon, lat, payload.roadId, {}
+        )
+
+    # Resolve region for SLA target hours
+    region = AuthorityResolver.get_region_for_coordinates(lon, lat)
+    region_code = region["code"] if region else "IN"
+    sla_configs = db.query(
+        "SELECT escalation_hours FROM sla_config "
+        "WHERE (region_code = ? OR region_code IS NULL) "
+        "AND (category = ? OR category IS NULL) "
+        "AND escalation_level = 1 "
+        "ORDER BY region_code NULLS LAST, category NULLS LAST LIMIT 1",
+        (region_code, payload.category),
+    )
+    target_hours = sla_configs[0]["escalation_hours"] if sla_configs else 48
+
     insert_sql = """
     INSERT INTO complaints (title, description, category, geom, status, priority,
       client_temp_id, image_url, assigned_authority_id, road_id,
@@ -110,7 +131,7 @@ async def create_complaint(payload: ComplaintPayload):
         payload.imageUrl or payload.imagePreview,
         payload.assignedAuthorityId,
         payload.roadId,
-        48,  # default target_resolution_hours
+        target_hours,
         created_at,
         created_at,
     )
@@ -137,12 +158,27 @@ async def create_complaint(payload: ComplaintPayload):
     if authority:
         await NotificationService.notify_complaint_assigned(complaint_dict, authority)
 
+    # If cross-region detected, split the complaint to secondary regions
+    split_ids = []
+    if cross_region_info and cross_region_info.get("cross_region"):
+        split_ids = CrossRegionRouter.split_complaint_across_regions(
+            new_id,
+            cross_region_info["primary_region"],
+            cross_region_info["secondary_regions"],
+            {"created_at": created_at},
+        )
+
     return {
         "id": new_id,
         "status": "routed",
         "priority": priority,
         "region_code": region_code,
         "message": "Complaint registered and routed successfully.",
+        "cross_region": bool(cross_region_info),
+        "split_complaint_ids": split_ids if split_ids else None,
+        "secondary_regions": [
+            s["region_code"] for s in (cross_region_info or {}).get("secondary_regions", [])
+        ] if cross_region_info else None,
     }
 
 

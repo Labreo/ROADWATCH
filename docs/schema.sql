@@ -200,24 +200,140 @@ CREATE TRIGGER update_roads_modtime BEFORE UPDATE ON roads FOR EACH ROW EXECUTE 
 CREATE TRIGGER update_projects_modtime BEFORE UPDATE ON projects FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_complaints_modtime BEFORE UPDATE ON complaints FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- 11. Trigger for updating regions updated_at (if we add the column later)
--- regions table has no updated_at column currently
+-- 11. Timezone column for regions
+ALTER TABLE regions ADD COLUMN IF NOT EXISTS timezone VARCHAR(50) DEFAULT 'Asia/Kolkata';
 
--- 12. SLA Config Seed Data
--- Escalation thresholds per category (NULL = fallback for undefined categories)
-INSERT INTO sla_config (category, escalation_hours, escalation_level, escalate_to_authority_id, notify_template) VALUES
-    ('pothole', 48, 1, (SELECT id FROM authorities WHERE department_code = 'PWD-MUM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1.'),
-    ('pothole', 96, 2, (SELECT id FROM authorities WHERE department_code = 'NHAI-ROM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2.'),
-    ('waterlogging', 24, 1, (SELECT id FROM authorities WHERE department_code = 'PWD-MUM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1.'),
-    ('waterlogging', 48, 2, (SELECT id FROM authorities WHERE department_code = 'NHAI-ROM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2.'),
-    ('paving_defect', 72, 1, (SELECT id FROM authorities WHERE department_code = 'PWD-MUM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1.'),
-    ('paving_defect', 120, 2, (SELECT id FROM authorities WHERE department_code = 'NHAI-ROM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2.'),
-    ('debris', 48, 1, (SELECT id FROM authorities WHERE department_code = 'PWD-MUM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1.'),
-    ('debris', 96, 2, (SELECT id FROM authorities WHERE department_code = 'NHAI-ROM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2.'),
-    ('missing_signage', 72, 1, (SELECT id FROM authorities WHERE department_code = 'PWD-MUM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1.'),
-    ('missing_signage', 144, 2, (SELECT id FROM authorities WHERE department_code = 'NHAI-ROM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2.'),
-    (NULL, 48, 1, (SELECT id FROM authorities WHERE department_code = 'PWD-MUM'), 'Complaint #{id}: {title} unactioned for {hours}h. Default escalation.'),
-    (NULL, 96, 2, (SELECT id FROM authorities WHERE department_code = 'NHAI-ROM'), 'Complaint #{id}: {title} unactioned for {hours}h. Default escalation.');
+-- 12. Region-specific SLA thresholds
+-- Add region_code to sla_config for per-region SLA rules
+ALTER TABLE sla_config ADD COLUMN IF NOT EXISTS region_code VARCHAR(2) REFERENCES regions(code) ON DELETE SET NULL;
+
+-- 13. Cross-region complaint routing support
+-- Self-referential FK for split complaints across regions
+ALTER TABLE complaints ADD COLUMN IF NOT EXISTS parent_complaint_id INTEGER REFERENCES complaints(id) ON DELETE SET NULL;
+ALTER TABLE complaints ADD COLUMN IF NOT EXISTS region_override VARCHAR(2); -- manual region override
+CREATE INDEX IF NOT EXISTS idx_complaints_parent ON complaints(parent_complaint_id);
+
+-- 14. Conflict group IDs for duplicate road/authority resolution
+ALTER TABLE roads ADD COLUMN IF NOT EXISTS conflict_group_id INTEGER;
+CREATE INDEX IF NOT EXISTS idx_roads_conflict_group ON roads(conflict_group_id);
+
+ALTER TABLE authorities ADD COLUMN IF NOT EXISTS conflict_group_id INTEGER;
+CREATE INDEX IF NOT EXISTS idx_authorities_conflict_group ON authorities(conflict_group_id);
+
+-- 15. ROAD REGION CROSSINGS TABLE
+-- Tracks which portions of a road span which regions
+CREATE TABLE IF NOT EXISTS road_region_crossings (
+    id SERIAL PRIMARY KEY,
+    road_id INTEGER NOT NULL REFERENCES roads(id) ON DELETE CASCADE,
+    region_code VARCHAR(2) NOT NULL REFERENCES regions(code) ON DELETE CASCADE,
+    geom_segment GEOMETRY(LineString, 4326),
+    authority_id INTEGER REFERENCES authorities(id) ON DELETE SET NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(road_id, region_code)
+);
+
+CREATE INDEX IF NOT EXISTS idx_rrc_road ON road_region_crossings(road_id);
+CREATE INDEX IF NOT EXISTS idx_rrc_region ON road_region_crossings(region_code);
+CREATE INDEX IF NOT EXISTS idx_rrc_geom ON road_region_crossings USING GIST (geom_segment);
+
+-- 16. REGION OVERLAP ROUTES TABLE
+-- Defines routing actions for complaints near region boundaries
+CREATE TABLE IF NOT EXISTS region_overlap_routes (
+    id SERIAL PRIMARY KEY,
+    complaint_id INTEGER NOT NULL REFERENCES complaints(id) ON DELETE CASCADE,
+    primary_region VARCHAR(2) NOT NULL,
+    secondary_region VARCHAR(2) NOT NULL,
+    split_action VARCHAR(20) NOT NULL CHECK (split_action IN ('duplicate', 'forward', 'split')),
+    resolved BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_ror_complaint ON region_overlap_routes(complaint_id);
+
+-- 17. ROAD CONFLICT GROUPS TABLE
+CREATE TABLE IF NOT EXISTS road_conflict_groups (
+    id SERIAL PRIMARY KEY,
+    conflict_key VARCHAR(255) NOT NULL UNIQUE,
+    primary_road_id INTEGER REFERENCES roads(id) ON DELETE SET NULL,
+    merged_metadata JSONB DEFAULT '{}',
+    resolved BOOLEAN DEFAULT FALSE,
+    resolved_at TIMESTAMP WITH TIME ZONE,
+    resolved_by VARCHAR(100),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 18. AUTHORITY CONFLICT GROUPS TABLE
+CREATE TABLE IF NOT EXISTS authority_conflict_groups (
+    id SERIAL PRIMARY KEY,
+    conflict_key VARCHAR(255) NOT NULL UNIQUE,
+    primary_authority_id INTEGER REFERENCES authorities(id) ON DELETE SET NULL,
+    merged_metadata JSONB DEFAULT '{}',
+    resolved BOOLEAN DEFAULT FALSE,
+    resolved_at TIMESTAMP WITH TIME ZONE,
+    resolved_by VARCHAR(100),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 19. Region-specific SLA Config Seed Data
+-- India (IN): pothole 48h, waterlogging 24h, paving_defect 72h, debris 48h, missing_signage 72h
+INSERT INTO sla_config (category, escalation_hours, escalation_level, escalate_to_authority_id, notify_template, region_code) VALUES
+    ('pothole', 48, 1, (SELECT id FROM authorities WHERE department_code = 'PWD-MUM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (India).', 'IN'),
+    ('pothole', 96, 2, (SELECT id FROM authorities WHERE department_code = 'NHAI-ROM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (India).', 'IN'),
+    ('waterlogging', 24, 1, (SELECT id FROM authorities WHERE department_code = 'PWD-MUM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (India).', 'IN'),
+    ('waterlogging', 48, 2, (SELECT id FROM authorities WHERE department_code = 'NHAI-ROM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (India).', 'IN'),
+    ('paving_defect', 72, 1, (SELECT id FROM authorities WHERE department_code = 'PWD-MUM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (India).', 'IN'),
+    ('paving_defect', 120, 2, (SELECT id FROM authorities WHERE department_code = 'NHAI-ROM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (India).', 'IN'),
+    ('debris', 48, 1, (SELECT id FROM authorities WHERE department_code = 'PWD-MUM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (India).', 'IN'),
+    ('debris', 96, 2, (SELECT id FROM authorities WHERE department_code = 'NHAI-ROM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (India).', 'IN'),
+    ('missing_signage', 72, 1, (SELECT id FROM authorities WHERE department_code = 'PWD-MUM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (India).', 'IN'),
+    ('missing_signage', 144, 2, (SELECT id FROM authorities WHERE department_code = 'NHAI-ROM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (India).', 'IN'),
+    (NULL, 48, 1, (SELECT id FROM authorities WHERE department_code = 'PWD-MUM'), 'Complaint #{id}: {title} unactioned for {hours}h. Default escalation (India).', 'IN'),
+    (NULL, 96, 2, (SELECT id FROM authorities WHERE department_code = 'NHAI-ROM'), 'Complaint #{id}: {title} unactioned for {hours}h. Default escalation (India).', 'IN');
+
+-- US: pothole 24h, waterlogging 12h, paving_defect 48h, debris 24h, missing_signage 36h
+INSERT INTO sla_config (category, escalation_hours, escalation_level, escalate_to_authority_id, notify_template, region_code) VALUES
+    ('pothole', 24, 1, (SELECT id FROM authorities WHERE department_code = 'MDOT-LAN'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (US).', 'US'),
+    ('pothole', 48, 2, (SELECT id FROM authorities WHERE department_code = 'FHWA-MI'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (US).', 'US'),
+    ('waterlogging', 12, 1, (SELECT id FROM authorities WHERE department_code = 'DPW-DET'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (US).', 'US'),
+    ('waterlogging', 24, 2, (SELECT id FROM authorities WHERE department_code = 'MDOT-LAN'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (US).', 'US'),
+    ('paving_defect', 48, 1, (SELECT id FROM authorities WHERE department_code = 'MDOT-LAN'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (US).', 'US'),
+    ('paving_defect', 96, 2, (SELECT id FROM authorities WHERE department_code = 'FHWA-MI'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (US).', 'US'),
+    ('debris', 24, 1, (SELECT id FROM authorities WHERE department_code = 'DPW-DET'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (US).', 'US'),
+    ('debris', 48, 2, (SELECT id FROM authorities WHERE department_code = 'MDOT-LAN'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (US).', 'US'),
+    ('missing_signage', 36, 1, (SELECT id FROM authorities WHERE department_code = 'MDOT-LAN'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (US).', 'US'),
+    ('missing_signage', 72, 2, (SELECT id FROM authorities WHERE department_code = 'FHWA-MI'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (US).', 'US'),
+    (NULL, 24, 1, (SELECT id FROM authorities WHERE department_code = 'MDOT-LAN'), 'Complaint #{id}: {title} unactioned for {hours}h. Default escalation (US).', 'US'),
+    (NULL, 48, 2, (SELECT id FROM authorities WHERE department_code = 'FHWA-MI'), 'Complaint #{id}: {title} unactioned for {hours}h. Default escalation (US).', 'US');
+
+-- GB: pothole 48h, waterlogging 24h, paving_defect 48h, debris 48h, missing_signage 48h
+INSERT INTO sla_config (category, escalation_hours, escalation_level, escalate_to_authority_id, notify_template, region_code) VALUES
+    ('pothole', 48, 1, (SELECT id FROM authorities WHERE department_code = 'CBC-HIGHWAYS'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (UK).', 'GB'),
+    ('pothole', 96, 2, (SELECT id FROM authorities WHERE department_code = 'NH-SE'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (UK).', 'GB'),
+    ('waterlogging', 24, 1, (SELECT id FROM authorities WHERE department_code = 'CBC-HIGHWAYS'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (UK).', 'GB'),
+    ('waterlogging', 48, 2, (SELECT id FROM authorities WHERE department_code = 'LHJC-LON'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (UK).', 'GB'),
+    ('paving_defect', 48, 1, (SELECT id FROM authorities WHERE department_code = 'CBC-HIGHWAYS'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (UK).', 'GB'),
+    ('paving_defect', 96, 2, (SELECT id FROM authorities WHERE department_code = 'NH-SE'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (UK).', 'GB'),
+    ('debris', 48, 1, (SELECT id FROM authorities WHERE department_code = 'CBC-HIGHWAYS'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (UK).', 'GB'),
+    ('debris', 96, 2, (SELECT id FROM authorities WHERE department_code = 'LHJC-LON'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (UK).', 'GB'),
+    ('missing_signage', 48, 1, (SELECT id FROM authorities WHERE department_code = 'CBC-HIGHWAYS'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (UK).', 'GB'),
+    ('missing_signage', 96, 2, (SELECT id FROM authorities WHERE department_code = 'NH-SE'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (UK).', 'GB'),
+    (NULL, 48, 1, (SELECT id FROM authorities WHERE department_code = 'CBC-HIGHWAYS'), 'Complaint #{id}: {title} unactioned for {hours}h. Default escalation (UK).', 'GB'),
+    (NULL, 96, 2, (SELECT id FROM authorities WHERE department_code = 'NH-SE'), 'Complaint #{id}: {title} unactioned for {hours}h. Default escalation (UK).', 'GB');
+
+-- KE: pothole 72h, waterlogging 48h, paving_defect 96h, debris 72h, missing_signage 96h
+INSERT INTO sla_config (category, escalation_hours, escalation_level, escalate_to_authority_id, notify_template, region_code) VALUES
+    ('pothole', 72, 1, (SELECT id FROM authorities WHERE department_code = 'NCC-ROADS'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (Kenya).', 'KE'),
+    ('pothole', 144, 2, (SELECT id FROM authorities WHERE department_code = 'KeNHA-HQ'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (Kenya).', 'KE'),
+    ('waterlogging', 48, 1, (SELECT id FROM authorities WHERE department_code = 'NCC-ROADS'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (Kenya).', 'KE'),
+    ('waterlogging', 96, 2, (SELECT id FROM authorities WHERE department_code = 'KURA-HQ'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (Kenya).', 'KE'),
+    ('paving_defect', 96, 1, (SELECT id FROM authorities WHERE department_code = 'KURA-HQ'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (Kenya).', 'KE'),
+    ('paving_defect', 168, 2, (SELECT id FROM authorities WHERE department_code = 'KeNHA-HQ'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (Kenya).', 'KE'),
+    ('debris', 72, 1, (SELECT id FROM authorities WHERE department_code = 'NCC-ROADS'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (Kenya).', 'KE'),
+    ('debris', 144, 2, (SELECT id FROM authorities WHERE department_code = 'KURA-HQ'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (Kenya).', 'KE'),
+    ('missing_signage', 96, 1, (SELECT id FROM authorities WHERE department_code = 'NCC-ROADS'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (Kenya).', 'KE'),
+    ('missing_signage', 168, 2, (SELECT id FROM authorities WHERE department_code = 'KeNHA-HQ'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (Kenya).', 'KE'),
+    (NULL, 72, 1, (SELECT id FROM authorities WHERE department_code = 'NCC-ROADS'), 'Complaint #{id}: {title} unactioned for {hours}h. Default escalation (Kenya).', 'KE'),
+    (NULL, 144, 2, (SELECT id FROM authorities WHERE department_code = 'KeNHA-HQ'), 'Complaint #{id}: {title} unactioned for {hours}h. Default escalation (Kenya).', 'KE');
 
 -- =========================================================================
 -- 13. AUDIT TRAIL TABLE

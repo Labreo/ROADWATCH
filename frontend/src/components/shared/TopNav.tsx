@@ -15,9 +15,12 @@ import {
   Sun,
   Moon,
   ChevronRight,
+  Accessibility,
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { NotificationItem } from '@/types';
+import { useA11y } from '@/hooks/useA11y';
+import AccessibilityPanel from './AccessibilityPanel';
 
 const VIEW_TITLES: Record<string, { label: string; section: string }> = {
   dashboard:   { label: 'Dashboard Overview',             section: 'Intelligence'   },
@@ -44,7 +47,10 @@ export default function TopNav() {
   const [notifOpen, setNotifOpen]   = useState(false);
   const [theme, setTheme]           = useState<'dark' | 'light'>('dark');
   const [searchFocused, setSearchFocused] = useState(false);
+  const [a11yOpen, setA11yOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const a11yDropdownRef = useRef<HTMLDivElement>(null);
+  const { t } = useA11y();
 
   useEffect(() => {
     const stored = localStorage.getItem('theme') as 'dark' | 'light' || 'dark';
@@ -70,6 +76,16 @@ export default function TopNav() {
     const handler = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setNotifOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (a11yDropdownRef.current && !a11yDropdownRef.current.contains(e.target as Node)) {
+        setA11yOpen(false);
       }
     };
     document.addEventListener('mousedown', handler);
@@ -124,14 +140,15 @@ export default function TopNav() {
         <Search className={`absolute top-1/2 -translate-y-1/2 left-3 w-3.5 h-3.5 transition-colors duration-200 ${searchFocused ? 'text-cyan-400' : 'text-[#45455a]'}`} />
         <input
           type="text"
-          placeholder="Search roads, contractors, reports…"
+          placeholder={t('search.placeholder')}
+          aria-label={t('search.placeholder')}
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
           onFocus={() => setSearchFocused(true)}
           onBlur={() => setSearchFocused(false)}
           className="search-input w-full pl-9 pr-12 py-2 text-[11px] bg-white/[0.035] border border-white/[0.06] rounded-xl placeholder-[#45455a] text-slate-200 transition-all"
         />
-        <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded-md bg-white/[0.04] border border-white/[0.06] text-[8px] text-[#45455a] font-mono pointer-events-none select-none">
+        <kbd aria-hidden="true" className="absolute right-2.5 top-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded-md bg-white/[0.04] border border-white/[0.06] text-[8px] text-[#45455a] font-mono pointer-events-none select-none">
           ⌘K
         </kbd>
       </div>
@@ -146,6 +163,7 @@ export default function TopNav() {
               ? 'bg-emerald-950/30 border-emerald-900/40 text-emerald-400'
               : 'bg-rose-950/50 border-rose-900/50 text-rose-400 animate-pulse'
           }`}
+          aria-label={isOnline ? t('banner.online') : t('banner.offline')}
         >
           <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}`} />
           {isOnline ? (
@@ -156,16 +174,35 @@ export default function TopNav() {
         </div>
 
         {/* Region chip */}
-        <span className="hidden lg:inline-flex items-center text-[8px] bg-white/[0.03] border border-white/[0.05] text-[#45455a] font-bold tracking-[0.12em] uppercase px-2.5 py-1 rounded-full">
+        <span className="hidden lg:inline-flex items-center text-[8px] bg-white/[0.03] border border-white/[0.05] text-[#45455a] font-bold tracking-[0.12em] uppercase px-2.5 py-1 rounded-full"
+          aria-hidden="true">
           Mumbai · MH
         </span>
+
+        {/* A11y settings */}
+        <div className="relative" ref={a11yDropdownRef}>
+          <button
+            onClick={() => { setA11yOpen(!a11yOpen); setNotifOpen(false); }}
+            className="p-2 rounded-xl border border-white/[0.06] hover:bg-white/[0.05] transition-all text-[#55555f] hover:text-slate-200 btn-press"
+            aria-label={t('settings.a11y')}
+            aria-expanded={a11yOpen}
+            aria-controls="a11y-panel"
+          >
+            <Accessibility className="w-3.5 h-3.5" />
+          </button>
+          {a11yOpen && (
+            <div id="a11y-panel" className="absolute right-0 mt-2 w-[260px] z-[1050] animate-toast-in">
+              <AccessibilityPanel />
+            </div>
+          )}
+        </div>
 
         {/* Theme toggle */}
         <button
           onClick={toggleTheme}
           className="p-2 rounded-xl border border-white/[0.06] hover:bg-white/[0.05] transition-all text-[#55555f] hover:text-slate-200 btn-press"
-          title={theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-          aria-label="Toggle Theme"
+          aria-label={t('theme.toggle')}
+          aria-pressed={theme === 'light'}
         >
           {theme === 'dark' ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-indigo-400" />}
         </button>
@@ -173,9 +210,11 @@ export default function TopNav() {
         {/* Notifications */}
         <div className="relative" ref={dropdownRef}>
           <button
-            onClick={() => setNotifOpen(!notifOpen)}
+            onClick={() => { setNotifOpen(!notifOpen); setA11yOpen(false); }}
             className="relative p-2 rounded-xl border border-white/[0.06] hover:bg-white/[0.05] transition-all text-[#55555f] hover:text-slate-200 btn-press"
-            aria-label="Notifications"
+            aria-label={t('notifications.title')}
+            aria-expanded={notifOpen}
+            aria-controls="notifications-dropdown"
           >
             <Bell className="w-3.5 h-3.5" />
             {unreadCount > 0 && (
@@ -187,10 +226,10 @@ export default function TopNav() {
           </button>
 
           {notifOpen && (
-            <div className="absolute right-0 mt-2 w-[320px] glass-depth-2 border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden z-[1050] animate-toast-in">
+            <div id="notifications-dropdown" role="menu" aria-label={t('notifications.title')} className="absolute right-0 mt-2 w-[320px] glass-depth-2 border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden z-[1050] animate-toast-in">
               <div className="px-4 py-3 border-b border-white/[0.05] flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <h4 className="text-[11px] font-black text-slate-200 uppercase tracking-wider">Alerts</h4>
+                  <h4 className="text-[11px] font-black text-slate-200 uppercase tracking-wider">{t('notifications.title')}</h4>
                   {unreadCount > 0 && (
                     <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-rose-500/15 border border-rose-500/25 text-rose-400">
                       {unreadCount} new
@@ -199,7 +238,7 @@ export default function TopNav() {
                 </div>
                 {unreadCount > 0 && (
                   <button onClick={markAllRead} className="text-[9px] font-bold text-cyan-400 hover:text-cyan-300 transition-colors">
-                    Mark all read
+                    {t('notifications.markAllRead')}
                   </button>
                 )}
               </div>
@@ -233,7 +272,8 @@ export default function TopNav() {
         </div>
 
         {/* Avatar */}
-        <button className="w-8 h-8 rounded-full border border-cyan-500/25 bg-gradient-to-br from-cyan-950/60 to-indigo-950/60 flex items-center justify-center text-cyan-400 hover:border-cyan-500/50 transition-all btn-press shadow-sm">
+        <button className="w-8 h-8 rounded-full border border-cyan-500/25 bg-gradient-to-br from-cyan-950/60 to-indigo-950/60 flex items-center justify-center text-cyan-400 hover:border-cyan-500/50 transition-all btn-press shadow-sm"
+          aria-label={t('user.profile')}>
           <User className="w-3.5 h-3.5" />
         </button>
       </div>

@@ -42,7 +42,11 @@ export default function EmptyState({
   const layout = getLayout();
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center glass-panel border-dashed border-border/80 rounded-2xl relative overflow-hidden shadow-sm">
+    <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center glass-panel border-dashed border-border/80 rounded-2xl relative overflow-hidden shadow-sm"
+      role="region"
+      aria-live="polite"
+      aria-label={layout.title}
+    >
       {/* Background radial highlight */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.025),transparent_70%)] pointer-events-none"></div>
 

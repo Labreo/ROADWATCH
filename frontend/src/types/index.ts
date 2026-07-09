@@ -4,6 +4,9 @@ export type ComplaintStatus = 'pending' | 'routed' | 'in_progress' | 'resolved' 
 export type EscalationLevel = 0 | 1 | 2;
 export type ProjectStatus = 'planned' | 'in_progress' | 'completed' | 'halted' | 'cancelled';
 
+// Accessibility types
+export type { FontSizeLevel, ContrastMode, Locale, A11yState } from './a11y';
+
 export interface Authority {
   id: number;
   name: string;
@@ -14,6 +17,9 @@ export interface Authority {
     type: 'Polygon';
     coordinates: [number, number][][]; // [[longitude, latitude], ...]
   };
+  conflictGroupId?: number;
+  regionCode?: string;
+  timezone?: string;
 }
 
 export interface Contractor {
@@ -42,6 +48,8 @@ export interface Road {
     type: 'LineString';
     coordinates: [number, number][]; // [longitude, latitude][]
   };
+  conflictGroupId?: number;
+  regionCode?: string;
 }
 
 export interface FundSourceAllocation {
@@ -172,6 +180,9 @@ export interface Complaint {
   createdAt: string;
   imageUrl?: string;
   imagePreview?: string;
+  parentComplaintId?: number;
+  regionOverride?: string;
+  regionCode?: string;
 }
 
 // UI/Layout related types

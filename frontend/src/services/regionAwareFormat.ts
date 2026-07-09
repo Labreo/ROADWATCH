@@ -16,6 +16,10 @@ export function getActiveTemplate() {
   return globalTemplates[activeRegionCode] || globalTemplates.IN;
 }
 
+export function getRegionTemplate(regionCode: string) {
+  return globalTemplates[regionCode] || globalTemplates.IN;
+}
+
 export function formatCurrency(value: number, short?: boolean): string {
   const template = getActiveTemplate();
   return template.formatCurrency(value, short);

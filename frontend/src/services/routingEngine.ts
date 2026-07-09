@@ -15,6 +15,7 @@ export interface RoutingResult {
   regionName: string;
   currency: string;
   currencySymbol: string;
+  timezone: string;
   classificationNetwork: string;
   competentAgency: string;
   fieldManagerTitle: string;
@@ -84,6 +85,7 @@ async function resolveViaBackend(longitude: number, latitude: number): Promise<R
 
     const template = globalTemplates[data.region_code] || globalTemplates.IN;
     const regionCode = data.region_code || 'IN';
+    const timezone = data.timezone || template.timezone;
 
     const jurisdictionMap: Record<string, 'municipal' | 'state_highway' | 'national_highway' | 'pwd_default'> = {
       'MCGM-KW': 'municipal', 'MCGM-FN': 'municipal', 'MCGM-HE': 'municipal',
@@ -110,6 +112,7 @@ async function resolveViaBackend(longitude: number, latitude: number): Promise<R
       regionName: data.region_name || template.regionName,
       currency: template.currency,
       currencySymbol: template.currencySymbol,
+      timezone,
       classificationNetwork: tierTemplate.classification,
       competentAgency: tierTemplate.agency,
       fieldManagerTitle: tierTemplate.managerTitle,
@@ -175,6 +178,7 @@ function offlineRoute(longitude: number, latitude: number, resolvedRoadId: numbe
       regionName: template.regionName,
       currency: template.currency,
       currencySymbol: template.currencySymbol,
+      timezone: template.timezone,
       classificationNetwork: tierTemplate.classification,
       competentAgency: tierTemplate.agency,
       fieldManagerTitle: tierTemplate.managerTitle,
@@ -236,6 +240,7 @@ function createOfflineResult(authority: Authority, type: RoutingResult['jurisdic
     regionName: template.regionName,
     currency: template.currency,
     currencySymbol: template.currencySymbol,
+    timezone: template.timezone,
     classificationNetwork: tierTemplate.classification,
     competentAgency: tierTemplate.agency,
     fieldManagerTitle: tierTemplate.managerTitle,

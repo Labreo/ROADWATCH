@@ -8,6 +8,7 @@ import { roads, projects, getComplaintsForRoad } from '@/data/mockData';
 import { Road } from '@/types';
 import { getHistoricalRoadState, playbackSteps } from '@/data/historicalData';
 import { generateSensorsForRoads, generateStressZones, SENSOR_LEVEL_COLORS, SENSOR_COLORS, type SensorReading } from '@/data/sensorData';
+import { useGeolocation } from '@/hooks/useGeolocation';
 
 // Swaps GeoJSON [longitude, latitude] to Leaflet [latitude, longitude]
 const getLeafletCoords = (coords: [number, number][]): [number, number][] => {
@@ -147,15 +148,19 @@ const getRoadMidpoint = (coordinates: [number, number][]): [number, number] => {
 };
 
 export default function LeafletMap() {
-  const { 
-    selectedRoadId, 
-    setSelectedRoadId, 
-    searchQuery, 
+  const {
+    selectedRoadId,
+    setSelectedRoadId,
+    searchQuery,
     statusFilter,
     activeView,
     currentPlaybackStepId,
-    complaintsList
+    complaintsList,
+    isOnline
   } = useStore();
+
+  const geo = useGeolocation();
+  const [showManualLocation, setShowManualLocation] = useState(false);
 
   const [isLightMode, setIsLightMode] = useState(false);
 
@@ -208,9 +213,46 @@ export default function LeafletMap() {
   const defaultZoom = 11.5;
 
   return (
-    <div className="relative w-full h-full rounded-xl overflow-hidden border border-border/80 shadow-2xl">
+    <div className="relative w-full h-full rounded-xl overflow-hidden border border-border/80 shadow-2xl"
+      role="application"
+      aria-label={isOnline ? 'Interactive road map' : 'Map data limited — offline mode'}
+    >
+      {/* Screen reader announcements */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only" id="map-status-announcements" />
+
+      {/* Geolocation error toast */}
+      {geo.error && (
+        <div role="alert" className="absolute bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 z-[1006] glass-depth-2 border border-amber-500/30 rounded-2xl p-4 shadow-2xl animate-toast-in">
+          <div className="flex items-start gap-3">
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-bold text-amber-300">
+                Can't find your location — tap to set manually
+              </p>
+              <div className="flex gap-2 mt-2">
+                <button
+                  onClick={geo.retry}
+                  className="text-[9px] font-bold px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-500/30 text-amber-300 hover:bg-amber-500/30 transition-all"
+                  aria-label="Retry geolocation"
+                >
+                  Retry
+                </button>
+                <button
+                  onClick={() => setShowManualLocation(!showManualLocation)}
+                  className="text-[9px] font-bold px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700 transition-all"
+                  aria-label="Set location manually"
+                >
+                  Set location manually
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Visual map status indicator */}
-      <div className="absolute top-3 right-3 z-[1005] flex flex-col gap-1.5 text-[10px] font-bold glass-panel px-4 py-3 rounded-xl border border-border/80 shadow-2xl select-none min-w-[125px] border-l-2 border-l-cyan-400/80 transition-all duration-300">
+      <div className="absolute top-3 right-3 z-[1005] flex flex-col gap-1.5 text-[10px] font-bold glass-panel px-4 py-3 rounded-xl border border-border/80 shadow-2xl select-none min-w-[125px] border-l-2 border-l-cyan-400/80 transition-all duration-300"
+        role="region"
+        aria-label="Map legend">
         <span className="text-muted-foreground uppercase tracking-widest font-black mb-1.5 text-[8px] opacity-75">Status Matrix</span>
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-1.5 rounded-sm bg-[#34d399] inline-block shadow-sm"></span>

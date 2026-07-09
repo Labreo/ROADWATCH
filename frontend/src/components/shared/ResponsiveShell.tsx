@@ -56,13 +56,17 @@ export default function ResponsiveShell({ children }: ResponsiveShellProps) {
           <OfflineBanner />
 
           {/* Content area */}
-          <main className="flex-1 flex flex-col p-4 lg:p-5 pb-28 lg:pb-5 min-h-0 overflow-y-auto relative bg-background scroll-smooth">
+          <main
+            id="main-content"
+            className="flex-1 flex flex-col p-4 lg:p-5 pb-28 lg:pb-5 min-h-0 overflow-y-auto relative bg-background scroll-smooth"
+          >
             {children}
           </main>
         </div>
 
         {/* Mobile Bottom Navigation — premium pill bar */}
         <nav
+          aria-label="Mobile navigation"
           className="lg:hidden fixed bottom-0 inset-x-0 z-[1008] pb-safe"
           style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
         >

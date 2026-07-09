@@ -10,6 +10,10 @@ from app.api.audit import router as audit_router
 from app.api.roads import router as roads_router
 from app.api.contractors import router as contractors_router
 from app.api.projects import router as projects_router
+from app.api.conflicts import router as conflicts_router
+from app.api.exchange import router as exchange_router
+from app.api.translate import router as translate_router
+from app.api.global_search import router as global_search_router
 from app.services.sla_service import SlaService
 from app.services.audit_context import set_audit_user
 
@@ -65,6 +69,10 @@ app.include_router(audit_router, prefix="/api/v1")
 app.include_router(roads_router, prefix="/api/v1")
 app.include_router(contractors_router, prefix="/api/v1")
 app.include_router(projects_router, prefix="/api/v1")
+app.include_router(conflicts_router, prefix="/api/v1")
+app.include_router(exchange_router, prefix="/api/v1")
+app.include_router(translate_router, prefix="/api/v1")
+app.include_router(global_search_router, prefix="/api/v1")
 
 
 @app.get("/")

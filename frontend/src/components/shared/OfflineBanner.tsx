@@ -28,12 +28,14 @@ export default function OfflineBanner() {
         transition={{ duration: 0.3, ease: 'easeInOut' }}
         className="overflow-hidden shrink-0 z-[999] relative"
       >
-        <div 
+        <div
           className={`w-full py-2.5 px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs border-b transition-colors duration-300 ${
             !activeOnline
               ? 'bg-red-500/10 border-red-500/20 text-red-200 backdrop-blur-md'
               : 'bg-cyan-500/10 border-cyan-500/20 text-cyan-200 backdrop-blur-md'
           }`}
+          role="status"
+          aria-live="polite"
         >
           <div className="flex items-center gap-2.5">
             {!activeOnline ? (

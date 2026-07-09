@@ -42,7 +42,10 @@ export default class ErrorBoundary extends React.Component<Props, State> {
       }
 
       return (
-        <div className="w-full h-full min-h-[300px] flex flex-col items-center justify-center p-6 text-center bg-slate-950/60 border border-red-950 rounded-xl relative overflow-hidden">
+        <div className="w-full h-full min-h-[300px] flex flex-col items-center justify-center p-6 text-center bg-slate-950/60 border border-red-950 rounded-xl relative overflow-hidden"
+          role="alert"
+          aria-live="assertive"
+        >
           {/* Subtle background red mask */}
           <div className="absolute inset-0 bg-red-950/5 pointer-events-none"></div>
           
@@ -70,6 +73,7 @@ export default class ErrorBoundary extends React.Component<Props, State> {
             <button
               onClick={this.handleReset}
               className="flex items-center gap-2 text-[10px] uppercase font-extrabold tracking-wider bg-red-950/80 border border-red-800/60 hover:bg-red-900/70 text-red-300 px-4 py-2 rounded-xl transition-all"
+              aria-label="Reset and reload the application"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               Reset Mapping Frame

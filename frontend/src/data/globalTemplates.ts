@@ -10,6 +10,7 @@ export interface RegionTemplate {
   currency: string;
   currencySymbol: string;
   locale: string;
+  timezone: string;
   formatCurrency: (value: number, short?: boolean) => string;
   fieldManagerTitle: string;
   formatManagerName: (name: string) => string;
@@ -28,6 +29,7 @@ export const globalTemplates: Record<string, RegionTemplate> = {
     currency: 'INR',
     currencySymbol: '₹',
     locale: 'en-IN',
+    timezone: 'Asia/Kolkata',
     formatCurrency: (value: number, short?: boolean) => {
       const formatted = new Intl.NumberFormat('en-IN', {
         style: 'currency',
@@ -74,6 +76,7 @@ export const globalTemplates: Record<string, RegionTemplate> = {
     currency: 'GBP',
     currencySymbol: '£',
     locale: 'en-GB',
+    timezone: 'Europe/London',
     formatCurrency: (value: number, short?: boolean) => {
       const formatted = new Intl.NumberFormat('en-GB', {
         style: 'currency',
@@ -120,6 +123,7 @@ export const globalTemplates: Record<string, RegionTemplate> = {
     currency: 'USD',
     currencySymbol: '$',
     locale: 'en-US',
+    timezone: 'America/Detroit',
     formatCurrency: (value: number, short?: boolean) => {
       const formatted = new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -166,6 +170,7 @@ export const globalTemplates: Record<string, RegionTemplate> = {
     currency: 'KES',
     currencySymbol: 'KSh',
     locale: 'en-KE',
+    timezone: 'Africa/Nairobi',
     formatCurrency: (value: number, short?: boolean) => {
       const formatted = new Intl.NumberFormat('en-KE', {
         style: 'currency',

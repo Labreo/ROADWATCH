@@ -4,6 +4,7 @@ import React, { ReactNode, useRef, useEffect } from 'react';
 import { motion, useDragControls, AnimatePresence } from 'framer-motion';
 import { springs } from './animations';
 import { X } from 'lucide-react';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 interface BottomSheetProps {
   isOpen: boolean;
@@ -30,6 +31,8 @@ export default function BottomSheet({
   const sheetRef = useRef<HTMLDivElement>(null);
   const dragControls = useDragControls();
   const [mounted, setMounted] = React.useState(false);
+
+  useFocusTrap(sheetRef, isOpen && mounted, onClose);
 
   useEffect(() => {
     setMounted(true);
@@ -58,6 +61,7 @@ export default function BottomSheet({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={onClose}
+              aria-hidden="true"
               className="lg:hidden fixed inset-0 bg-[#000000]/40 backdrop-blur-sm z-[1010]"
             />
           )}
@@ -65,6 +69,9 @@ export default function BottomSheet({
           {/* Bottom Sheet Drawer Shell */}
           <motion.div
             ref={sheetRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={title || 'Panel'}
             initial={{ y: '100%' }}
             animate={{ 
               y: typeof window !== 'undefined' ? window.innerHeight - (window.innerHeight * defaultSnapPoint) / 100 : 0
@@ -108,8 +115,9 @@ export default function BottomSheet({
             }}
           >
             {/* Grab Handle Header (Touch gesture indicator for mobile) */}
-            <div 
+            <div
               onPointerDown={(e) => dragControls.start(e)}
+              aria-hidden="true"
               className="lg:hidden w-full h-8 flex items-center justify-center cursor-ns-resize active:scale-95 transition-all touch-none shrink-0"
             >
               <div className="w-12 h-1.2 bg-slate-650 rounded-full opacity-80 hover:opacity-100 transition-opacity" />

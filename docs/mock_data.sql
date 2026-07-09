@@ -7,11 +7,11 @@ TRUNCATE TABLE complaints, projects, roads, contractors, authorities, fund_sourc
 -- =========================================================================
 -- 0. SEED REGIONS
 -- =========================================================================
-INSERT INTO regions (code, name, default_currency, locale, phone_format, bounding_box) VALUES
-('IN', 'India', 'INR', 'en-IN', '+91-XX-XXXXXXXX', ST_GeomFromText('POLYGON((68.1 6.8, 97.4 6.8, 97.4 35.7, 68.1 35.7, 68.1 6.8))', 4326)),
-('US', 'United States', 'USD', 'en-US', '+1-XXX-XXX-XXXX', ST_GeomFromText('POLYGON((-125.0 24.5, -66.9 24.5, -66.9 49.4, -125.0 49.4, -125.0 24.5))', 4326)),
-('GB', 'United Kingdom', 'GBP', 'en-GB', '+44-XX-XXXXXXXX', ST_GeomFromText('POLYGON((-8.6 49.8, 1.8 49.8, 1.8 60.9, -8.6 60.9, -8.6 49.8))', 4326)),
-('KE', 'Kenya', 'KES', 'en-KE', '+254-XX-XXXXXXX', ST_GeomFromText('POLYGON((33.8 -4.7, 41.9 -4.7, 41.9 5.5, 33.8 5.5, 33.8 -4.7))', 4326));
+INSERT INTO regions (code, name, default_currency, locale, phone_format, bounding_box, timezone) VALUES
+('IN', 'India', 'INR', 'en-IN', '+91-XX-XXXXXXXX', ST_GeomFromText('POLYGON((68.1 6.8, 97.4 6.8, 97.4 35.7, 68.1 35.7, 68.1 6.8))', 4326), 'Asia/Kolkata'),
+('US', 'United States', 'USD', 'en-US', '+1-XXX-XXX-XXXX', ST_GeomFromText('POLYGON((-125.0 24.5, -66.9 24.5, -66.9 49.4, -125.0 49.4, -125.0 24.5))', 4326), 'America/Detroit'),
+('GB', 'United Kingdom', 'GBP', 'en-GB', '+44-XX-XXXXXXXX', ST_GeomFromText('POLYGON((-8.6 49.8, 1.8 49.8, 1.8 60.9, -8.6 60.9, -8.6 49.8))', 4326), 'Europe/London'),
+('KE', 'Kenya', 'KES', 'en-KE', '+254-XX-XXXXXXX', ST_GeomFromText('POLYGON((33.8 -4.7, 41.9 -4.7, 41.9 5.5, 33.8 5.5, 33.8 -4.7))', 4326), 'Africa/Nairobi');
 
 -- =========================================================================
 -- 1. SEED AUTHORITIES (5 Records — India only; international added separately)
@@ -855,6 +855,41 @@ VALUES
 );
 
 -- =========================================================================
+-- 10. CROSS-REGION SPLIT COMPLAINT (parent + child)
+-- Simulates a complaint filed near a region boundary that gets split
+-- =========================================================================
+INSERT INTO complaints (client_temp_id, title, description, category, geom, status, escalation_level, image_url, assigned_authority_id, road_id, parent_complaint_id, region_override)
+VALUES
+(
+    '7f7f7f7f-1001-4000-8000-400000000001',
+    'Pothole on I-94 near Dearborn (primary)',
+    'Deep pothole on I-94 westbound near the Michigan Ave interchange.',
+    'pothole',
+    ST_GeomFromText('POINT(-83.1000 42.3550)', 4326),
+    'routed',
+    0,
+    NULL,
+    8,
+    13,
+    NULL,
+    'US'
+),
+(
+    '7f7f7f7f-1001-4000-8000-400000000002',
+    'Pothole on I-94 near Dearborn (secondary split)',
+    'Duplicate notification for I-94 pothole — forwarded to secondary jurisdiction.',
+    'pothole',
+    ST_GeomFromText('POINT(-83.1000 42.3550)', 4326),
+    'pending',
+    0,
+    NULL,
+    6,
+    13,
+    29,
+    'US'
+);
+
+-- =========================================================================
 -- BACKFILL CONTRACTOR CODES (for existing contractors)
 -- ORDER must match INSERT order in sections 2 and 7
 -- Indian contractors (id 1-12) + International (id 13-21)
@@ -1016,3 +1051,19 @@ INSERT INTO approval_trail (entity_type, entity_id, action, requested_by, approv
 ('variance', 1, 'budget_variance', 'Contractor (Apex Constructions)', 'Rajesh Kumar (Chief Engineer)', '2025-10-15 16:00:00+05:30', 'approved', 'Bitumen price index clause invoked per contract clause 14.2'),
 ('variance', 2, 'budget_underrun', 'Project Manager (LBS Marg)', 'Anita Deshmukh (Project Director)', '2025-08-20 11:00:00+05:30', 'approved', 'Savings from optimized alignment — acceptable rerouting per site instruction SI-042'),
 ('contingency', 6, 'contingency_release', 'Bridges Division Engineer (SCLR)', 'PWD Chief Engineer', '2026-01-10 09:45:00+05:30', 'approved', '3 additional expansion joints needed — original survey missed corrosion damage under bearing plates');
+
+-- =========================================================================
+-- SEED ROAD REGION CROSSINGS (roads that span multiple regions)
+-- =========================================================================
+-- I-94 crosses from MI into other states; simulate a region boundary crossing
+INSERT INTO road_region_crossings (road_id, region_code, geom_segment, authority_id) VALUES
+(13, 'US', ST_GeomFromText('LINESTRING(-83.1500 42.3500, -83.1000 42.3550, -83.0500 42.3600, -82.9900 42.3650, -82.9400 42.3700)', 4326), 8);
+
+-- =========================================================================
+-- SEED CONFLICT GROUPS (simulated duplicate roads/authorities)
+-- =========================================================================
+INSERT INTO road_conflict_groups (conflict_key, primary_road_id, merged_metadata, resolved) VALUES
+('dup-london-camden-high-st', 18, '{"detected_by":"global_search","similarity":0.85,"duplicate_ids":[18,21],"resolution":"linked"}', FALSE);
+
+INSERT INTO authority_conflict_groups (conflict_key, primary_authority_id, merged_metadata, resolved) VALUES
+('dup-michigan-road-authorities', 7, '{"detected_by":"boundary_overlap","overlap_pct":0.45,"duplicate_ids":[7,8],"resolution":"pending_review"}', FALSE);

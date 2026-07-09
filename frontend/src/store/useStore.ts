@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { RoadStatus, Complaint, SyncQueueItem, Road, NotificationItem } from '@/types';
+import { RoadStatus, Complaint, SyncQueueItem, Road, NotificationItem, FontSizeLevel, ContrastMode, Locale } from '@/types';
 import { complaints as mockComplaints, roads as mockRoads } from '@/data/mockData';
 import { CachedRoadRepository, SyncLog } from '@/services/cachedRoadRepository';
 import { OfflineSyncManager } from '@/services/offlineSync';
@@ -111,6 +111,24 @@ interface AppState {
   setCanvasAction: (action: { type: string; coordinates?: [number, number, number]; [key: string]: any } | null) => void;
   uStructuralStressIntensity: number;
   setUStructuralStressIntensity: (val: number) => void;
+
+  // Region State
+  regionCode: string;
+  setRegionCode: (code: string) => void;
+
+  // Exchange Rate State
+  exchangeTargetCurrency: string;
+  setExchangeTargetCurrency: (currency: string) => void;
+
+  // Accessibility State
+  contrastMode: ContrastMode;
+  setContrastMode: (mode: ContrastMode) => void;
+  fontSize: FontSizeLevel;
+  setFontSize: (size: FontSizeLevel) => void;
+  locale: Locale;
+  setLocale: (locale: Locale) => void;
+  reducedMotion: boolean;
+  setReducedMotion: (val: boolean) => void;
 }
 
 // Helper to load custom complaints from LocalStorage
@@ -298,6 +316,69 @@ export const useStore = create<AppState>((set, get) => {
       return 0.0;
     })(),
     setUStructuralStressIntensity: (val) => set({ uStructuralStressIntensity: val }),
+
+    // Region State
+    regionCode: (() => {
+      if (typeof window === 'undefined') return 'IN';
+      return localStorage.getItem('rw_region') || 'IN';
+    })(),
+    setRegionCode: (code) => {
+      set({ regionCode: code });
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('rw_region', code);
+      }
+    },
+
+    // Exchange Rate State
+    exchangeTargetCurrency: 'USD',
+    setExchangeTargetCurrency: (currency) => set({ exchangeTargetCurrency: currency }),
+
+    // Accessibility State
+    contrastMode: (() => {
+      if (typeof window === 'undefined') return 'normal';
+      return (localStorage.getItem('rw_contrast') as ContrastMode) || 'normal';
+    })(),
+    setContrastMode: (mode) => {
+      set({ contrastMode: mode });
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('rw_contrast', mode);
+        document.documentElement.classList.toggle('high-contrast', mode === 'high');
+      }
+    },
+    fontSize: (() => {
+      if (typeof window === 'undefined') return 'default';
+      return (localStorage.getItem('rw_fontsize') as FontSizeLevel) || 'default';
+    })(),
+    setFontSize: (size) => {
+      set({ fontSize: size });
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('rw_fontsize', size);
+        document.documentElement.classList.remove('font-size-small', 'font-size-large');
+        if (size !== 'default') {
+          document.documentElement.classList.add(`font-size-${size}`);
+        }
+      }
+    },
+    locale: (() => {
+      if (typeof window === 'undefined') return 'en-IN';
+      return (localStorage.getItem('rw_locale') as Locale) || 'en-IN';
+    })(),
+    setLocale: (locale) => {
+      set({ locale });
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('rw_locale', locale);
+      }
+    },
+    reducedMotion: (() => {
+      if (typeof window === 'undefined') return false;
+      return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    })(),
+    setReducedMotion: (val) => {
+      set({ reducedMotion: val });
+      if (typeof window !== 'undefined') {
+        document.documentElement.classList.toggle('reduced-motion', val);
+      }
+    },
 
     // Network / Offline Queue
     isOnline: typeof window !== 'undefined' ? window.navigator.onLine : true,

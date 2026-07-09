@@ -121,8 +121,8 @@ export default function Sidebar() {
           )}
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 py-3 overflow-y-auto overflow-x-hidden">
+        {/* Navigator */}
+        <nav id="sidebar-nav" className="flex-1 py-3 overflow-y-auto overflow-x-hidden" aria-label="Main navigation">
           {navSections.map(section => (
             <div key={section.label}>
               {sidebarOpen && <NavSeparator label={section.label} />}
