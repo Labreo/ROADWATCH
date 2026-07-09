@@ -1,14 +1,15 @@
-import React from 'react';
-import { 
-  MapPin, 
-  HardHat, 
-  Landmark, 
-  ShieldAlert, 
-  ShieldCheck, 
+import React, { useState, useCallback } from 'react';
+import {
+  MapPin,
+  HardHat,
+  Landmark,
+  ShieldAlert,
+  ShieldCheck,
   ExternalLink,
   Mail,
   Phone
 } from 'lucide-react';
+import ContractorScorecardDialog from '@/components/contractors/ContractorScorecardDialog';
 
 export interface Citation {
   type: 'road' | 'contractor' | 'authority';
@@ -27,11 +28,20 @@ interface CitationRendererProps {
   onSelectContractor?: (id: number) => void;
 }
 
-export default function CitationRenderer({ 
-  citations, 
-  onSelectRoad, 
-  onSelectContractor 
+export default function CitationRenderer({
+  citations,
+  onSelectRoad,
+  onSelectContractor
 }: CitationRendererProps) {
+  const [selectedContractorId, setSelectedContractorId] = useState<number | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const handleContractorClick = useCallback((id: number) => {
+    setSelectedContractorId(id);
+    setDialogOpen(true);
+    onSelectContractor?.(id);
+  }, [onSelectContractor]);
+
   if (!citations || citations.length === 0) return null;
 
   return (
@@ -81,9 +91,9 @@ export default function CitationRenderer({
 
           if (cite.type === 'contractor') {
             return (
-              <div 
+              <div
                 key={`cite-contractor-${cite.id}-${idx}`}
-                onClick={() => onSelectContractor?.(cite.id)}
+                onClick={() => handleContractorClick(cite.id)}
                 className="group relative overflow-hidden glass-panel p-3 rounded-xl border border-border/60 hover:border-indigo-500/50 bg-slate-950/40 cursor-pointer transition-all hover:-translate-y-0.5 active:translate-y-0 select-none"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -165,6 +175,13 @@ export default function CitationRenderer({
           return null;
         })}
       </div>
+
+      {/* Contractor Scorecard Dialog */}
+      <ContractorScorecardDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        contractorId={selectedContractorId ?? undefined}
+      />
     </div>
   );
 }

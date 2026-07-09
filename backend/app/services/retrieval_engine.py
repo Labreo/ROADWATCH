@@ -23,7 +23,56 @@ ROAD_ALIASES = {
     "sclr": 9, "santa cruz chembur": 9, "santa cruz-chembur": 9,
     "ghodbunder": 10, "gb": 10,
     "marine drive": 11, "promenade": 11, "queens necklace": 11,
-    "sion panvel": 12, "sion-panvel": 12, "sph": 12
+    "sion panvel": 12, "sion-panvel": 12, "sph": 12,
+    # US — Detroit
+    "i-94": 13, "edsel ford": 13,
+    "m-10": 14, "lodge freeway": 14,
+    "woodward": 15, "woodward avenue": 15,
+    "gratiot": 16, "gratiot avenue": 16,
+    "michigan avenue": 17,
+    "m-39": 29, "southfield freeway": 29,
+    "i-75": 42, "fisher freeway": 42,
+    "i-696": 43, "reuther freeway": 43,
+    "m-8": 44, "davison freeway": 44,
+    "telegraph road": 45, "us-24": 45,
+    "van dyke": 46, "m-53": 46,
+    "fort street": 47, "m-85": 47,
+    "8 mile": 48, "m-102": 48,
+    "grand river": 49,
+    "john r": 50,
+    "jefferson avenue": 51,
+    # UK — London
+    "a41": 18, "camden high street": 18,
+    "a502": 19, "finchley road": 19,
+    "euston road": 20, "a501": 20,
+    "m25": 30,
+    "a4": 52,
+    "a406": 53, "north circular": 53,
+    "a40": 54, "westway": 54,
+    "a10": 55,
+    "b522": 56,
+    "a1": 57, "holloway road": 57,
+    "whitehall": 58,
+    "oxford street": 59,
+    "b516": 60,
+    "a23": 61,
+    # KE — Nairobi
+    "uhuru highway": 22,
+    "mombasa road": 23, "a109": 23,
+    "thika superhighway": 24, "a2": 24,
+    "jogoo road": 25, "b301": 25,
+    "langata road": 26, "c401": 26,
+    "waiyaki way": 31, "c62": 31,
+    "ngong road": 62, "c58": 62,
+    "kiambu road": 63,
+    "haile selassie": 64,
+    "kenyatta avenue": 65,
+    "limuru road": 66, "b3": 66,
+    "enterprise road": 67,
+    "outer ring road": 68,
+    "bunyala road": 69,
+    "forest road": 70,
+    "likoni road": 71
 }
 
 CONTRACTOR_ALIASES = {
@@ -38,7 +87,19 @@ CONTRACTOR_ALIASES = {
     "skyline": 9, "skyline developers": 9,
     "omega": 10, "omega infrastructure": 10,
     "precision": 11, "precision asphalt": 11,
-    "pioneer": 12, "pioneer engineering": 12
+    "pioneer": 12, "pioneer engineering": 12,
+    # US — Detroit
+    "great lakes": 13, "great lakes infrastructure": 13,
+    "michigan paving": 14,
+    "detroit roads": 15, "detroit roads alliance": 15,
+    # UK — London
+    "thames highway": 16, "thames": 16,
+    "camden civils": 17,
+    "london asphalt": 18,
+    # KE — Nairobi
+    "nairobi road": 19, "nairobi road builders": 19,
+    "kenya infrastructure": 20,
+    "mombasa roadworks": 21
 }
 
 AUTHORITY_ALIASES = {
@@ -46,7 +107,20 @@ AUTHORITY_ALIASES = {
     "f-north": 2, "mcgm-fn": 2, "fn": 2, "ward f": 2,
     "h-east": 3, "mcgm-he": 3, "he": 3, "ward h": 3,
     "pwd": 4, "pwd-mum": 4, "state pwd": 4, "public works": 4,
-    "nhai": 5, "nhai-rom": 5, "national highway": 5, "highways authority": 5
+    "nhai": 5, "nhai-rom": 5, "national highway": 5, "highways authority": 5,
+    # US — Detroit
+    "dpw": 6, "dpw-det": 6, "detroit public works": 6,
+    "mdot": 7, "michigan dot": 7, "lansing": 7,
+    "fhwa": 8, "fhwa-mi": 8, "federal highway": 8,
+    # UK — London
+    "crca": 9,
+    "camden": 10, "camden borough": 10, "cbc": 10,
+    "lhjc": 11, "london highways": 11,
+    "national highways": 12, "nh-se": 12,
+    # KE — Nairobi
+    "nairobi county": 14, "ncc": 14,
+    "kura": 15, "urban roads": 15,
+    "kenha": 16, "kenya national highways": 16
 }
 
 class RetrievalEngine:

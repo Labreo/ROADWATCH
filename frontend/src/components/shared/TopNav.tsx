@@ -21,6 +21,7 @@ import { useState, useEffect, useRef } from 'react';
 import { NotificationItem } from '@/types';
 import { useA11y } from '@/hooks/useA11y';
 import AccessibilityPanel from './AccessibilityPanel';
+import RegionSelector from './RegionSelector';
 
 const VIEW_TITLES: Record<string, { label: string; section: string }> = {
   dashboard:   { label: 'Dashboard Overview',             section: 'Intelligence'   },
@@ -111,7 +112,7 @@ export default function TopNav() {
   const viewMeta = VIEW_TITLES[activeView] ?? { label: 'ROADWATCH', section: '' };
 
   return (
-    <header className="sticky top-0 z-[1005] w-full h-14 glass-frosted px-4 lg:px-6 flex items-center justify-between gap-3 shrink-0">
+    <header role="banner" className="sticky top-0 z-[1005] w-full h-14 glass-frosted px-4 lg:px-6 flex items-center justify-between gap-3 shrink-0">
 
       {/* Left: burger + breadcrumb */}
       <div className="flex items-center gap-3 min-w-0">
@@ -173,11 +174,8 @@ export default function TopNav() {
           )}
         </div>
 
-        {/* Region chip */}
-        <span className="hidden lg:inline-flex items-center text-[8px] bg-white/[0.03] border border-white/[0.05] text-[#45455a] font-bold tracking-[0.12em] uppercase px-2.5 py-1 rounded-full"
-          aria-hidden="true">
-          Mumbai · MH
-        </span>
+        {/* Region selector */}
+        <RegionSelector />
 
         {/* A11y settings */}
         <div className="relative" ref={a11yDropdownRef}>

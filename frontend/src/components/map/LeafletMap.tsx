@@ -9,6 +9,7 @@ import { Road } from '@/types';
 import { getHistoricalRoadState, playbackSteps } from '@/data/historicalData';
 import { generateSensorsForRoads, generateStressZones, SENSOR_LEVEL_COLORS, SENSOR_COLORS, type SensorReading } from '@/data/sensorData';
 import { useGeolocation } from '@/hooks/useGeolocation';
+import RoadClassificationLegend from './RoadClassificationLegend';
 
 // Swaps GeoJSON [longitude, latitude] to Leaflet [latitude, longitude]
 const getLeafletCoords = (coords: [number, number][]): [number, number][] => {
@@ -277,6 +278,9 @@ export default function LeafletMap() {
           ))}
         </div>
       </div>
+
+      {/* Road classification legend */}
+      <RoadClassificationLegend />
 
       <MapContainer
         center={defaultCenter}

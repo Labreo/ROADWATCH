@@ -74,20 +74,22 @@ class AuthorityResolver:
         return results[0] if results else None
 
     @staticmethod
-    def resolve_authority_for_coordinates(lon: float, lat: float, exclude_authority_ids: list = None):
+    def resolve_authority_for_coordinates(lon: float, lat: float, exclude_authority_ids: list = None, region_code: str = None):
         """
-        Resolves authority across ALL regions using PostGIS ST_Contains.
-        1. Queries regions table bounding boxes for fast country filter
-        2. Queries authorities where ST_Contains(geom_boundary, point) is true
-        3. Smallest boundary wins (most granular jurisdiction)
-        4. Falls back to region default if no boundary match
-        5. Skips authorities in exclude_authority_ids (for reassignment)
+        Resolves authority using PostGIS ST_Contains.
+        1. If region_code provided, queries only that region's authorities (skip regions table lookup)
+        2. Otherwise queries regions table bounding boxes for fast country filter
+        3. Queries authorities where ST_Contains(geom_boundary, point) is true
+        4. Smallest boundary wins (most granular jurisdiction)
+        5. Falls back to region default if no boundary match
+        6. Skips authorities in exclude_authority_ids (for reassignment)
         """
         if exclude_authority_ids is None:
             exclude_authority_ids = []
 
-        region = AuthorityResolver.get_region_for_coordinates(lon, lat)
-        region_code = region['code'] if region else 'IN'
+        if region_code is None:
+            region = AuthorityResolver.get_region_for_coordinates(lon, lat)
+            region_code = region['code'] if region else 'IN'
 
         point_wkt = f"POINT({lon} {lat})"
 
@@ -97,17 +99,25 @@ class AuthorityResolver:
             placeholders = ",".join(str(int(x)) for x in exclude_authority_ids)
             exclude_clause = f" AND a.id NOT IN ({placeholders})"
 
+        # Build region filter clause
+        region_filter = ""
+        params = [point_wkt]
+        if region_code:
+            region_filter = " AND a.region_code = %s"
+            params.append(region_code)
+
         sql = f"""
         SELECT a.*, r.name as region_name, r.default_currency, r.locale, r.phone_format
         FROM authorities a
         LEFT JOIN regions r ON a.region_code = r.code
         WHERE ST_Contains(a.geom_boundary, ST_GeomFromText(%s, 4326)) = true
           AND a.geom_boundary IS NOT NULL
+          {region_filter}
           {exclude_clause}
         ORDER BY ST_Area(a.geom_boundary) ASC
         LIMIT 1
         """
-        results = db.query(sql, (point_wkt,))
+        results = db.query(sql, tuple(params))
         if results:
             res = dict(results[0])
             res.setdefault('region_code', region_code)
@@ -147,6 +157,19 @@ class AuthorityResolver:
             'geom_boundary': None, 'created_at': None, 'updated_at': None,
             'match_type': 'hardcoded_fallback'
         }
+
+    @staticmethod
+    def resolve_authority_for_region(region_code: str, lon: float, lat: float):
+        """
+        Resolves authority for coordinates within a specific region.
+        Passes region_code to resolve_authority_for_coordinates which
+        narrows the spatial query to that region's authorities.
+
+        Returns the resolved authority dict or a hardcoded fallback.
+        """
+        return AuthorityResolver.resolve_authority_for_coordinates(
+            lon, lat, exclude_authority_ids=None, region_code=region_code
+        )
 
     @staticmethod
     def resolve_authority_with_auto_reassign(lon: float, lat: float, declined_authority_ids: list = None) -> dict:
@@ -258,10 +281,13 @@ class AuthorityResolver:
         return {'area_match_percentage': None, 'boundary_distance_meters': None}
 
     @staticmethod
-    def resolve_with_routing_details(lon: float, lat: float, road_name: str = None) -> dict:
+    def resolve_with_routing_details(lon: float, lat: float, road_name: str = None, region_code: str = None) -> dict:
         """One-call: resolve authority for coordinates + build routing details."""
-        authority = AuthorityResolver.resolve_authority_for_coordinates(lon, lat)
-        region = AuthorityResolver.get_region_for_coordinates(lon, lat)
+        authority = AuthorityResolver.resolve_authority_for_coordinates(lon, lat, region_code=region_code)
+        if region_code:
+            region = AuthorityResolver.get_region_by_code(region_code)
+        else:
+            region = AuthorityResolver.get_region_for_coordinates(lon, lat)
         region_name = region.get('name') if region else None
         return AuthorityResolver.build_routing_details(authority, road_name, region_name, lon, lat)
 

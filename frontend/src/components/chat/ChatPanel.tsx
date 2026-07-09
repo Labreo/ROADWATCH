@@ -193,6 +193,30 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
   const [currentTranscription, setCurrentTranscription] = useState('Tap Mic to speak to AI');
   const [audioVolume, setAudioVolume] = useState(0);
 
+  // Screen reader announcement state
+  const [announcement, setAnnouncement] = useState('');
+
+  // Announce new assistant messages (skip empty/typing indicators)
+  useEffect(() => {
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg && lastMsg.role === 'assistant' && lastMsg.content && lastMsg.content.trim()) {
+      const clean = lastMsg.content
+        .replace(/\*\*/g, '')
+        .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
+        .replace(/`/g, '')
+        .replace(/#{1,6}\s/g, '')
+        .trim();
+      setAnnouncement(clean);
+    }
+  }, [messages]);
+
+  // Clear announcement after 5 seconds
+  useEffect(() => {
+    if (!announcement) return;
+    const timer = setTimeout(() => setAnnouncement(''), 5000);
+    return () => clearTimeout(timer);
+  }, [announcement]);
+
   // References to handle resources
   const isVoiceModeRef = useRef(false);
   const recognitionRef = useRef<any>(null);
@@ -924,6 +948,10 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
 
   return (
     <>
+      {/* Screen-reader live region for assistant messages */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {announcement}
+      </div>
       {/* Floating Toggle Button */}
       <div className="fixed bottom-24 right-4 lg:bottom-6 lg:right-6 z-[1006]">
         <motion.button
