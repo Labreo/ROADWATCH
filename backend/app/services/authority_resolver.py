@@ -1,5 +1,39 @@
 from app.services.database import db
 
+# Executive Engineer contact information for each authority
+EXECUTIVE_ENGINEERS = {
+    1: {  # MCGM Ward K-West
+        'name': 'Er. Ramesh Sawant',
+        'designation': 'Executive Engineer (Civil Engineering Division)',
+        'contact': '+91-22-2623-0101',
+        'email': 'ee.kw@mcgm.gov.in'
+    },
+    2: {  # MCGM Ward F-North
+        'name': 'Er. Anil Deshmukh',
+        'designation': 'Executive Engineer (Civil Engineering Division)',
+        'contact': '+91-22-2402-1102',
+        'email': 'ee.fn@mcgm.gov.in'
+    },
+    3: {  # MCGM Ward H-East
+        'name': 'Er. Sandeep Patil',
+        'designation': 'Executive Engineer (Civil Engineering Division)',
+        'contact': '+91-22-2618-2203',
+        'email': 'ee.he@mcgm.gov.in'
+    },
+    4: {  # State PWD Mumbai
+        'name': 'Er. Vijay Kadam',
+        'designation': 'Superintending Engineer (Public Works Division)',
+        'contact': '+91-22-2202-3304',
+        'email': 'se.mumbai@pwd.gov.in'
+    },
+    5: {  # NHAI RO Mumbai
+        'name': 'Er. Yashwant Rao',
+        'designation': 'Project Director (National Highways)',
+        'contact': '+91-22-2756-4405',
+        'email': 'romumbai@nhai.org'
+    }
+}
+
 class AuthorityResolver:
 
     @staticmethod
@@ -108,6 +142,54 @@ class AuthorityResolver:
             'department_code': 'PWD-MUM', 'contact_email': 'se.mumbai@pwd.gov.in',
             'contact_phone': '+91-22-2202-3333', 'region_code': 'IN',
             'geom_boundary': None, 'created_at': None, 'updated_at': None
+        }
+
+    @staticmethod
+    def resolve_with_routing_details(lon: float, lat: float, road_name: str = None) -> dict:
+        """One-call: resolve authority for coordinates + build routing details."""
+        authority = AuthorityResolver.resolve_authority_for_coordinates(lon, lat)
+        region = AuthorityResolver.get_region_for_coordinates(lon, lat)
+        region_name = region.get('name') if region else None
+        return AuthorityResolver.build_routing_details(authority, road_name, region_name)
+
+    @staticmethod
+    def build_routing_details(authority: dict, road_name: str = None, region_name: str = None) -> dict:
+        """
+        Build a human-readable routing_details payload from resolved authority.
+        Includes executive engineer info, fallback for unknown authorities.
+        Returns dict with authority_name, executive_engineer_name, designation, contact, reason_for_routing.
+        """
+        auth_id = authority.get('id', 4)
+        eng = EXECUTIVE_ENGINEERS.get(auth_id, {
+            'name': 'Office of the Commissioner',
+            'designation': 'Chief Engineer (Central Division)',
+            'contact': '+91-22-2262-0251',
+            'email': 'commissioner@mcgm.gov.in'
+        })
+
+        region = region_name or authority.get('region_name', authority.get('region_code', 'the region'))
+        dept = authority.get('name', 'Department of Public Works')
+
+        if road_name:
+            reasons = [
+                f"This issue on **{road_name}** falls under **{dept}** ({region}).",
+                f"Routing to **{eng['name']}** ({eng['designation']})."
+            ]
+        else:
+            reasons = [
+                f"This location falls under **{dept}** ({region}).",
+                f"Routing to **{eng['name']}** ({eng['designation']})."
+            ]
+
+        return {
+            "authority_name": dept,
+            "authority_id": auth_id,
+            "executive_engineer_name": eng['name'],
+            "designation": eng['designation'],
+            "contact": eng['contact'],
+            "email": eng['email'],
+            "region": region,
+            "reason_for_routing": " ".join(reasons)
         }
 
     @staticmethod

@@ -56,6 +56,7 @@ import ChatOrchestrator from '@/components/chat/ChatOrchestrator';
 import OperationsDashboard from '@/components/operations/OperationsDashboard';
 import LandingHero from '@/components/demo/LandingHero';
 import DemoTourGuide from '@/components/demo/DemoTourGuide';
+import DemoChatMode from '@/components/demo/DemoChatMode';
 import PlaybackDashboard from '@/components/playback/PlaybackDashboard';
 import SensorDashboard from '@/components/sensors/SensorDashboard';
 import DigitalTwinView from '@/components/twin/DigitalTwinView';
@@ -70,16 +71,17 @@ import BudgetTimeline from '@/components/transparency/BudgetTimeline';
 import ContractorHistoryCard from '@/components/transparency/ContractorHistoryCard';
 import TransparencyScoreCard from '@/components/transparency/TransparencyScoreCard';
 import SankeyFlowVisualizer from '@/components/transparency/SankeyFlowVisualizer';
+import RegionsOverview from '@/components/regions/RegionsOverview';
 
 export default function Page() {
-  const { 
-    activeView, 
+  const {
+    activeView,
     setActiveView,
-    searchQuery, 
+    searchQuery,
     setSearchQuery,
-    statusFilter, 
+    statusFilter,
     setStatusFilter,
-    selectedRoadId, 
+    selectedRoadId,
     setSelectedRoadId,
     selectedComplaintId,
     setSelectedComplaintId,
@@ -95,7 +97,9 @@ export default function Page() {
     playbackSpeed,
     stepPlaybackForward,
     setPlaybackPlaying,
-    toggleSidebar
+    toggleSidebar,
+    demoMode,
+    setDemoMode
   } = useStore();
 
   const [isSyncingUI, setIsSyncingUI] = useState(false);
@@ -111,7 +115,7 @@ export default function Page() {
 
   // Sync drawer height when activeView is driven by the chat stream
   useEffect(() => {
-    if (isChatDriven && ['twin', 'roads', 'budgets', 'contractors'].includes(activeView)) {
+    if (isChatDriven && ['twin', 'roads', 'budgets', 'contractors', 'regions'].includes(activeView)) {
       setDrawerHeight(40);
     } else {
       setDrawerHeight(0);
@@ -1492,9 +1496,19 @@ export default function Page() {
         <DigitalTwinView />
       )}
 
+      {/* VIEW 10: REGIONS HUB */}
+      {!isChatDriven && activeView === 'regions' && (
+        <RegionsOverview />
+      )}
+
       {/* VIEW 0: CONVERSATIONAL ORCHESTRATOR SHELL */}
-      {(activeView === 'chat' || isChatDriven) && (
+      {(activeView === 'chat' || isChatDriven) && demoMode !== 'scripted' && (
         <ChatOrchestrator />
+      )}
+
+      {/* VIEW 0b: DEMO CHAT MODE */}
+      {(activeView === 'chat' || isChatDriven) && demoMode === 'scripted' && (
+        <DemoChatMode />
       )}
 
       {/* Responsive Bottom Drawer Overlay for Chat-Driven Views */}
@@ -1732,18 +1746,23 @@ export default function Page() {
 
       {/* Interactive Tour Guide Dock */}
       {isTourActive && (
-        <DemoTourGuide 
+        <DemoTourGuide
           currentStep={tourStep}
           setStep={setTourStep}
           onExit={() => {
             setIsTourActive(false);
+          }}
+          onLaunchDemo={() => {
+            setIsTourActive(false);
+            setDemoMode('scripted');
+            setActiveView('chat');
           }}
         />
       )}
 
       {/* Landing Page Cinematic Overlay */}
       {showLanding && (
-        <LandingHero 
+        <LandingHero
           onStartTour={() => {
             setShowLanding(false);
             setIsTourActive(true);
@@ -1752,6 +1771,12 @@ export default function Page() {
           onEnterDirect={() => {
             setShowLanding(false);
             setIsTourActive(false);
+          }}
+          onStartDemo={() => {
+            setShowLanding(false);
+            setIsTourActive(false);
+            setDemoMode('scripted');
+            setActiveView('chat');
           }}
         />
       )}

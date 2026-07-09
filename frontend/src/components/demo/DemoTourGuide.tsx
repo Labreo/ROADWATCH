@@ -8,6 +8,7 @@ interface DemoTourGuideProps {
   currentStep: number;
   setStep: (step: number) => void;
   onExit: () => void;
+  onLaunchDemo?: () => void;
 }
 
 interface TourStep {
@@ -59,7 +60,7 @@ const steps: TourStep[] = [
   }
 ];
 
-export default function DemoTourGuide({ currentStep, setStep, onExit }: DemoTourGuideProps) {
+export default function DemoTourGuide({ currentStep, setStep, onExit, onLaunchDemo }: DemoTourGuideProps) {
   const { 
     setActiveView, 
     setSelectedRoadId, 
@@ -292,6 +293,16 @@ export default function DemoTourGuide({ currentStep, setStep, onExit }: DemoTour
           {currentStep === steps.length ? 'Finish Tour' : 'Next Step'}
           <ArrowRight className="w-3.5 h-3.5" />
         </button>
+
+        {currentStep === steps.length && onLaunchDemo && (
+          <button
+            onClick={onLaunchDemo}
+            className="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold transition-all flex items-center gap-1.5 text-[10px] uppercase tracking-wider shadow-sm cursor-pointer active:scale-95"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            Try Demo Mode
+          </button>
+        )}
 
         <div className="h-6 w-[1px] bg-border/40 mx-1 hidden md:block" />
 

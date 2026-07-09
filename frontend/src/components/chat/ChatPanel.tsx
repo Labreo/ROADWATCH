@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import { springs } from '../shared/animations';
-import { 
-  MessageSquare, 
-  Send, 
-  X, 
-  RefreshCw, 
-  Sparkles, 
-  Maximize2, 
+import {
+  MessageSquare,
+  Send,
+  X,
+  RefreshCw,
+  Sparkles,
+  Maximize2,
   Minimize2,
   Navigation,
   FileSpreadsheet,
@@ -20,16 +20,27 @@ import {
   Volume2,
   VolumeX,
   Globe,
-  ChevronDown
+  ChevronDown,
+  WifiOff,
+  Wifi,
+  CloudUpload,
+  CheckCircle2,
+  Wrench
 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import CitationRenderer, { Citation } from './CitationRenderer';
+import RoutedToCard from './RoutedToCard';
+import type { RoutingDetail } from '@/types';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
+import { detectRegionSwitch, detectRegionFromText, detectRegionFromGps } from '@/services/regionDetectionService';
+import { isComparisonQuery, getCrossRegionComparison, generateComparisonResponse } from '@/services/regionComparisonService';
+import { setActiveRegion } from '@/services/regionAwareFormat';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
   citations?: Citation[];
+  routingDetails?: RoutingDetail;
   suggestedActions?: { type: string; target_id: number; label: string }[];
   evidence?: { title: string; items: string[] }[];
 }
@@ -197,12 +208,47 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
     sessionIdRef.current = 'sess_' + Math.random().toString(36).substring(2, 11);
   }, []);
 
-  const { 
-    setSelectedRoadId, 
-    setSelectedComplaintId, 
+  const {
+    setSelectedRoadId,
+    setSelectedComplaintId,
     setActiveView,
-    setIsReporting
+    setIsReporting,
+    isOnline: storeOnline,
+    setIsOnline: setStoreOnline,
+    syncQueueCount,
+    isSyncing,
+    processSyncQueue,
+    offlineQueue,
+    regionCode,
+    setRegionCode,
   } = useStore();
+
+  // Simulate offline toggle state (overrides real network state for demo)
+  const [simulateOffline, setSimulateOffline] = useState(false);
+  const effectiveOnline = simulateOffline ? false : storeOnline;
+
+  // Sync simulateOffline toggle to Zustand store so queueComplaint routes offline
+  // Also send system message to chat guiding demo users
+  useEffect(() => {
+    if (simulateOffline) {
+      setStoreOnline(false);
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: '🔧 **Demo Offline Mode Active.** Queued reports wait in IndexedDB. Toggle wrench ⚙️ button to restore connection and see auto-sync progress. Try filing a complaint!'
+      }]);
+      const id = setInterval(() => setStoreOnline(false), 500);
+      return () => {
+        clearInterval(id);
+        setStoreOnline(typeof window !== 'undefined' ? window.navigator.onLine : true);
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: '✅ **Connection Restored.** Auto-sync progress shown above. Check queue for results.'
+        }]);
+      };
+    } else {
+      setStoreOnline(typeof window !== 'undefined' ? window.navigator.onLine : true);
+    }
+  }, [simulateOffline, setStoreOnline]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
@@ -407,9 +453,13 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isVoiceMode, isListening, speechLanguage]);
 
-  // Backend checking
+  // Backend checking (respect simulated offline)
   useEffect(() => {
     const checkBackend = async () => {
+      if (simulateOffline) {
+        setIsBackendOnline(false);
+        return;
+      }
       try {
         const res = await fetch("http://localhost:8000/");
         if (res.ok) {
@@ -421,11 +471,11 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
         setIsBackendOnline(false);
       }
     };
-    
+
     checkBackend();
     const interval = setInterval(checkBackend, 15000);
     return () => clearInterval(interval);
-  }, []);
+  }, [simulateOffline]);
 
   // Action links click
   const handleActionClick = (action: { type: string; target_id: number; label: string }) => {
@@ -442,6 +492,9 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
       setSelectedRoadId(action.target_id);
       setIsReporting(true);
       setIsOpen(false);
+    } else if (action.type === 'navigate_to_regions' || action.type === 'navigate_to_region') {
+      setActiveView('regions' as any);
+      setIsOpen(false);
     }
   };
 
@@ -450,10 +503,46 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
     const lowerQuery = textToSend.toLowerCase();
     
     let text = "";
+    let routingDetails: RoutingDetail | undefined = undefined;
     let citations: Citation[] = [];
     let suggestedActions: { type: string; target_id: number; label: string }[] = [];
     let evidence: { title: string; items: string[] }[] = [];
     let nextSuggestedPrompts: string[] = [];
+
+    // ── Region Detection: explicit switch ──
+    const regionSwitch = detectRegionSwitch(textToSend);
+    if (regionSwitch && regionSwitch.confidence === 'explicit') {
+      setRegionCode(regionSwitch.regionCode);
+      setActiveRegion(regionSwitch.regionCode);
+      const rName = regionSwitch.regionCode === 'IN' ? 'India' : regionSwitch.regionCode === 'GB' ? 'United Kingdom' : regionSwitch.regionCode === 'US' ? 'United States' : 'Kenya';
+      text = `✅ **Region switched to ${rName}.** All data, currency, and terminology now reflect ${rName} standards. Ask about ${rName === 'India' ? 'NH-8' : rName === 'United Kingdom' ? 'M25' : rName === 'United States' ? 'I-94' : 'A104'} or compare across regions.`;
+      nextSuggestedPrompts = [`Show ${rName} roads`, `Compare ${rName} with UK`, `Who manages roads in ${rName}?`];
+      return void streamResponse(text, citations, suggestedActions, evidence, nextSuggestedPrompts, routingDetails);
+    }
+
+    // ── Auto-detect region from road names / landmarks ──
+    const detectedRegion = detectRegionFromText(textToSend);
+    if (detectedRegion.confidence === 'high' && detectedRegion.regionCode !== regionCode) {
+      setRegionCode(detectedRegion.regionCode);
+      setActiveRegion(detectedRegion.regionCode);
+    }
+
+    // ── Cross-Region Comparison ──
+    if (isComparisonQuery(textToSend)) {
+      const comparison = getCrossRegionComparison();
+      text = generateComparisonResponse(textToSend, comparison);
+      suggestedActions = [{ type: 'navigate_to_regions', target_id: 0, label: 'Open Region Hub' }];
+      nextSuggestedPrompts = ['Compare road budgets across all regions', 'Which region has best contractors?', 'Show India vs UK roads'];
+      return void streamResponse(text, citations, suggestedActions, evidence, nextSuggestedPrompts, routingDetails);
+    }
+
+    // ── Region-specific road query ──
+    const isM25Query = lowerQuery.includes('m25') || lowerQuery.includes('motorway');
+    const isI94Query = lowerQuery.includes('i-94') || lowerQuery.includes('i94') || lowerQuery.includes('interstate');
+    const isA104Query = lowerQuery.includes('a104') || lowerQuery.includes('nairobi-nakuru') || lowerQuery.includes('kenya highway');
+    const isA406Query = lowerQuery.includes('a406') || lowerQuery.includes('north circular');
+    const isM1Query = lowerQuery.includes('m1 motorway') || lowerQuery.includes('m1 ');
+    const isWoodwardQuery = lowerQuery.includes('woodward') || lowerQuery.includes('m-1');
 
     // Map localized keywords
     const isDamageQuery = lowerQuery.includes('damage') || lowerQuery.includes('recurring') || lowerQuery.includes('repeat') || lowerQuery.includes('खराब') || lowerQuery.includes('का खराब');
@@ -544,6 +633,16 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
           items: ["Superintendent Engineer: Mr. R.K. Joshi", "Ward Office: H-West Ward, Bandra (W)", "Email: ee.roads.hw@mcgm.gov.in", "Helpline: 1916 / 022-2623-0000"]
         }
       ];
+      routingDetails = {
+        authority_name: "Brihanmumbai Municipal Corporation (BMC) Ward H-West",
+        authority_id: 1,
+        executive_engineer_name: "Er. Ramesh Sawant",
+        designation: "Executive Engineer (Civil Engineering Division)",
+        contact: "+91-22-2623-0101",
+        email: "ee.kw@mcgm.gov.in",
+        region: "Mumbai – K-West Ward",
+        reason_for_routing: "This issue on **S.V. Road** falls under **Brihanmumbai Municipal Corporation (BMC) Ward H-West** (Mumbai – K-West Ward). Routing to **Er. Ramesh Sawant** (Executive Engineer, Civil Engineering Division)."
+      };
       nextSuggestedPrompts = [
         "Why is S.V. Road damaged again?",
         "Who repaired this road?",
@@ -568,6 +667,30 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
         "Who repaired S.V. Road?",
         "How much money was spent here?"
       ];
+    } else if (isM25Query) {
+      text = "**M25 Orbital Motorway (London)** — 188.5 km in **fair**. Junction 10-16 Smart Motorway (£324M) by Balfour Beatty at 92% spend. A406 North Circular (poor) has £42M pothole programme 45 days late.";
+      citations = [{ type: 'road', id: 201, name: 'M25 Orbital Motorway', code: 'M25', status: 'fair', length: 188.5 }];
+      nextSuggestedPrompts = ["Show M25 smart motorway budget", "Who manages the M25?", "Compare M25 with NH-8"];
+    } else if (isI94Query) {
+      text = "**I-94 Edsel Ford Freeway (Detroit)** — 45.2 km in **fair**. $185M Rehabilitation by Pulte Road Construction at 77% spend. I-75 Fisher Freeway is **good** after $420M express lane expansion.";
+      citations = [{ type: 'road', id: 301, name: 'I-94 Edsel Ford Freeway', code: 'I-94', status: 'fair', length: 45.2 }];
+      nextSuggestedPrompts = ["Show I-94 budget details", "Which contractor built I-75?", "Compare I-94 with M1"];
+    } else if (isA104Query) {
+      text = "**A104 Nairobi-Nakuru Highway (Kenya)** — 160 km Class A trunk road in **poor**. KSh 8.2B dual carriageway upgrade by Haji & Sons at 58%. B3 Thika Road is **good**.";
+      citations = [{ type: 'road', id: 401, name: 'A104 Nairobi-Nakuru Highway', code: 'A104', status: 'poor', length: 160 }];
+      nextSuggestedPrompts = ["Show A104 upgrade budget", "Who manages Kenya roads?", "Compare Kenya with India"];
+    } else if (isA406Query) {
+      text = "**A406 North Circular Road (London)** — 25.7 km A-road in **poor**. £42M pothole repair by Tarmac Road Services — 92% spent, 45 days late. Ringway Infrastructure blacklisted for M25 failure.";
+      citations = [{ type: 'road', id: 202, name: 'A406 North Circular Road', code: 'A406', status: 'poor', length: 25.7 }];
+      nextSuggestedPrompts = ["Show A406 pothole fix budget", "Who manages London roads?", "Compare UK with US"];
+    } else if (isM1Query) {
+      text = "**M1 Motorway** — 310 km major north-south route in **fair**, managed by National Highways (England). £156M A1 Safety Barrier project completed March 2025. Carries 120k+ vehicles/day near London.";
+      citations = [{ type: 'road', id: 204, name: 'M1 Motorway', code: 'M1', status: 'fair', length: 310 }];
+      nextSuggestedPrompts = ["Show M1 maintenance budget", "Compare M1 with I-75", "Show National Highways contacts"];
+    } else if (isWoodwardQuery) {
+      text = "**M-1 Woodward Avenue (Detroit)** — 21.3 km historic roadway in **poor**. $52M streetcar track & road repair by Michigan Paving — 106% spent, 120 days late. Carries Detroit's QLINE streetcar.";
+      citations = [{ type: 'road', id: 302, name: 'M-1 Woodward Avenue', code: 'M-1', status: 'poor', length: 21.3 }];
+      nextSuggestedPrompts = ["Show Woodward budget details", "Who manages Detroit roads?", "Compare Detroit with Mumbai"];
     } else {
       text = "I have consulted the municipal ledger. In Ward H-West, active transparency scoring is underway. **S.V. Road** is currently the lowest-scoring segment in this area due to recurring damage and contractor performance warnings. Let me know if you would like details on contractor scores, active budgets, or how to file a routed citizen report.";
       citations = [
@@ -590,6 +713,18 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
     }
 
     // Stream response text chunk by chunk
+    await streamResponse(text, citations, suggestedActions, evidence, nextSuggestedPrompts, routingDetails);
+  };
+
+  // Streaming helper shared by all response paths
+  const streamResponse = async (
+    text: string,
+    citations: Citation[],
+    suggestedActions: { type: string; target_id: number; label: string }[],
+    evidence: { title: string; items: string[] }[],
+    nextSuggestedPrompts: string[],
+    routingDetails?: RoutingDetail
+  ) => {
     const words = text.split(" ");
     let currentContent = "";
     for (let i = 0; i < words.length; i++) {
@@ -613,6 +748,9 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
         last.citations = citations;
         last.suggestedActions = suggestedActions;
         last.evidence = evidence;
+        if (routingDetails) {
+          last.routingDetails = routingDetails;
+        }
       }
       return updated;
     });
@@ -706,6 +844,9 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
                   if (last && last.role === 'assistant') {
                     last.citations = data.citations;
                     last.suggestedActions = data.suggested_actions;
+                    if (data.routing_details) {
+                      last.routingDetails = data.routing_details;
+                    }
                   }
                   return updated;
                 });
@@ -889,51 +1030,135 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
             )}
 
             {/* Header */}
-            <div className="px-4 py-3 bg-gradient-to-r from-slate-900/60 via-cyan-950/20 to-indigo-950/20 border-b border-border/60 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="p-1 rounded-lg bg-cyan-950/60 border border-cyan-800/40 text-cyan-400">
-                  <Sparkles className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <h3 className="text-xs font-black uppercase text-slate-100 tracking-wider">
-                      ROADWATCH AI
-                    </h3>
-                    <span className={`w-1.5 h-1.5 rounded-full ${isBackendOnline ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+            <div className="px-4 py-3 bg-gradient-to-r from-slate-900/60 via-cyan-950/20 to-indigo-950/20 border-b border-border/60 flex flex-col">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1 rounded-lg bg-cyan-950/60 border border-cyan-800/40 text-cyan-400">
+                    <Sparkles className="w-4 h-4" />
                   </div>
-                  <p className="text-[9px] text-muted-foreground font-semibold">
-                    {isBackendOnline ? 'Accredited Records Engine' : 'Connection Throttled (Local Fallback)'}
-                  </p>
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <h3 className="text-xs font-black uppercase text-slate-100 tracking-wider">
+                        ROADWATCH AI
+                      </h3>
+                      <span className={`w-1.5 h-1.5 rounded-full ${effectiveOnline ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+                      {simulateOffline && (
+                        <span className="text-[8px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 rounded-full tracking-wider">
+                          DEMO MODE
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[9px] text-muted-foreground font-semibold">
+                      {effectiveOnline ? 'Accredited Records Engine' : 'Offline Queue Active — Local Responses'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center gap-1">
+                  {/* Simulate Offline toggle button (demo) */}
+                  <button
+                    onClick={() => setSimulateOffline(!simulateOffline)}
+                    className={`p-1.5 rounded-lg border transition-all shrink-0 cursor-pointer flex items-center justify-center ${
+                      simulateOffline
+                        ? 'border-amber-500/50 bg-amber-500/10 text-amber-400'
+                        : 'border-border/60 hover:border-amber-500/30 hover:bg-amber-500/5 text-muted-foreground hover:text-amber-400'
+                    }`}
+                    title={simulateOffline ? 'Restore Online Connection' : 'Simulate Offline Mode (Demo)'}
+                    aria-label={simulateOffline ? 'Restore online connection' : 'Simulate offline mode'}
+                  >
+                    <Wrench className="w-3.5 h-3.5" />
+                  </button>
+
+                  {/* Voice mode trigger */}
+                  <button
+                    onClick={() => setIsVoiceMode(true)}
+                    className="p-1.5 rounded-lg border border-border/60 hover:border-cyan-500/40 hover:bg-cyan-950/40 text-muted-foreground hover:text-cyan-455 transition-all shrink-0 cursor-pointer flex items-center justify-center mr-1"
+                    title="Launch Voice Mode"
+                    aria-label="Launch Voice Mode"
+                  >
+                    <Mic className="w-3.5 h-3.5" />
+                  </button>
+
+                  <button
+                    onClick={() => setIsMaximized(!isMaximized)}
+                    className="p-1.5 rounded-lg border border-border/60 hover:bg-slate-900 text-muted-foreground hover:text-foreground transition-all shrink-0 cursor-pointer hidden sm:block"
+                    aria-label={isMaximized ? 'Minimize chat' : 'Maximize chat'}
+                  >
+                    {isMaximized ? <Minimize2 className="w-3 h-3" /> : <Maximize2 className="w-3 h-3" />}
+                  </button>
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    className="p-1.5 rounded-lg border border-border/60 hover:bg-slate-900 text-muted-foreground hover:text-foreground transition-all shrink-0 cursor-pointer"
+                    aria-label="Close chat"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex items-center gap-1">
-                {/* Voice mode trigger */}
-                <button
-                  onClick={() => setIsVoiceMode(true)}
-                  className="p-1.5 rounded-lg border border-border/60 hover:border-cyan-500/40 hover:bg-cyan-950/40 text-muted-foreground hover:text-cyan-455 transition-all shrink-0 cursor-pointer flex items-center justify-center mr-1"
-                  title="Launch Voice Mode"
-                  aria-label="Launch Voice Mode"
-                >
-                  <Mic className="w-3.5 h-3.5" />
-                </button>
-                
-                <button
-                  onClick={() => setIsMaximized(!isMaximized)}
-                  className="p-1.5 rounded-lg border border-border/60 hover:bg-slate-900 text-muted-foreground hover:text-foreground transition-all shrink-0 cursor-pointer hidden sm:block"
-                  aria-label={isMaximized ? 'Minimize chat' : 'Maximize chat'}
-                >
-                  {isMaximized ? <Minimize2 className="w-3 h-3" /> : <Maximize2 className="w-3 h-3" />}
-                </button>
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="p-1.5 rounded-lg border border-border/60 hover:bg-slate-900 text-muted-foreground hover:text-foreground transition-all shrink-0 cursor-pointer"
-                  aria-label="Close chat"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
+              {/* Offline banner inside chat header */}
+              <AnimatePresence>
+                {(!effectiveOnline || syncQueueCount > 0 || isSyncing) && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden mt-2"
+                  >
+                    <div className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold border ${
+                      !effectiveOnline
+                        ? 'bg-red-500/10 border-red-500/20 text-red-300'
+                        : isSyncing
+                        ? 'bg-cyan-500/10 border-cyan-500/20 text-cyan-300'
+                        : 'bg-amber-500/10 border-amber-500/20 text-amber-300'
+                    }`}>
+                      {!effectiveOnline ? (
+                        <>
+                          <WifiOff className="w-3 h-3 shrink-0 text-red-400" />
+                          <span className="flex-1">Offline — responses are local. Reports queued.</span>
+                        </>
+                      ) : isSyncing ? (
+                        <>
+                          <RefreshCw className="w-3 h-3 shrink-0 text-cyan-400 animate-spin" />
+                          <span className="flex-1">Syncing {syncQueueCount} queued reports...</span>
+                        </>
+                      ) : (
+                        <>
+                          <CloudUpload className="w-3 h-3 shrink-0 text-amber-400" />
+                          <span className="flex-1">{syncQueueCount} report{syncQueueCount > 1 ? 's' : ''} pending sync</span>
+                          <button
+                            onClick={processSyncQueue}
+                            className="text-[9px] font-black px-2 py-0.5 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-md transition-all cursor-pointer uppercase tracking-wider shrink-0"
+                          >
+                            Sync Now
+                          </button>
+                        </>
+                      )}
+
+                      {/* Sync progress when actively syncing */}
+                      {isSyncing && (
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <span className="text-[9px] text-cyan-400/80">
+                            {offlineQueue.filter(i => i.status === 'syncing').length}/{syncQueueCount}
+                          </span>
+                          <div className="w-12 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                            <motion.div
+                              className="h-full bg-gradient-to-r from-cyan-500 to-indigo-500 rounded-full"
+                              initial={{ width: '0%' }}
+                              animate={{
+                                width: `${syncQueueCount > 0 ? ((syncQueueCount - offlineQueue.filter(i => i.status === 'pending').length) / syncQueueCount) * 100 : 0}%`
+                              }}
+                              transition={{ duration: 0.5 }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Messages Box */}
@@ -1040,8 +1265,8 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
 
                       {isAI && msg.citations && msg.citations.length > 0 && (
                         <div className="w-full">
-                          <CitationRenderer 
-                            citations={msg.citations} 
+                          <CitationRenderer
+                            citations={msg.citations}
                             onSelectRoad={(id) => {
                               setSelectedRoadId(id);
                               setActiveView('roads');
@@ -1055,6 +1280,10 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
                             }}
                           />
                         </div>
+                      )}
+
+                      {isAI && msg.routingDetails && (
+                        <RoutedToCard routing={msg.routingDetails} />
                       )}
 
                       {isAI && msg.suggestedActions && msg.suggestedActions.length > 0 && (

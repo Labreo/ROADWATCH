@@ -6,7 +6,9 @@ import { OfflineSyncManager } from '@/services/offlineSync';
 import { playbackSteps } from '@/data/historicalData';
 import { generateStressZones } from '@/data/sensorData';
 
-export type AppView = 'dashboard' | 'roads' | 'contractors' | 'budgets' | 'complaints' | 'admin' | 'playback' | 'sensors' | 'twin' | 'chat';
+export type AppView = 'dashboard' | 'roads' | 'contractors' | 'budgets' | 'complaints' | 'admin' | 'playback' | 'sensors' | 'twin' | 'chat' | 'regions';
+
+export type DemoMode = 'off' | 'tour' | 'scripted';
 
 interface AppState {
   // Sidebar State
@@ -129,6 +131,18 @@ interface AppState {
   setLocale: (locale: Locale) => void;
   reducedMotion: boolean;
   setReducedMotion: (val: boolean) => void;
+
+  // Demo Mode
+  demoMode: DemoMode;
+  setDemoMode: (mode: DemoMode) => void;
+  activeDemoSnippet: string | null;
+  setActiveDemoSnippet: (id: string | null) => void;
+  activeDemoScene: number;
+  setActiveDemoScene: (scene: number) => void;
+  isDemoAutoPlaying: boolean;
+  setDemoAutoPlaying: (playing: boolean) => void;
+  demoNarration: string;
+  setDemoNarration: (narration: string) => void;
 }
 
 // Helper to load custom complaints from LocalStorage
@@ -243,13 +257,15 @@ export const useStore = create<AppState>((set, get) => {
           if (contractorIdVal !== undefined) {
             updates.selectedContractorId = contractorIdVal;
           }
+        } else if (eventType === 'SHOW_REGIONS' || payload.view === 'regions') {
+          updates.activeView = 'regions';
         } else {
           // Fallback legacy navigation payload
           if (payload.view) {
             const v = payload.view;
             if (v === 'map' || v === 'roads') {
               updates.activeView = 'roads';
-            } else if (['dashboard', 'contractors', 'budgets', 'complaints', 'admin', 'playback', 'sensors', 'twin', 'chat'].includes(v)) {
+            } else if (['dashboard', 'contractors', 'budgets', 'complaints', 'admin', 'playback', 'sensors', 'twin', 'chat', 'regions'].includes(v)) {
               updates.activeView = v;
             }
           }
@@ -379,6 +395,18 @@ export const useStore = create<AppState>((set, get) => {
         document.documentElement.classList.toggle('reduced-motion', val);
       }
     },
+
+    // Demo Mode
+    demoMode: 'off',
+    setDemoMode: (mode) => set({ demoMode: mode }),
+    activeDemoSnippet: null,
+    setActiveDemoSnippet: (id) => set({ activeDemoSnippet: id }),
+    activeDemoScene: 0,
+    setActiveDemoScene: (scene) => set({ activeDemoScene: scene }),
+    isDemoAutoPlaying: false,
+    setDemoAutoPlaying: (playing) => set({ isDemoAutoPlaying: playing }),
+    demoNarration: '',
+    setDemoNarration: (narration) => set({ demoNarration: narration }),
 
     // Network / Offline Queue
     isOnline: typeof window !== 'undefined' ? window.navigator.onLine : true,

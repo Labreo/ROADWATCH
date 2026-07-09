@@ -66,6 +66,9 @@ CREATE TABLE roads (
     length_km NUMERIC(6, 2) NOT NULL CHECK (length_km > 0.00),
     authority_id INT REFERENCES authorities(id) ON DELETE SET NULL,
     geom GEOMETRY(LineString, 4326) NOT NULL, -- Spatial segment representation (lat/lon coordinates)
+    road_type VARCHAR(20) NOT NULL DEFAULT 'City' CHECK (road_type IN ('NH','SH','MDR','City','Interstate','US-Highway','State-Highway','Local','Motorway','A-Road','B-Road','C-Road','Urban')),
+    last_relaying_date DATE,
+    contractor_id INT REFERENCES contractors(id) ON DELETE SET NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -598,7 +601,14 @@ CREATE TABLE IF NOT EXISTS fund_sources (
         'Central Road Fund',
         'State PWD Allocations',
         'Municipal General Tier',
-        'International Multilateral Loans'
+        'International Multilateral Loans',
+        'State Budget',
+        'World Bank Loan',
+        'Kenya RMLF',
+        'UK Department for Transport Grant',
+        'FHWA Federal Aid',
+        'MDOT State Trunkline Fund',
+        'Local Municipal Bond'
     )),
     amount NUMERIC(15, 2) NOT NULL CHECK (amount > 0),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP

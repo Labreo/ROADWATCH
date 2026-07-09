@@ -22,7 +22,7 @@ class ChatRequest(BaseModel):
 @router.post("/chat")
 async def chat_endpoint(request: ChatRequest):
     # Retrieve system prompt, citations, and metadata
-    system_prompt, citations, suggested_actions, suggested_prompts, intent = \
+    system_prompt, citations, suggested_actions, suggested_prompts, intent, routing_details = \
         await RetrievalEngine.process_query(
             message=request.message,
             session_id=request.session_id,
@@ -50,7 +50,8 @@ async def chat_endpoint(request: ChatRequest):
             "citations": citations,
             "suggested_actions": suggested_actions,
             "suggested_prompts": suggested_prompts,
-            "intent": intent
+            "intent": intent,
+            "routing_details": routing_details
         }) + "\n"
         
     return StreamingResponse(event_generator(), media_type="application/x-ndjson")
@@ -210,7 +211,15 @@ async def analyze_photo_endpoint(
             # 4. Resolve geographic routing (authority and closest road segment)
             authority = AuthorityResolver.resolve_authority_for_coordinates(resolved_lon, resolved_lat)
             road = StructuredRoadRetriever.get_closest_road(resolved_lon, resolved_lat)
-            
+
+            # Build routing details
+            routing_details = None
+            if resolved_lat is not None and resolved_lon is not None:
+                road_name = road["name"] if road else None
+                routing_details = AuthorityResolver.resolve_with_routing_details(resolved_lon, resolved_lat, road_name)
+            elif authority:
+                routing_details = AuthorityResolver.build_routing_details(authority, "Unmapped Segment")
+
             assigned_authority_id = authority["id"] if authority else 4
             road_id = road["id"] if road else None
             road_name = road["name"] if road else "Unmapped Segment"
@@ -293,7 +302,8 @@ async def analyze_photo_endpoint(
                     "recommended_action": analysis.get('recommendedAction', ''),
                     "description": description
                 },
-                "draft_complaint": draft_complaint
+                "draft_complaint": draft_complaint,
+                "routing_details": routing_details
             }) + "\n"
             
         except Exception as outer_err:

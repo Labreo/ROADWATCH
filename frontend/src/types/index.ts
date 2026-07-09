@@ -185,6 +185,18 @@ export interface Complaint {
   regionCode?: string;
 }
 
+// Routing detail returned by backend in metadata events
+export interface RoutingDetail {
+  authority_name: string;
+  authority_id: number;
+  executive_engineer_name: string;
+  designation: string;
+  contact: string;
+  email: string;
+  region: string;
+  reason_for_routing: string;
+}
+
 // UI/Layout related types
 export interface SidebarItem {
   id: string;

@@ -9,6 +9,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Shield,
+  Globe,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -70,6 +71,7 @@ export default function Sidebar() {
         { id: 'roads'       as AppView, label: 'Geospatial Map',    icon: Map },
         { id: 'budgets'     as AppView, label: 'Budget Compliance', icon: Coins },
         { id: 'contractors' as AppView, label: 'Contractor Scores', icon: HardHat },
+        { id: 'regions' as AppView, label: 'Regions Hub', icon: Globe },
       ] as { id: AppView; label: string; icon: any; badge?: string | number }[]
     }
   ];

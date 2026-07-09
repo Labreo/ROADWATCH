@@ -10,6 +10,7 @@ const RoadInspectionScene = dynamic(
 interface LandingHeroProps {
   onStartTour: () => void;
   onEnterDirect: () => void;
+  onStartDemo?: () => void;
 }
 
 // Deterministic telemetry ticker entries
@@ -45,7 +46,7 @@ function useMissionClock() {
   return time;
 }
 
-export default function LandingHero({ onStartTour, onEnterDirect }: LandingHeroProps) {
+export default function LandingHero({ onStartTour, onEnterDirect, onStartDemo }: LandingHeroProps) {
   const clock = useMissionClock();
   const [tickerPos, setTickerPos] = useState(0);
 
@@ -190,6 +191,14 @@ export default function LandingHero({ onStartTour, onEnterDirect }: LandingHeroP
             >
               Interactive Tour
             </button>
+            {onStartDemo && (
+              <button
+                onClick={onStartDemo}
+                className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg border border-cyan-500/30 bg-cyan-950/20 text-cyan-400 hover:text-cyan-300 hover:border-cyan-500/60 text-xs font-black uppercase tracking-widest transition-all active:scale-95"
+              >
+                Demo Mode
+              </button>
+            )}
           </div>
 
           {/* Footer line */}

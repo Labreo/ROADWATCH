@@ -1,5 +1,7 @@
 const CACHE_NAME = 'roadwatch-cache-v1';
 const MAP_CACHE_NAME = 'roadwatch-map-tiles';
+const CHAT_CACHE_NAME = 'roadwatch-chat-v1';
+const DYNAMIC_CACHE_NAME = 'roadwatch-dynamic-v1';
 const STATIC_ASSETS = [
   '/',
   '/next.svg',
@@ -23,7 +25,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((keys) => {
       return Promise.all(
         keys.map((key) => {
-          if (key !== CACHE_NAME && key !== MAP_CACHE_NAME) {
+          if (key !== CACHE_NAME && key !== MAP_CACHE_NAME && key !== CHAT_CACHE_NAME && key !== DYNAMIC_CACHE_NAME) {
             return caches.delete(key);
           }
         })
@@ -36,7 +38,47 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // 1. Cache Map Tiles (OpenStreetMap tiles) in 'roadwatch-map-tiles' namespace
+  // 1a. Cache Chat API responses for offline fallback
+  // Network-first: show cached fallback when offline
+  if (url.pathname.includes('/api/v1/chat') || url.pathname.includes('/api/v1/complaints')) {
+    event.respondWith(
+      caches.open(CHAT_CACHE_NAME).then((cache) => {
+        return fetch(event.request)
+          .then((networkResponse) => {
+            const cloned = networkResponse.clone();
+            cache.put(event.request, cloned);
+            return networkResponse;
+          })
+          .catch(() => {
+            return cache.match(event.request).then((cached) => {
+              if (cached) return cached;
+              return new Response(
+                JSON.stringify({ type: 'content', content: 'You are offline. Cached responses replayed.' }),
+                { status: 200, headers: { 'Content-Type': 'application/json' } }
+              );
+            });
+          });
+      })
+    );
+    return;
+  }
+
+  // 1b. Cache other same-origin API routes with network-first strategy
+  if (url.pathname.includes('/api/')) {
+    event.respondWith(
+      caches.open(DYNAMIC_CACHE_NAME).then((cache) => {
+        return fetch(event.request)
+          .then((res) => {
+            if (res.status === 200) cache.put(event.request, res.clone());
+            return res;
+          })
+          .catch(() => cache.match(event.request).then((cached) => cached || new Response('', { status: 503 })));
+      })
+    );
+    return;
+  }
+
+  // 2. Cache Map Tiles (OpenStreetMap tiles) in 'roadwatch-map-tiles' namespace
   if (url.hostname.includes('tile.openstreetmap.org') || url.pathname.includes('/tile/')) {
     event.respondWith(
       caches.open(MAP_CACHE_NAME).then((cache) => {
