@@ -25,6 +25,47 @@ PRIORITY_BY_CATEGORY: dict[str, int] = {
 # Default priority for unknown categories
 DEFAULT_PRIORITY = 3
 
+# Severity-to-priority mapping (B3: Image-based severity prioritization)
+SEVERITY_PRIORITY_MAP: dict[str, int] = {
+    "emergency": 5,
+    "high": 4,
+    "medium": 3,
+    "low": 1,
+}
+
+
+def compute_priority_from_vision(
+    severity: str,
+    has_traffic: bool = False,
+    category: str = "",
+    escalation_level: int = 0,
+) -> int:
+    """
+    B3: Compute priority from vision analysis results.
+    severity: 'emergency', 'high', 'medium', 'low'
+    has_traffic: whether the defect is on a high-traffic road
+    category: defect category (for fallback)
+    escalation_level: current escalation level (for boost)
+
+    Priority logic:
+    - emergency: always 5
+    - high: 4 (boost to 5 if has_traffic)
+    - medium: category base (boost +1 if has_traffic, max 4)
+    - low: 1 (boost to 2 if has_traffic)
+    - Each escalation level adds +1, capped at 5
+    """
+    severity = severity.lower() if severity else "medium"
+    base = SEVERITY_PRIORITY_MAP.get(severity, DEFAULT_PRIORITY)
+
+    # Traffic boost
+    if has_traffic and severity in ("high", "medium", "low"):
+        base = min(5, base + 1)
+
+    # Escalation boost
+    base = min(5, base + escalation_level)
+
+    return base
+
 
 def compute_priority(category: str, escalation_level: int = 0) -> int:
     """
@@ -142,7 +183,7 @@ class SlaService:
                     new_priority,
                 )
 
-                # Send notification
+                # Send notification to authority
                 escalation_data = {
                     "from_level": old_level,
                     "to_level": new_level,
@@ -152,6 +193,17 @@ class SlaService:
                 await NotificationService.notify_complaint_escalated(
                     complaint, escalation_data
                 )
+
+                # Send citizen notification if contact present
+                citizen_contact = complaint.get("citizen_contact")
+                if citizen_contact:
+                    target_auth = None
+                    if target_authority_id:
+                        from app.services.authority_resolver import AuthorityResolver
+                        target_auth = AuthorityResolver.get_authority_by_id(target_authority_id)
+                    await NotificationService.notify_citizen_escalated(
+                        complaint, escalation_data, target_auth or {}
+                    )
 
     @classmethod
     async def start_background_monitor(cls):

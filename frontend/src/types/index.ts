@@ -5,7 +5,7 @@ export type EscalationLevel = 0 | 1 | 2;
 export type ProjectStatus = 'planned' | 'in_progress' | 'completed' | 'halted' | 'cancelled';
 
 // Accessibility types
-export type { FontSizeLevel, ContrastMode, Locale, A11yState } from './a11y';
+export type { FontSizeLevel, ContrastMode, Locale, A11yState, UserRole } from './a11y';
 
 export interface Authority {
   id: number;
@@ -50,6 +50,41 @@ export interface Road {
   };
   conflictGroupId?: number;
   regionCode?: string;
+  surfaceType?: 'asphalt' | 'concrete' | 'gravel' | 'pavers' | 'composite';
+  laneCount?: number;
+  widthM?: number;
+  aadt?: number;
+  lastInspectionDate?: string;
+}
+
+export type DataQualityGrade = 'A' | 'B' | 'C' | 'D' | 'F';
+
+export interface DataQualityDimension {
+  score: number;
+  missing?: string[];
+  filled?: number;
+  totalFields?: number;
+  ageDays?: number | null;
+  lastDate?: string | null;
+  source?: string | null;
+  issues?: string[];
+}
+
+export interface DataQualityDimensions {
+  completeness: DataQualityDimension;
+  freshness: DataQualityDimension;
+  consistency: DataQualityDimension;
+  spatial_validity: DataQualityDimension;
+}
+
+export interface RoadDataQuality {
+  road_id: number;
+  road_name: string;
+  road_code: string;
+  overall_score: number;
+  grade: DataQualityGrade;
+  dimensions: DataQualityDimensions;
+  evaluated_at: string;
 }
 
 export interface FundSourceAllocation {
@@ -183,6 +218,45 @@ export interface Complaint {
   parentComplaintId?: number;
   regionOverride?: string;
   regionCode?: string;
+  citizenContact?: string;
+}
+
+// Escalation chain types (B5)
+export interface EscalationChainLink {
+  level: number;
+  escalationId?: number;
+  authority: {
+    id: number;
+    name: string;
+  };
+  assignedAt?: string;
+  escalatedAt?: string;
+  escalatedBy?: string;
+  fromLevel?: number;
+  toLevel?: number;
+  status?: string;
+}
+
+export interface EscalationChain {
+  complaintId: number;
+  title: string;
+  currentStatus: string;
+  currentLevel: number;
+  chain: EscalationChainLink[];
+}
+
+// SLA metrics types (B4)
+export interface SlaMetrics {
+  avgRoutingTimeHours: number;
+  escalationRateByAuthority: Record<string, number>;
+  resolutionRateByCategory: Record<string, number>;
+  routingAccuracyPct: number;
+}
+
+// Routing feedback types (B2)
+export interface RoutingFeedbackPayload {
+  citizenConfirmed: boolean;
+  feedbackText?: string;
 }
 
 // Routing detail returned by backend in metadata events
@@ -244,6 +318,103 @@ export interface ScoreDeduction {
   points: number;
   reason: string;
   category: 'budget' | 'delay' | 'quality' | 'anomaly' | 'complaints';
+}
+
+export interface TenderRecord {
+  id: number;
+  referenceNo: string;
+  title: string;
+  description?: string;
+  authorityId: number;
+  authorityName?: string;
+  authorityCode?: string;
+  projectId?: number;
+  estimatedValue: number;
+  status: 'draft' | 'published' | 'bid_open' | 'under_evaluation' | 'awarded' | 'cancelled';
+  publishedDate?: string;
+  bidDeadline?: string;
+  awardDate?: string;
+  awardLetterUrl?: string;
+  bidCount?: number;
+}
+
+export interface TenderBid {
+  id: number;
+  tenderId: number;
+  contractorId: number;
+  contractorName: string;
+  contractorLicense?: string;
+  contractorRating?: number;
+  contractorBlacklisted?: boolean;
+  financialQuote: number;
+  technicalScore?: number;
+  financialScore?: number;
+  weightedTotal?: number;
+  evaluatorNotes?: string;
+  isWinner: boolean;
+}
+
+export interface EvaluationCriterion {
+  id: number;
+  tenderId: number;
+  criterionName: string;
+  weightPct: number;
+  maxScore: number;
+}
+
+export interface ProjectBeneficiary {
+  id: number;
+  projectId: number;
+  projectTitle?: string;
+  populationServed: number;
+  estimatedDailyTraffic?: number;
+  householdCount?: number;
+  beneficiaryType: 'residential' | 'commercial' | 'mixed' | 'commuters';
+  dataSource?: string;
+  censusYear?: number;
+  notes?: string;
+}
+
+export interface ValueForMoneyData {
+  roadId: number;
+  roadName: string;
+  regionCode: string;
+  qualityScore: number;
+  costPerKm: number;
+  vfmIndex: number;
+  vfmNormalized?: number;
+  projectCount: number;
+  activeComplaints: number;
+}
+
+export interface InflationAdjustment {
+  originalAmount: number;
+  adjustedAmount: number;
+  fromYear: number;
+  toYear: number;
+  regionCode: string;
+  inflationMultiplier: number;
+}
+
+export interface CostPrediction {
+  predictedPerKm: number;
+  predictionMethod: string;
+  minExpected: number;
+  maxExpected: number;
+  r2Score?: number;
+}
+
+export interface CostAnomaly {
+  projectId: number;
+  projectTitle: string;
+  roadName: string;
+  contractorName: string;
+  regionCode: string;
+  actualPerKm: number;
+  expectedPerKm: number;
+  deviationPct: number;
+  severity: 'medium' | 'high';
+  direction: 'over' | 'under';
 }
 
 export interface RoadTransparencyData {

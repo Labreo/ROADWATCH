@@ -477,7 +477,44 @@ CREATE TRIGGER trg_audit_contractors AFTER INSERT OR UPDATE OR DELETE ON contrac
 CREATE TRIGGER trg_audit_roads AFTER INSERT OR UPDATE OR DELETE ON roads FOR EACH ROW EXECUTE FUNCTION audit_trigger_roads();
 
 -- =========================================================================
--- 14. ROAD DEFECT HISTORY TABLE
+-- 14. Citizen contact field on complaints
+ALTER TABLE complaints ADD COLUMN IF NOT EXISTS citizen_contact VARCHAR(255);
+
+-- 15. Citizen Notifications Table
+-- Tracks all outbound citizen SMS/email notifications
+CREATE TABLE IF NOT EXISTS citizen_notifications (
+    id SERIAL PRIMARY KEY,
+    complaint_id INTEGER REFERENCES complaints(id) ON DELETE CASCADE,
+    channel VARCHAR(10) NOT NULL CHECK (channel IN ('sms', 'email')),
+    recipient VARCHAR(255) NOT NULL,
+    event_type VARCHAR(50) NOT NULL CHECK (event_type IN ('routed', 'escalated', 'resolved', 'rejected', 'updated')),
+    template_used VARCHAR(100),
+    status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'sent', 'failed')),
+    provider_response TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_citizen_notifications_complaint ON citizen_notifications(complaint_id);
+CREATE INDEX IF NOT EXISTS idx_citizen_notifications_status ON citizen_notifications(status);
+
+-- 16. Routing Feedback Table
+-- Tracks whether citizen confirms the authority routing was correct
+CREATE TABLE IF NOT EXISTS routing_feedback (
+    id SERIAL PRIMARY KEY,
+    complaint_id INTEGER REFERENCES complaints(id) ON DELETE CASCADE,
+    authority_id INTEGER REFERENCES authorities(id) ON DELETE CASCADE,
+    citizen_confirmed BOOLEAN NOT NULL,
+    feedback_text TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(complaint_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_routing_feedback_authority ON routing_feedback(authority_id);
+
+-- Routing accuracy score column on authorities
+ALTER TABLE authorities ADD COLUMN IF NOT EXISTS routing_accuracy_score NUMERIC(5,2) DEFAULT 0.00;
+
+-- 17. ROAD DEFECT HISTORY TABLE
 -- Tracks per-road deterioration over time, auto-snapshotted on changes
 -- =========================================================================
 CREATE TABLE IF NOT EXISTS road_defect_history (
@@ -711,7 +748,42 @@ CREATE TRIGGER update_contingency_modtime BEFORE UPDATE ON contingency_reserves
 FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- =========================================================================
--- 20. APPROVAL TRAIL TABLE
+-- 20. ROAD ALIASES TABLE (E4: Cross-Region Road Name Resolver)
+-- Maps the same road across different regions (e.g., "NH-48" in India vs local name)
+-- =========================================================================
+CREATE TABLE IF NOT EXISTS road_aliases (
+    id SERIAL PRIMARY KEY,
+    road_id INTEGER NOT NULL REFERENCES roads(id) ON DELETE CASCADE,
+    alias_name VARCHAR(255) NOT NULL,
+    alias_region_code VARCHAR(2) REFERENCES regions(code) ON DELETE CASCADE,
+    alias_type VARCHAR(50) DEFAULT 'local' CHECK (alias_type IN ('local', 'national', 'international', 'historical')),
+    is_primary BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(road_id, alias_name)
+);
+
+CREATE INDEX IF NOT EXISTS idx_road_aliases_road ON road_aliases(road_id);
+CREATE INDEX IF NOT EXISTS idx_road_aliases_region ON road_aliases(alias_region_code);
+CREATE INDEX IF NOT EXISTS idx_road_aliases_name ON road_aliases(alias_name);
+
+-- =========================================================================
+-- 21. REGION DATA IMPORT LOG TABLE (E1: OSM Import Tracking)
+-- Tracks OSM / external import runs per region for freshness metrics
+-- =========================================================================
+CREATE TABLE IF NOT EXISTS region_import_log (
+    id SERIAL PRIMARY KEY,
+    region_code VARCHAR(2) NOT NULL REFERENCES regions(code) ON DELETE CASCADE,
+    source VARCHAR(50) NOT NULL DEFAULT 'osm',
+    roads_imported INTEGER NOT NULL DEFAULT 0,
+    roads_skipped INTEGER NOT NULL DEFAULT 0,
+    roads_errors INTEGER NOT NULL DEFAULT 0,
+    finished_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_region_import_log_region ON region_import_log(region_code);
+
+-- =========================================================================
+-- 22. APPROVAL TRAIL TABLE
 -- Generic approval records across variance, contingency, milestone, project
 -- =========================================================================
 CREATE TABLE IF NOT EXISTS approval_trail (
@@ -751,3 +823,201 @@ SELECT
 FROM projects p
 JOIN roads r ON p.road_id = r.id
 LEFT JOIN contractors c ON p.contractor_id = c.id;
+
+-- =========================================================================
+-- 22. TENDERS TABLE (C1: Procurement Audit Trail)
+-- Tracks tender call lifecycle from publication to award
+-- =========================================================================
+CREATE TABLE IF NOT EXISTS tenders (
+    id SERIAL PRIMARY KEY,
+    reference_no VARCHAR(100) NOT NULL UNIQUE,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    authority_id INT NOT NULL REFERENCES authorities(id) ON DELETE RESTRICT,
+    project_id INT REFERENCES projects(id) ON DELETE SET NULL,
+    estimated_value NUMERIC(15, 2) CHECK (estimated_value > 0),
+    status VARCHAR(50) NOT NULL DEFAULT 'draft' CHECK (status IN ('draft','published','bid_open','under_evaluation','awarded','cancelled')),
+    published_date DATE,
+    bid_deadline DATE,
+    award_date DATE,
+    award_letter_url VARCHAR(512),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT check_dates CHECK (bid_deadline IS NULL OR published_date IS NULL OR bid_deadline >= published_date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_tenders_authority ON tenders(authority_id);
+CREATE INDEX IF NOT EXISTS idx_tenders_project ON tenders(project_id);
+CREATE INDEX IF NOT EXISTS idx_tenders_status ON tenders(status);
+CREATE TRIGGER update_tenders_modtime BEFORE UPDATE ON tenders FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- =========================================================================
+-- 23. TENDER BIDS TABLE (C1: Procurement Audit Trail)
+-- Per-contractor bid submissions with evaluation scores
+-- =========================================================================
+CREATE TABLE IF NOT EXISTS tender_bids (
+    id SERIAL PRIMARY KEY,
+    tender_id INT NOT NULL REFERENCES tenders(id) ON DELETE CASCADE,
+    contractor_id INT NOT NULL REFERENCES contractors(id) ON DELETE RESTRICT,
+    financial_quote NUMERIC(15, 2) NOT NULL CHECK (financial_quote > 0),
+    technical_score NUMERIC(5, 2) CHECK (technical_score >= 0 AND technical_score <= 100),
+    financial_score NUMERIC(5, 2) CHECK (financial_score >= 0 AND financial_score <= 100),
+    weighted_total NUMERIC(5, 2) CHECK (weighted_total >= 0 AND weighted_total <= 100),
+    evaluator_notes TEXT,
+    is_winner BOOLEAN DEFAULT FALSE,
+    submitted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_tender_bids_tender ON tender_bids(tender_id);
+CREATE INDEX IF NOT EXISTS idx_tender_bids_contractor ON tender_bids(contractor_id);
+CREATE INDEX IF NOT EXISTS idx_tender_bids_winner ON tender_bids(tender_id, is_winner) WHERE is_winner = TRUE;
+
+-- =========================================================================
+-- 24. EVALUATION CRITERIA TABLE (C1: Weighted scoring framework)
+-- Configurable per-tender evaluation weightings
+-- =========================================================================
+CREATE TABLE IF NOT EXISTS evaluation_criteria (
+    id SERIAL PRIMARY KEY,
+    tender_id INT NOT NULL REFERENCES tenders(id) ON DELETE CASCADE,
+    criterion_name VARCHAR(100) NOT NULL,
+    weight_pct NUMERIC(5, 2) NOT NULL CHECK (weight_pct > 0 AND weight_pct <= 100),
+    max_score NUMERIC(5, 2) NOT NULL CHECK (max_score > 0),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(tender_id, criterion_name)
+);
+
+CREATE INDEX IF NOT EXISTS idx_eval_criteria_tender ON evaluation_criteria(tender_id);
+
+-- =========================================================================
+-- 25. CPI / INFLATION DATA TABLE (C3: Inflation-Adjusted Comparisons)
+-- Annual CPI values per region for inflation adjustment calculations
+-- =========================================================================
+CREATE TABLE IF NOT EXISTS cpi_data (
+    id SERIAL PRIMARY KEY,
+    region_code VARCHAR(2) NOT NULL REFERENCES regions(code) ON DELETE CASCADE,
+    year INT NOT NULL CHECK (year >= 2000),
+    cpi_value NUMERIC(10, 4) NOT NULL CHECK (cpi_value > 0),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(region_code, year)
+);
+
+CREATE INDEX IF NOT EXISTS idx_cpi_region_year ON cpi_data(region_code, year);
+
+-- =========================================================================
+-- 26. PROJECT BENEFICIARIES TABLE (C5: Beneficiary Tracking)
+-- Tracks population served per project
+-- =========================================================================
+CREATE TABLE IF NOT EXISTS project_beneficiaries (
+    id SERIAL PRIMARY KEY,
+    project_id INT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    population_served INT NOT NULL CHECK (population_served > 0),
+    estimated_daily_traffic INT CHECK (estimated_daily_traffic >= 0),
+    household_count INT CHECK (household_count >= 0),
+    beneficiary_type VARCHAR(50) NOT NULL CHECK (beneficiary_type IN ('residential','commercial','mixed','commuters')),
+    data_source VARCHAR(100),
+    census_year INT,
+    notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(project_id, beneficiary_type)
+);
+
+CREATE INDEX IF NOT EXISTS idx_beneficiaries_project ON project_beneficiaries(project_id);
+
+-- Audit trigger for project_beneficiaries
+CREATE TRIGGER trg_audit_beneficiaries AFTER INSERT OR UPDATE OR DELETE ON project_beneficiaries
+FOR EACH ROW EXECUTE FUNCTION audit_trigger_projects();
+
+-- =========================================================================
+-- 27. BENEFICIARY VIEW — Aggregate population served per road
+-- =========================================================================
+CREATE OR REPLACE VIEW road_beneficiary_view AS
+SELECT
+    r.id AS road_id,
+    r.name AS road_name,
+    COUNT(DISTINCT pb.id) AS beneficiary_records,
+    COALESCE(SUM(pb.population_served), 0) AS total_population_served,
+    COALESCE(SUM(pb.estimated_daily_traffic), 0) AS total_daily_traffic,
+    COALESCE(SUM(pb.household_count), 0) AS total_households,
+    COUNT(DISTINCT p.id) AS project_count
+FROM roads r
+LEFT JOIN projects p ON r.id = p.road_id
+LEFT JOIN project_beneficiaries pb ON p.id = pb.project_id
+GROUP BY r.id, r.name;
+
+-- =========================================================================
+-- 28. ROADS ENRICHMENT COLUMNS (A1: Data Accuracy)
+-- Adds data quality dimensions to the roads table
+-- =========================================================================
+ALTER TABLE roads ADD COLUMN IF NOT EXISTS surface_type VARCHAR(20) CHECK (surface_type IN ('asphalt', 'concrete', 'gravel', 'pavers', 'composite'));
+ALTER TABLE roads ADD COLUMN IF NOT EXISTS lane_count INTEGER CHECK (lane_count > 0);
+ALTER TABLE roads ADD COLUMN IF NOT EXISTS width_m NUMERIC(5,2) CHECK (width_m > 0);
+ALTER TABLE roads ADD COLUMN IF NOT EXISTS aadt INTEGER CHECK (aadt >= 0);
+ALTER TABLE roads ADD COLUMN IF NOT EXISTS last_inspection_date DATE;
+
+-- =========================================================================
+-- 29. ROAD MATERIALS TABLE (A1: Material quality tracking)
+-- Tracks asphalt/concrete grades, mix design, source quarry per project
+-- =========================================================================
+CREATE TABLE IF NOT EXISTS road_materials (
+    id SERIAL PRIMARY KEY,
+    project_id INT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    material_type VARCHAR(50) NOT NULL CHECK (material_type IN ('asphalt', 'concrete', 'base_course', 'subbase', 'aggregate')),
+    specification_grade VARCHAR(100),
+    mix_design_ref VARCHAR(100),
+    source_quarry VARCHAR(255),
+    test_report_url VARCHAR(512),
+    test_date DATE,
+    approved_by VARCHAR(255),
+    notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_road_materials_project ON road_materials(project_id);
+
+-- Audit trigger for road_materials
+CREATE TRIGGER trg_audit_road_materials AFTER INSERT OR UPDATE OR DELETE ON road_materials
+FOR EACH ROW EXECUTE FUNCTION audit_trigger_roads();
+
+-- =========================================================================
+-- 30. PROJECT WARRANTIES TABLE (A1: Defect liability tracking)
+-- Warranty / defect-liability period on completed projects
+-- =========================================================================
+CREATE TABLE IF NOT EXISTS project_warranties (
+    id SERIAL PRIMARY KEY,
+    project_id INT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    warranty_period_months INT NOT NULL CHECK (warranty_period_months > 0),
+    warranty_start_date DATE NOT NULL,
+    warranty_end_date DATE NOT NULL,
+    warranty_type VARCHAR(50) DEFAULT 'defect_liability' CHECK (warranty_type IN ('defect_liability', 'performance', 'maintenance')),
+    defect_amount NUMERIC(15,2),
+    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'expired', 'claimed')),
+    claim_count INT DEFAULT 0,
+    notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT ck_warranty_dates CHECK (warranty_end_date > warranty_start_date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_project_warranties_project ON project_warranties(project_id);
+
+-- Audit trigger for project_warranties
+CREATE TRIGGER trg_audit_project_warranties AFTER INSERT OR UPDATE OR DELETE ON project_warranties
+FOR EACH ROW EXECUTE FUNCTION audit_trigger_projects();
+
+-- =========================================================================
+-- 31. ROAD DOCUMENTS TABLE (A5: Photo/Attachment storage)
+-- Supports inspection photos, design documents, contractor reports
+-- =========================================================================
+CREATE TABLE IF NOT EXISTS road_documents (
+    id SERIAL PRIMARY KEY,
+    road_id INT NOT NULL REFERENCES roads(id) ON DELETE CASCADE,
+    doc_type VARCHAR(50) NOT NULL CHECK (doc_type IN ('inspection_photo', 'design_document', 'contractor_report', 'material_certificate', 'other')),
+    title VARCHAR(255) NOT NULL,
+    file_url VARCHAR(512) NOT NULL,
+    file_size_bytes INT,
+    mime_type VARCHAR(100),
+    uploaded_by VARCHAR(100) DEFAULT 'system',
+    uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_road_documents_road ON road_documents(road_id);

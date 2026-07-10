@@ -10,6 +10,8 @@ import {
   ChevronRight,
   Shield,
   Globe,
+  Clock,
+  Activity,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -46,6 +48,8 @@ export default function Sidebar() {
     activeView,
     setActiveView,
     syncQueueCount,
+    userRole,
+    setUserRole,
   } = useStore();
 
   const clock = useClock();
@@ -63,16 +67,33 @@ export default function Sidebar() {
     return () => window.removeEventListener('resize', handleResize);
   }, [setSidebarOpen]);
 
+  const isAdmin = userRole === 'admin';
+
+  const citizenItems: { id: AppView; label: string; icon: any; badge?: string | number }[] = [
+    { id: 'chat'        as AppView, label: 'Chat Assistant',    icon: MessageSquare, badge: syncQueueCount > 0 ? syncQueueCount : undefined },
+    { id: 'roads'       as AppView, label: 'Geospatial Map',    icon: Map },
+    { id: 'budgets'     as AppView, label: 'Budget Compliance', icon: Coins },
+    { id: 'complaints'  as AppView, label: 'Complaints',        icon: MessageSquare },
+    { id: 'regions'     as AppView, label: 'Regions Hub',       icon: Globe },
+  ];
+
+  const adminItems: { id: AppView; label: string; icon: any; badge?: string | number }[] = [
+    { id: 'chat'        as AppView, label: 'Chat Assistant',      icon: MessageSquare, badge: syncQueueCount > 0 ? syncQueueCount : undefined },
+    { id: 'roads'       as AppView, label: 'Geospatial Map',      icon: Map },
+    { id: 'budgets'     as AppView, label: 'Budget Compliance',   icon: Coins },
+    { id: 'contractors' as AppView, label: 'Contractor Scores',   icon: HardHat },
+    { id: 'complaints'  as AppView, label: 'Complaints',          icon: MessageSquare },
+    { id: 'admin'       as AppView, label: 'Operations Dashboard', icon: Shield },
+    { id: 'playback'    as AppView, label: 'Playback',            icon: Clock },
+    { id: 'sensors'     as AppView, label: 'Sensor Monitor',      icon: Activity },
+    { id: 'twin'        as AppView, label: 'Digital Twin',        icon: Globe },
+    { id: 'regions'     as AppView, label: 'Regions Hub',         icon: Globe },
+  ];
+
   const navSections = [
     {
-      label: 'Navigation',
-      items: [
-        { id: 'chat'        as AppView, label: 'Chat Assistant',    icon: MessageSquare, badge: syncQueueCount > 0 ? syncQueueCount : undefined },
-        { id: 'roads'       as AppView, label: 'Geospatial Map',    icon: Map },
-        { id: 'budgets'     as AppView, label: 'Budget Compliance', icon: Coins },
-        { id: 'contractors' as AppView, label: 'Contractor Scores', icon: HardHat },
-        { id: 'regions' as AppView, label: 'Regions Hub', icon: Globe },
-      ] as { id: AppView; label: string; icon: any; badge?: string | number }[]
+      label: isAdmin ? 'Navigation' : 'Citizen Hub',
+      items: isAdmin ? adminItems : citizenItems,
     }
   ];
 
@@ -181,7 +202,15 @@ export default function Sidebar() {
 
         {/* Footer */}
         {!sidebarOpen && (
-          <div className="hidden lg:flex items-center justify-center h-14 border-t border-white/[0.055] shrink-0">
+          <div className="hidden lg:flex flex-col items-center gap-1 py-2 border-t border-white/[0.055] shrink-0">
+            <button
+              onClick={() => setUserRole(isAdmin ? 'citizen' : 'admin')}
+              className="p-1.5 rounded-lg border border-white/[0.06] hover:border-cyan-500/30 text-[#55555f] hover:text-cyan-400 bg-black/20 transition-all duration-200"
+              aria-label={`Switch to ${isAdmin ? 'Citizen' : 'Admin'} mode`}
+              title={isAdmin ? 'Switch to Citizen' : 'Switch to Admin'}
+            >
+              <Shield className="w-3.5 h-3.5" />
+            </button>
             <button
               onClick={toggleSidebar}
               className="p-1.5 rounded-lg border border-white/[0.06] hover:border-cyan-500/30 text-[#55555f] hover:text-cyan-400 bg-black/20 transition-all"
@@ -194,6 +223,24 @@ export default function Sidebar() {
 
         {sidebarOpen && (
           <div className="px-3 pb-4 pt-2 border-t border-white/[0.055] shrink-0 space-y-2">
+            {/* Role toggle */}
+            <button
+              onClick={() => setUserRole(isAdmin ? 'citizen' : 'admin')}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl border border-white/[0.06] hover:border-cyan-500/30 text-[#55555f] hover:text-cyan-400 bg-black/20 transition-all duration-200"
+              aria-label={`Switch to ${isAdmin ? 'Citizen' : 'Admin'} mode`}
+            >
+              <Shield className="w-3.5 h-3.5" />
+              <span className="flex-1 text-left text-[10px] font-bold tracking-wide truncate">
+                {isAdmin ? 'Switch to Citizen' : 'Switch to Admin'}
+              </span>
+              <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded border ${
+                isAdmin
+                  ? 'text-cyan-400 border-cyan-800/30 bg-cyan-950/30'
+                  : 'text-indigo-400 border-indigo-800/30 bg-indigo-950/30'
+              }`}>
+                {userRole}
+              </span>
+            </button>
             {/* Status row */}
             <div className="flex items-center gap-2 text-[8px] py-2 px-3 rounded-xl bg-black/25 border border-white/[0.04]">
               <span className="relative flex h-1.5 w-1.5">

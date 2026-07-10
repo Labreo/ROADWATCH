@@ -16,6 +16,9 @@ from app.api.translate import router as translate_router
 from app.api.global_search import router as global_search_router
 from app.api.demo import router as demo_router
 from app.api.data_validation import router as data_validation_router
+from app.api.data_quality import router as data_quality_router
+from app.api.public import router as public_router
+from app.api.procurement import router as procurement_router
 from app.services.sla_service import SlaService
 from app.services.audit_context import set_audit_user
 
@@ -76,7 +79,10 @@ app.include_router(exchange_router, prefix="/api/v1")
 app.include_router(translate_router, prefix="/api/v1")
 app.include_router(global_search_router, prefix="/api/v1")
 app.include_router(demo_router)
+app.include_router(procurement_router, prefix="/api/v1")
 app.include_router(data_validation_router, prefix="/api/v1")
+app.include_router(data_quality_router, prefix="/api/v1")
+app.include_router(public_router, prefix="/api/v1")
 
 
 @app.get("/")

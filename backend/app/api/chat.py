@@ -9,7 +9,7 @@ from app.services.vision_pipeline import RoadDamageEvaluator
 from app.services.authority_resolver import AuthorityResolver
 from app.services.road_retriever import StructuredRoadRetriever
 from app.services.database import db
-from app.services.sla_service import compute_priority
+from app.services.sla_service import compute_priority, compute_priority_from_vision
 
 router = APIRouter()
 
@@ -230,7 +230,8 @@ async def analyze_photo_endpoint(
             
             depth = analysis.get("estimatedDepthCm", 0.0)
             width = analysis.get("estimatedWidthM", 0.0)
-            severity = 5
+            vision_severity = analysis.get("severity", "medium")
+            has_traffic = analysis.get("hasTraffic", False)
             
             description = (
                 f"Defect type: {category_title}. "
@@ -247,7 +248,11 @@ async def analyze_photo_endpoint(
             INSERT INTO complaints (title, description, category, geom, status, escalation_level, priority, target_resolution_hours, image_url, assigned_authority_id, road_id, created_at, updated_at)
             VALUES (?, ?, ?, ST_GeomFromText(?, 4326), ?, 0, ?, 48, ?, ?, ?, ?, ?)
             """
-            priority = compute_priority(category)
+            priority = compute_priority_from_vision(
+                severity=vision_severity,
+                has_traffic=has_traffic,
+                category=category,
+            )
             filename = image.filename if hasattr(image, 'filename') and image.filename else "upload.jpg"
             params = (
                 title,
@@ -299,6 +304,9 @@ async def analyze_photo_endpoint(
                     "defect_type": category,
                     "depth_cm": depth,
                     "width_m": width,
+                    "severity": vision_severity,
+                    "has_traffic": has_traffic,
+                    "priority": priority,
                     "recommended_action": analysis.get('recommendedAction', ''),
                     "description": description
                 },

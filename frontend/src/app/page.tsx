@@ -99,7 +99,9 @@ export default function Page() {
     setPlaybackPlaying,
     toggleSidebar,
     demoMode,
-    setDemoMode
+    setDemoMode,
+    userRole,
+    setUserRole
   } = useStore();
 
   const [isSyncingUI, setIsSyncingUI] = useState(false);
@@ -742,7 +744,7 @@ export default function Page() {
       )}
 
       {/* VIEW 3: CONTRACTOR TRANSPARENCY REGISTRY */}
-      {!isChatDriven && activeView === 'contractors' && (
+      {!isChatDriven && activeView === 'contractors' && userRole === 'admin' && (
         <div className="flex-1 flex flex-col lg:flex-row gap-6 min-h-0 overflow-hidden animate-in fade-in duration-300">
           
           {/* Main List */}
@@ -884,6 +886,9 @@ export default function Page() {
             </div>
           )}
         </div>
+      )}
+      {!isChatDriven && activeView === 'contractors' && userRole !== 'admin' && (
+        <AdminRestrictedView />
       )}
 
       {/* VIEW 4: BUDGET & EXPENDITURE AUDITS */}
@@ -1475,25 +1480,37 @@ export default function Page() {
       )}
 
       {/* VIEW 6: AUTHORITY OPERATIONS DASHBOARD */}
-      {!isChatDriven && activeView === 'admin' && (
+      {!isChatDriven && activeView === 'admin' && userRole === 'admin' && (
         <div className="flex-1 min-h-0 overflow-y-auto pr-1">
           <OperationsDashboard />
         </div>
       )}
+      {!isChatDriven && activeView === 'admin' && userRole !== 'admin' && (
+        <AdminRestrictedView />
+      )}
 
       {/* VIEW 7: HISTORICAL PLAYBACK SYSTEM */}
-      {!isChatDriven && activeView === 'playback' && (
+      {!isChatDriven && activeView === 'playback' && userRole === 'admin' && (
         <PlaybackDashboard />
+      )}
+      {!isChatDriven && activeView === 'playback' && userRole !== 'admin' && (
+        <AdminRestrictedView />
       )}
 
       {/* VIEW 8: SMART INFRASTRUCTURE SENSOR MONITOR */}
-      {!isChatDriven && activeView === 'sensors' && (
+      {!isChatDriven && activeView === 'sensors' && userRole === 'admin' && (
         <SensorDashboard />
+      )}
+      {!isChatDriven && activeView === 'sensors' && userRole !== 'admin' && (
+        <AdminRestrictedView />
       )}
 
       {/* VIEW 9: DIGITAL TWIN COMMAND CONSOLE */}
-      {!isChatDriven && activeView === 'twin' && (
+      {!isChatDriven && activeView === 'twin' && userRole === 'admin' && (
         <DigitalTwinView />
+      )}
+      {!isChatDriven && activeView === 'twin' && userRole !== 'admin' && (
+        <AdminRestrictedView />
       )}
 
       {/* VIEW 10: REGIONS HUB */}
@@ -1781,6 +1798,46 @@ export default function Page() {
         />
       )}
     </div>
+  );
+}
+
+// Admin-restricted view shown to citizens
+function AdminRestrictedView() {
+  const setUserRole = useStore((s) => s.setUserRole);
+  const setActiveView = useStore((s) => s.setActiveView);
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex-1 flex items-center justify-center p-8"
+    >
+      <div className="max-w-md text-center glass-panel rounded-2xl p-8 border border-white/[0.06]">
+        <ShieldAlert className="w-12 h-12 text-indigo-400 mx-auto mb-4" />
+        <h2 className="text-sm font-black text-slate-100 uppercase tracking-wider mb-2">
+          Admin View Required
+        </h2>
+        <p className="text-[11px] text-muted-foreground leading-relaxed mb-6">
+          This section is only available in Admin mode. Switch to access the full
+          operations dashboard, contractor registry, and infrastructure controls.
+        </p>
+        <div className="flex gap-3 justify-center">
+          <button
+            onClick={() => {
+              setUserRole('admin');
+            }}
+            className="px-4 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white text-[10px] font-black uppercase tracking-wider transition-all"
+          >
+            Switch to Admin
+          </button>
+          <button
+            onClick={() => setActiveView('chat')}
+            className="px-4 py-2 rounded-xl border border-white/[0.1] text-[#55555f] hover:text-slate-300 text-[10px] font-black uppercase tracking-wider transition-all"
+          >
+            Back to Chat
+          </button>
+        </div>
+      </div>
+    </motion.div>
   );
 }
 

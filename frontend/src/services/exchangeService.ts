@@ -101,6 +101,48 @@ export async function getGlobalSpend(
   return resp.json();
 }
 
+// CPI data for frontend inflation calculations (mirrors backend)
+const CPI_DATA: Record<string, Record<number, number>> = {
+  IN: { 2020: 100, 2021: 105.1, 2022: 111.6, 2023: 118.4, 2024: 124.8, 2025: 131, 2026: 136.5 },
+  US: { 2020: 100, 2021: 104.7, 2022: 112, 2023: 115.8, 2024: 119, 2025: 121.5, 2026: 123.8 },
+  GB: { 2020: 100, 2021: 102.6, 2022: 109.1, 2023: 115.4, 2024: 118.2, 2025: 120.8, 2026: 123 },
+  KE: { 2020: 100, 2021: 106.2, 2022: 113.8, 2023: 121.5, 2024: 128.1, 2025: 133.6, 2026: 138.2 },
+};
+
+export function getInflationData(region: string): Record<number, number> | null {
+  return CPI_DATA[region] || null;
+}
+
+export function adjustForInflation(
+  amount: number,
+  fromYear: number,
+  toYear: number = 2026,
+  region: string = 'IN'
+): number | null {
+  const regionData = CPI_DATA[region];
+  if (!regionData) return null;
+  const fromCpi = regionData[fromYear];
+  const toCpi = regionData[toYear];
+  if (!fromCpi || !toCpi) return null;
+  return Math.round(amount * (toCpi / fromCpi) * 100) / 100;
+}
+
+const REGION_CURRENCY: Record<string, string> = {
+  IN: 'INR', US: 'USD', GB: 'GBP', KE: 'KES',
+};
+
+export function formatInflationAdjustment(
+  amount: number,
+  fromYear: number,
+  toYear: number = 2026,
+  region: string = 'IN'
+): string {
+  const adjusted = adjustForInflation(amount, fromYear, toYear, region);
+  const currency = REGION_CURRENCY[region] || 'INR';
+  if (adjusted === null) return `${formatConvertedAmount(amount, currency)} (no CPI data)`;
+  return `${formatConvertedAmount(amount, currency)} (${fromYear}) → ${formatConvertedAmount(adjusted, currency)} (${toYear})`;
+}
+
 export function formatConvertedAmount(
   amount: number | null | undefined,
   currency: string,

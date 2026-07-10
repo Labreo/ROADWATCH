@@ -1,4 +1,4 @@
-import { Road, Project, Contractor, Complaint, RoadTransparencyData, YearlyAllocation, FinancialAnomaly, ScoreDeduction, FundSourceAllocation } from '@/types';
+import { Road, Project, Contractor, Complaint, RoadTransparencyData, YearlyAllocation, FinancialAnomaly, ScoreDeduction, FundSourceAllocation, ValueForMoneyData } from '@/types';
 import { formatCurrency } from './regionAwareFormat';
 
 // Upstream funding weights for the hackathon criteria
@@ -337,6 +337,96 @@ export function getScoreGrade(score: number): { grade: string; color: string; bg
 }
 
 /**
+ * Calculates Value-for-Money index for a road segment.
+ * VfM = (qualityScore / costPerKm) * normalizationFactor
+ */
+export function calculateVfmIndex(
+  road: Road,
+  projects: Project[],
+  complaints: Complaint[]
+): ValueForMoneyData {
+  const roadProjects = projects.filter(p => p.roadId === road.id);
+  const roadComplaints = complaints.filter(c => c.roadId === road.id);
+
+  const totalSpent = roadProjects.reduce((sum, p) => sum + p.budgetSpent, 0);
+  const lengthKm = road.lengthKm;
+
+  if (lengthKm === 0 || totalSpent === 0) {
+    return {
+      roadId: road.id,
+      roadName: road.name,
+      regionCode: road.regionCode || 'IN',
+      qualityScore: 0,
+      costPerKm: 0,
+      vfmIndex: 0,
+      projectCount: roadProjects.length,
+      activeComplaints: roadComplaints.filter(c => c.status !== 'resolved' && c.status !== 'rejected').length,
+    };
+  }
+
+  const spentPerKm = totalSpent / lengthKm;
+
+  // Quality score: start at 100, deduct for unresolved complaints, poor road status
+  let qualityScore = 100;
+  const activeComplaints = roadComplaints.filter(c => c.status !== 'resolved' && c.status !== 'rejected');
+  qualityScore -= Math.min(40, activeComplaints.length * 5);
+
+  if (road.status === 'poor') qualityScore -= 20;
+  else if (road.status === 'fair') qualityScore -= 10;
+  else if (road.status === 'under_construction') qualityScore -= 5;
+
+  qualityScore = Math.max(10, qualityScore);
+
+  // VfM = qualityScore / (spentPerKm / 100000) — scaling to 0-100 range
+  const vfmRaw = spentPerKm > 0 ? qualityScore / (spentPerKm / 100000) : 0;
+
+  return {
+    roadId: road.id,
+    roadName: road.name,
+    regionCode: road.regionCode || 'IN',
+    qualityScore: Math.round(qualityScore * 10) / 10,
+    costPerKm: Math.round(spentPerKm * 100) / 100,
+    vfmIndex: Math.round(Math.min(100, vfmRaw * 100) * 10) / 10,
+    projectCount: roadProjects.length,
+    activeComplaints: activeComplaints.length,
+  };
+}
+
+/**
+ * Aggregated city-wide VfM with per-region normalization.
+ */
+export function getCitywideVfmData(
+  roads: Road[],
+  projects: Project[],
+  complaints: Complaint[]
+): { averageVfm: number; roads: ValueForMoneyData[] } {
+  const vfmList = roads.map(r => calculateVfmIndex(r, projects, complaints)).filter(v => v.vfmIndex > 0);
+
+  // Per-region min-max normalization
+  const regionScores: Record<string, number[]> = {};
+  vfmList.forEach(v => {
+    if (!regionScores[v.regionCode]) regionScores[v.regionCode] = [];
+    regionScores[v.regionCode].push(v.vfmIndex);
+  });
+
+  const regionMinMax: Record<string, [number, number]> = {};
+  for (const [rg, vals] of Object.entries(regionScores)) {
+    regionMinMax[rg] = [Math.min(...vals), Math.max(...vals)];
+  }
+
+  vfmList.forEach(v => {
+    const [lo, hi] = regionMinMax[v.regionCode] || [0, 1];
+    v.vfmNormalized = hi > lo ? Math.round(((v.vfmIndex - lo) / (hi - lo)) * 100) : 100;
+  });
+
+  const avgVfm = vfmList.length > 0
+    ? Math.round(vfmList.reduce((s, v) => s + v.vfmIndex, 0) / vfmList.length * 10) / 10
+    : 0;
+
+  return { averageVfm: avgVfm, roads: vfmList };
+}
+
+/**
  * Aggregates city-wide statistics for the dashboard landing view.
  */
 export function getCitywideTransparencyData(
@@ -408,4 +498,39 @@ export function getCitywideTransparencyData(
     roadTransparencyList,
     fundSources
   };
+}
+
+// Hardcoded CPI data for frontend inflation adjustments (mirrors backend)
+const CPI_DATA: Record<string, Record<number, number>> = {
+  IN: { 2020: 100, 2021: 105.1, 2022: 111.6, 2023: 118.4, 2024: 124.8, 2025: 131, 2026: 136.5 },
+  US: { 2020: 100, 2021: 104.7, 2022: 112, 2023: 115.8, 2024: 119, 2025: 121.5, 2026: 123.8 },
+  GB: { 2020: 100, 2021: 102.6, 2022: 109.1, 2023: 115.4, 2024: 118.2, 2025: 120.8, 2026: 123 },
+  KE: { 2020: 100, 2021: 106.2, 2022: 113.8, 2023: 121.5, 2024: 128.1, 2025: 133.6, 2026: 138.2 },
+};
+
+export function adjustForInflation(
+  amount: number,
+  fromYear: number,
+  toYear: number = 2026,
+  region: string = 'IN'
+): number | null {
+  const regionData = CPI_DATA[region];
+  if (!regionData) return null;
+  const fromCpi = regionData[fromYear];
+  const toCpi = regionData[toYear];
+  if (!fromCpi || !toCpi) return null;
+  return Math.round(amount * (toCpi / fromCpi) * 100) / 100;
+}
+
+export function getInflationMultiplier(
+  fromYear: number,
+  toYear: number = 2026,
+  region: string = 'IN'
+): number | null {
+  const regionData = CPI_DATA[region];
+  if (!regionData) return null;
+  const fromCpi = regionData[fromYear];
+  const toCpi = regionData[toYear];
+  if (!fromCpi || !toCpi) return null;
+  return Math.round((toCpi / fromCpi) * 10000) / 10000;
 }

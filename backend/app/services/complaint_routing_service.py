@@ -72,6 +72,19 @@ class ComplaintRoutingService:
         """
         notif_id = db.execute(notif_sql, (complaint_id, auth_id))
 
+        # Send citizen notification if contact present
+        citizen_contact = complaint.get('citizen_contact')
+        if citizen_contact:
+            complaint_dict = ComplaintRoutingService.get_complaint_by_id(complaint_id)
+            from app.services.notification_service import NotificationService
+            import asyncio
+            try:
+                asyncio.ensure_future(
+                    NotificationService.notify_citizen_routed(complaint_dict, authority)
+                )
+            except Exception:
+                pass
+
         return {
             'success': True,
             'complaint_id': complaint_id,

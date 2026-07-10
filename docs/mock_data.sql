@@ -2,7 +2,7 @@
 -- Ensure schema.sql is executed first to create tables.
 
 -- Clear existing data (optional, for clean run)
-TRUNCATE TABLE complaints, projects, roads, contractors, authorities, fund_sources, budget_variance_reasons, project_milestones, contingency_reserves, approval_trail RESTART IDENTITY CASCADE;
+TRUNCATE TABLE complaints, projects, roads, contractors, authorities, fund_sources, budget_variance_reasons, project_milestones, contingency_reserves, approval_trail, road_materials, project_warranties, road_documents RESTART IDENTITY CASCADE;
 
 -- =========================================================================
 -- 0. SEED REGIONS
@@ -188,7 +188,7 @@ VALUES
 -- =========================================================================
 -- 3. SEED ROADS (12 Records)
 -- =========================================================================
-INSERT INTO roads (name, road_code, status, length_km, authority_id, geom, road_type, last_relaying_date, contractor_id)
+INSERT INTO roads (name, road_code, status, length_km, authority_id, geom, road_type, last_relaying_date, contractor_id, surface_type, lane_count, width_m, aadt, last_inspection_date)
 VALUES
 (
     'Western Express Highway',
@@ -199,7 +199,8 @@ VALUES
     ST_GeomFromText('LINESTRING(72.8524 19.1012, 72.8530 19.1340, 72.8590 19.1860, 72.8610 19.2300)', 4326),
     'NH',
     '2025-03-15',
-    1 -- L&T
+    1, -- L&T
+    'asphalt', 6, 35.50, 185000, '2025-06-15'
 ),
 (
     'Eastern Express Highway',
@@ -210,62 +211,68 @@ VALUES
     ST_GeomFromText('LINESTRING(72.9210 19.0410, 72.9340 19.1020, 72.9460 19.1680, 72.9610 19.2150)', 4326),
     'SH',
     '2020-11-20',
-    2 -- IRB
+    2, -- IRB
+    'asphalt', 4, 22.00, 95000, '2024-12-10'
 ),
 (
     'S.V. Road',
     'SV-RD-01',
     'poor',
     16.80,
-    1, -- Ward K-West
+    1, -- MCGM-KW
     ST_GeomFromText('LINESTRING(72.8354 19.0601, 72.8360 19.1020, 72.8398 19.1620, 72.8450 19.2080)', 4326),
     'City',
     '2018-06-10',
-    3 -- Dilip Buildcon (replaced Vijay Infra)
+    3, -- Dilip Buildcon
+    'asphalt', 4, 14.50, 62000, '2025-01-20'
 ),
 (
     'Link Road',
     'LNK-RD-02',
     'under_construction',
     18.20,
-    1, -- Ward K-West
+    1, -- MCGM-KW
     ST_GeomFromText('LINESTRING(72.8250 19.0805, 72.8270 19.1240, 72.8310 19.1840, 72.8510 19.2450)', 4326),
     'City',
     '2025-10-01',
-    6 -- KNR
+    6, -- KNR
+    'concrete', 4, 18.00, 48000, '2025-04-10'
 ),
 (
     'LBS Marg',
     'LBS-RD-03',
     'poor',
     21.00,
-    3, -- Ward H-East
+    3, -- MCGM-HE
     ST_GeomFromText('LINESTRING(72.8890 19.0305, 72.8980 19.0840, 72.9120 19.1360, 72.9350 19.1980)', 4326),
     'City',
     '2017-04-05',
-    4 -- Ashoka
+    4, -- Ashoka
+    'asphalt', 4, 16.00, 78000, '2024-08-05'
 ),
 (
     'Senapati Bapat Marg',
     'SBM-RD-04',
     'good',
     7.50,
-    2, -- Ward F-North
+    2, -- MCGM-FN
     ST_GeomFromText('LINESTRING(72.8240 18.9510, 72.8260 18.9850, 72.8290 19.0180)', 4326),
     'City',
     '2023-12-10',
-    3 -- Dilip Buildcon
+    3, -- Dilip Buildcon
+    'concrete', 6, 28.00, 35000, '2025-05-30'
 ),
 (
     'Dr. Ambedkar Road',
     'AMB-RD-05',
     'good',
     8.20,
-    2, -- Ward F-North
+    2, -- MCGM-FN
     ST_GeomFromText('LINESTRING(72.8480 18.9610, 72.8500 18.9950, 72.8520 19.0280)', 4326),
     'City',
     '2024-08-15',
-    8 -- Gawar
+    8, -- Gawar
+    'asphalt', 4, 15.00, 42000, '2025-06-01'
 ),
 (
     'Jogeshwari-Vikhroli Link Road',
@@ -276,7 +283,8 @@ VALUES
     ST_GeomFromText('LINESTRING(72.8520 19.1320, 72.8810 19.1290, 72.9050 19.1240, 72.9230 19.1200)', 4326),
     'SH',
     '2022-02-28',
-    5 -- PNC
+    5, -- PNC
+    'asphalt', 4, 16.50, 55000, '2025-03-15'
 ),
 (
     'Santa Cruz-Chembur Link Road',
@@ -287,7 +295,8 @@ VALUES
     ST_GeomFromText('LINESTRING(72.8550 19.0710, 72.8790 19.0700, 72.8990 19.0680, 72.9110 19.0650)', 4326),
     'SH',
     '2021-09-12',
-    7 -- HG Infra
+    7, -- HG Infra
+    'asphalt', 4, 15.00, 38000, '2024-10-22'
 ),
 (
     'Ghodbunder Road',
@@ -298,18 +307,20 @@ VALUES
     ST_GeomFromText('LINESTRING(72.9550 19.2220, 72.9310 19.2520, 72.8990 19.2680, 72.8680 19.2810)', 4326),
     'SH',
     '2024-12-25',
-    8 -- Gawar
+    8, -- Gawar
+    'asphalt', 6, 30.00, 85000, '2025-05-20'
 ),
 (
     'Marine Drive',
     'MD-RD-06',
     'good',
     3.60,
-    2, -- Ward F-North
+    2, -- MCGM-FN
     ST_GeomFromText('LINESTRING(72.8205 18.9210, 72.8210 18.9320, 72.8235 18.9480)', 4326),
     'City',
     '2025-01-20',
-    3 -- Dilip Buildcon
+    3, -- Dilip Buildcon
+    'concrete', 4, 28.00, 15000, '2025-06-10'
 ),
 (
     'Sion-Panvel Highway',
@@ -320,7 +331,8 @@ VALUES
     ST_GeomFromText('LINESTRING(72.9010 19.0390, 72.9450 19.0430, 72.9980 19.0400, 73.0610 19.0250)', 4326),
     'NH',
     '2023-06-30',
-    11 -- JMC
+    11, -- JMC
+    'asphalt', 6, 30.00, 125000, '2025-04-01'
 );
 
 
@@ -656,7 +668,7 @@ VALUES
 -- =========================================================================
 -- 7. INTERNATIONAL ROADS (US, GB, KE)
 -- =========================================================================
-INSERT INTO roads (name, road_code, status, length_km, authority_id, geom, road_type, last_relaying_date, contractor_id)
+INSERT INTO roads (name, road_code, status, length_km, authority_id, geom, road_type, last_relaying_date, contractor_id, surface_type, lane_count, width_m, aadt, last_inspection_date)
 VALUES
 -- US: Detroit area roads
 (
@@ -668,7 +680,8 @@ VALUES
     ST_GeomFromText('LINESTRING(-83.1500 42.3500, -83.1000 42.3550, -83.0500 42.3600, -82.9900 42.3650, -82.9400 42.3700)', 4326),
     'Interstate',
     '2021-05-15',
-    13 -- Great Lakes
+    13, -- Great Lakes
+    'asphalt', 6, 35.00, 155000, '2025-03-01'
 ),
 (
     'M-10 (Lodge Freeway)',
@@ -679,7 +692,8 @@ VALUES
     ST_GeomFromText('LINESTRING(-83.1200 42.3200, -83.1150 42.3500, -83.1100 42.3800, -83.1050 42.4100)', 4326),
     'US-Highway',
     '2019-08-20',
-    14 -- Michigan Paving
+    14, -- Michigan Paving
+    'asphalt', 4, 22.00, 85000, '2024-11-15'
 ),
 (
     'Woodward Avenue',
@@ -690,7 +704,8 @@ VALUES
     ST_GeomFromText('LINESTRING(-83.0800 42.3500, -83.0750 42.3800, -83.0700 42.4100, -83.0650 42.4400)', 4326),
     'US-Highway',
     '2024-10-05',
-    13 -- Great Lakes
+    13, -- Great Lakes
+    'asphalt', 4, 24.00, 72000, '2025-05-10'
 ),
 (
     'Gratiot Avenue',
@@ -701,7 +716,8 @@ VALUES
     ST_GeomFromText('LINESTRING(-82.9800 42.3500, -82.9700 42.3800, -82.9600 42.4100, -82.9500 42.4400)', 4326),
     'US-Highway',
     '2022-04-18',
-    14 -- Michigan Paving
+    14, -- Michigan Paving
+    'asphalt', 4, 20.00, 55000, '2024-09-20'
 ),
 (
     'Michigan Avenue',
@@ -712,7 +728,8 @@ VALUES
     ST_GeomFromText('LINESTRING(-83.1200 42.3300, -83.1000 42.3350, -83.0800 42.3400, -83.0600 42.3450)', 4326),
     'State-Highway',
     '2025-11-01',
-    15 -- Detroit Roads
+    15, -- Detroit Roads
+    'asphalt', 4, 18.00, 42000, '2025-02-20'
 ),
 
 -- GB: London / Camden area roads
@@ -725,7 +742,8 @@ VALUES
     ST_GeomFromText('LINESTRING(-0.1500 51.5300, -0.1450 51.5400, -0.1400 51.5500, -0.1350 51.5600)', 4326),
     'A-Road',
     '2023-03-10',
-    17 -- Camden Civils
+    17, -- Camden Civils
+    'asphalt', 2, 10.00, 28000, '2025-01-30'
 ),
 (
     'A502 (Parkway / Finchley Road)',
@@ -736,7 +754,8 @@ VALUES
     ST_GeomFromText('LINESTRING(-0.1700 51.5350, -0.1650 51.5450, -0.1600 51.5550, -0.1550 51.5650)', 4326),
     'A-Road',
     '2024-06-22',
-    16 -- Thames
+    16, -- Thames
+    'asphalt', 2, 12.00, 32000, '2025-04-15'
 ),
 (
     'Euston Road (A501)',
@@ -747,7 +766,8 @@ VALUES
     ST_GeomFromText('LINESTRING(-0.1400 51.5250, -0.1300 51.5270, -0.1200 51.5280, -0.1100 51.5300)', 4326),
     'A-Road',
     '2019-11-30',
-    18 -- London Asphalt
+    18, -- London Asphalt
+    'asphalt', 4, 24.00, 65000, '2024-12-05'
 ),
 (
     'Camden High Street',
@@ -758,7 +778,8 @@ VALUES
     ST_GeomFromText('LINESTRING(-0.1420 51.5340, -0.1410 51.5420, -0.1400 51.5500)', 4326),
     'Urban',
     '2022-09-05',
-    17 -- Camden Civils
+    17, -- Camden Civils
+    'pavers', 2, 9.00, 12000, '2025-02-10'
 ),
 
 -- KE: Nairobi area roads
@@ -771,7 +792,8 @@ VALUES
     ST_GeomFromText('LINESTRING(36.8200 -1.2800, 36.8150 -1.2900, 36.8100 -1.3000, 36.8050 -1.3100)', 4326),
     'A-Road',
     '2021-12-15',
-    19 -- Nairobi Road Builders
+    19, -- Nairobi Road Builders
+    'asphalt', 4, 20.00, 68000, '2025-03-25'
 ),
 (
     'Mombasa Road (A109)',
@@ -782,7 +804,8 @@ VALUES
     ST_GeomFromText('LINESTRING(36.8500 -1.3000, 36.8700 -1.3100, 36.8900 -1.3200, 36.9100 -1.3250)', 4326),
     'A-Road',
     '2018-07-20',
-    20 -- Kenya Infrastructure
+    20, -- Kenya Infrastructure
+    'asphalt', 4, 18.00, 55000, '2024-10-30'
 ),
 (
     'Thika Superhighway (A2)',
@@ -793,7 +816,8 @@ VALUES
     ST_GeomFromText('LINESTRING(36.8300 -1.2700, 36.8400 -1.2600, 36.8500 -1.2500, 36.8600 -1.2400)', 4326),
     'A-Road',
     '2024-03-30',
-    21 -- Mombasa Roadworks
+    21, -- Mombasa Roadworks
+    'asphalt', 6, 35.00, 95000, '2025-05-05'
 ),
 (
     'Jogoo Road',
@@ -804,7 +828,8 @@ VALUES
     ST_GeomFromText('LINESTRING(36.8600 -1.2900, 36.8700 -1.2950, 36.8800 -1.3000, 36.8900 -1.3050)', 4326),
     'B-Road',
     '2022-10-10',
-    19 -- Nairobi Road Builders
+    19, -- Nairobi Road Builders
+    'asphalt', 2, 10.00, 22000, '2024-11-18'
 ),
 (
     'Lang''ata Road',
@@ -815,9 +840,10 @@ VALUES
     ST_GeomFromText('LINESTRING(36.7800 -1.3200, 36.7900 -1.3150, 36.8000 -1.3100, 36.8100 -1.3050)', 4326),
     'C-Road',
     '2025-10-01',
-    20 -- Kenya Infrastructure
+    20, -- Kenya Infrastructure
+    'gravel', 2, 8.00, 8500, '2025-01-12'
 ),
--- ============= NEW ROADS (7 total new, bringing to 31) =============
+-- ============= ADDITIONAL ROADS (roads 27-71) =============
 -- IN: Mumbai-Nashik Highway (NH-3) — road 27
 (
     'Mumbai-Nashik Highway',
@@ -828,7 +854,8 @@ VALUES
     ST_GeomFromText('LINESTRING(72.9000 19.0000, 73.0500 19.2000, 73.3500 19.5000, 73.7500 19.9000)', 4326),
     'NH',
     '2023-01-15',
-    1 -- L&T
+    1, -- L&T
+    'asphalt', 4, 24.00, 45000, '2025-02-28'
 ),
 -- IN: MTHL Bridge Approach Road — road 28
 (
@@ -840,7 +867,8 @@ VALUES
     ST_GeomFromText('LINESTRING(72.9500 18.9700, 72.9800 18.9700, 73.0100 18.9700, 73.0400 18.9700)', 4326),
     'SH',
     '2025-06-01',
-    8 -- Gawar
+    8, -- Gawar
+    'concrete', 6, 32.00, 28000, '2025-06-05'
 ),
 -- US: Southfield Freeway (M-39) — road 29
 (
@@ -852,7 +880,8 @@ VALUES
     ST_GeomFromText('LINESTRING(-83.2000 42.2500, -83.1900 42.3000, -83.1800 42.3500, -83.1700 42.4000)', 4326),
     'US-Highway',
     '2022-08-01',
-    13 -- Great Lakes
+    13, -- Great Lakes
+    'asphalt', 4, 20.00, 65000, '2024-12-20'
 ),
 -- GB: M25 Motorway (Junction 8-12) — road 30
 (
@@ -864,7 +893,8 @@ VALUES
     ST_GeomFromText('LINESTRING(-0.3000 51.2800, -0.2500 51.2900, -0.2000 51.3000, -0.1500 51.3100)', 4326),
     'Motorway',
     '2023-05-20',
-    16 -- Thames
+    16, -- Thames
+    'asphalt', 6, 36.00, 180000, '2025-04-01'
 ),
 -- KE: Waiyaki Way (C62) — road 31
 (
@@ -876,7 +906,493 @@ VALUES
     ST_GeomFromText('LINESTRING(36.7700 -1.2600, 36.7800 -1.2750, 36.7900 -1.2900, 36.8000 -1.3050)', 4326),
     'C-Road',
     '2021-06-15',
-    21 -- Mombasa Roadworks
+    21, -- Mombasa Roadworks
+    'asphalt', 4, 16.00, 38000, '2024-08-15'
+),
+-- ============= ROADS 32-61 (New additions for A2: Data Accuracy) =============
+-- US: Detroit area roads (32-41) — 10 additional US roads
+(
+    'I-75 (Fisher Freeway)',
+    'US-I75',
+    'good',
+    62.50,
+    8, -- FHWA-MI
+    ST_GeomFromText('LINESTRING(-83.1500 42.2500, -83.1400 42.3000, -83.1200 42.3500, -83.1000 42.4000, -83.0800 42.4500)', 4326),
+    'Interstate',
+    '2024-11-15',
+    13,
+    'asphalt', 6, 36.00, 195000, '2025-06-01'
+),
+(
+    'I-696 (Reuther Freeway)',
+    'US-I696',
+    'fair',
+    45.80,
+    8, -- FHWA-MI
+    ST_GeomFromText('LINESTRING(-83.2000 42.4800, -83.1500 42.4900, -83.1000 42.5000, -83.0500 42.5100)', 4326),
+    'Interstate',
+    '2022-10-30',
+    13,
+    'asphalt', 6, 32.00, 165000, '2025-03-10'
+),
+(
+    'M-8 (Davison Freeway)',
+    'US-M8',
+    'fair',
+    9.20,
+    8, -- FHWA-MI
+    ST_GeomFromText('LINESTRING(-83.1000 42.3800, -83.0800 42.3850, -83.0600 42.3900)', 4326),
+    'US-Highway',
+    '2023-06-01',
+    14,
+    'asphalt', 4, 18.00, 52000, '2025-01-25'
+),
+(
+    'Telegraph Road',
+    'US-24',
+    'fair',
+    35.00,
+    6, -- DPW-DET
+    ST_GeomFromText('LINESTRING(-83.3000 42.2500, -83.2900 42.3200, -83.2800 42.3800, -83.2700 42.4500)', 4326),
+    'US-Highway',
+    '2021-04-20',
+    14,
+    'asphalt', 4, 20.00, 58000, '2024-07-30'
+),
+(
+    'Van Dyke Avenue',
+    'US-M53',
+    'good',
+    28.00,
+    7, -- MDOT
+    ST_GeomFromText('LINESTRING(-83.0500 42.3500, -83.0400 42.3900, -83.0300 42.4300, -83.0200 42.4700)', 4326),
+    'US-Highway',
+    '2024-08-01',
+    13,
+    'asphalt', 4, 18.00, 42000, '2025-04-20'
+),
+(
+    'Fort Street',
+    'US-M85',
+    'poor',
+    22.00,
+    6, -- DPW-DET
+    ST_GeomFromText('LINESTRING(-83.1500 42.2800, -83.1300 42.3000, -83.1100 42.3200, -83.0900 42.3400)', 4326),
+    'US-Highway',
+    '2018-12-15',
+    15,
+    'asphalt', 4, 16.00, 35000, '2024-06-10'
+),
+(
+    '8 Mile Road',
+    'US-M102',
+    'fair',
+    32.00,
+    7, -- MDOT
+    ST_GeomFromText('LINESTRING(-83.3000 42.4500, -83.2000 42.4500, -83.1000 42.4500, -83.0000 42.4500)', 4326),
+    'US-Highway',
+    '2022-05-15',
+    14,
+    'asphalt', 4, 22.00, 48000, '2024-11-05'
+),
+(
+    'Grand River Avenue',
+    'US-GRAND',
+    'fair',
+    40.00,
+    7, -- MDOT
+    ST_GeomFromText('LINESTRING(-83.2500 42.3000, -83.2000 42.3200, -83.1500 42.3400, -83.1000 42.3600)', 4326),
+    'US-Highway',
+    '2020-09-01',
+    14,
+    'asphalt', 4, 18.00, 38000, '2024-08-25'
+),
+(
+    'John R Road',
+    'US-JOHNR',
+    'good',
+    18.50,
+    6, -- DPW-DET
+    ST_GeomFromText('LINESTRING(-83.0800 42.3800, -83.0750 42.4100, -83.0700 42.4400, -83.0650 42.4700)', 4326),
+    'City',
+    '2024-03-10',
+    13,
+    'asphalt', 4, 14.00, 25000, '2025-02-15'
+),
+(
+    'Jefferson Avenue',
+    'US-JEFF',
+    'fair',
+    25.00,
+    6, -- DPW-DET
+    ST_GeomFromText('LINESTRING(-83.0500 42.3200, -83.0000 42.3300, -82.9500 42.3400, -82.9000 42.3500)', 4326),
+    'City',
+    '2021-07-01',
+    14,
+    'asphalt', 4, 16.00, 30000, '2024-10-15'
+),
+-- GB: London roads (52-61)
+(
+    'A4 (Great West Road)',
+    'GB-A4',
+    'fair',
+    14.50,
+    11, -- LHJC-LON
+    ST_GeomFromText('LINESTRING(-0.2800 51.4900, -0.2400 51.4950, -0.2000 51.5000, -0.1600 51.5050)', 4326),
+    'A-Road',
+    '2022-04-10',
+    16,
+    'asphalt', 4, 20.00, 52000, '2025-01-20'
+),
+(
+    'A406 (North Circular Road)',
+    'GB-A406',
+    'fair',
+    25.00,
+    12, -- NH-SE
+    ST_GeomFromText('LINESTRING(-0.3000 51.5800, -0.2500 51.5700, -0.2000 51.5600, -0.1500 51.5500)', 4326),
+    'A-Road',
+    '2023-08-20',
+    18,
+    'asphalt', 4, 22.00, 85000, '2025-03-05'
+),
+(
+    'A40 (Westway)',
+    'GB-A40',
+    'good',
+    8.00,
+    11, -- LHJC-LON
+    ST_GeomFromText('LINESTRING(-0.2200 51.5200, -0.2000 51.5250, -0.1800 51.5300, -0.1600 51.5350)', 4326),
+    'Motorway',
+    '2024-09-01',
+    16,
+    'concrete', 4, 26.00, 72000, '2025-05-15'
+),
+(
+    'A10 (Great Cambridge Road)',
+    'GB-A10',
+    'fair',
+    12.00,
+    12, -- NH-SE
+    ST_GeomFromText('LINESTRING(-0.0800 51.5300, -0.0700 51.5500, -0.0600 51.5700, -0.0500 51.5900)', 4326),
+    'A-Road',
+    '2021-11-05',
+    18,
+    'asphalt', 4, 18.00, 48000, '2024-09-15'
+),
+(
+    'B522 (Camden Road)',
+    'GB-B522',
+    'poor',
+    3.50,
+    10, -- CBC-HIGHWAYS
+    ST_GeomFromText('LINESTRING(-0.1450 51.5450, -0.1400 51.5480, -0.1350 51.5510, -0.1300 51.5540)', 4326),
+    'B-Road',
+    '2018-03-20',
+    17,
+    'asphalt', 2, 8.00, 9500, '2024-05-30'
+),
+(
+    'A1 (Holloway Road)',
+    'GB-A1',
+    'fair',
+    10.00,
+    11, -- LHJC-LON
+    ST_GeomFromText('LINESTRING(-0.1200 51.5400, -0.1150 51.5500, -0.1100 51.5600, -0.1000 51.5700)', 4326),
+    'A-Road',
+    '2022-06-15',
+    16,
+    'asphalt', 4, 20.00, 55000, '2024-12-10'
+),
+(
+    'Whitehall',
+    'GB-WHITE',
+    'good',
+    1.20,
+    11, -- LHJC-LON
+    ST_GeomFromText('LINESTRING(-0.1280 51.5040, -0.1270 51.5060, -0.1260 51.5080, -0.1250 51.5100)', 4326),
+    'A-Road',
+    '2025-01-15',
+    17,
+    'pavers', 4, 28.00, 18000, '2025-06-10'
+),
+(
+    'Oxford Street',
+    'GB-OXFORD',
+    'good',
+    2.50,
+    11, -- LHJC-LON
+    ST_GeomFromText('LINESTRING(-0.1500 51.5140, -0.1400 51.5150, -0.1300 51.5160, -0.1200 51.5170)', 4326),
+    'Urban',
+    '2024-05-01',
+    17,
+    'pavers', 2, 12.00, 25000, '2025-04-25'
+),
+(
+    'B516 (Marylebone Road)',
+    'GB-B516',
+    'fair',
+    2.80,
+    10, -- CBC-HIGHWAYS
+    ST_GeomFromText('LINESTRING(-0.1650 51.5200, -0.1550 51.5220, -0.1450 51.5240, -0.1350 51.5260)', 4326),
+    'B-Road',
+    '2023-03-10',
+    18,
+    'asphalt', 4, 18.00, 32000, '2025-02-01'
+),
+(
+    'A23 (Brighton Road)',
+    'GB-A23',
+    'fair',
+    18.00,
+    12, -- NH-SE
+    ST_GeomFromText('LINESTRING(-0.1300 51.3800, -0.1200 51.4000, -0.1100 51.4200, -0.1000 51.4400)', 4326),
+    'A-Road',
+    '2020-08-01',
+    16,
+    'asphalt', 4, 20.00, 45000, '2024-07-15'
+),
+-- KE: Nairobi roads (62-71)
+(
+    'Ngong Road',
+    'KE-C58',
+    'poor',
+    8.50,
+    14, -- NCC-ROADS
+    ST_GeomFromText('LINESTRING(36.7800 -1.2900, 36.7900 -1.3050, 36.8000 -1.3200, 36.8100 -1.3350)', 4326),
+    'C-Road',
+    '2019-05-20',
+    20,
+    'asphalt', 2, 10.00, 18000, '2024-04-10'
+),
+(
+    'Kiambu Road',
+    'KE-KIAMBU',
+    'fair',
+    12.00,
+    15, -- KURA-HQ
+    ST_GeomFromText('LINESTRING(36.8300 -1.2200, 36.8400 -1.2000, 36.8500 -1.1800, 36.8600 -1.1600)', 4326),
+    'B-Road',
+    '2022-03-15',
+    19,
+    'asphalt', 2, 12.00, 25000, '2024-10-05'
+),
+(
+    'Haile Selassie Avenue',
+    'KE-HAILE',
+    'good',
+    3.00,
+    16, -- KeNHA-HQ
+    ST_GeomFromText('LINESTRING(36.8200 -1.2850, 36.8250 -1.2880, 36.8300 -1.2910, 36.8350 -1.2940)', 4326),
+    'A-Road',
+    '2024-12-01',
+    19,
+    'asphalt', 4, 20.00, 45000, '2025-05-20'
+),
+(
+    'Kenyatta Avenue',
+    'KE-KENYA',
+    'good',
+    2.50,
+    14, -- NCC-ROADS
+    ST_GeomFromText('LINESTRING(36.8200 -1.2800, 36.8250 -1.2820, 36.8300 -1.2840, 36.8350 -1.2860)', 4326),
+    'A-Road',
+    '2025-02-15',
+    19,
+    'asphalt', 4, 22.00, 35000, '2025-06-01'
+),
+(
+    'Limuru Road',
+    'KE-B3',
+    'fair',
+    14.00,
+    15, -- KURA-HQ
+    ST_GeomFromText('LINESTRING(36.7000 -1.2000, 36.7200 -1.1800, 36.7400 -1.1600, 36.7600 -1.1400)', 4326),
+    'B-Road',
+    '2021-11-20',
+    20,
+    'asphalt', 2, 10.00, 15000, '2024-06-30'
+),
+(
+    'Enterprise Road',
+    'KE-ENTER',
+    'fair',
+    5.00,
+    14, -- NCC-ROADS
+    ST_GeomFromText('LINESTRING(36.8600 -1.3100, 36.8700 -1.3150, 36.8800 -1.3200, 36.8900 -1.3250)', 4326),
+    'C-Road',
+    '2023-04-01',
+    21,
+    'asphalt', 2, 12.00, 22000, '2024-11-20'
+),
+(
+    'Outer Ring Road',
+    'KE-OUTER',
+    'poor',
+    11.00,
+    15, -- KURA-HQ
+    ST_GeomFromText('LINESTRING(36.8500 -1.2700, 36.8600 -1.2850, 36.8700 -1.3000, 36.8800 -1.3150)', 4326),
+    'B-Road',
+    '2017-09-10',
+    20,
+    'asphalt', 2, 10.00, 28000, '2024-03-15'
+),
+(
+    'Bunyala Road',
+    'KE-BUNY',
+    'good',
+    3.00,
+    14, -- NCC-ROADS
+    ST_GeomFromText('LINESTRING(36.8100 -1.2950, 36.8150 -1.2980, 36.8200 -1.3010, 36.8250 -1.3040)', 4326),
+    'C-Road',
+    '2024-07-01',
+    19,
+    'asphalt', 2, 8.00, 12000, '2025-03-20'
+),
+(
+    'Forest Road',
+    'KE-FOREST',
+    'good',
+    2.00,
+    14, -- NCC-ROADS
+    ST_GeomFromText('LINESTRING(36.7900 -1.2800, 36.7950 -1.2830, 36.8000 -1.2860, 36.8050 -1.2890)', 4326),
+    'C-Road',
+    '2024-10-01',
+    21,
+    'asphalt', 2, 8.00, 8000, '2025-04-10'
+),
+(
+    'Likoni Road',
+    'KE-LIKONI',
+    'fair',
+    4.50,
+    14, -- NCC-ROADS
+    ST_GeomFromText('LINESTRING(36.8300 -1.3050, 36.8400 -1.3100, 36.8500 -1.3150, 36.8600 -1.3200)', 4326),
+    'C-Road',
+    '2022-12-10',
+    21,
+    'asphalt', 2, 10.00, 16000, '2024-09-25'
+),
+-- IN: Mumbai area roads (62-71) — 10 additional India roads
+(
+    'Andheri-Ghatkopar Link Road',
+    'IN-AGLR',
+    'fair',
+    8.50,
+    1, -- MCGM-KW
+    ST_GeomFromText('LINESTRING(72.8600 19.1100, 72.8700 19.1050, 72.8800 19.1000, 72.8900 19.0950)', 4326),
+    'City',
+    '2021-08-15',
+    5,
+    'asphalt', 4, 16.00, 45000, '2024-05-20'
+),
+(
+    'Bandra-Worli Sea Link Approach',
+    'IN-BWSL',
+    'good',
+    4.20,
+    2, -- MCGM-FN
+    ST_GeomFromText('LINESTRING(72.8200 19.0300, 72.8250 19.0250, 72.8300 19.0200, 72.8350 19.0150)', 4326),
+    'City',
+    '2024-11-01',
+    8,
+    'concrete', 6, 32.00, 85000, '2025-05-10'
+),
+(
+    'Juhu-Vile Parle Link Road',
+    'IN-JVPL',
+    'good',
+    5.00,
+    1, -- MCGM-KW
+    ST_GeomFromText('LINESTRING(72.8300 19.1000, 72.8350 19.0950, 72.8400 19.0900, 72.8450 19.0850)', 4326),
+    'City',
+    '2024-06-20',
+    3,
+    'asphalt', 4, 14.00, 32000, '2025-04-15'
+),
+(
+    'Aarey Road',
+    'IN-AAREY',
+    'fair',
+    6.00,
+    1, -- MCGM-KW
+    ST_GeomFromText('LINESTRING(72.8600 19.1400, 72.8550 19.1350, 72.8500 19.1300, 72.8450 19.1250)', 4326),
+    'City',
+    '2022-03-10',
+    7,
+    'asphalt', 2, 10.00, 18000, '2024-10-05'
+),
+(
+    'Mahakali Caves Road',
+    'IN-MAHK',
+    'poor',
+    4.50,
+    1, -- MCGM-KW
+    ST_GeomFromText('LINESTRING(72.8700 19.1250, 72.8750 19.1200, 72.8800 19.1150, 72.8850 19.1100)', 4326),
+    'City',
+    '2019-05-01',
+    10,
+    'asphalt', 2, 8.00, 12000, '2024-03-01'
+),
+(
+    'Film City Road',
+    'IN-FILM',
+    'fair',
+    3.00,
+    3, -- MCGM-HE
+    ST_GeomFromText('LINESTRING(72.8900 19.1400, 72.8950 19.1350, 72.9000 19.1300)', 4326),
+    'City',
+    '2023-01-20',
+    5,
+    'asphalt', 2, 8.00, 8000, '2024-12-15'
+),
+(
+    'New Link Road (Kandivali-Borivali)',
+    'IN-NLNK',
+    'good',
+    8.00,
+    1, -- MCGM-KW
+    ST_GeomFromText('LINESTRING(72.8400 19.2000, 72.8450 19.1950, 72.8500 19.1900, 72.8550 19.1850)', 4326),
+    'City',
+    '2024-09-10',
+    6,
+    'asphalt', 4, 18.00, 38000, '2025-05-25'
+),
+(
+    'Lokhandwala Complex Road',
+    'IN-LOKH',
+    'fair',
+    2.50,
+    1, -- MCGM-KW
+    ST_GeomFromText('LINESTRING(72.8250 19.1200, 72.8300 19.1180, 72.8350 19.1160, 72.8400 19.1140)', 4326),
+    'City',
+    '2020-11-30',
+    4,
+    'asphalt', 2, 10.00, 15000, '2024-04-20'
+),
+(
+    'Yari Road (Versova)',
+    'IN-YARI',
+    'good',
+    3.20,
+    1, -- MCGM-KW
+    ST_GeomFromText('LINESTRING(72.8200 19.1300, 72.8250 19.1280, 72.8300 19.1260, 72.8350 19.1240)', 4326),
+    'City',
+    '2024-04-01',
+    3,
+    'asphalt', 2, 12.00, 22000, '2025-04-30'
+),
+(
+    'Malad-Marve Road',
+    'IN-MLMR',
+    'fair',
+    5.50,
+    1, -- MCGM-KW
+    ST_GeomFromText('LINESTRING(72.8400 19.1800, 72.8450 19.1750, 72.8500 19.1700, 72.8550 19.1650)', 4326),
+    'City',
+    '2022-07-15',
+    5,
+    'asphalt', 2, 10.00, 14000, '2024-08-10'
 );
 
 -- =========================================================================
@@ -3169,3 +3685,273 @@ INSERT INTO road_conflict_groups (conflict_key, primary_road_id, merged_metadata
 
 INSERT INTO authority_conflict_groups (conflict_key, primary_authority_id, merged_metadata, resolved) VALUES
 ('dup-michigan-road-authorities', 7, '{"detected_by":"boundary_overlap","overlap_pct":0.45,"duplicate_ids":[7,8],"resolution":"pending_review"}', FALSE);
+
+-- =========================================================================
+-- SEED CPI DATA (C3: Inflation-Adjusted Comparisons)
+-- Annual CPI 2020-2026 for IN, US, GB, KE
+-- Base year 2020 = 100 for all regions
+-- =========================================================================
+INSERT INTO cpi_data (region_code, year, cpi_value) VALUES
+-- India (CPI-IW combined)
+('IN', 2020, 100.0), ('IN', 2021, 105.1), ('IN', 2022, 111.6), ('IN', 2023, 118.4), ('IN', 2024, 124.8), ('IN', 2025, 131.0), ('IN', 2026, 136.5),
+-- US (CPI-U)
+('US', 2020, 100.0), ('US', 2021, 104.7), ('US', 2022, 112.0), ('US', 2023, 115.8), ('US', 2024, 119.0), ('US', 2025, 121.5), ('US', 2026, 123.8),
+-- UK (CPI)
+('GB', 2020, 100.0), ('GB', 2021, 102.6), ('GB', 2022, 109.1), ('GB', 2023, 115.4), ('GB', 2024, 118.2), ('GB', 2025, 120.8), ('GB', 2026, 123.0),
+-- Kenya (CPI)
+('KE', 2020, 100.0), ('KE', 2021, 106.2), ('KE', 2022, 113.8), ('KE', 2023, 121.5), ('KE', 2024, 128.1), ('KE', 2025, 133.6), ('KE', 2026, 138.2);
+
+-- =========================================================================
+-- SEED TENDERS (C1: Procurement Audit Trail)
+-- =========================================================================
+INSERT INTO tenders (reference_no, title, description, authority_id, project_id, estimated_value, status, published_date, bid_deadline, award_date, award_letter_url) VALUES
+-- Mumbai — WEH Flyover (tender linked to project 1)
+('BMC-2025/T-0042', 'WEH Flyover Structural Grouting & Resurfacing', 'Comprehensive structural rehabilitation of Western Express Highway flyover including pier grouting, deck repairs, and full-width resurfacing. Estimated 6.2km per carriageway.', 4, 1, 240000000.00, 'awarded', '2025-06-01', '2025-07-15', '2025-08-10', '/docs/awards/WEH-Flyover-Award-2025.pdf'),
+-- Mumbai — SV Road Drainage (tender linked to halted project 3 — led to blacklisting)
+('BMC-2024/T-0081', 'SV Road Drainage Trenching & Microtunnelling', 'Design-build microtunnelling for stormwater drainage along S.V. Road from Bandra to Khar. Includes 2.8km of 1200mm RCC pipe and 8 catch basins.', 4, 3, 95000000.00, 'cancelled', '2024-03-15', '2024-04-30', NULL, NULL),
+-- Mumbai — Ghodbunder Road Overlay (project 11)
+('BMC-2024/T-0112', 'Ghodbunder Road Mast-Asphalt Overlay', '20km mast-asphalt overlay on Ghodbunder Road from Thane to Bhayander. Two-lift application with PMB binder.', 4, 11, 190000000.00, 'awarded', '2024-02-01', '2024-03-15', '2024-04-10', '/docs/awards/Ghodbunder-Overlay-Award-2024.pdf'),
+-- Mumbai — Sion-Panvel Expressway (project 12)
+('MSRDC-2025/T-0007', 'Sion-Panvel Expressway Maintenance & Repair', 'Comprehensive maintenance of Sion-Panvel Expressway including pothole repair, bridge joint replacement, drainage, and road markings. 22km corridor.', 5, 12, 80000000.00, 'published', '2025-10-01', '2025-11-15', NULL, NULL),
+-- Detroit — Southfield Freeway (project 16)
+('MDOT-2025/T-009', 'Southfield Freeway Pavement Rehabilitation', 'Full-width milling and HMA overlay of Southfield Freeway (2.6 miles). Includes bridge approach slab repairs and guardrail upgrade to MGS standard.', 7, 16, 22500000.00, 'awarded', '2025-07-01', '2025-08-15', '2025-09-05', '/docs/awards/Southfield-Freeway-Award-2025.pdf'),
+-- London — M25 Smart Motorway (project 17)
+('NH-2025/T-0033', 'M25 J8-12 Smart Motorway Upgrade', 'All-lane running conversion of M25 junctions 8 to 12. Includes hard shoulder running, overhead gantries, ERA lay-bys, and MIDAS loops.', 12, 17, 95000000.00, 'awarded', '2025-04-01', '2025-06-15', '2025-07-20', '/docs/awards/M25-Smart-Motorway-Award-2025.pdf'),
+-- Nairobi — Langata Road (project 28)
+('KeNHA-2025/T-0018', 'Lang''ata Road Widening & Overlay', 'Widening of Langata Road from 2 to 4 lanes (6.5km) including bulk earthwork, drainage, asphalt overlay, and junction improvements.', 16, 28, 120000000.00, 'under_evaluation', '2025-09-01', '2025-10-31', NULL, NULL);
+
+-- =========================================================================
+-- SEED EVALUATION CRITERIA (C1: Scoring framework per tender)
+-- =========================================================================
+INSERT INTO evaluation_criteria (tender_id, criterion_name, weight_pct, max_score) VALUES
+-- WEH Flyover (tender 1)
+(1, 'Technical Capability & Methodology', 35, 100),
+(1, 'Financial Competitiveness (L1)', 30, 100),
+(1, 'Past Performance & Similar Projects', 20, 100),
+(1, 'Safety Record & Compliance', 10, 100),
+(1, 'Local Content & Labor Utilization', 5, 100),
+-- SV Road Drainage (tender 2 — cancelled)
+(2, 'Microtunnelling Experience', 40, 100),
+(2, 'Financial Quote', 30, 100),
+(2, 'Subsurface Risk Management', 15, 100),
+(2, 'Project Timeline & Delivery', 15, 100),
+-- Ghodbunder Road (tender 3)
+(3, 'Technical Approach', 30, 100),
+(3, 'Financial Quote', 35, 100),
+(3, 'Similar Scale Projects', 20, 100),
+(3, 'Quality Assurance Plan', 15, 100),
+-- Sion-Panvel (tender 4 — published, not yet evaluated)
+(4, 'Technical Capability', 30, 100),
+(4, 'Financial Quote', 30, 100),
+(4, 'Expressway Maintenance Experience', 25, 100),
+(4, 'Emergency Response Capability', 15, 100),
+-- Southfield Freeway (tender 5)
+(5, 'Pavement Rehabilitation Experience', 35, 100),
+(5, 'Cost Competitiveness', 30, 100),
+(5, 'Bridge Repair Capability', 20, 100),
+(5, 'DBE/MBE Participation', 15, 100),
+-- M25 Smart Motorway (tender 6)
+(6, 'Smart Motorway Delivery Experience', 40, 100),
+(6, 'Financial Competitiveness', 25, 100),
+(6, 'Technology Integration & Systems', 20, 100),
+(6, 'Environmental & Community', 15, 100),
+-- Langata Road (tender 7)
+(7, 'Road Widening Experience', 35, 100),
+(7, 'Financial Proposal', 30, 100),
+(7, 'Resettlement & Community Engagement', 20, 100),
+(7, 'Environmental Compliance', 15, 100);
+
+-- =========================================================================
+-- SEED TENDER BIDS (C1: Bid submissions with evaluation scores)
+-- =========================================================================
+INSERT INTO tender_bids (tender_id, contractor_id, financial_quote, technical_score, financial_score, weighted_total, evaluator_notes, is_winner) VALUES
+-- WEH Flyover — 4 bidders
+(1, 1, 238000000.00, 92.00, 88.00, 90.20, 'Exceptional technical proposal with detailed grouting methodology. Strongest past performance on similar flyover projects.', FALSE),
+(1, 2, 235000000.00, 85.00, 90.00, 87.00, 'Competitive financial quote but technical proposal lacked detail on structural grouting procedure.', FALSE),
+(1, 6, 242000000.00, 78.00, 82.00, 79.60, 'Adequate proposal — limited experience with high-traffic flyover structural repairs.', FALSE),
+(1, 3, 240000000.00, 95.00, 85.00, 90.75, 'WINNER — Best technical score. Proven track record on NHAI flyover projects. Strong safety record.', TRUE),
+-- SV Road Drainage (cancelled — contractor 10 was winner but later blacklisted)
+(2, 10, 92000000.00, 82.00, 78.00, 80.20, 'Initially selected — lowest L1 bidder. Later blacklisted for substandard material on another project.', TRUE),
+(2, 1, 95000000.00, 90.00, 72.00, 82.20, 'Strong technical proposal (microtunnelling specialist) but higher financial quote by 3.2%.', FALSE),
+(2, 2, 93000000.00, 75.00, 80.00, 77.25, 'Acceptable technical submission but limited microtunnelling experience.', FALSE),
+-- Ghodbunder Road — 3 bidders
+(3, 4, 185000000.00, 88.00, 92.00, 89.60, 'WINNER — Best overall value. Strong financial competitiveness and extensive mast-asphalt experience.', TRUE),
+(3, 6, 190000000.00, 85.00, 85.00, 85.00, 'Competitive technical and financial scores — marginal difference of 4.6% on weighted total.', FALSE),
+(3, 2, 188000000.00, 78.00, 88.00, 82.50, 'Lower technical score due to limited experience with mast-asphalt overlay specifications.', FALSE),
+-- Southfield Freeway — 3 bidders
+(5, 13, 21800000.00, 90.00, 92.00, 90.80, 'WINNER — Strongest proposal overall. Proven pavement rehabilitation experience on I-75 corridor.', TRUE),
+(5, 14, 22500000.00, 85.00, 88.00, 86.35, 'Competitive bid but limited bridge approach slab experience.', FALSE),
+(5, 15, 22000000.00, 82.00, 90.00, 85.60, 'Adequate pavement experience but weaker on safety management plan.', FALSE),
+-- M25 Smart Motorway — 3 bidders
+(6, 16, 93000000.00, 93.00, 90.00, 91.80, 'WINNER — Unmatched smart motorway experience including M1 J10-13 delivery. Strong tech integration.', TRUE),
+(6, 17, 95000000.00, 85.00, 85.00, 85.00, 'Good regional knowledge but limited all-lane running system experience.', FALSE),
+(6, 18, 92000000.00, 78.00, 92.00, 84.10, 'Lowest financial quote but technical scoring insufficient on gantry installation methodology.', FALSE),
+-- Langata Road (under evaluation — no winner yet)
+(7, 19, 115000000.00, 82.00, 85.00, 83.35, 'Strong local knowledge of Nairobi road network. Good resettlement plan.', FALSE),
+(7, 20, 118000000.00, 88.00, 80.00, 84.40, 'Best technical score. Comprehensive environmental and community engagement plan.', FALSE),
+(7, 21, 120000000.00, 75.00, 78.00, 76.35, 'Adequate proposal — weaker on utility relocation methodology.', FALSE);
+
+-- =========================================================================
+-- SEED PROJECT BENEFICIARIES (C5: Beneficiary Tracking)
+-- =========================================================================
+INSERT INTO project_beneficiaries (project_id, population_served, estimated_daily_traffic, household_count, beneficiary_type, data_source, census_year, notes) VALUES
+-- WEH Flyover (project 1) — major commuter artery
+(1, 850000, 275000, 212500, 'commuters', 'Mumbai Traffic Survey 2024', 2024, 'WEH carries ~275K vehicles daily. Serves western suburbs and Thane commuter corridor.'),
+-- EEH Pothole Remediation (project 2) — mixed corridor
+(2, 320000, 95000, 80000, 'mixed', 'PWD Road Usage Report 2024', 2024, 'EEH serves industrial zones, residential areas, and airport-bound traffic.'),
+-- SV Road Drainage (project 3) — halted project
+(3, 450000, 120000, 112500, 'mixed', 'BMC Ward Data 2023', 2023, 'SV Road is a major north-south arterial through Bandra-Khar. Project halted mid-execution.'),
+-- SV Road Emergency Asphalt (project 4) — same corridor
+(4, 450000, 120000, 112500, 'commuters', 'BMC Ward Data 2023', 2023, 'Emergency overlay replacing halted drainage project. Same corridor as project 3.'),
+-- Link Road Concrete Upgrade (project 5)
+(5, 280000, 85000, 70000, 'mixed', 'MCGM Traffic Census 2023', 2023, 'Link Road connects western suburbs to Western Express Highway. Key commuter route.'),
+-- LBS Marg Sewer Line (project 6)
+(6, 180000, 40000, 45000, 'residential', 'BMC Sewerage Zone Data', 2022, 'LBS Marg serves densely populated residential neighborhoods in Kurla and Ghatkopar.'),
+-- Senapati Bapat Marg (project 7)
+(7, 150000, 55000, 37500, 'commuters', 'PWD Traffic Count 2022', 2022, 'SB Marg connects Lower Parel commercial district to Dadar. Office commuter corridor.'),
+-- Dr. Ambedkar Road (project 8)
+(8, 220000, 65000, 55000, 'mixed', 'BMC Road Network Plan', 2023, 'Major junction redesign at Dadar TT — serves rail commuters, shoppers, and local traffic.'),
+-- JVLR (project 9)
+(9, 310000, 90000, 77500, 'commuters', 'Jogeshwari-Vikhroli Link Road Survey', 2024, 'JVLR connects western and eastern suburbs. Critical alternative to WEH/EEH corridor.'),
+-- SCLR (project 10)
+(10, 250000, 70000, 62500, 'mixed', 'MCGM Connector Road Study', 2023, 'Santa Cruz-Chembur Link Road serves both residential and industrial zones.'),
+-- Ghodbunder Road (project 11)
+(11, 500000, 130000, 125000, 'mixed', 'Thane Municipal Corporation Data', 2024, '20km arterial connecting Thane to Mira-Bhayander. Rapid urbanization zone.'),
+-- Sion-Panvel Expressway (project 12)
+(12, 650000, 180000, 162500, 'commuters', 'MSRDC Expressway Usage Report', 2024, 'Major commuter expressway serving Navi Mumbai and Panvel corridor. 22km length.'),
+-- Marine Drive Promenade (project 13)
+(13, 420000, 50000, 105000, 'mixed', 'MCGM Tourism & Recreation Data', 2023, 'Iconic promenade serving both daily commuters and recreational users. Heritage zone.'),
+-- NH-3 Mumbai-Nashik (project 14) — major highway widening
+(14, 1200000, 350000, 300000, 'mixed', 'NHAI Traffic Survey 2024', 2024, 'National Highway widening serving entire Mumbai-Nashik industrial corridor. 35km widening scope.'),
+-- MTHL Approach (project 15)
+(15, 580000, 160000, 145000, 'commuters', 'MSRDC MTHL Traffic Projections', 2023, 'MTHL approach road connecting to Mumbai Trans Harbour Link. Major commuter connector.'),
+-- Southfield Freeway (project 16) — US
+(16, 340000, 125000, 130000, 'commuters', 'MDOT Traffic Volume Report 2024', 2024, 'Southfield Freeway (M-39) serves western Detroit suburbs. Key commuter corridor.'),
+-- M25 Smart Motorway (project 17) — UK
+(17, 1500000, 420000, 600000, 'commuters', 'National Highways Traffic Statistics 2024', 2024, 'M25 J8-12 serves London orbital corridor. Heaviest-trafficked motorway section in UK.'),
+-- Waiyaki Way (project 18) — Kenya
+(18, 450000, 110000, 90000, 'commuters', 'KeNHA Nairobi Traffic Survey 2024', 2024, 'Waiyaki Way connects Nairobi CBD to Westlands and Kiambu corridor. Major commuter route.'),
+-- I-94 Resurfacing (project 19) — US
+(19, 520000, 195000, 200000, 'commuters', 'MDOT I-94 Corridor Study 2023', 2023, 'I-94 is Detroit primary east-west freeway. Serves airport, industrial, and commuter traffic.'),
+-- M-10 Freeway (project 20) — US
+(20, 280000, 100000, 107000, 'commuters', 'Detroit DPW Traffic Data 2024', 2024, 'Lodge Freeway (M-10) serves Detroit CBD and northern suburbs.'),
+-- Woodward Avenue (project 21) — US
+(21, 180000, 45000, 72000, 'mixed', 'City of Detroit Streetscape Plan', 2024, 'Woodward Avenue is Detroit main cultural corridor. Streetscape serves residents and businesses.'),
+-- Michigan Avenue (project 22) — US
+(22, 120000, 35000, 48000, 'mixed', 'Detroit Water & Sewerage District Data', 2023, 'Michigan Avenue drainage serves southwest Detroit industrial and residential area.'),
+-- Camden High Street (project 23) — UK
+(23, 85000, 25000, 34000, 'mixed', 'Camden Borough Transport Survey', 2024, 'Camden High Street (A41) serves local businesses, residents, and tourists. Safety improvement zone.'),
+-- A502 Finchley Road (project 24) — UK
+(24, 150000, 40000, 60000, 'commuters', 'TfL Road Network Report 2024', 2024, 'Finchley Road (A502) is major north London bus corridor and commuter route.'),
+-- Euston Road (project 25) — UK
+(25, 350000, 85000, 140000, 'commuters', 'TfL Bus Lane Usage Data 2024', 2024, 'Euston Road bus lane serves 80+ bus routes per hour. Major transport interchange zone.'),
+-- Uhuru Highway (project 26) — Kenya
+(26, 600000, 150000, 150000, 'commuters', 'KeNHA Bridge Inventory Report', 2024, 'Uhuru Highway is Nairobi primary north-south corridor. Bridge joints serve CBD approach.'),
+-- Mombasa Road (project 27) — Kenya
+(27, 480000, 120000, 96000, 'commuters', 'KeNHA Drainage Assessment', 2024, 'Mombasa Road (A109) serves Nairobi industrial area and JKIA airport corridor.'),
+-- Langata Road (project 28) — Kenya
+(28, 350000, 80000, 70000, 'mixed', 'KeNHA Widening Feasibility Study', 2023, 'Langata Road connects Nairobi CBD to Karen and Ongata Rongai residential areas.'),
+-- Gratiot Avenue (project 29) — US
+(29, 160000, 42000, 64000, 'mixed', 'MDOT Metro Region Traffic Data', 2024, 'Gratiot Avenue (M-3) serves Detroit east side and Macomb County commuter corridor.'),
+-- Thika Superhighway (project 30) — Kenya
+(30, 750000, 200000, 187500, 'commuters', 'KeNHA Superhighway Usage Report', 2024, 'Thika Superhighway (A2) is Nairobi-Thika commuter corridor. Highest traffic volume in Kenya.'),
+-- Jogoo Road (project 31) — Kenya
+(31, 220000, 55000, 44000, 'mixed', 'Nairobi County Drainage Master Plan', 2023, 'Jogoo Road (B301) serves eastern Nairobi residential areas and light industrial zone.');
+
+-- =========================================================================
+-- MAINTENANCE WORK ORDERS (32-51)
+-- Small-scale maintenance tasks across all regions
+-- =========================================================================
+INSERT INTO projects (title, road_id, contractor_id, authority_id, budget_allocated, budget_spent, status, start_date, target_end_date, actual_end_date, delay_days) VALUES
+('WEH Pothole Patching Q1 2024', 1, 3, 5, 2500000.00, 2500000.00, 'completed', '2024-01-15', '2024-02-15', '2024-02-10', 0),
+('SV Road Crack Sealing', 3, 4, 1, 1800000.00, 1950000.00, 'completed', '2023-11-01', '2023-12-15', '2024-01-05', 21),
+('LBS Marg Shoulder Repair', 5, 10, 3, 3200000.00, 3100000.00, 'completed', '2024-03-01', '2024-04-30', '2024-04-25', 0),
+('JVLR Drain Cleaning', 8, 7, 4, 850000.00, 850000.00, 'completed', '2024-06-01', '2024-06-30', '2024-06-28', 0),
+('SCLR Guardrail Replacement', 9, 5, 4, 1200000.00, 1200000.00, 'completed', '2024-04-01', '2024-05-15', '2024-05-10', 0),
+('WEH Median Repair', 1, 1, 5, 4500000.00, 4800000.00, 'completed', '2023-08-01', '2023-10-31', '2023-11-15', 15),
+('SV Road Drain Unclogging', 3, 6, 1, 600000.00, 600000.00, 'completed', '2024-07-01', '2024-07-15', '2024-07-12', 0),
+('EEH Asphalt Patching', 2, 2, 4, 2100000.00, 2100000.00, 'completed', '2024-05-01', '2024-06-15', '2024-06-10', 0),
+('I-94 Pothole Emergency Repair', 13, 14, 8, 1500000.00, 1500000.00, 'completed', '2025-02-01', '2025-02-15', '2025-02-14', 0),
+('M-10 Crack Sealing', 14, 13, 8, 800000.00, 820000.00, 'completed', '2024-10-01', '2024-10-31', '2024-11-05', 5),
+('Woodward Ave Signage Replacement', 15, 13, 7, 350000.00, 350000.00, 'completed', '2024-08-01', '2024-08-15', '2024-08-12', 0),
+('A41 Paving Patch Repair', 18, 17, 10, 450000.00, 460000.00, 'completed', '2024-09-01', '2024-09-30', '2024-09-28', 0),
+('Euston Road Drain Cleaning', 20, 18, 12, 280000.00, 280000.00, 'completed', '2024-11-01', '2024-11-15', '2024-11-14', 0),
+('Mombasa Road Pothole Fill', 23, 20, 16, 1800000.00, 1850000.00, 'completed', '2024-12-01', '2025-01-15', '2025-01-20', 5),
+('Uhuru Highway Joint Seal', 22, 19, 16, 2200000.00, 2100000.00, 'completed', '2024-05-15', '2024-06-30', '2024-06-25', 0),
+('WEH Street Light Repair', 1, 8, 5, 950000.00, 950000.00, 'completed', '2024-09-01', '2024-09-30', '2024-09-28', 0),
+('Link Road Median Landscaping', 4, 6, 1, 450000.00, 480000.00, 'completed', '2024-03-15', '2024-04-15', '2024-04-18', 3),
+('Ghodbunder Road Signage Refresh', 10, 8, 4, 520000.00, 520000.00, 'completed', '2024-07-15', '2024-08-15', '2024-08-10', 0),
+('Sion-Panvel Highway Barrier Repair', 12, 11, 5, 3800000.00, 3500000.00, 'completed', '2024-04-01', '2024-05-31', '2024-05-25', 0),
+('Marine Drive Footpath Repair', 11, 3, 2, 1800000.00, 1850000.00, 'completed', '2024-02-01', '2024-03-31', '2024-03-28', 0);
+
+-- =========================================================================
+-- ROAD MATERIALS (20 records)
+-- Quality assurance and material certification records
+-- =========================================================================
+INSERT INTO road_materials (project_id, material_type, specification_grade, mix_design_ref, source_quarry, test_report_url, test_date, approved_by, notes) VALUES
+(7, 'concrete', 'M40', 'JMF-SBM-2023-001', 'Wadala Concrete Plant', 'https://docs.roadwatch.civic/materials/sbm_m40_2023.pdf', '2023-02-15', 'Rajesh Kumar (Chief Engineer)', 'Micro-silica modified concrete for high-traffic urban road. 28-day strength: 48.2 MPa.'),
+(7, 'asphalt', 'VG-40', 'JMF-SBM-2023-002', 'Mankhurd Asphalt Plant', 'https://docs.roadwatch.civic/materials/sbm_vg40_2023.pdf', '2023-03-01', 'Rajesh Kumar (Chief Engineer)', 'Bituminous concrete wearing course. Marshall stability: 14.2 kN.'),
+(8, 'asphalt', 'VG-30', 'JMF-AMB-2024-001', 'Airoli Asphalt Plant', 'https://docs.roadwatch.civic/materials/amb_vg30_2024.pdf', '2024-03-10', 'Anita Deshmukh (Project Director)', 'Dense graded bituminous macadam for road widening.'),
+(11, 'asphalt', 'VG-40', 'JMF-GB-2024-001', 'Thane Asphalt Plant', 'https://docs.roadwatch.civic/materials/gb_vg40_2024.pdf', '2024-04-05', 'Rajesh Kumar (Chief Engineer)', 'Mastic asphalt overlay for high-speed corridor. Rut resistance optimized.'),
+(13, 'concrete', 'M35', 'JMF-MD-2025-001', 'Worli RMC Plant', 'https://docs.roadwatch.civic/materials/md_m35_2025.pdf', '2025-02-01', 'Anita Deshmukh (Project Director)', 'Colored concrete for promenade aesthetic finish.'),
+(15, 'concrete', 'M40', 'JMF-MTHL-2024-001', 'Navi Mumbai RMC Plant', NULL, '2024-07-15', 'Rajesh Kumar (Chief Engineer)', 'High-performance concrete for bridge approach. 56-day strength target: 52 MPa.'),
+(2, 'asphalt', 'VG-30', 'JMF-EEH-2025-001', 'Mankhurd Asphalt Plant', 'https://docs.roadwatch.civic/materials/eeh_vg30_2025.pdf', '2025-09-15', 'PWD Quality Cell', 'Pothole repair patching mix. Polymer modified for improved adhesion.'),
+(9, 'asphalt', 'VG-10', 'JMF-JVLR-2025-001', 'Airoli Asphalt Plant', 'https://docs.roadwatch.civic/materials/jvlr_vg10_2025.pdf', '2025-05-10', 'PWD Quality Cell', 'Thin overlay for pothole repair. Rapid-set formulation.'),
+(24, 'asphalt', 'VG-40', 'JMF-A502-2025-001', 'Brentwood Asphalt Plant', 'https://docs.roadwatch.civic/materials/a502_vg40_2025.pdf', '2025-05-01', 'TfL Materials Lab', 'Low-noise asphalt surface for residential area.'),
+(27, 'asphalt', 'VG-30', 'JMF-MOMB-2025-001', 'Athi River Asphalt Plant', 'https://docs.roadwatch.civic/materials/momb_vg30_2025.pdf', '2025-03-10', 'KeNHA Materials Engineer', 'Heavy-duty asphalt for truck corridor.'),
+(30, 'asphalt', 'VG-40', 'JMF-THIKA-2024-001', 'Ruiru Asphalt Plant', NULL, '2024-10-01', 'KURA Quality Control', 'High-modulus asphalt for BRT lane.'),
+(22, 'asphalt', 'VG-30', 'JMF-MICH-2024-001', 'Detroit Asphalt Terminal', 'https://docs.roadwatch.civic/materials/mich_vg30_2024.pdf', '2024-06-15', 'MDOT Materials Engineer', 'Dense-graded mix for Michigan Avenue drainage works restoration.'),
+(20, 'asphalt', 'VG-40', 'JMF-M10-2025-001', 'Taylor Asphalt Plant', 'https://docs.roadwatch.civic/materials/m10_vg40_2025.pdf', '2025-04-01', 'FHWA MI Division', 'Polymer-modified for freeze-thaw resistance.'),
+(33, 'asphalt', 'VG-10', 'JMF-PATCH-SV-2024-001', 'Wadala Concrete Plant', NULL, '2024-01-20', NULL, 'Emergency patching material. No formal approval due to urgency.'),
+(1, 'concrete', 'M50', 'JMF-WEH-2025-001', 'Airoli RMC Plant', 'https://docs.roadwatch.civic/materials/weh_m50_2025.pdf', '2025-07-01', 'NHAI Quality Assurance', 'High-strength structural grout for flyover pier rehabilitation.'),
+(5, 'base_course', 'WMM Grade 3', 'JMF-LINK-2025-001', 'Vashi Quarry', 'https://docs.roadwatch.civic/materials/link_wmm_2025.pdf', '2025-11-01', 'KNR Projects QC', 'Wet mix macadam for concrete pavement sub-base.'),
+(3, 'asphalt', 'VG-10', NULL, NULL, NULL, NULL, NULL, 'Materials record missing — contractor failed to submit lab reports before project halted.'),
+(21, 'asphalt', 'VG-30', 'JMF-WOOD-2025-001', 'Southfield Asphalt Terminal', 'https://docs.roadwatch.civic/materials/wood_vg30_2025.pdf', '2025-12-01', 'MDOT Materials Lab', 'Streetscape asphalt mix with light-colored aggregate.'),
+(26, 'asphalt', 'VG-40', 'JMF-UHURU-2025-001', 'Mombasa Road Asphalt Plant', 'https://docs.roadwatch.civic/materials/uhuru_vg40_2025.pdf', '2025-09-01', 'KeNHA Bridge Engineer', 'Expansion joint approach mix. High skid resistance required.'),
+(18, 'concrete', 'M40', 'JMF-WAIYAKI-2024-001', 'Limuru Concrete Plant', 'https://docs.roadwatch.civic/materials/waiyaki_m40_2024.pdf', '2024-12-01', 'KURA Quality Control', 'Curb and channel concrete for drainage works.');
+
+-- =========================================================================
+-- PROJECT WARRANTIES (12 records)
+-- Defect liability and maintenance periods
+-- =========================================================================
+INSERT INTO project_warranties (project_id, warranty_period_months, warranty_start_date, warranty_end_date, warranty_type, defect_amount, status, claim_count, notes) VALUES
+(7, 60, '2023-12-10', '2028-12-10', 'defect_liability', 8500000.00, 'active', 0, 'Senapati Bapat Marg micro-silica concrete topping — standard 5yr defect liability. Retention: 10%.'),
+(8, 36, '2025-01-20', '2028-01-20', 'defect_liability', 5500000.00, 'active', 0, 'Dr. Ambedkar Road junction redesign — 3yr defect period.'),
+(9, 12, '2025-06-28', '2026-06-28', 'defect_liability', 625000.00, 'active', 1, 'JVLR pothole repair and guardrail — 1yr warranty. Claim filed for guardrail bolt loosening.'),
+(11, 60, '2024-12-25', '2029-12-25', 'defect_liability', 9500000.00, 'active', 0, 'Ghodbunder Road mastic asphalt overlay — 5yr performance warranty.'),
+(13, 36, '2025-06-25', '2028-06-25', 'defect_liability', 2600000.00, 'active', 0, 'Marine Drive promenade resurfacing — 3yr warranty on colored concrete.'),
+(15, 60, '2025-05-15', '2030-05-15', 'defect_liability', 9000000.00, 'active', 0, 'MTHL approach road connector — 5yr structural warranty.'),
+(24, 24, '2025-10-28', '2027-10-28', 'defect_liability', 240000.00, 'active', 0, 'A502 Finchley Road carriageway repair — 2yr standard warranty.'),
+(27, 24, '2025-08-10', '2027-08-10', 'defect_liability', 1250000.00, 'active', 0, 'Mombasa Road drainage desilting — 2yr works warranty.'),
+(30, 60, '2025-07-15', '2030-07-15', 'performance', 1600000.00, 'active', 0, 'Thika Superhighway overlay — 5yr performance warranty. Pavement smoothness incentive.'),
+(2, 12, '2025-11-12', '2026-11-12', 'defect_liability', 1800000.00, 'active', 2, 'EEH pothole remediation — 1yr warranty. Two claims for patch failure within 6 months.'),
+(22, 24, '2024-12-15', '2026-12-15', 'defect_liability', 325000.00, 'active', 0, 'Michigan Avenue drainage upgrade — 2yr warranty on civil works.'),
+(18, 36, '2025-09-05', '2028-09-05', 'maintenance', 2250000.00, 'active', 0, 'Waiyaki Way drainage and resurfacing — 3yr maintenance period.');
+
+-- =========================================================================
+-- ROAD DOCUMENTS (15 records)
+-- Inspection photos, design docs, material certs per road
+-- =========================================================================
+INSERT INTO road_documents (road_id, doc_type, title, file_url, file_size_bytes, mime_type, uploaded_by) VALUES
+(1, 'inspection_photo', 'WEH Flyover Pier G4 Crack', 'https://docs.roadwatch.civic/roads/1/inspection_weh_pier_g4.jpg', 2457600, 'image/jpeg', 'inspector_01'),
+(1, 'design_document', 'WEH Resurfacing Structural Drawings', 'https://docs.roadwatch.civic/roads/1/weh_resurfacing_dwg_v2.pdf', 5242880, 'application/pdf', 'engineering_dept'),
+(3, 'inspection_photo', 'SV Road Drainage Trench Collapse', 'https://docs.roadwatch.civic/roads/3/sv_drainage_collapse.jpg', 1894400, 'image/jpeg', 'inspector_02'),
+(3, 'contractor_report', 'SV Road Project Halt Notice', 'https://docs.roadwatch.civic/roads/3/sv_halt_notice.pdf', 102400, 'application/pdf', 'legal_dept'),
+(5, 'inspection_photo', 'LBS Marg Pothole Survey Q1 2025', 'https://docs.roadwatch.civic/roads/5/lbs_pothole_survey_q1_2025.jpg', 3123200, 'image/jpeg', 'inspector_03'),
+(6, 'design_document', 'Senapati Bapat Cross Section Design', 'https://docs.roadwatch.civic/roads/6/sbm_cross_section.pdf', 4194304, 'application/pdf', 'engineering_dept'),
+(10, 'material_certificate', 'Ghodbunder Asphalt Mix Design Certificate', 'https://docs.roadwatch.civic/roads/10/gb_mix_design_cert.pdf', 204800, 'application/pdf', 'qa_engineer'),
+(13, 'inspection_photo', 'I-94 Dearborn Pothole Documentation', 'https://docs.roadwatch.civic/roads/13/i94_pothole_dearborn.jpg', 2048000, 'image/jpeg', 'mdot_inspector'),
+(15, 'material_certificate', 'Woodward Ave Polymer Modified Asphalt Cert', 'https://docs.roadwatch.civic/roads/15/woodward_pma_cert.pdf', 153600, 'application/pdf', 'mdot_lab'),
+(18, 'inspection_photo', 'Camden High Street Sunken Manhole', 'https://docs.roadwatch.civic/roads/18/camden_sunken_manhole.jpg', 1126400, 'image/jpeg', 'camden_inspector'),
+(20, 'contractor_report', 'Euston Road Bus Lane Progress Report', 'https://docs.roadwatch.civic/roads/20/euston_progress_report_q2_2026.pdf', 307200, 'application/pdf', 'contractor_18'),
+(23, 'inspection_photo', 'Mombasa Road Industrial Area Crater', 'https://docs.roadwatch.civic/roads/23/mombasa_crater_industrial.jpg', 2867200, 'image/jpeg', 'kenha_inspector'),
+(24, 'design_document', 'Thika Superhighway Overlay Design', 'https://docs.roadwatch.civic/roads/24/thika_overlay_design.pdf', 3670016, 'application/pdf', 'kura_engineering'),
+(27, 'inspection_photo', 'NH-3 Mumbai-Nashik Widening Progress', 'https://docs.roadwatch.civic/roads/27/nh3_widening_progress.jpg', 1576960, 'image/jpeg', 'nhai_inspector'),
+(28, 'contractor_report', 'MTHL Approach Road Completion Certificate', 'https://docs.roadwatch.civic/roads/28/mthl_completion_cert.pdf', 819200, 'application/pdf', 'pwd_engineer');
+
+-- =========================================================================
+-- ROAD DEFECT HISTORY BASELINE (roads 32-71)
+-- Single baseline row per new road
+-- =========================================================================
+INSERT INTO road_defect_history (road_id, snapshot_date, status_at_time, complaint_count, project_count, source)
+SELECT r.id, CURRENT_DATE, r.status, 0, 0, 'inspection' FROM roads r WHERE r.id >= 32;

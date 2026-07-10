@@ -8,6 +8,7 @@ and complaint routing across all core tables.
 from fastapi import APIRouter
 
 from app.services.database import db
+from app.services.data_quality import score_road, score_all_roads, get_summary_stats
 
 router = APIRouter()
 
@@ -621,3 +622,32 @@ async def validate_data():
         },
         "details": checks,
     }
+
+
+# ---------------------------------------------------------------------------
+# GET /api/v1/data-quality/road/{road_id}
+# GET /api/v1/data-quality/summary
+# ---------------------------------------------------------------------------
+
+@router.get("/data-quality/road/{road_id}")
+async def road_data_quality(road_id: int):
+    """Return per-road data quality score with dimension breakdown.
+
+    Scores are 0-100 across 4 dimensions: completeness, freshness,
+    consistency, and spatial validity. Grade is A (>=90) through F (<40).
+    """
+    result = score_road(road_id)
+    if result is None:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail=f"Road with id {road_id} not found")
+    return result
+
+
+@router.get("/data-quality/summary")
+async def data_quality_summary():
+    """Return aggregate data quality statistics across all roads.
+
+    Includes average score, grade distribution, weakest dimension,
+    and best/worst ranked roads.
+    """
+    return get_summary_stats()

@@ -1,4 +1,15 @@
+from typing import Optional, Callable
 from app.services.database import db
+
+BOUNDARY_ALERT_THRESHOLD_M: float = 50.0
+
+# Callback for boundary alerts (set by complaints.py at runtime to avoid circular imports)
+_on_boundary_alert: Optional[Callable] = None
+
+def set_boundary_alert_callback(callback: Callable):
+    global _on_boundary_alert
+    _on_boundary_alert = callback
+
 
 # Executive Engineer contact information for each authority
 EXECUTIVE_ENGINEERS = {
@@ -354,6 +365,116 @@ class AuthorityResolver:
             "routing_confidence": routing_confidence,
             "area_match_percentage": area_match_percentage,
             "boundary_distance_meters": boundary_distance_meters
+        }
+
+    @staticmethod
+    def check_boundary_proximity(lon: float, lat: float, primary_authority_id: int) -> dict:
+        """
+        B6: Check if a point is within 50m of an authority boundary.
+        If so, find the nearest adjacent authority and return alert info.
+
+        Returns:
+            {
+                "near_boundary": bool,
+                "boundary_distance_meters": float,
+                "secondary_authority": dict or None,
+                "secondary_authority_id": int or None,
+            }
+        """
+        point_wkt = f"POINT({lon} {lat})"
+        sql = """
+        SELECT
+            ST_Distance(
+                ST_GeomFromText(%s, 4326)::geography,
+                ST_Boundary(a.geom_boundary)::geography
+            ) AS boundary_distance_meters
+        FROM authorities a
+        WHERE a.id = %s AND a.geom_boundary IS NOT NULL
+        """
+        results = db.query(sql, (point_wkt, primary_authority_id))
+        if not results or results[0].get("boundary_distance_meters") is None:
+            return {"near_boundary": False}
+
+        distance = float(results[0]["boundary_distance_meters"])
+
+        if distance > BOUNDARY_ALERT_THRESHOLD_M:
+            return {"near_boundary": False}
+
+        # Find adjacent authority (nearest one that doesn't contain the point)
+        adj_sql = """
+        SELECT a.id, a.name, a.department_code, a.contact_email, a.contact_phone,
+               r.name AS region_name, r.code AS region_code,
+               ST_Distance(
+                   ST_GeomFromText(%s, 4326)::geography,
+                   a.geom_boundary::geography
+               ) AS distance_to_boundary
+        FROM authorities a
+        LEFT JOIN regions r ON a.region_code = r.code
+        WHERE a.id != %s
+          AND a.geom_boundary IS NOT NULL
+          AND NOT ST_Contains(a.geom_boundary, ST_GeomFromText(%s, 4326))
+        ORDER BY ST_Distance(
+            ST_GeomFromText(%s, 4326)::geography,
+            a.geom_boundary::geography
+        ) ASC
+        LIMIT 1
+        """
+        adjacent = db.query(adj_sql, (point_wkt, primary_authority_id, point_wkt, point_wkt))
+
+        secondary = None
+        if adjacent:
+            adj = adjacent[0]
+            secondary = {
+                "id": adj["id"],
+                "name": adj["name"],
+                "department_code": adj.get("department_code"),
+                "contact_email": adj.get("contact_email"),
+                "contact_phone": adj.get("contact_phone"),
+                "region_name": adj.get("region_name"),
+                "region_code": adj.get("region_code"),
+            }
+
+        return {
+            "near_boundary": True,
+            "boundary_distance_meters": round(distance, 2),
+            "secondary_authority": secondary,
+            "secondary_authority_id": secondary["id"] if secondary else None,
+        }
+
+    @staticmethod
+    def resolve_with_boundary_alert(lon: float, lat: float, region_code: str = None) -> dict:
+        """
+        B6: One-call resolver that also checks boundary proximity.
+        Returns routing details + boundary alert info.
+        """
+        authority = AuthorityResolver.resolve_authority_for_coordinates(lon, lat, region_code=region_code)
+        if not authority:
+            return {"authority": None, "boundary_alert": None}
+
+        routing = AuthorityResolver.build_routing_details(
+            authority, region_name=None, lon=lon, lat=lat
+        )
+
+        boundary_info = AuthorityResolver.check_boundary_proximity(
+            lon, lat, authority.get("id", 4)
+        )
+
+        # Fire boundary alert callback if near boundary
+        if boundary_info.get("near_boundary") and _on_boundary_alert:
+            try:
+                _on_boundary_alert(
+                    authority_id=authority.get("id"),
+                    secondary_authority=boundary_info.get("secondary_authority"),
+                    boundary_distance_m=boundary_info["boundary_distance_meters"],
+                    lon=lon,
+                    lat=lat,
+                )
+            except Exception:
+                pass
+
+        return {
+            "authority": routing,
+            "boundary_alert": boundary_info if boundary_info.get("near_boundary") else None,
         }
 
     @staticmethod

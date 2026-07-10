@@ -4,7 +4,7 @@ import { useStore } from '@/store/useStore';
 import JurisdictionMapWrapper from './JurisdictionMapWrapper';
 import ComplaintOperationsPanel from './ComplaintOperationsPanel';
 import ContractorAnalytics from './ContractorAnalytics';
-import ResponseTimeTracker from './ResponseTimeTracker';
+import RoutingSLADashboard from './RoutingSLADashboard';
 import RepairScheduler from './RepairScheduler';
 import LiveSystemLog from './LiveSystemLog';
 
@@ -136,9 +136,9 @@ export default function OperationsDashboard() {
           <ContractorAnalytics />
         </div>
 
-        {/* Average SLA speed analytics */}
+        {/* Routing SLA Dashboard (B4) */}
         <div className="min-h-[300px]">
-          <ResponseTimeTracker />
+          <RoutingSLADashboard />
         </div>
 
         {/* Terminal logs showing live updates */}

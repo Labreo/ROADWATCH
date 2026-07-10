@@ -1,6 +1,7 @@
 """
-Notification service for webhook dispatch and SSE event broadcast.
-Sends outbound notifications to authority webhook endpoints and logs delivery.
+Notification service for webhook dispatch, SSE event broadcast, and citizen SMS/email.
+Sends outbound notifications to authority webhook endpoints, citizen contacts,
+and logs delivery.
 """
 import hmac
 import hashlib
@@ -15,6 +16,44 @@ from app.services.database import db
 from app.services.event_bus import broadcast_log
 
 logger = logging.getLogger(__name__)
+
+# ── Simulated Twilio/SendGrid providers (log-only) ──────────────────────
+
+CITIZEN_TEMPLATES = {
+    "routed": (
+        "ROADWATCH: Your complaint #{id} '{title}' has been routed to {authority} "
+        "({engineer}, {contact}). Track: roadwatch.app/track/{id}"
+    ),
+    "escalated": (
+        "ROADWATCH: Complaint #{id} '{title}' has been escalated to Level {level}. "
+        "New authority: {authority}. Track: roadwatch.app/track/{id}"
+    ),
+    "resolved": (
+        "ROADWATCH: Complaint #{id} '{title}' has been marked as resolved by {authority}. "
+        "Thank you for your report. Review: roadwatch.app/track/{id}"
+    ),
+    "rejected": (
+        "ROADWATCH: Complaint #{id} '{title}' could not be routed. "
+        "Please file a new report or contact your local authority."
+    ),
+}
+
+
+def _simulate_send_sms(recipient: str, message: str) -> dict:
+    """Simulated SMS dispatch — logs to console and returns success."""
+    logger.info("📱 [SIMULATED SMS] To: %s | Body: %s", recipient, message[:120])
+    return {"status": "sent", "provider": "simulated_sms", "message_id": None}
+
+
+def _simulate_send_email(recipient: str, subject: str, body: str) -> dict:
+    """Simulated email dispatch — logs to console and returns success."""
+    logger.info("📧 [SIMULATED EMAIL] To: %s | Subject: %s", recipient, subject)
+    return {"status": "sent", "provider": "simulated_email", "message_id": None}
+
+
+def _determine_channel(contact: str) -> str:
+    """Heuristic: if contact contains '@', treat as email, else SMS."""
+    return "email" if "@" in contact else "sms"
 
 
 class NotificationService:
@@ -193,3 +232,184 @@ class NotificationService:
         )
 
         return {"status": status, "response_code": response_code}
+
+    # ── Citizen Notifications ──────────────────────────────────────────
+
+    @staticmethod
+    async def notify_citizen_routed(
+        complaint: dict, authority: dict
+    ) -> dict:
+        """Send SMS/email to citizen when complaint is routed to an authority."""
+        contact = complaint.get("citizen_contact")
+        if not contact:
+            return {"status": "skipped", "reason": "no_contact"}
+
+        message = CITIZEN_TEMPLATES["routed"].format(
+            id=complaint.get("id", "?"),
+            title=complaint.get("title", "Untitled"),
+            authority=authority.get("name", "Unknown"),
+            engineer=authority.get("executive_engineer_name", ""),
+            contact=authority.get("contact_phone", ""),
+        )
+
+        return await NotificationService._send_citizen_notification(
+            complaint_id=complaint.get("id"),
+            contact=contact,
+            event_type="routed",
+            subject=f"ROADWATCH: Complaint #{complaint.get('id')} Routed",
+            body=message,
+        )
+
+    @staticmethod
+    async def notify_citizen_escalated(
+        complaint: dict, escalation: dict, authority: dict
+    ) -> dict:
+        """Send SMS/email to citizen when complaint is escalated."""
+        contact = complaint.get("citizen_contact")
+        if not contact:
+            return {"status": "skipped", "reason": "no_contact"}
+
+        message = CITIZEN_TEMPLATES["escalated"].format(
+            id=complaint.get("id", "?"),
+            title=complaint.get("title", "Untitled"),
+            level=escalation.get("to_level", 1),
+            authority=authority.get("name", "Unknown"),
+        )
+
+        return await NotificationService._send_citizen_notification(
+            complaint_id=complaint.get("id"),
+            contact=contact,
+            event_type="escalated",
+            subject=f"ROADWATCH: Complaint #{complaint.get('id')} Escalated",
+            body=message,
+        )
+
+    @staticmethod
+    async def notify_citizen_resolved(
+        complaint: dict, authority: dict
+    ) -> dict:
+        """Send SMS/email to citizen when complaint is resolved."""
+        contact = complaint.get("citizen_contact")
+        if not contact:
+            return {"status": "skipped", "reason": "no_contact"}
+
+        message = CITIZEN_TEMPLATES["resolved"].format(
+            id=complaint.get("id", "?"),
+            title=complaint.get("title", "Untitled"),
+            authority=authority.get("name", "Unknown"),
+        )
+
+        return await NotificationService._send_citizen_notification(
+            complaint_id=complaint.get("id"),
+            contact=contact,
+            event_type="resolved",
+            subject=f"ROADWATCH: Complaint #{complaint.get('id')} Resolved",
+            body=message,
+        )
+
+    @staticmethod
+    async def notify_citizen_rejected(
+        complaint: dict
+    ) -> dict:
+        """Send SMS/email to citizen when complaint cannot be routed."""
+        contact = complaint.get("citizen_contact")
+        if not contact:
+            return {"status": "skipped", "reason": "no_contact"}
+
+        message = CITIZEN_TEMPLATES["rejected"].format(
+            id=complaint.get("id", "?"),
+            title=complaint.get("title", "Untitled"),
+        )
+
+        return await NotificationService._send_citizen_notification(
+            complaint_id=complaint.get("id"),
+            contact=contact,
+            event_type="rejected",
+            subject=f"ROADWATCH: Complaint #{complaint.get('id')} Could Not Be Routed",
+            body=message,
+        )
+
+    @staticmethod
+    async def _send_citizen_notification(
+        complaint_id: int,
+        contact: str,
+        event_type: str,
+        subject: str,
+        body: str,
+    ) -> dict:
+        """Helper: dispatch SMS or email, log to citizen_notifications table."""
+        channel = _determine_channel(contact)
+        if channel == "email":
+            result = _simulate_send_email(contact, subject, body)
+        else:
+            result = _simulate_send_sms(contact, body)
+
+        status = result.get("status", "failed")
+        db.execute(
+            "INSERT INTO citizen_notifications "
+            "(complaint_id, channel, recipient, event_type, status, provider_response) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            (complaint_id, channel, contact, event_type, status, json.dumps(result)),
+        )
+
+        if status == "sent":
+            await broadcast_log(
+                "info",
+                f"Citizen notification sent ({channel}) for complaint #{complaint_id}: {event_type}",
+            )
+
+        return result
+
+    # ── Boundary Alert Notification (used by B6) ───────────────────────
+
+    @staticmethod
+    async def notify_authorities_boundary_alert(
+        complaint: dict,
+        primary_authority: dict,
+        secondary_authority: dict,
+        boundary_distance_m: float,
+    ) -> dict:
+        """Notify both authorities when a complaint is near a jurisdiction boundary."""
+        payload = {
+            "event": "complaint.boundary_alert",
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "complaint": {
+                "id": complaint.get("id"),
+                "title": complaint.get("title"),
+                "category": complaint.get("category"),
+            },
+            "primary_authority": {
+                "id": primary_authority.get("id"),
+                "name": primary_authority.get("name"),
+            },
+            "secondary_authority": {
+                "id": secondary_authority.get("id"),
+                "name": secondary_authority.get("name"),
+            },
+            "boundary_distance_meters": boundary_distance_m,
+        }
+
+        # Notify primary authority
+        await NotificationService._dispatch_webhook(
+            authority_id=primary_authority.get("id"),
+            event_type="complaint.boundary_alert",
+            payload=payload,
+            complaint_id=complaint.get("id"),
+        )
+
+        # Notify secondary authority
+        await NotificationService._dispatch_webhook(
+            authority_id=secondary_authority.get("id"),
+            event_type="complaint.boundary_alert",
+            payload=payload,
+            complaint_id=complaint.get("id"),
+        )
+
+        await broadcast_log(
+            "warning",
+            f"Boundary alert: Complaint #{complaint.get('id')} is {boundary_distance_m:.1f}m "
+            f"from boundary between {primary_authority.get('name')} and {secondary_authority.get('name')}.",
+            complaint=complaint,
+        )
+
+        return {"status": "sent", "primary": primary_authority.get("id"), "secondary": secondary_authority.get("id")}

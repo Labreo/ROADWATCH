@@ -30,7 +30,8 @@ import {
 import { useStore } from '@/store/useStore';
 import CitationRenderer, { Citation } from './CitationRenderer';
 import RoutedToCard from './RoutedToCard';
-import type { RoutingDetail } from '@/types';
+import EscalationChainCard from './EscalationChainCard';
+import type { RoutingDetail, EscalationChain } from '@/types';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { detectRegionSwitch, detectRegionFromText, detectRegionFromGps } from '@/services/regionDetectionService';
 import { isComparisonQuery, getCrossRegionComparison, generateComparisonResponse } from '@/services/regionComparisonService';
@@ -43,6 +44,7 @@ interface Message {
   routingDetails?: RoutingDetail;
   suggestedActions?: { type: string; target_id: number; label: string }[];
   evidence?: { title: string; items: string[] }[];
+  escalationChain?: EscalationChain;
 }
 
 interface ChatPanelProps {
@@ -560,6 +562,56 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
       return void streamResponse(text, citations, suggestedActions, evidence, nextSuggestedPrompts, routingDetails);
     }
 
+    // ── B5: Escalation chain query ──
+    const isEscalationQuery = lowerQuery.includes('what happened') || lowerQuery.includes('escalation') || lowerQuery.includes('complaint status') || lowerQuery.includes('track my') || lowerQuery.includes('where is my complaint') || lowerQuery.includes('my complaint');
+    if (isEscalationQuery) {
+      // Extract complaint ID if present
+      const idMatch = textToSend.match(/(?:complaint|#)\s*(\d+)/i);
+      const complaintId = idMatch ? parseInt(idMatch[1]) : 1;
+
+      text = `Here is the escalation history for **Complaint #${complaintId}**. The timeline below shows each authority assignment and escalation step.`;
+
+      // Attempt to fetch from backend
+      let escalationChain: EscalationChain | undefined = undefined;
+      try {
+        const res = await fetch(`http://localhost:8000/api/v1/complaints/${complaintId}/escalation-chain`);
+        if (res.ok) {
+          const data = await res.json();
+          escalationChain = {
+            complaintId: data.complaint_id,
+            title: data.title,
+            currentStatus: data.current_status,
+            currentLevel: data.current_level,
+            chain: data.chain.map((link: any) => ({
+              level: link.level,
+              escalationId: link.escalation_id,
+              authority: link.authority,
+              assignedAt: link.assigned_at,
+              escalatedAt: link.escalated_at,
+              escalatedBy: link.escalated_by,
+              fromLevel: link.from_level,
+              toLevel: link.to_level,
+              status: link.status,
+            })),
+          };
+        }
+      } catch {
+        // Fallback mock chain
+        escalationChain = {
+          complaintId,
+          title: `Complaint #${complaintId}`,
+          currentStatus: 'in_progress',
+          currentLevel: 1,
+          chain: [
+            { level: 0, authority: { id: 1, name: 'MCGM Ward K-West' }, assignedAt: new Date(Date.now() - 86400000 * 3).toISOString(), status: 'routed' },
+            { level: 1, authority: { id: 4, name: 'State PWD Mumbai' }, escalatedAt: new Date(Date.now() - 86400000).toISOString(), escalatedBy: 'system', fromLevel: 0, toLevel: 1 },
+          ],
+        };
+      }
+
+      return void streamResponse(text, citations, suggestedActions, evidence, nextSuggestedPrompts, routingDetails, escalationChain);
+    }
+
     // ── Region-specific road query ──
     const isM25Query = lowerQuery.includes('m25') || lowerQuery.includes('motorway');
     const isI94Query = lowerQuery.includes('i-94') || lowerQuery.includes('i94') || lowerQuery.includes('interstate');
@@ -747,7 +799,8 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
     suggestedActions: { type: string; target_id: number; label: string }[],
     evidence: { title: string; items: string[] }[],
     nextSuggestedPrompts: string[],
-    routingDetails?: RoutingDetail
+    routingDetails?: RoutingDetail,
+    escalationChain?: EscalationChain
   ) => {
     const words = text.split(" ");
     let currentContent = "";
@@ -774,6 +827,9 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
         last.evidence = evidence;
         if (routingDetails) {
           last.routingDetails = routingDetails;
+        }
+        if (escalationChain) {
+          last.escalationChain = escalationChain;
         }
       }
       return updated;
@@ -870,6 +926,9 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
                     last.suggestedActions = data.suggested_actions;
                     if (data.routing_details) {
                       last.routingDetails = data.routing_details;
+                    }
+                    if (data.escalation_chain) {
+                      last.escalationChain = data.escalation_chain;
                     }
                   }
                   return updated;
@@ -1312,6 +1371,10 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
 
                       {isAI && msg.routingDetails && (
                         <RoutedToCard routing={msg.routingDetails} />
+                      )}
+
+                      {isAI && msg.escalationChain && (
+                        <EscalationChainCard chain={msg.escalationChain} />
                       )}
 
                       {isAI && msg.suggestedActions && msg.suggestedActions.length > 0 && (

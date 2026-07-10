@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Landmark, Phone, Mail, MapPin, ArrowRightCircle, User } from 'lucide-react';
+import { Landmark, Phone, Mail, MapPin, ArrowRightCircle, User, ThumbsUp, ThumbsDown, Loader2 } from 'lucide-react';
 import type { RoutingDetail } from '@/types';
 
 interface RoutedToCardProps {
   routing: RoutingDetail;
+  complaintId?: number;
+  onFeedbackSubmitted?: (confirmed: boolean) => void;
 }
 
 // Fallback avatar colors per authority
@@ -30,9 +32,29 @@ function getAvatarColors(authId: number) {
   return AVATAR_COLORS[authId] || { bg: 'from-slate-600 to-slate-800', ring: 'ring-slate-500/40', initials: 'NA' };
 }
 
-export default function RoutedToCard({ routing }: RoutedToCardProps) {
+export default function RoutedToCard({ routing, complaintId, onFeedbackSubmitted }: RoutedToCardProps) {
   const colors = getAvatarColors(routing.authority_id);
   const initials = getInitials(routing.executive_engineer_name);
+  const [feedbackState, setFeedbackState] = useState<'idle' | 'submitting' | 'done'>('idle');
+  const [feedbackValue, setFeedbackValue] = useState<boolean | null>(null);
+
+  const submitFeedback = async (confirmed: boolean) => {
+    if (!complaintId || feedbackState !== 'idle') return;
+    setFeedbackState('submitting');
+    setFeedbackValue(confirmed);
+    try {
+      await fetch(`http://localhost:8000/api/v1/complaints/${complaintId}/routing-feedback`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ citizenConfirmed: confirmed }),
+      });
+      setFeedbackState('done');
+      onFeedbackSubmitted?.(confirmed);
+    } catch {
+      setFeedbackState('idle');
+      setFeedbackValue(null);
+    }
+  };
 
   return (
     <motion.div
@@ -49,13 +71,10 @@ export default function RoutedToCard({ routing }: RoutedToCardProps) {
       </div>
 
       <div className="relative overflow-hidden glass-panel rounded-xl border border-cyan-500/30 bg-slate-950/50">
-        {/* Gradient accent bar */}
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-500 via-indigo-500 to-cyan-500" />
 
         <div className="p-3.5 space-y-3 relative z-10">
-          {/* Authority Name + Region */}
           <div className="flex items-start gap-3">
-            {/* Engineer Avatar */}
             <div className={`shrink-0 w-10 h-10 rounded-full bg-gradient-to-br ${colors.bg} ring-2 ${colors.ring} flex items-center justify-center shadow-lg`}>
               <span className="text-[10px] font-black text-slate-100">{initials}</span>
             </div>
@@ -70,7 +89,6 @@ export default function RoutedToCard({ routing }: RoutedToCardProps) {
             </div>
           </div>
 
-          {/* Executive Engineer Details */}
           <div className="bg-slate-950/60 rounded-lg border border-slate-800/60 p-2.5 space-y-2">
             <div className="flex items-center gap-2">
               <User className="w-3 h-3 text-cyan-400 shrink-0" />
@@ -102,10 +120,53 @@ export default function RoutedToCard({ routing }: RoutedToCardProps) {
             </div>
           </div>
 
-          {/* Routing Reason */}
           <div className="text-[9px] text-slate-400 leading-relaxed italic border-t border-slate-800/40 pt-2">
             {routing.reason_for_routing}
           </div>
+
+          {/* B2: Routing Accuracy Feedback */}
+          {complaintId && feedbackState !== 'done' && (
+            <div className="border-t border-slate-800/40 pt-2 mt-1">
+              <p className="text-[9px] text-slate-500 mb-1.5 font-semibold">
+                Was this routing correct?
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => submitFeedback(true)}
+                  disabled={feedbackState === 'submitting'}
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[9px] font-bold transition-all cursor-pointer ${
+                    feedbackValue === true
+                      ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-400'
+                      : 'bg-slate-900 border border-slate-700/60 text-slate-400 hover:border-emerald-500/30 hover:text-emerald-400'
+                  }`}
+                >
+                  {feedbackState === 'submitting' ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <ThumbsUp className="w-2.5 h-2.5" />}
+                  Yes
+                </button>
+                <button
+                  onClick={() => submitFeedback(false)}
+                  disabled={feedbackState === 'submitting'}
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[9px] font-bold transition-all cursor-pointer ${
+                    feedbackValue === false
+                      ? 'bg-red-500/20 border border-red-500/40 text-red-400'
+                      : 'bg-slate-900 border border-slate-700/60 text-slate-400 hover:border-red-500/30 hover:text-red-400'
+                  }`}
+                >
+                  {feedbackState === 'submitting' ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <ThumbsDown className="w-2.5 h-2.5" />}
+                  No
+                </button>
+              </div>
+            </div>
+          )}
+
+          {feedbackState === 'done' && (
+            <div className="border-t border-slate-800/40 pt-2 mt-1">
+              <p className="text-[9px] text-emerald-400/80 font-semibold flex items-center gap-1">
+                <ThumbsUp className="w-2.5 h-2.5" />
+                {feedbackValue ? 'Feedback recorded — thank you!' : 'Feedback recorded — routing will be reviewed.'}
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </motion.div>

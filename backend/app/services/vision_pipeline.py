@@ -40,6 +40,8 @@ class RoadDamageEvaluator:
                         '"defectType": one of "pothole", "waterlogging", "paving_defect", "missing_signage"\n'
                         '"estimatedDepthCm": number\n'
                         '"estimatedWidthM": number\n'
+                        '"severity": one of "emergency", "high", "medium", "low"\n'
+                        '"hasTraffic": boolean — true if the defect appears to be on a high-traffic road or near an intersection\n'
                         '"recommendedAction": string describing the exact repair action to take'
                     )
                 },

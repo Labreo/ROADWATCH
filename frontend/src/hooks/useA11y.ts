@@ -3,16 +3,22 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { useStore } from '@/store/useStore';
 import type { Locale } from '@/types';
-import en from '@/i18n/en-IN.json';
+import enIN from '@/i18n/en-IN.json';
 import hi from '@/i18n/hi-IN.json';
 import mr from '@/i18n/mr-IN.json';
+import enUS from '@/i18n/en-US.json';
+import enGB from '@/i18n/en-GB.json';
+import enKE from '@/i18n/en-KE.json';
 
 type I18nBundle = Record<string, string>;
 
 const bundles: Record<Locale, I18nBundle> = {
-  'en-IN': en,
+  'en-IN': enIN,
   'hi-IN': hi,
   'mr-IN': mr,
+  'en-US': enUS,
+  'en-GB': enGB,
+  'en-KE': enKE,
 };
 
 export function useA11y() {
@@ -26,7 +32,7 @@ export function useA11y() {
 
   const cacheRef = useRef<{ locale: Locale; bundle: I18nBundle }>({
     locale: 'en-IN',
-    bundle: en,
+    bundle: enIN,
   });
 
   // Apply CSS classes to <html> on mount/value change
@@ -44,7 +50,7 @@ export function useA11y() {
   }, [fontSize]);
 
   useEffect(() => {
-    document.documentElement.lang = locale === 'en-IN' ? 'en' : locale.split('-')[0];
+    document.documentElement.lang = locale.startsWith('en') ? 'en' : locale.split('-')[0];
   }, [locale]);
 
   useEffect(() => {
@@ -64,7 +70,7 @@ export function useA11y() {
   const t = useCallback(
     (key: string): string => {
       if (cacheRef.current.locale !== locale) {
-        cacheRef.current = { locale, bundle: bundles[locale] || en };
+        cacheRef.current = { locale, bundle: bundles[locale] || enIN };
       }
       return cacheRef.current.bundle[key] ?? key;
     },

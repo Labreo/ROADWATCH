@@ -395,3 +395,82 @@ async def compare_cost_per_km(
 ):
     """Return roads where cost-per-km exceeds average by threshold multiplier."""
     return await list_cost_per_km(threshold=threshold)
+
+
+# ── Predictive Cost Analytics (C2) ─────────────────────────────────────────
+
+@router.get("/projects/predictive-cost")
+def predictive_cost_analysis(
+    road_type: Optional[str] = Query(None),
+    region: Optional[str] = Query(None),
+    anomaly_threshold: float = Query(2.0, ge=1.0),
+):
+    """Get predicted vs actual cost-per-km with anomaly flags."""
+    from app.services.predictive_analytics import CostPredictor
+
+    if not CostPredictor.is_trained():
+        CostPredictor.train()
+
+    model_metrics = CostPredictor.get_model_metrics()
+    anomalies = CostPredictor.get_anomalies(threshold_std=anomaly_threshold)
+
+    if road_type:
+        anomalies = [a for a in anomalies if a.get('road_type') == road_type]
+    if region:
+        anomalies = [a for a in anomalies if a.get('region_code') == region]
+
+    return {
+        "model_metrics": model_metrics,
+        "anomalies_found": len(anomalies),
+        "anomalies": anomalies[:50],
+    }
+
+
+# ── Beneficiary Tracking (C5) ──────────────────────────────────────────────
+
+@router.get("/projects/{project_id}/beneficiaries")
+def get_project_beneficiaries(project_id: int):
+    _get_project_or_404(project_id)
+    return db.query(
+        "SELECT * FROM project_beneficiaries WHERE project_id = ? ORDER BY population_served DESC",
+        (project_id,),
+    )
+
+
+@router.post("/projects/{project_id}/beneficiaries")
+def create_project_beneficiary(project_id: int, payload: dict):
+    _get_project_or_404(project_id)
+    required = ['population_served', 'beneficiary_type']
+    for field in required:
+        if field not in payload:
+            raise HTTPException(status_code=422, detail=f"Missing required field: {field}")
+
+    sql = """
+    INSERT INTO project_beneficiaries
+        (project_id, population_served, estimated_daily_traffic, household_count,
+         beneficiary_type, data_source, census_year, notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """
+    new_id = db.execute(sql, (
+        project_id,
+        payload['population_served'],
+        payload.get('estimated_daily_traffic'),
+        payload.get('household_count'),
+        payload['beneficiary_type'],
+        payload.get('data_source'),
+        payload.get('census_year'),
+        payload.get('notes'),
+    ))
+    return {"id": new_id, "message": "Beneficiary record created"}
+
+
+@router.get("/projects/{project_id}/beneficiaries/summary")
+def get_project_beneficiary_summary(project_id: int):
+    _get_project_or_404(project_id)
+    row = db.query(
+        "SELECT COUNT(*) AS records, COALESCE(SUM(population_served), 0) AS total_population, "
+        "COALESCE(SUM(estimated_daily_traffic), 0) AS total_traffic "
+        "FROM project_beneficiaries WHERE project_id = ?",
+        (project_id,),
+    )
+    return row[0] if row else {"records": 0}

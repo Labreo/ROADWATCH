@@ -5,7 +5,9 @@ import asyncio
 from app.services.road_retriever import StructuredRoadRetriever
 from app.services.authority_resolver import AuthorityResolver
 from app.services.database import db
-from app.services.transparency_service import calculate_road_transparency, get_citywide_transparency_snapshot
+from app.services.transparency_service import calculate_road_transparency, get_citywide_transparency_snapshot, calculate_vfm_index, get_citywide_vfm_snapshot
+from app.services.inflation_service import InflationService
+from app.services.predictive_analytics import CostPredictor
 
 # In-memory session memory storage
 sessions_memory = {}
@@ -31,31 +33,31 @@ ROAD_ALIASES = {
     "gratiot": 16, "gratiot avenue": 16,
     "michigan avenue": 17,
     "m-39": 29, "southfield freeway": 29,
-    "i-75": 42, "fisher freeway": 42,
-    "i-696": 43, "reuther freeway": 43,
-    "m-8": 44, "davison freeway": 44,
-    "telegraph road": 45, "us-24": 45,
-    "van dyke": 46, "m-53": 46,
-    "fort street": 47, "m-85": 47,
-    "8 mile": 48, "m-102": 48,
-    "grand river": 49,
-    "john r": 50,
-    "jefferson avenue": 51,
+    "i-75": 32, "fisher freeway": 32,
+    "i-696": 33, "reuther freeway": 33,
+    "m-8": 34, "davison freeway": 34,
+    "telegraph road": 35, "us-24": 35,
+    "van dyke": 36, "m-53": 36,
+    "fort street": 37, "m-85": 37,
+    "8 mile": 38, "m-102": 38,
+    "grand river": 39,
+    "john r": 40,
+    "jefferson avenue": 41,
     # UK — London
     "a41": 18, "camden high street": 18,
     "a502": 19, "finchley road": 19,
     "euston road": 20, "a501": 20,
     "m25": 30,
-    "a4": 52,
-    "a406": 53, "north circular": 53,
-    "a40": 54, "westway": 54,
-    "a10": 55,
-    "b522": 56,
-    "a1": 57, "holloway road": 57,
-    "whitehall": 58,
-    "oxford street": 59,
-    "b516": 60,
-    "a23": 61,
+    "a4": 42,
+    "a406": 43, "north circular": 43,
+    "a40": 44, "westway": 44,
+    "a10": 45,
+    "b522": 46,
+    "a1": 47, "holloway road": 47,
+    "whitehall": 48,
+    "oxford street": 49,
+    "b516": 50,
+    "a23": 51,
     # KE — Nairobi
     "uhuru highway": 22,
     "mombasa road": 23, "a109": 23,
@@ -63,16 +65,38 @@ ROAD_ALIASES = {
     "jogoo road": 25, "b301": 25,
     "langata road": 26, "c401": 26,
     "waiyaki way": 31, "c62": 31,
-    "ngong road": 62, "c58": 62,
-    "kiambu road": 63,
-    "haile selassie": 64,
-    "kenyatta avenue": 65,
-    "limuru road": 66, "b3": 66,
-    "enterprise road": 67,
-    "outer ring road": 68,
-    "bunyala road": 69,
-    "forest road": 70,
-    "likoni road": 71
+    "ngong road": 52, "c58": 52,
+    "kiambu road": 53,
+    "haile selassie": 54,
+    "kenyatta avenue": 55,
+    "limuru road": 56, "b3": 56,
+    "enterprise road": 57,
+    "outer ring road": 58,
+    "bunyala road": 59,
+    "forest road": 60,
+    "likoni road": 61,
+    # IN — New Mumbai area roads (62-71)
+    "andheri ghatkopar": 62, "aglr": 62,
+    "bandra worli": 63, "bwsl": 63, "sea link approach": 63,
+    "juhu vile parle": 64, "jvpl": 64,
+    "aarey": 65,
+    "mahakali caves": 66, "mahk": 66,
+    "film city": 67,
+    "new link road": 68, "kandivali borivali": 68, "nlnk": 68,
+    "lokhandwala": 69, "lokh": 69,
+    "yari road": 70, "versova": 70,
+    "malad marve": 71, "mlmr": 71,
+    # Future expansion placeholder
+    "mumbai pune expressway": 72, "mumbai-pune": 72,
+    "nh-8": 73, "delhi mumbai": 73,
+    "chennai bangalore": 74, "nh-44": 74,
+    "kolkata mumbai": 75, "nh-6": 75,
+    "ahmedabad vadodara": 76, "ne-1": 76,
+    "lucknow kanpur": 77,
+    "jaipur delhi": 78, "nh-48": 78,
+    "bengaluru ring road": 79,
+    "hyderabad outer ring": 80,
+    "pune ring road": 81
 }
 
 CONTRACTOR_ALIASES = {
@@ -100,6 +124,16 @@ CONTRACTOR_ALIASES = {
     "nairobi road": 19, "nairobi road builders": 19,
     "kenya infrastructure": 20,
     "mombasa roadworks": 21
+}
+
+TENDER_ALIASES = {
+    "bmc-2025/t-0042": 1, "weh flyover tender": 1,
+    "bmc-2024/t-0081": 2, "sv road drainage tender": 2,
+    "bmc-2024/t-0112": 3, "ghodbunder tender": 3,
+    "msrdc-2025/t-0007": 4, "sion panvel tender": 4,
+    "mdot-2025/t-009": 5, "southfield freeway tender": 5,
+    "nh-2025/t-0033": 6, "m25 smart motorway tender": 6,
+    "kenha-2025/t-0018": 7, "langata road tender": 7,
 }
 
 AUTHORITY_ALIASES = {
@@ -130,6 +164,7 @@ class RetrievalEngine:
         road_id = None
         contractor_id = None
         authority_id = None
+        tender_id = None
         
         # Check roads
         for alias, r_id in ROAD_ALIASES.items():
@@ -149,23 +184,32 @@ class RetrievalEngine:
             if alias in msg_lower:
                 authority_id = a_id
                 break
+
+        # Check tenders
+        if not tender_id:
+            for alias, t_id in TENDER_ALIASES.items():
+                if alias in msg_lower:
+                    tender_id = t_id
+                    break
                 
-        return road_id, contractor_id, authority_id
+        return road_id, contractor_id, authority_id, tender_id
 
     @staticmethod
     def classify_intent(message: str):
         msg_lower = message.lower()
         
-        if any(w in msg_lower for w in ["budget", "cost", "money", "spent", "funding", "allocat", "variance", "crore", "lakh", "price"]):
+        if any(w in msg_lower for w in ["budget", "cost", "money", "spent", "funding", "allocat", "variance", "crore", "lakh", "price", "inflation", "cpi", "predict", "forecast", "value for money", "vfm"]):
             return "budget_audit"
         if any(w in msg_lower for w in ["damage", "pothole", "crater", "caved", "uneven", "defect", "waterlog", "flood", "debris", "ruin", "status", "condition", "bad"]):
             return "road_status"
-        if any(w in msg_lower for w in ["contractor", "builder", "repaired", "built", "paved", "license", "blacklisted", "rating", "delay"]):
+        if any(w in msg_lower for w in ["contractor", "builder", "repaired", "built", "paved", "license", "blacklisted", "rating", "delay", "tender", "bid", "procurement", "evaluation", "selected"]):
             return "contractor_lookup"
         if any(w in msg_lower for w in ["authority", "supervise", "responsible", "department", "ward", "officer", "who owns", "maintenance"]):
             return "authority_routing"
         if any(w in msg_lower for w in ["report", "complain", "file", "submit", "raise", "register", "escalat"]):
             return "report_escalation"
+        if any(w in msg_lower for w in ["beneficiar", "people", "population", "commuter", "serves", "resident", "daily traffic", "household"]):
+            return "general_inquiry"
             
         return "general_inquiry"
 
@@ -180,7 +224,7 @@ class RetrievalEngine:
             sessions_memory[session_id] = sessions_memory[session_id][-6:]
             
         # 2. Extract Entities & Intents
-        road_id, contractor_id, authority_id = cls.extract_entities(message)
+        road_id, contractor_id, authority_id, tender_id = cls.extract_entities(message)
         intent = cls.classify_intent(message)
         
         # 3. Handle GPS fallback if coordinates provided and no road/authority resolved yet
@@ -297,7 +341,18 @@ class RetrievalEngine:
                         )
                 else:
                     context_facts.append("Citizen Defect Reports: No complaints logged on this segment.")
-                    
+
+                # — Maintenance Timeline (always included for road queries) —
+                timeline = StructuredRoadRetriever.get_road_timeline(road_id)
+                if timeline:
+                    timeline_lines = ["Chronological Maintenance Timeline:"]
+                    for event in timeline[:30]:
+                        mat_note = f" — Material: {event['material_note']}" if event.get('material_note') else ""
+                        timeline_lines.append(
+                            f"  [{event['event_date']}] {event['event_type']}: {event['description']}{mat_note}"
+                        )
+                    context_facts.append("\n".join(timeline_lines))
+                
                 # — Budget-specific context for budget_audit intent —
                 if intent == "budget_audit":
                     budget_summary = StructuredRoadRetriever.get_road_budget_summary(road_id)
@@ -339,6 +394,45 @@ class RetrievalEngine:
                                 f"  * {fs['source_name']}: ₹{fs['total_amount']:,.0f} ({fs['pct_of_total']}%)"
                             )
                         context_facts.append("\n".join(sources_lines))
+
+                    # Value-for-Money Index (C4)
+                    vfm = calculate_vfm_index(road_id)
+                    if vfm and vfm['vfm_index'] is not None:
+                        context_facts.append(
+                            f"Value-for-Money Index for {resolved_road['name']}: {vfm['vfm_index']}/100\n"
+                            f"- Quality Score: {vfm['quality_score']}/100 | Cost per km: ₹{vfm['cost_per_km']:,.0f}\n"
+                            f"- VfM = Quality Score / (Cost per km scaling) — higher is better.\n"
+                            f"- Region: {vfm['region_code']} | Projects: {vfm['project_count']} | Active Complaints: {vfm['active_complaints']}"
+                        )
+
+                    # Predictive Cost Analytics (C2)
+                    if not CostPredictor.is_trained():
+                        CostPredictor.train()
+                    pred = CostPredictor.predict_cost_per_km(resolved_road.get('road_type', 'City'), 'IN', float(resolved_road.get('length_km', 1)))
+                    if pred:
+                        context_facts.append(
+                            f"Predicted Cost Analytics for {resolved_road['name']}:\n"
+                            f"- Expected Cost per km: ₹{pred['predicted_per_km']:,.0f}\n"
+                            f"- Expected Range: ₹{pred['min_expected']:,.0f} – ₹{pred['max_expected']:,.0f}/km\n"
+                            f"- Prediction Method: {pred.get('prediction_method', 'N/A')}"
+                        )
+
+                    # Inflation-Adjusted Context (C3)
+                    projects_list = StructuredRoadRetriever.get_road_projects(road_id)
+                    if projects_list:
+                        infl_lines = ["Inflation-Adjusted Budget Comparison:"]
+                        for p_infl in projects_list[:3]:
+                            start_yr = int(p_infl['start_date'].year) if hasattr(p_infl['start_date'], 'year') else 2024
+                            adj = InflationService.adjust_for_inflation(
+                                float(p_infl['budget_spent']), start_yr, 2026, 'IN'
+                            )
+                            if adj:
+                                infl_lines.append(
+                                    f"  * {p_infl['title']}: ₹{adj['original_amount']:,.0f} ({start_yr}) → "
+                                    f"₹{adj['adjusted_amount']:,.0f} (2026, ×{adj['inflation_multiplier']:.2f} CPI multiplier)"
+                                )
+                        if len(infl_lines) > 1:
+                            context_facts.append("\n".join(infl_lines))
 
                     # Cost per KM
                     cost_per_km = StructuredRoadRetriever.get_road_cost_per_km(road_id)
@@ -418,8 +512,35 @@ class RetrievalEngine:
                             ap_lines.append(f"  * ... and {len(approvals) - 5} more approval records")
                         context_facts.append("\n".join(ap_lines))
 
+                    # Procurement / Tender Context (C1)
+                    tenders = StructuredRoadRetriever.get_road_tenders(road_id)
+                    if tenders:
+                        tender_lines = ["Procurement / Tender History:"]
+                        for t in tenders:
+                            tender_lines.append(
+                                f"  * Tender: {t['reference_no']} — {t['title']}\n"
+                                f"    - Authority: {t['authority_name']} ({t['authority_code']})\n"
+                                f"    - Status: {t['status']} | Est. Value: ₹{t['estimated_value']:,.0f}\n"
+                                f"    - Published: {t['published_date']} | Deadline: {t['bid_deadline']}\n"
+                                f"    - Bids Received: {t['bid_count']} | Award Date: {t['award_date'] or 'N/A'}"
+                            )
+                        context_facts.append("\n".join(tender_lines))
+
+                    # Beneficiary Context (C5)
+                    benef = StructuredRoadRetriever.get_road_beneficiary_summary(road_id)
+                    if benef and benef['total_population_served'] > 0:
+                        context_facts.append(
+                            f"Beneficiary Impact for {resolved_road['name']}:\n"
+                            f"- Total Population Served: {benef['total_population_served']:,}\n"
+                            f"- Estimated Daily Traffic: {benef['total_daily_traffic']:,} vehicles\n"
+                            f"- Total Households: {benef['total_households']:,}\n"
+                            f"- Coverage from {benef['project_count']} project(s)"
+                        )
+
                     suggested_prompts.append(f"How does {resolved_road['name']} compare to other roads on cost-per-km?")
                     suggested_prompts.append(f"What is the funding breakdown for {resolved_road['name']}?")
+                    suggested_prompts.append(f"What is the value-for-money score for {resolved_road['name']}?")
+                    suggested_prompts.append(f"Who benefits from projects on {resolved_road['name']}?")
 
                 # Setup quick actions
                 suggested_actions.append({
@@ -484,6 +605,21 @@ class RetrievalEngine:
                             f"- Rating: {c_trans['rating']}/5.00 | Blacklisted: {'YES' if c_trans['blacklisted'] else 'NO'}"
                         )
 
+                    # Procurement / Bid History (C1)
+                    c_bids = StructuredRoadRetriever.get_contractor_bids(contractor_id)
+                    if c_bids:
+                        bid_lines = ["Contractor Bid / Tender History:"]
+                        for b in c_bids:
+                            is_winner = "WINNER" if b['is_winner'] else ""
+                            bid_lines.append(
+                                f"  * Tender: {b['reference_no']} — {b['tender_title']} ({b['tender_status']}) {is_winner}\n"
+                                f"    - Financial Quote: ₹{b['financial_quote']:,.0f}\n"
+                                f"    - Technical Score: {b['technical_score']}/100 | Financial Score: {b['financial_score']}/100\n"
+                                f"    - Weighted Total: {b['weighted_total']}/100\n"
+                                f"    - Evaluator Notes: {b['evaluator_notes'] or 'N/A'}"
+                            )
+                        context_facts.append("\n".join(bid_lines))
+
                 # Action
                 suggested_actions.append({
                     "type": "navigate_to_contractor",
@@ -494,6 +630,7 @@ class RetrievalEngine:
                 # Contextual prompts
                 suggested_prompts.append(f"Is {resolved_contractor['name']} blacklisted?")
                 suggested_prompts.append(f"What projects has {resolved_contractor['name']} completed?")
+                suggested_prompts.append(f"How was {resolved_contractor['name']} selected? What bids did they win?")
 
         if authority_id:
             resolved_authority = AuthorityResolver.get_authority_by_id(authority_id)
@@ -542,6 +679,35 @@ class RetrievalEngine:
                         f"- Total Anomalies Detected: {city_transparency['total_anomalies']}\n"
                         f"- High Severity Anomalies: {city_transparency['high_severity_anomalies']}"
                     )
+
+                # City-wide VfM snapshot
+                vfm_snapshot = get_citywide_vfm_snapshot()
+                if vfm_snapshot and vfm_snapshot['roads_analyzed'] > 0:
+                    vfm_summary = (
+                        f"City-wide Value-for-Money Snapshot:\n"
+                        f"- Roads Analyzed: {vfm_snapshot['roads_analyzed']}\n"
+                        f"- Average VfM Index: {vfm_snapshot['average_vfm_index']}/100\n"
+                    )
+                    for rg, info in vfm_snapshot['regions'].items():
+                        vfm_summary += f"- Region {rg}: {info['count']} roads, avg VfM {info['average']}/100\n"
+                    context_facts.append(vfm_summary)
+
+                # City-wide beneficiary snapshot
+                benef_city = db.query(
+                    "SELECT COALESCE(SUM(population_served), 0) AS total_pop, "
+                    "COALESCE(SUM(estimated_daily_traffic), 0) AS total_traffic, "
+                    "COUNT(DISTINCT project_id) AS project_count "
+                    "FROM project_beneficiaries"
+                )
+                if benef_city and benef_city[0]['total_pop'] > 0:
+                    bc = benef_city[0]
+                    context_facts.append(
+                        f"City-wide Beneficiary Impact:\n"
+                        f"- Total Population Served: {bc['total_pop']:,}\n"
+                        f"- Total Daily Traffic Impact: {bc['total_traffic']:,} vehicles\n"
+                        f"- Projects with Beneficiary Data: {bc['project_count']}"
+                    )
+
                 suggested_prompts.append("How much total budget is allocated to road projects city-wide?")
                 suggested_prompts.append("Which road had the biggest budget variance?")
                 suggested_prompts.append("Show me spending per km on WEH vs EEH")
@@ -581,6 +747,11 @@ class RetrievalEngine:
             "- When cost-per-km data is available, mention it (e.g. '₹7.5 Cr/km allocated').\n"
             "- When variance reasons exist, summarize the key reason and approval authority.\n"
             "- If the project is delayed, include delay days in the response.\n"
+            "- When VfM (Value-for-Money) index data is available, mention the score out of 100 and what it means (higher is better value).\n"
+            "- When inflation-adjusted figures are available, show both nominal and adjusted amounts (e.g. '₹38.2 Cr nominal → ₹42.1 Cr in 2026 rupees').\n"
+            "- When predictive cost analytics are available, mention predicted vs actual cost-per-km and any anomaly flags.\n"
+            "- When beneficiary data exists, include population served (e.g. 'This road serves ~125,000 daily commuters').\n"
+            "- When procurement/tender data is available for contractor queries, describe how the contractor was selected (bid scores, evaluation).\n"
             "- Example format: 'NH-48: ₹45 Cr sanctioned, ₹38.2 Cr actual spent (85%). Sources: Central Road Fund ₹30 Cr, State Budget ₹12 Cr, MPLAD ₹3 Cr'\n\n"
             f"STRUCTURED DATABASE RECORDS:\n{context_str}\n\n"
             "ANSWER DIALECT:\n"
@@ -645,7 +816,7 @@ class RetrievalEngine:
 
     @classmethod
     def generate_deterministic_fallback(cls, system_prompt: str, user_message: str) -> str:
-        road_id, contractor_id, authority_id = cls.extract_entities(user_message)
+        road_id, contractor_id, authority_id, tender_id = cls.extract_entities(user_message)
         msg_lower = user_message.lower()
 
         if road_id:
@@ -733,6 +904,14 @@ class RetrievalEngine:
                     parts.append(f"- {p['title']}: ₹{p['budget_allocated']:,.0f} allocated, ₹{p['budget_spent']:,.0f} spent. Contractor: {p['contractor_name']} (rating {p['contractor_rating']}/5). Status: {p['status']}. Delays: {p['delay_days']} days.")
             if complaints:
                 parts.append(f"\n**Complaints:** {len(complaints)} logged ({len([c for c in complaints if c['status'] != 'resolved'])} unresolved).")
+            # Beneficiary data
+            benef = StructuredRoadRetriever.get_road_beneficiary_summary(road_id)
+            if benef and benef['total_population_served'] > 0:
+                parts.append(f"\n**Beneficiaries:** {benef['total_population_served']:,} people served, ~{benef['total_daily_traffic']:,} daily vehicles.")
+            # VfM
+            vfm = calculate_vfm_index(road_id)
+            if vfm and vfm['vfm_index'] is not None:
+                parts.append(f"**Value-for-Money:** {vfm['vfm_index']}/100")
             return "\n".join(parts)
 
         if contractor_id:
@@ -758,12 +937,21 @@ class RetrievalEngine:
                         f"- Rating: {contractor['rating']}/5.00\n"
                         f"- Contact: {contractor['contact_email']} | {contractor['contact_phone']}"
                     )
+            # Procurement data
+            c_bids = StructuredRoadRetriever.get_contractor_bids(contractor_id)
+            bid_str = ""
+            if c_bids:
+                won = [b for b in c_bids if b['is_winner']]
+                bid_str = f"\n- Bids Submitted: {len(c_bids)} | Won: {len(won)}"
+                if won:
+                    bid_str += f" | Last Win: {won[0]['reference_no']} ({won[0]['tender_title']})"
             return (
                 f"**{contractor['name']}** (License: {contractor['license_number']})\n"
                 f"- Status: {status_str}\n"
                 f"- Rating: {contractor['rating']}/5.00\n"
                 f"- Completed: {contractor['projects_completed']} | Delayed: {contractor['projects_delayed']}\n"
                 f"- Contact: {contractor['contact_email']} | {contractor['contact_phone']}"
+                f"{bid_str}"
             )
 
         if authority_id:

@@ -4,6 +4,7 @@ import httpx
 import logging
 from typing import Optional
 from app.services.database import db
+from app.services.inflation_service import InflationService
 
 logger = logging.getLogger(__name__)
 
@@ -192,3 +193,59 @@ class ExchangeRateService:
             "project_count": len(project_details),
             "projects": project_details,
         }
+
+    @classmethod
+    async def compare_with_inflation(
+        cls, project_id: int, target_year: int | None = None, target_currency: str | None = None
+    ) -> Optional[dict]:
+        """Combine exchange rate conversion with inflation adjustment for fair comparison."""
+        project = db.query(
+            "SELECT p.id, p.title, p.budget_allocated, p.budget_spent, "
+            "EXTRACT(YEAR FROM p.start_date) AS start_year, "
+            "rgn.default_currency, rgn.code AS region_code "
+            "FROM projects p "
+            "JOIN roads rd ON p.road_id = rd.id "
+            "JOIN authorities a ON rd.authority_id = a.id "
+            "JOIN regions rgn ON a.region_code = rgn.code "
+            "WHERE p.id = ?",
+            (project_id,),
+        )
+        if not project:
+            return None
+
+        p = project[0]
+        from_year = int(p['start_year']) if p['start_year'] else 2024
+        to_year = target_year or 2026
+        source_currency = p['default_currency']
+
+        inflation_adjusted = InflationService.adjust_for_inflation(
+            float(p['budget_spent']), from_year, to_year, p['region_code']
+        )
+
+        result = {
+            "project_id": p['id'],
+            "project_title": p['title'],
+            "region_code": p['region_code'],
+            "source_currency": source_currency,
+            "from_year": from_year,
+            "to_year": to_year,
+            "budget_allocated_nominal": float(p['budget_allocated']),
+            "budget_spent_nominal": float(p['budget_spent']),
+        }
+
+        if inflation_adjusted:
+            result["budget_spent_inflation_adjusted"] = inflation_adjusted['adjusted_amount']
+            result["inflation_multiplier"] = inflation_adjusted['inflation_multiplier']
+
+        if target_currency and target_currency != source_currency:
+            conv = await cls.convert_amount(
+                inflation_adjusted['adjusted_amount'] if inflation_adjusted else float(p['budget_spent']),
+                source_currency,
+                target_currency,
+            )
+            if conv:
+                result["budget_spent_adjusted_converted"] = conv['amount_to']
+                result["target_currency"] = target_currency
+                result["exchange_rate"] = conv['rate']
+
+        return result

@@ -62,7 +62,10 @@ export default function AccessibilityPanel() {
           aria-label={t('settings.locale')}
           className="w-full px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-[10px] font-semibold text-slate-300"
         >
-          <option value="en-IN">English</option>
+          <option value="en-IN">English (India)</option>
+          <option value="en-US">English (US)</option>
+          <option value="en-GB">English (UK)</option>
+          <option value="en-KE">English (Kenya)</option>
           <option value="hi-IN">हिन्दी</option>
           <option value="mr-IN">मराठी</option>
         </select>

@@ -118,6 +118,107 @@ def _score_grade(score: int) -> str:
     return "F"
 
 
+def calculate_vfm_index(road_id: int) -> dict | None:
+    """Value-for-Money index: (quality_score / cost_per_km) * normalization_factor."""
+    road = StructuredRoadRetriever.get_road_by_id(road_id)
+    if not road:
+        return None
+
+    projects = StructuredRoadRetriever.get_road_projects(road_id) or []
+    complaints = StructuredRoadRetriever.get_road_complaints(road_id) or []
+
+    total_spent = sum(p['budget_spent'] or 0 for p in projects)
+    length_km = float(road['length_km'])
+
+    if length_km == 0 or total_spent == 0:
+        return {"road_id": road_id, "vfm_index": None, "reason": "Insufficient data"}
+
+    spent_per_km = total_spent / length_km
+
+    # Quality score: start at 100, deduct for unresolved complaints, poor road status
+    quality_score = 100.0
+    active = [c for c in complaints if c.get('status') not in ('resolved', 'rejected')]
+    quality_score -= min(40, len(active) * 5)
+
+    status = road.get('status', 'good')
+    if status == 'poor':
+        quality_score -= 20
+    elif status == 'fair':
+        quality_score -= 10
+    elif status == 'under_construction':
+        quality_score -= 5
+
+    quality_score = max(10, quality_score)
+
+    # VfM = quality_score / (spent_per_km / 100000) — scaling factor to bring to 0-100 range
+    vfm_raw = quality_score / (spent_per_km / 100000) if spent_per_km > 0 else 0
+
+    # Get region code for normalization
+    region_code = road.get('region_code') or 'IN'
+
+    return {
+        "road_id": road_id,
+        "road_name": road['name'],
+        "region_code": region_code,
+        "quality_score": round(quality_score, 1),
+        "cost_per_km": round(spent_per_km, 2),
+        "vfm_raw": round(vfm_raw, 4),
+        "vfm_index": round(min(100, vfm_raw * 100), 1),
+        "project_count": len(projects),
+        "active_complaints": len(active),
+    }
+
+
+def get_citywide_vfm_snapshot() -> dict:
+    """Aggregate VfM scores across all roads with per-region normalization."""
+    roads = db.query("SELECT id, name FROM roads")
+    scores = []
+    for r in roads:
+        s = calculate_vfm_index(r['id'])
+        if s and s['vfm_index'] is not None:
+            scores.append(s)
+
+    if not scores:
+        return {"roads_analyzed": 0}
+
+    # Per-region min-max normalization
+    region_scores: dict[str, list[float]] = {}
+    for s in scores:
+        rg = s['region_code']
+        if rg not in region_scores:
+            region_scores[rg] = []
+        region_scores[rg].append(s['vfm_index'])
+
+    region_min_max: dict[str, tuple[float, float]] = {}
+    for rg, vals in region_scores.items():
+        region_min_max[rg] = (min(vals), max(vals))
+
+    normalized_scores = []
+    for s in scores:
+        rg = s['region_code']
+        lo, hi = region_min_max[rg]
+        if hi > lo:
+            s['vfm_normalized'] = round(((s['vfm_index'] - lo) / (hi - lo)) * 100, 1)
+        else:
+            s['vfm_normalized'] = 100.0
+        normalized_scores.append(s)
+
+    avg_vfm = round(sum(s['vfm_index'] for s in scores) / len(scores), 1)
+
+    return {
+        "roads_analyzed": len(scores),
+        "average_vfm_index": avg_vfm,
+        "regions": {
+            rg: {
+                "count": len(region_scores[rg]),
+                "average": round(sum(region_scores[rg]) / len(region_scores[rg]), 1),
+            }
+            for rg in region_scores
+        },
+        "roads": normalized_scores,
+    }
+
+
 def get_citywide_transparency_snapshot() -> dict:
     """Aggregate transparency across all roads."""
     snapshot = StructuredRoadRetriever.get_citywide_budget_snapshot()

@@ -33,7 +33,8 @@ export type CrossRegionMetricKey =
   | 'avg_contractor_rating'
   | 'active_complaints'
   | 'avg_delay_days'
-  | 'cost_per_km';
+  | 'cost_per_km'
+  | 'vfm_index';
 
 export interface RegionMetric {
   code: string;
@@ -134,6 +135,15 @@ const METRIC_DEFINITIONS: Record<CrossRegionMetricKey, MetricDefinition> = {
     icon: <Route className="w-3.5 h-3.5 text-slate-400" />,
     formatValue: (v) => formatCurrency(v, true),
   },
+  vfm_index: {
+    key: 'vfm_index',
+    label: 'Value-for-Money Index',
+    unit: '/100',
+    higherIsBetter: true,
+    decimalPlaces: 1,
+    icon: <Award className="w-3.5 h-3.5 text-emerald-400" />,
+    formatValue: (v) => `${v.toFixed(1)}/100`,
+  },
 };
 
 /* ------------------------------------------------------------------ */
@@ -195,6 +205,12 @@ const DEFAULT_METRICS_DATA: Record<CrossRegionMetricKey, RegionMetric[]> = {
     { code: 'GB', name: 'United Kingdom', flag: '🇬🇧', value: 15000000 },
     { code: 'US', name: 'United States', flag: '🇺🇸', value: 18000000 },
     { code: 'KE', name: 'Kenya', flag: '🇰🇪', value: 6200000 },
+  ],
+  vfm_index: [
+    { code: 'IN', name: 'India', flag: '🇮🇳', value: 65.2 },
+    { code: 'GB', name: 'United Kingdom', flag: '🇬🇧', value: 82.5 },
+    { code: 'US', name: 'United States', flag: '🇺🇸', value: 76.8 },
+    { code: 'KE', name: 'Kenya', flag: '🇰🇪', value: 48.3 },
   ],
 };
 

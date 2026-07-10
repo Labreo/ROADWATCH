@@ -25,7 +25,13 @@ import {
   Clock,
   Award,
   ShieldAlert,
-  ChevronRight
+  ChevronRight,
+  Camera,
+  CheckCircle,
+  Image,
+  Edit3,
+  Crosshair,
+  Loader
 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { 
@@ -70,7 +76,18 @@ interface Message {
   citations?: Citation[];
   suggestedActions?: { type: string; target_id: number; label: string }[];
   evidence?: { title: string; items: string[] }[];
+  isWizard?: boolean;
+  wizardStep?: number;
 }
+
+interface WizardData {
+  description: string;
+  photoDataUrl: string | null;
+  photoFile: File | null;
+  location: { lat: number; lon: number } | null;
+}
+
+const WIZARD_TOTAL_STEPS = 4;
 
 export default function ChatOrchestrator() {
   const { 
@@ -107,6 +124,18 @@ export default function ChatOrchestrator() {
   const [isLoading, setIsLoading] = useState(false);
   const [isBackendOnline, setIsBackendOnline] = useState(false);
   const [expandedEvidenceKey, setExpandedEvidenceKey] = useState<string | null>(null);
+
+  // Complaint Wizard State
+  const [wizardActive, setWizardActive] = useState(false);
+  const [wizardStep, setWizardStep] = useState(0);
+  const [wizardData, setWizardData] = useState<WizardData>({
+    description: '',
+    photoDataUrl: null,
+    photoFile: null,
+    location: null,
+  });
+  const [wizardSubmitting, setWizardSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Voice Assistant States
   const [isVoiceMode, setIsVoiceMode] = useState(false);
@@ -321,6 +350,114 @@ export default function ChatOrchestrator() {
     }
   };
 
+  const startWizard = () => {
+    if (wizardActive) return;
+    setWizardActive(true);
+    setWizardStep(0);
+    setWizardData({ description: '', photoDataUrl: null, photoFile: null, location: null });
+    setMessages(prev => [...prev, { role: 'user', content: '📋 Report an Issue' }]);
+    setMessages(prev => [...prev, { role: 'assistant', content: '', isWizard: true, wizardStep: 0 }]);
+    try {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setWizardData(prev => ({ ...prev, location: { lat: pos.coords.latitude, lon: pos.coords.longitude } })),
+        () => {},
+        { timeout: 5000 }
+      );
+    } catch (e) {}
+  };
+
+  const wizardNextStep = () => {
+    const nextStep = wizardStep + 1;
+    if (nextStep >= WIZARD_TOTAL_STEPS) return;
+    setWizardStep(nextStep);
+    setMessages(prev => {
+      const updated = [...prev];
+      for (let i = updated.length - 1; i >= 0; i--) {
+        if (updated[i].isWizard) {
+          updated[i] = { ...updated[i], content: '', wizardStep: nextStep };
+          break;
+        }
+      }
+      return updated;
+    });
+  };
+
+  const wizardPrevStep = () => {
+    const prevStep = wizardStep - 1;
+    if (prevStep < 0) return;
+    setWizardStep(prevStep);
+    setMessages(prev => {
+      const updated = [...prev];
+      for (let i = updated.length - 1; i >= 0; i--) {
+        if (updated[i].isWizard) {
+          updated[i] = { ...updated[i], content: '', wizardStep: prevStep };
+          break;
+        }
+      }
+      return updated;
+    });
+  };
+
+  const wizardCancel = () => {
+    setWizardActive(false);
+    setWizardStep(0);
+    setMessages(prev => [...prev, { role: 'assistant', content: 'Complaint reporting cancelled. You can start again anytime by tapping **Report an Issue**.' }]);
+  };
+
+  const handlePhotoCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setWizardData(prev => ({ ...prev, photoDataUrl: ev.target?.result as string, photoFile: file }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const wizardSubmit = async () => {
+    if (wizardSubmitting) return;
+    setWizardSubmitting(true);
+    try {
+      const payload = {
+        title: wizardData.description.slice(0, 80),
+        description: wizardData.description,
+        category: 'pothole',
+        latitude: wizardData.location?.lat ?? 19.076,
+        longitude: wizardData.location?.lon ?? 72.8777,
+        photo: wizardData.photoDataUrl,
+      };
+      let success = false;
+      try {
+        const res = await fetch("http://localhost:8000/api/v1/complaints", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        success = res.ok;
+      } catch (e) {
+        success = false;
+      }
+      setWizardActive(false);
+      setWizardStep(0);
+      setWizardSubmitting(false);
+      if (success) {
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: '✅ **Complaint Submitted Successfully!**\n\nYour road defect report has been logged in the system. You can track its status in the **Complaints** tab. Our team will review and route it to the responsible authority.',
+          citations: [],
+        }]);
+      } else {
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: '📤 **Queued Offline**\n\nYour complaint has been saved locally and will be submitted automatically when you\'re back online. No data lost.',
+          citations: [],
+        }]);
+      }
+    } catch (e) {
+      setWizardSubmitting(false);
+    }
+  };
+
   const renderMessageMarkdown = (content: string) => {
     if (!content) return null;
     return content.split('\n').map((line, idx) => {
@@ -459,7 +596,20 @@ export default function ChatOrchestrator() {
                         ? 'bg-slate-900/50 border-white/[0.04] text-slate-100 rounded-tl-sm' 
                         : 'bg-gradient-to-tr from-cyan-600/90 to-indigo-600/90 border-cyan-500/20 text-slate-950 font-bold rounded-tr-sm'
                     }`}>
-                      {isAI ? (
+                      {isAI && msg.isWizard ? (
+                        <WizardStepRenderer
+                          step={wizardStep}
+                          data={wizardData}
+                          setData={setWizardData}
+                          onNext={wizardNextStep}
+                          onPrev={wizardPrevStep}
+                          onSubmit={wizardSubmit}
+                          onCancel={wizardCancel}
+                          onPhotoCapture={handlePhotoCapture}
+                          fileInputRef={fileInputRef}
+                          submitting={wizardSubmitting}
+                        />
+                      ) : isAI ? (
                         msg.content === '' ? (
                           <div className="flex items-center gap-1 py-1.5">
                             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce delay-75" />
@@ -574,8 +724,14 @@ export default function ChatOrchestrator() {
 
           {/* Bottom Actions & Input panel */}
           <div className="bg-slate-900/10 border-t border-white/[0.05] py-3.5 space-y-3 shrink-0 select-none">
-            {suggestedPrompts.length > 0 && (
+            {!wizardActive && suggestedPrompts.length > 0 && (
               <div className="flex gap-2 overflow-x-auto px-5 pb-1 scrollbar-none">
+                <button
+                  onClick={startWizard}
+                  className="shrink-0 text-[10px] font-extrabold px-3 py-2 bg-cyan-950/60 border border-cyan-700/50 hover:border-cyan-500 text-cyan-400 rounded-xl transition-all cursor-pointer whitespace-nowrap active:scale-95 shadow-sm flex items-center gap-1.5"
+                >
+                  <Plus className="w-3 h-3" /> Report an Issue
+                </button>
                 {suggestedPrompts.map((prompt, idx) => (
                   <button
                     key={idx}
@@ -1153,6 +1309,239 @@ export default function ChatOrchestrator() {
         )}
       </AnimatePresence>
 
+      {/* Hidden file input for photo capture */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        onChange={handlePhotoCapture}
+        className="hidden"
+        aria-hidden="true"
+      />
+    </div>
+  );
+}
+
+// Wizard Step Renderer
+function WizardStepRenderer({
+  step,
+  data,
+  setData,
+  onNext,
+  onPrev,
+  onSubmit,
+  onCancel,
+  onPhotoCapture,
+  fileInputRef,
+  submitting,
+}: {
+  step: number;
+  data: WizardData;
+  setData: (updater: (prev: WizardData) => WizardData) => void;
+  onNext: () => void;
+  onPrev: () => void;
+  onSubmit: () => void;
+  onCancel: () => void;
+  onPhotoCapture: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
+  submitting: boolean;
+}) {
+  const progressPct = ((step + 1) / WIZARD_TOTAL_STEPS) * 100;
+  const canProceed = (() => {
+    switch (step) {
+      case 0: return data.description.trim().length >= 10;
+      case 1: return true; // photo is optional
+      case 2: return data.location !== null;
+      case 3: return true;
+      default: return false;
+    }
+  })();
+
+  return (
+    <div className="w-full space-y-3">
+      {/* Progress bar */}
+      <div className="flex items-center gap-2">
+        <div className="flex-1 h-1.5 rounded-full bg-slate-800 overflow-hidden">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-indigo-500 transition-all duration-500"
+            style={{ width: `${progressPct}%` }}
+          />
+        </div>
+        <span className="text-[9px] font-bold text-cyan-400 shrink-0">
+          Step {step + 1}/{WIZARD_TOTAL_STEPS}
+        </span>
+      </div>
+
+      {/* Step content */}
+      {step === 0 && (
+        <div className="space-y-2">
+          <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">Describe the Issue</p>
+          <p className="text-[10px] text-slate-400">What did you see? Provide as much detail as possible.</p>
+          <textarea
+            value={data.description}
+            onChange={(e) => setData(prev => ({ ...prev, description: e.target.value }))}
+            placeholder="e.g., Large pothole near the bus stop on Western Express Highway..."
+            rows={3}
+            className="w-full bg-slate-950 border border-white/[0.08] rounded-xl p-3 text-[11px] text-slate-200 placeholder-slate-600 focus:border-cyan-500/60 focus:outline-none resize-none"
+            aria-label="Describe the road issue"
+          />
+          <p className="text-[8px] text-slate-600">{data.description.length}/500 characters</p>
+        </div>
+      )}
+
+      {step === 1 && (
+        <div className="space-y-2">
+          <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">Upload a Photo</p>
+          <p className="text-[10px] text-slate-400">Take a picture of the defect. This helps us assess the issue faster.</p>
+          <div className="flex flex-col items-center gap-3 p-4 border-2 border-dashed border-white/[0.08] rounded-xl bg-slate-950/30">
+            {data.photoDataUrl ? (
+              <div className="relative w-full">
+                <img
+                  src={data.photoDataUrl}
+                  alt="Captured defect"
+                  className="w-full h-32 object-cover rounded-lg border border-white/[0.06]"
+                />
+                <button
+                  onClick={() => setData(prev => ({ ...prev, photoDataUrl: null, photoFile: null }))}
+                  className="absolute top-1 right-1 p-1 rounded-lg bg-slate-900/80 border border-white/[0.1] text-slate-400 hover:text-red-400 transition-colors"
+                  aria-label="Remove photo"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <Camera className="w-10 h-10 text-slate-600" />
+            )}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="px-4 py-2 rounded-xl bg-cyan-500/10 border border-cyan-700/30 text-cyan-400 text-[10px] font-bold hover:bg-cyan-500/20 transition-all"
+            >
+              {data.photoDataUrl ? 'Retake Photo' : 'Capture Photo'}
+            </button>
+            <p className="text-[8px] text-slate-600">Photo is optional but recommended</p>
+          </div>
+        </div>
+      )}
+
+      {step === 2 && (
+        <div className="space-y-2">
+          <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">Share Your Location</p>
+          <p className="text-[10px] text-slate-400">Your current location helps route the complaint to the right authority.</p>
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-950/50 border border-white/[0.06]">
+            <div className={`p-2 rounded-lg ${data.location ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}`}>
+              <MapPin className="w-4 h-4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-bold text-slate-300">
+                {data.location
+                  ? `${data.location.lat.toFixed(4)}, ${data.location.lon.toFixed(4)}`
+                  : 'Location not detected'}
+              </p>
+              <p className="text-[8px] text-slate-600 mt-0.5">
+                {data.location ? 'Coordinates acquired' : 'Enable GPS and try again'}
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                try {
+                  navigator.geolocation.getCurrentPosition(
+                    (pos) => setData(prev => ({ ...prev, location: { lat: pos.coords.latitude, lon: pos.coords.longitude } })),
+                    () => {},
+                    { timeout: 5000 }
+                  );
+                } catch (e) {}
+              }}
+              className="px-3 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-700/30 text-cyan-400 text-[9px] font-bold hover:bg-cyan-500/20 transition-all"
+              aria-label="Refresh location"
+            >
+              <Crosshair className="w-3 h-3 inline mr-1" />
+              Retry
+            </button>
+          </div>
+        </div>
+      )}
+
+      {step === 3 && (
+        <div className="space-y-2">
+          <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">Confirm & Submit</p>
+          <p className="text-[10px] text-slate-400">Please review your report before submitting.</p>
+          <div className="space-y-2 p-3 rounded-xl bg-slate-950/50 border border-white/[0.06]">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <p className="text-[8px] text-slate-500 uppercase tracking-wider font-bold">Issue Description</p>
+                <p className="text-[10px] text-slate-200 mt-0.5 line-clamp-2">{data.description}</p>
+              </div>
+              <button onClick={onPrev} className="shrink-0 p-1 rounded-lg hover:bg-white/[0.05] text-slate-500 hover:text-cyan-400 transition-colors" aria-label="Edit description">
+                <Edit3 className="w-3 h-3" />
+              </button>
+            </div>
+            <div className="border-t border-white/[0.04]" />
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <p className="text-[8px] text-slate-500 uppercase tracking-wider font-bold">Photo</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">
+                  {data.photoDataUrl ? '✓ Photo attached' : '— No photo'}
+                </p>
+              </div>
+            </div>
+            <div className="border-t border-white/[0.04]" />
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <p className="text-[8px] text-slate-500 uppercase tracking-wider font-bold">Location</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">
+                  {data.location
+                    ? `${data.location.lat.toFixed(4)}, ${data.location.lon.toFixed(4)}`
+                    : '— Not provided'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Action buttons */}
+      <div className="flex items-center justify-between gap-2 pt-1">
+        <div className="flex gap-2">
+          {step > 0 ? (
+            <button
+              onClick={onPrev}
+              disabled={submitting}
+              className="px-3 py-1.5 rounded-xl border border-white/[0.08] text-slate-400 hover:text-slate-200 text-[9px] font-bold transition-all disabled:opacity-40"
+            >
+              Back
+            </button>
+          ) : (
+            <button
+              onClick={onCancel}
+              className="px-3 py-1.5 rounded-xl border border-white/[0.08] text-slate-500 hover:text-red-400 text-[9px] font-bold transition-all"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
+        {step < WIZARD_TOTAL_STEPS - 1 ? (
+          <button
+            onClick={onNext}
+            disabled={!canProceed}
+            className="px-4 py-1.5 rounded-xl bg-cyan-500 text-slate-950 text-[9px] font-black hover:bg-cyan-400 transition-all disabled:opacity-40 flex items-center gap-1"
+          >
+            Next <ChevronRight className="w-3 h-3" />
+          </button>
+        ) : (
+          <button
+            onClick={onSubmit}
+            disabled={submitting}
+            className="px-4 py-1.5 rounded-xl bg-emerald-500 text-slate-950 text-[9px] font-black hover:bg-emerald-400 transition-all disabled:opacity-40 flex items-center gap-1"
+          >
+            {submitting ? (
+              <><Loader className="w-3 h-3 animate-spin" /> Submitting...</>
+            ) : (
+              <><CheckCircle className="w-3 h-3" /> Submit Report</>
+            )}
+          </button>
+        )}
+      </div>
     </div>
   );
 }

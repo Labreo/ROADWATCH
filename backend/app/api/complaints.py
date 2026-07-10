@@ -1,25 +1,61 @@
 from datetime import datetime
 from typing import Optional
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from app.services.database import db
 from app.services.authority_resolver import AuthorityResolver
 from app.services.sla_service import compute_priority
 from app.services.notification_service import NotificationService
 from app.services.validators import ValidatedComplaintPayload
 from app.services.cross_region_router import CrossRegionRouter
+from app.services.routing_accuracy import RoutingAccuracyService
+from app.services.authority_resolver import set_boundary_alert_callback
 
 router = APIRouter()
 
 
+# ── B6: Boundary alert callback ──────────────────────────────────────────
+async def _boundary_alert_handler(
+    authority_id: int,
+    secondary_authority: dict,
+    boundary_distance_m: float,
+    lon: float,
+    lat: float,
+):
+    """Callback fired when a complaint is near an authority boundary."""
+    try:
+        from app.services.database import db
+        from app.services.notification_service import NotificationService
+        primary = AuthorityResolver.get_authority_by_id(authority_id)
+        if primary and secondary_authority:
+            complaint_dummy = {
+                "id": None,
+                "title": "Boundary proximity alert",
+                "category": "pending",
+            }
+            await NotificationService.notify_authorities_boundary_alert(
+                complaint_dummy, primary, secondary_authority, boundary_distance_m
+            )
+    except Exception as exc:
+        import logging
+        logging.getLogger(__name__).error("Boundary alert handler error: %s", exc)
+
+set_boundary_alert_callback(_boundary_alert_handler)
+
+
 class ComplaintPayload(ValidatedComplaintPayload):
     """Backward-compatible complaint payload with built-in validation."""
-    pass
+    citizenContact: Optional[str] = None
 
 
 class DeclinePayload(BaseModel):
     authorityId: int
     reason: Optional[str] = None
+
+
+class RoutingFeedbackPayload(BaseModel):
+    citizenConfirmed: bool
+    feedbackText: Optional[str] = None
 
 
 @router.post("/complaints")
@@ -116,8 +152,8 @@ async def create_complaint(payload: ComplaintPayload):
     insert_sql = """
     INSERT INTO complaints (title, description, category, geom, status, priority,
       client_temp_id, image_url, assigned_authority_id, road_id,
-      target_resolution_hours, created_at, updated_at)
-    VALUES (%s, %s, %s, ST_GeomFromText(%s, 4326), %s, %s, %s, %s, %s, %s, %s, %s, %s)
+      target_resolution_hours, citizen_contact, created_at, updated_at)
+    VALUES (%s, %s, %s, ST_GeomFromText(%s, 4326), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     RETURNING id
     """
     params = (
@@ -132,6 +168,7 @@ async def create_complaint(payload: ComplaintPayload):
         payload.assignedAuthorityId,
         payload.roadId,
         target_hours,
+        payload.citizenContact,
         created_at,
         created_at,
     )
@@ -154,9 +191,30 @@ async def create_complaint(payload: ComplaintPayload):
         "priority": priority,
         "created_at": created_at,
         "assigned_authority_id": payload.assignedAuthorityId,
+        "citizen_contact": payload.citizenContact,
     }
     if authority:
         await NotificationService.notify_complaint_assigned(complaint_dict, authority)
+
+    # Send citizen notification if contact provided
+    if payload.citizenContact:
+        await NotificationService.notify_citizen_routed(complaint_dict, authority or {})
+
+    # B6: Check boundary proximity and trigger alert if within 50m
+    boundary_alert = AuthorityResolver.check_boundary_proximity(lon, lat, payload.assignedAuthorityId)
+    if boundary_alert.get("near_boundary") and boundary_alert.get("secondary_authority"):
+        await _boundary_alert_handler(
+            authority_id=payload.assignedAuthorityId,
+            secondary_authority=boundary_alert["secondary_authority"],
+            boundary_distance_m=boundary_alert["boundary_distance_meters"],
+            lon=lon,
+            lat=lat,
+        )
+        # Flag complaint as cross-region near boundary
+        db.execute(
+            "UPDATE complaints SET region_override = 'boundary_proximity' WHERE id = ?",
+            (new_id,),
+        )
 
     # If cross-region detected, split the complaint to secondary regions
     split_ids = []
@@ -343,8 +401,258 @@ async def decline_complaint(complaint_id: int, payload: DeclinePayload):
             complaint_dict, old_authority, new_authority=None
         )
 
+        # Notify citizen if rejected
+        complaint_dict = dict(complaint)
+        await NotificationService.notify_citizen_rejected(
+            complaint_dict
+        )
+
         return {
             "status": "rejected",
             "reason": "All authorities declined or no suitable authority found.",
             "declined_authority_ids": declined_list,
         }
+
+
+@router.get("/complaints/{complaint_id}/escalation-chain")
+async def get_escalation_chain(complaint_id: int):
+    """
+    B5: Returns the full escalation history for a complaint.
+    Queries sla_escalations + complaint route history to build a timeline.
+    """
+    complaint = db.query(
+        "SELECT id, title, status, escalation_level, assigned_authority_id, "
+        "created_at, updated_at, last_escalated_at "
+        "FROM complaints WHERE id = ?",
+        (complaint_id,),
+    )
+    if not complaint:
+        raise HTTPException(status_code=404, detail="Complaint not found.")
+    complaint = complaint[0]
+
+    # Fetch escalation audit trail
+    escalations = db.query(
+        "SELECT se.id, se.from_level, se.to_level, se.escalated_by, "
+        "se.escalated_to_authority_id, se.notified_at, se.notification_status, "
+        "a.name AS authority_name, a.department_code "
+        "FROM sla_escalations se "
+        "LEFT JOIN authorities a ON se.escalated_to_authority_id = a.id "
+        "WHERE se.complaint_id = ? "
+        "ORDER BY se.notified_at ASC",
+        (complaint_id,),
+    )
+
+    # Build chain
+    chain = []
+    # Start with initial assignment
+    if complaint.get("assigned_authority_id"):
+        auth = AuthorityResolver.get_authority_by_id(complaint["assigned_authority_id"])
+        chain.append({
+            "level": 0,
+            "authority": {
+                "id": auth["id"] if auth else complaint["assigned_authority_id"],
+                "name": auth["name"] if auth else "Unknown",
+            },
+            "assigned_at": complaint.get("created_at"),
+            "status": complaint.get("status"),
+        })
+
+    for esc in escalations:
+        chain.append({
+            "level": esc["to_level"],
+            "escalation_id": esc["id"],
+            "authority": {
+                "id": esc["escalated_to_authority_id"],
+                "name": esc.get("authority_name", "Unknown"),
+            },
+            "escalated_at": esc.get("notified_at"),
+            "escalated_by": esc.get("escalated_by"),
+            "from_level": esc["from_level"],
+            "to_level": esc["to_level"],
+        })
+
+    return {
+        "complaint_id": complaint_id,
+        "title": complaint.get("title"),
+        "current_status": complaint.get("status"),
+        "current_level": complaint.get("escalation_level"),
+        "chain": chain,
+    }
+
+
+@router.post("/complaints/{complaint_id}/routing-feedback")
+async def submit_routing_feedback(complaint_id: int, payload: RoutingFeedbackPayload):
+    """
+    B2: Citizen confirms or rejects the routing accuracy.
+    Updates routing_accuracy_score on the authority.
+    """
+    complaint = db.query("SELECT * FROM complaints WHERE id = ?", (complaint_id,))
+    if not complaint:
+        raise HTTPException(status_code=404, detail="Complaint not found.")
+    complaint = complaint[0]
+
+    auth_id = complaint.get("assigned_authority_id")
+    if not auth_id:
+        raise HTTPException(status_code=400, detail="Complaint has no assigned authority.")
+
+    # Upsert feedback (one per complaint)
+    existing = db.query(
+        "SELECT id FROM routing_feedback WHERE complaint_id = ?", (complaint_id,)
+    )
+
+    if existing:
+        db.execute(
+            "UPDATE routing_feedback SET citizen_confirmed = ?, feedback_text = ? "
+            "WHERE complaint_id = ?",
+            (payload.citizenConfirmed, payload.feedbackText, complaint_id),
+        )
+    else:
+        db.execute(
+            "INSERT INTO routing_feedback (complaint_id, authority_id, citizen_confirmed, feedback_text) "
+            "VALUES (?, ?, ?, ?)",
+            (complaint_id, auth_id, payload.citizenConfirmed, payload.feedbackText),
+        )
+
+    # Recompute accuracy score for this authority
+    new_score = RoutingAccuracyService.compute_routing_accuracy_score(auth_id)
+    db.execute(
+        "UPDATE authorities SET routing_accuracy_score = ? WHERE id = ?",
+        (new_score, auth_id),
+    )
+
+    return {
+        "status": "ok",
+        "authority_id": auth_id,
+        "routing_accuracy_score": new_score,
+    }
+
+
+@router.put("/complaints/{complaint_id}/status")
+async def update_complaint_status(complaint_id: int, payload: dict):
+    """
+    B1: Update complaint status and send citizen notification.
+    Payload: { "status": "resolved" }
+    Also sends citizen notification on routed/escalated/resolved/rejected.
+    """
+    new_status = payload.get("status")
+    if new_status not in ("pending", "routed", "in_progress", "resolved", "rejected"):
+        raise HTTPException(status_code=400, detail=f"Invalid status: {new_status}")
+
+    complaint = db.query(
+        "SELECT c.*, a.name AS authority_name FROM complaints c "
+        "LEFT JOIN authorities a ON c.assigned_authority_id = a.id "
+        "WHERE c.id = ?",
+        (complaint_id,),
+    )
+    if not complaint:
+        raise HTTPException(status_code=404, detail="Complaint not found.")
+    complaint = complaint[0]
+
+    db.execute(
+        "UPDATE complaints SET status = ?, updated_at = NOW() WHERE id = ?",
+        (new_status, complaint_id),
+    )
+
+    # Send citizen notification on relevant transitions
+    if new_status == "resolved":
+        authority = AuthorityResolver.get_authority_by_id(complaint["assigned_authority_id"])
+        await NotificationService.notify_citizen_resolved(complaint, authority or {})
+
+    return {
+        "id": complaint_id,
+        "status": new_status,
+        "message": f"Complaint status updated to {new_status}.",
+    }
+
+
+@router.put("/complaints/{complaint_id}/vision-priority")
+async def update_vision_priority(complaint_id: int, payload: dict):
+    """
+    B3: Update complaint priority based on vision analysis results.
+    Payload: { "severity": "emergency"|"high"|"medium"|"low", "hasTraffic": bool }
+    """
+    severity = payload.get("severity", "medium")
+    has_traffic = payload.get("hasTraffic", False)
+
+    complaint = db.query("SELECT * FROM complaints WHERE id = ?", (complaint_id,))
+    if not complaint:
+        raise HTTPException(status_code=404, detail="Complaint not found.")
+    complaint = complaint[0]
+
+    from app.services.sla_service import compute_priority_from_vision
+    new_priority = compute_priority_from_vision(
+        severity=severity,
+        has_traffic=has_traffic,
+        category=complaint.get("category", ""),
+        escalation_level=complaint.get("escalation_level", 0),
+    )
+
+    db.execute(
+        "UPDATE complaints SET priority = ?, updated_at = NOW() WHERE id = ?",
+        (new_priority, complaint_id),
+    )
+
+    return {
+        "id": complaint_id,
+        "priority": new_priority,
+        "severity": severity,
+        "has_traffic": has_traffic,
+        "message": f"Priority updated to {new_priority} based on vision analysis.",
+    }
+
+
+@router.get("/complaints/sla-metrics")
+async def get_sla_metrics():
+    """
+    B4: Returns aggregated SLA metrics for the Routing SLA Dashboard.
+    - avg_routing_time_hours: average time from creation to first routing
+    - escalation_rate_by_authority: % of complaints escalated per authority
+    - resolution_rate_by_category: % of complaints resolved per category
+    - routing_accuracy_pct: overall routing accuracy % from citizen feedback
+    """
+    # Average routing time (creation to first escalation or resolution)
+    avg_routing = db.query("""
+        SELECT ROUND(AVG(EXTRACT(EPOCH FROM (COALESCE(last_escalated_at, updated_at) - created_at)) / 3600)::numeric, 2)
+        AS avg_hours FROM complaints WHERE status IN ('routed', 'in_progress', 'resolved')
+    """)
+    avg_routing_time = avg_routing[0]["avg_hours"] if avg_routing else 0
+
+    # Escalation rate per authority
+    escalation_rate = db.query("""
+        SELECT a.id AS authority_id, a.name AS authority_name,
+               COUNT(c.id) FILTER (WHERE c.escalation_level > 0)::float /
+               NULLIF(COUNT(c.id), 0)::float AS escalation_rate
+        FROM authorities a
+        LEFT JOIN complaints c ON c.assigned_authority_id = a.id
+        GROUP BY a.id, a.name
+        ORDER BY a.id
+    """)
+
+    # Resolution rate by category
+    resolution_rate = db.query("""
+        SELECT category,
+               COUNT(*) FILTER (WHERE status = 'resolved')::float /
+               NULLIF(COUNT(*), 0)::float AS resolution_rate
+        FROM complaints
+        GROUP BY category
+    """)
+
+    # Overall routing accuracy
+    accuracy = db.query("""
+        SELECT ROUND(AVG(routing_accuracy_score)::numeric, 2) AS avg_accuracy
+        FROM authorities WHERE routing_accuracy_score > 0
+    """)
+    routing_accuracy_pct = accuracy[0]["avg_accuracy"] if accuracy and accuracy[0].get("avg_accuracy") else 0
+
+    return {
+        "avg_routing_time_hours": float(avg_routing_time) if avg_routing_time else 0,
+        "escalation_rate_by_authority": {
+            str(r["authority_id"]): round(float(r["escalation_rate"]), 4)
+            for r in escalation_rate if r.get("escalation_rate") is not None
+        },
+        "resolution_rate_by_category": {
+            r["category"]: round(float(r["resolution_rate"]), 4)
+            for r in resolution_rate if r.get("resolution_rate") is not None
+        },
+        "routing_accuracy_pct": float(routing_accuracy_pct) if routing_accuracy_pct else 0,
+    }
