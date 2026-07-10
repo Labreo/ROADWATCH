@@ -38,6 +38,8 @@ All backend endpoints are prefixed with `/api/v1`.
 | `POST` | `/complaints/sync` | Batch import offline-queued complaints (JSON payload) | Optional |
 | `POST` | `/chat` | Process conversational chat query (returns response + citations) | No |
 | `GET` | `/authorities` | List municipal & state authorities and coverage statistics | No |
+| `POST` | `/integrations/sms` | SMS/USSD endpoint — accepts `ROAD <query>` via POST, returns plain-text summary | No |
+| `POST` | `/integrations/whatsapp/webhook` | WhatsApp/Twilio incoming webhook for media + GPS complaint routing | No |
 
 ---
 
@@ -199,6 +201,31 @@ All backend endpoints are prefixed with `/api/v1`.
     ]
   }
   ```
+
+---
+
+### 2.5. SMS/USSD Interface
+
+#### `POST /api/v1/integrations/sms`
+* **Purpose:** Accept plain-text SMS messages forwarded by a telecom carrier. Designed for USSD/SMS gateway integration. For the hackathon, accepts direct POST requests.
+* **Request Body:**
+  ```json
+  {
+    "from": "+919876543210",
+    "text": "ROAD Western Express Highway"
+  }
+  ```
+* **Response `200 OK`:**
+  ```json
+  {
+    "response": "Western Express Highway (NH-48, 7.2km): ⚠️ FAIR. Last repair: Mar 2026 by Zenith Construction. 12 complaints this year."
+  }
+  ```
+* **Behavior:**
+  - Text must start with `ROAD ` (case-insensitive) followed by a road name query.
+  - Returns a concise summary limited to SMS segment length (~160 chars).
+  - If multiple roads match, lists them and asks for disambiguation.
+  - If no match, returns a help message with example queries.
 
 ---
 

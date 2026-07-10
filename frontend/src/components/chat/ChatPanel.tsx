@@ -195,6 +195,13 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
   const [currentTranscription, setCurrentTranscription] = useState('Tap Mic to speak to AI');
   const [audioVolume, setAudioVolume] = useState(0);
 
+  // TTS (Text-to-Speech) state
+  const [ttsEnabled, setTtsEnabled] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('rw_tts') === 'true';
+  });
+  const [isSpeakingTTS, setIsSpeakingTTS] = useState(false);
+
   // Screen reader announcement state
   const [announcement, setAnnouncement] = useState('');
 
@@ -277,10 +284,30 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
   }, [simulateOffline, setStoreOnline]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
+  const messagesScrollRef = useRef<HTMLDivElement>(null);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  // Keyboard dismiss gesture — swipe down on chat scroll area blurs active input
+  useEffect(() => {
+    const el = messagesScrollRef.current;
+    if (!el) return;
+
+    let startY = 0;
+    const onTouchStart = (e: TouchEvent) => { startY = e.touches[0].clientY; };
+    const onTouchEnd = (e: TouchEvent) => {
+      const dy = e.changedTouches[0].clientY - startY;
+      if (dy > 60) (document.activeElement as HTMLElement | null)?.blur();
+    };
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchend', onTouchEnd, { passive: true });
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchend', onTouchEnd);
+    };
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
@@ -361,16 +388,19 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
 
     utterance.onstart = () => {
       setIsSpeaking(true);
+      setIsSpeakingTTS(true);
       setCurrentTranscription('AI is speaking...');
     };
 
     utterance.onend = () => {
       setIsSpeaking(false);
+      setIsSpeakingTTS(false);
       setCurrentTranscription('Standby. Tap Orb to speak.');
     };
 
     utterance.onerror = () => {
       setIsSpeaking(false);
+      setIsSpeakingTTS(false);
     };
 
     window.speechSynthesis.speak(utterance);
@@ -839,8 +869,8 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
       setSuggestedPrompts(nextSuggestedPrompts);
     }
 
-    // Speak response if voice overlay is open
-    if (isVoiceModeRef.current && text) {
+    // Speak response if voice overlay is open or TTS is enabled
+    if (text && (isVoiceModeRef.current || ttsEnabled)) {
       speakText(text);
     }
   };
@@ -848,6 +878,11 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
   // Submit query
   const handleSubmit = async (textToSend: string) => {
     if (!textToSend.trim() || isLoading) return;
+
+    // Haptic feedback on send
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate(10);
+    }
 
     setInput('');
     setIsLoading(true);
@@ -1157,6 +1192,35 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
                     <Wrench className="w-3.5 h-3.5" />
                   </button>
 
+                  {/* TTS (Text-to-Speech) toggle */}
+                  <button
+                    onClick={() => {
+                      const next = !ttsEnabled;
+                      setTtsEnabled(next);
+                      localStorage.setItem('rw_tts', next ? 'true' : 'false');
+                      if (!next) {
+                        window.speechSynthesis?.cancel();
+                        setIsSpeakingTTS(false);
+                      }
+                    }}
+                    className={`p-1.5 rounded-lg border transition-all shrink-0 cursor-pointer flex items-center justify-center mr-1 ${
+                      ttsEnabled
+                        ? 'border-cyan-500/50 bg-cyan-950/30 text-cyan-400'
+                        : 'border-border/60 hover:border-cyan-500/30 hover:bg-cyan-950/20 text-muted-foreground hover:text-cyan-400'
+                    }`}
+                    title={ttsEnabled ? 'Disable text-to-speech' : 'Enable text-to-speech'}
+                    aria-label={ttsEnabled ? 'Disable text-to-speech' : 'Enable text-to-speech'}
+                  >
+                    {isSpeakingTTS ? (
+                      <span className="relative flex h-3.5 w-3.5 items-center justify-center">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-60" />
+                        <Volume2 className="w-3.5 h-3.5 relative" />
+                      </span>
+                    ) : (
+                      <Volume2 className={`w-3.5 h-3.5 ${ttsEnabled ? 'text-cyan-400' : ''}`} />
+                    )}
+                  </button>
+
                   {/* Voice mode trigger */}
                   <button
                     onClick={() => setIsVoiceMode(true)}
@@ -1254,6 +1318,7 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
               aria-live="polite"
               aria-label="Chat messages"
               aria-relevant="additions"
+              ref={messagesScrollRef}
               className={`flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin ${isMobile ? 'pb-44' : ''}`}>
               {messages.map((msg, index) => {
                 const isAI = msg.role === 'assistant';
@@ -1580,14 +1645,17 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 260 }}
-            className="fixed bottom-0 inset-x-0 z-[1013] bg-slate-950/95 backdrop-blur-xl border-t border-border/60 py-4 pb-6 space-y-2"
+            className="fixed bottom-0 inset-x-0 z-[1013] bg-slate-950/95 backdrop-blur-xl border-t border-border/60 py-4 pb-[env(safe-area-inset-bottom,24px)] space-y-2"
           >
             {suggestedPrompts.length > 0 && (
               <div className="flex gap-1.5 overflow-x-auto px-4 pb-1 scrollbar-none select-none">
                 {suggestedPrompts.map((prompt, idx) => (
                   <button
                     key={idx}
-                    onClick={() => handleSubmit(prompt)}
+                    onClick={() => {
+                      if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
+                      handleSubmit(prompt);
+                    }}
                     className="shrink-0 text-[9.5px] font-black px-3 py-2 bg-slate-900/80 border border-border/80 hover:border-cyan-500/50 hover:bg-cyan-950/30 text-slate-350 hover:text-cyan-400 rounded-xl transition-all cursor-pointer whitespace-nowrap active:scale-95 shadow-sm"
                   >
                     {prompt}
@@ -1597,9 +1665,10 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
             )}
 
             <div className="px-4">
-              <form 
+              <form
                 onSubmit={(e) => {
                   e.preventDefault();
+                  if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
                   handleSubmit(input);
                 }}
                 className="flex gap-2 relative bg-slate-900 border border-border/80 focus-within:border-cyan-500 rounded-xl px-2 py-1.5 transition-all items-center"

@@ -571,9 +571,18 @@ export default function ChatOrchestrator() {
                 isVoiceMode ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400' : 'text-slate-400'
               }`}
               title="Toggle Voice overlay"
+              aria-label={isVoiceMode ? 'Close voice mode' : 'Open voice mode'}
             >
               <Mic className="w-4 h-4" />
             </button>
+          </div>
+
+          {/* Screen reader live region for message announcements */}
+          <div aria-live="polite" aria-atomic="true" className="sr-only" role="status">
+            {isLoading ? 'AI is thinking...' : ''}
+            {messages.length > 0 && !isLoading && messages[messages.length - 1].role === 'assistant' && messages[messages.length - 1].content
+              ? `New message: ${messages[messages.length - 1].content.replace(/\*\*/g, '').slice(0, 120)}`
+              : ''}
           </div>
 
           {/* Messages Box */}
@@ -639,6 +648,7 @@ export default function ChatOrchestrator() {
                               <button
                                 type="button"
                                 onClick={() => setExpandedEvidenceKey(isExpanded ? null : `${index}-${evIdx}`)}
+                                aria-expanded={isExpanded}
                                 className="w-full px-3 py-2 flex items-center justify-between text-[10px] font-bold text-cyan-400/90 hover:bg-cyan-500/5 transition-all text-left cursor-pointer"
                               >
                                 <div className="flex items-center gap-2">
@@ -763,6 +773,7 @@ export default function ChatOrchestrator() {
                 <button
                   type="submit"
                   disabled={!input.trim() || isLoading}
+                  aria-label="Send message"
                   className={`p-1.5 rounded-lg bg-gradient-to-tr from-cyan-600 to-indigo-600 text-slate-950 font-bold hover:opacity-90 active:scale-95 transition-all shrink-0 cursor-pointer ${
                     (!input.trim() || isLoading) ? 'opacity-40 cursor-not-allowed' : ''
                   }`}
@@ -1252,6 +1263,7 @@ export default function ChatOrchestrator() {
               <button
                 onClick={() => setIsVoiceMode(false)}
                 className="p-1.5 rounded-lg border border-white/[0.06] hover:bg-white/[0.02] text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+                aria-label="Close voice mode"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1261,6 +1273,7 @@ export default function ChatOrchestrator() {
             <div className="flex-1 flex flex-col items-center justify-center space-y-6">
               <button 
                 onClick={toggleListening}
+                aria-label={isListening ? 'Stop listening' : 'Start listening'}
                 className={`w-32 h-32 rounded-full border flex flex-col items-center justify-center cursor-pointer transition-all duration-300 relative focus:outline-none ${
                   isListening
                     ? 'border-cyan-400/40 bg-cyan-400/[0.02] shadow-[0_0_40px_rgba(34,211,238,0.12)]'

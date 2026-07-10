@@ -102,7 +102,9 @@ export default function Page() {
     demoMode,
     setDemoMode,
     userRole,
-    setUserRole
+    setUserRole,
+    hasSeenOnboarding,
+    setHasSeenOnboarding
   } = useStore();
 
   const [isSyncingUI, setIsSyncingUI] = useState(false);
@@ -1797,6 +1799,11 @@ export default function Page() {
             setActiveView('chat');
           }}
         />
+      )}
+
+      {/* Onboarding tour for first-time visitors */}
+      {!showLanding && !hasSeenOnboarding && !isTourActive && !isChatDriven && (
+        <OnboardingTour />
       )}
     </div>
   );
