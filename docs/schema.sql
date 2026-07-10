@@ -277,66 +277,9 @@ CREATE TABLE IF NOT EXISTS authority_conflict_groups (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 19. Region-specific SLA Config Seed Data
--- India (IN): pothole 48h, waterlogging 24h, paving_defect 72h, debris 48h, missing_signage 72h
-INSERT INTO sla_config (category, escalation_hours, escalation_level, escalate_to_authority_id, notify_template, region_code) VALUES
-    ('pothole', 48, 1, (SELECT id FROM authorities WHERE department_code = 'PWD-MUM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (India).', 'IN'),
-    ('pothole', 96, 2, (SELECT id FROM authorities WHERE department_code = 'NHAI-ROM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (India).', 'IN'),
-    ('waterlogging', 24, 1, (SELECT id FROM authorities WHERE department_code = 'PWD-MUM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (India).', 'IN'),
-    ('waterlogging', 48, 2, (SELECT id FROM authorities WHERE department_code = 'NHAI-ROM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (India).', 'IN'),
-    ('paving_defect', 72, 1, (SELECT id FROM authorities WHERE department_code = 'PWD-MUM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (India).', 'IN'),
-    ('paving_defect', 120, 2, (SELECT id FROM authorities WHERE department_code = 'NHAI-ROM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (India).', 'IN'),
-    ('debris', 48, 1, (SELECT id FROM authorities WHERE department_code = 'PWD-MUM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (India).', 'IN'),
-    ('debris', 96, 2, (SELECT id FROM authorities WHERE department_code = 'NHAI-ROM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (India).', 'IN'),
-    ('missing_signage', 72, 1, (SELECT id FROM authorities WHERE department_code = 'PWD-MUM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (India).', 'IN'),
-    ('missing_signage', 144, 2, (SELECT id FROM authorities WHERE department_code = 'NHAI-ROM'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (India).', 'IN'),
-    (NULL, 48, 1, (SELECT id FROM authorities WHERE department_code = 'PWD-MUM'), 'Complaint #{id}: {title} unactioned for {hours}h. Default escalation (India).', 'IN'),
-    (NULL, 96, 2, (SELECT id FROM authorities WHERE department_code = 'NHAI-ROM'), 'Complaint #{id}: {title} unactioned for {hours}h. Default escalation (India).', 'IN');
+-- 19. Region-specific SLA Config Seed Data (Moved to mock_data.sql to prevent foreign key errors)
 
--- US: pothole 24h, waterlogging 12h, paving_defect 48h, debris 24h, missing_signage 36h
-INSERT INTO sla_config (category, escalation_hours, escalation_level, escalate_to_authority_id, notify_template, region_code) VALUES
-    ('pothole', 24, 1, (SELECT id FROM authorities WHERE department_code = 'MDOT-LAN'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (US).', 'US'),
-    ('pothole', 48, 2, (SELECT id FROM authorities WHERE department_code = 'FHWA-MI'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (US).', 'US'),
-    ('waterlogging', 12, 1, (SELECT id FROM authorities WHERE department_code = 'DPW-DET'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (US).', 'US'),
-    ('waterlogging', 24, 2, (SELECT id FROM authorities WHERE department_code = 'MDOT-LAN'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (US).', 'US'),
-    ('paving_defect', 48, 1, (SELECT id FROM authorities WHERE department_code = 'MDOT-LAN'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (US).', 'US'),
-    ('paving_defect', 96, 2, (SELECT id FROM authorities WHERE department_code = 'FHWA-MI'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (US).', 'US'),
-    ('debris', 24, 1, (SELECT id FROM authorities WHERE department_code = 'DPW-DET'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (US).', 'US'),
-    ('debris', 48, 2, (SELECT id FROM authorities WHERE department_code = 'MDOT-LAN'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (US).', 'US'),
-    ('missing_signage', 36, 1, (SELECT id FROM authorities WHERE department_code = 'MDOT-LAN'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (US).', 'US'),
-    ('missing_signage', 72, 2, (SELECT id FROM authorities WHERE department_code = 'FHWA-MI'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (US).', 'US'),
-    (NULL, 24, 1, (SELECT id FROM authorities WHERE department_code = 'MDOT-LAN'), 'Complaint #{id}: {title} unactioned for {hours}h. Default escalation (US).', 'US'),
-    (NULL, 48, 2, (SELECT id FROM authorities WHERE department_code = 'FHWA-MI'), 'Complaint #{id}: {title} unactioned for {hours}h. Default escalation (US).', 'US');
 
--- GB: pothole 48h, waterlogging 24h, paving_defect 48h, debris 48h, missing_signage 48h
-INSERT INTO sla_config (category, escalation_hours, escalation_level, escalate_to_authority_id, notify_template, region_code) VALUES
-    ('pothole', 48, 1, (SELECT id FROM authorities WHERE department_code = 'CBC-HIGHWAYS'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (UK).', 'GB'),
-    ('pothole', 96, 2, (SELECT id FROM authorities WHERE department_code = 'NH-SE'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (UK).', 'GB'),
-    ('waterlogging', 24, 1, (SELECT id FROM authorities WHERE department_code = 'CBC-HIGHWAYS'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (UK).', 'GB'),
-    ('waterlogging', 48, 2, (SELECT id FROM authorities WHERE department_code = 'LHJC-LON'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (UK).', 'GB'),
-    ('paving_defect', 48, 1, (SELECT id FROM authorities WHERE department_code = 'CBC-HIGHWAYS'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (UK).', 'GB'),
-    ('paving_defect', 96, 2, (SELECT id FROM authorities WHERE department_code = 'NH-SE'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (UK).', 'GB'),
-    ('debris', 48, 1, (SELECT id FROM authorities WHERE department_code = 'CBC-HIGHWAYS'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (UK).', 'GB'),
-    ('debris', 96, 2, (SELECT id FROM authorities WHERE department_code = 'LHJC-LON'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (UK).', 'GB'),
-    ('missing_signage', 48, 1, (SELECT id FROM authorities WHERE department_code = 'CBC-HIGHWAYS'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (UK).', 'GB'),
-    ('missing_signage', 96, 2, (SELECT id FROM authorities WHERE department_code = 'NH-SE'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (UK).', 'GB'),
-    (NULL, 48, 1, (SELECT id FROM authorities WHERE department_code = 'CBC-HIGHWAYS'), 'Complaint #{id}: {title} unactioned for {hours}h. Default escalation (UK).', 'GB'),
-    (NULL, 96, 2, (SELECT id FROM authorities WHERE department_code = 'NH-SE'), 'Complaint #{id}: {title} unactioned for {hours}h. Default escalation (UK).', 'GB');
-
--- KE: pothole 72h, waterlogging 48h, paving_defect 96h, debris 72h, missing_signage 96h
-INSERT INTO sla_config (category, escalation_hours, escalation_level, escalate_to_authority_id, notify_template, region_code) VALUES
-    ('pothole', 72, 1, (SELECT id FROM authorities WHERE department_code = 'NCC-ROADS'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (Kenya).', 'KE'),
-    ('pothole', 144, 2, (SELECT id FROM authorities WHERE department_code = 'KeNHA-HQ'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (Kenya).', 'KE'),
-    ('waterlogging', 48, 1, (SELECT id FROM authorities WHERE department_code = 'NCC-ROADS'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (Kenya).', 'KE'),
-    ('waterlogging', 96, 2, (SELECT id FROM authorities WHERE department_code = 'KURA-HQ'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (Kenya).', 'KE'),
-    ('paving_defect', 96, 1, (SELECT id FROM authorities WHERE department_code = 'KURA-HQ'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (Kenya).', 'KE'),
-    ('paving_defect', 168, 2, (SELECT id FROM authorities WHERE department_code = 'KeNHA-HQ'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (Kenya).', 'KE'),
-    ('debris', 72, 1, (SELECT id FROM authorities WHERE department_code = 'NCC-ROADS'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (Kenya).', 'KE'),
-    ('debris', 144, 2, (SELECT id FROM authorities WHERE department_code = 'KURA-HQ'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (Kenya).', 'KE'),
-    ('missing_signage', 96, 1, (SELECT id FROM authorities WHERE department_code = 'NCC-ROADS'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 1 (Kenya).', 'KE'),
-    ('missing_signage', 168, 2, (SELECT id FROM authorities WHERE department_code = 'KeNHA-HQ'), 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Level 2 (Kenya).', 'KE'),
-    (NULL, 72, 1, (SELECT id FROM authorities WHERE department_code = 'NCC-ROADS'), 'Complaint #{id}: {title} unactioned for {hours}h. Default escalation (Kenya).', 'KE'),
-    (NULL, 144, 2, (SELECT id FROM authorities WHERE department_code = 'KeNHA-HQ'), 'Complaint #{id}: {title} unactioned for {hours}h. Default escalation (Kenya).', 'KE');
 
 -- =========================================================================
 -- 13. AUDIT TRAIL TABLE

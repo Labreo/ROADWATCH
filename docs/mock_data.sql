@@ -1,11 +1,10 @@
 -- ROADWATCH Seed Database Mock Data
+-- Complete replacement: seeds ALL tables with realistic 4-region data (IN, US, GB, KE)
 -- Ensure schema.sql is executed first to create tables.
-
--- Clear existing data (optional, for clean run)
-TRUNCATE TABLE complaints, projects, roads, contractors, authorities, fund_sources, budget_variance_reasons, project_milestones, contingency_reserves, approval_trail, road_materials, project_warranties, road_documents RESTART IDENTITY CASCADE;
+-- This file uses INSERT only (no TRUNCATE, CREATE TABLE, or ALTER TABLE).
 
 -- =========================================================================
--- 0. SEED REGIONS
+-- 0. REGIONS (4 rows)
 -- =========================================================================
 INSERT INTO regions (code, name, default_currency, locale, phone_format, bounding_box, timezone) VALUES
 ('IN', 'India', 'INR', 'en-IN', '+91-XX-XXXXXXXX', ST_GeomFromText('POLYGON((68.1 6.8, 97.4 6.8, 97.4 35.7, 68.1 35.7, 68.1 6.8))', 4326), 'Asia/Kolkata'),
@@ -14,3944 +13,617 @@ INSERT INTO regions (code, name, default_currency, locale, phone_format, boundin
 ('KE', 'Kenya', 'KES', 'en-KE', '+254-XX-XXXXXXX', ST_GeomFromText('POLYGON((33.8 -4.7, 41.9 -4.7, 41.9 5.5, 33.8 5.5, 33.8 -4.7))', 4326), 'Africa/Nairobi');
 
 -- =========================================================================
--- 1. SEED AUTHORITIES (5 Records — India only; international added separately)
+-- 1. AUTHORITIES (17 rows: 5 IN + 4 US + 4 GB + 4 KE)
 -- =========================================================================
-INSERT INTO authorities (name, department_code, contact_email, contact_phone, region_code, geom_boundary)
-VALUES
-(
-    'City Municipal Corporation - Ward K-West', 
-    'MCGM-KW', 
-    'ward.kw@mcgm.gov.in', 
-    '+91-22-2623-0000',
-    'IN',
-    ST_GeomFromText('POLYGON((72.80 19.10, 72.87 19.10, 72.87 19.22, 72.80 19.22, 72.80 19.10))', 4326)
-),
-(
-    'City Municipal Corporation - Ward F-North', 
-    'MCGM-FN', 
-    'ward.fn@mcgm.gov.in', 
-    '+91-22-2402-1111',
-    'IN',
-    ST_GeomFromText('POLYGON((72.80 18.90, 72.88 18.90, 72.88 19.03, 72.80 19.03, 72.80 18.90))', 4326)
-),
-(
-    'City Municipal Corporation - Ward H-East', 
-    'MCGM-HE', 
-    'ward.he@mcgm.gov.in', 
-    '+91-22-2618-2222',
-    'IN',
-    ST_GeomFromText('POLYGON((72.87 19.00, 72.95 19.00, 72.95 19.10, 72.87 19.10, 72.87 19.00))', 4326)
-),
-(
-    'State Public Works Department - Mumbai Division', 
-    'PWD-MUM', 
-    'se.mumbai@pwd.gov.in', 
-    '+91-22-2202-3333',
-    'IN',
-    ST_GeomFromText('POLYGON((72.70 18.80, 73.05 18.80, 73.05 19.30, 72.70 19.30, 72.70 18.80))', 4326)
-),
-(
-    'National Highways Authority of India - RO Mumbai', 
-    'NHAI-ROM', 
-    'romumbai@nhai.org', 
-    '+91-22-2756-4444',
-    'IN',
-    ST_GeomFromText('POLYGON((72.60 18.70, 73.15 18.70, 73.15 19.45, 72.60 19.45, 72.60 18.70))', 4326)
-);
-
--- =========================================================================
--- 1b. SEED INTERNATIONAL AUTHORITIES (US, GB, KE)
--- =========================================================================
--- US: Detroit area authorities
 INSERT INTO authorities (name, department_code, contact_email, contact_phone, region_code, geom_boundary) VALUES
-(
-    'Detroit Department of Public Works (DPW)',
-    'DPW-DET',
-    'dpw.dispatch@detroitmi.gov',
-    '+1-313-224-3901',
-    'US',
-    ST_GeomFromText('POLYGON((-83.15 42.25, -82.95 42.25, -82.95 42.42, -83.15 42.42, -83.15 42.25))', 4326)
-),
-(
-    'Michigan Department of Transportation (MDOT)',
-    'MDOT-LAN',
-    'mdot-info@michigan.gov',
-    '+1-517-373-2064',
-    'US',
-    ST_GeomFromText('POLYGON((-84.50 41.70, -82.50 41.70, -82.50 43.50, -84.50 43.50, -84.50 41.70))', 4326)
-),
-(
-    'Federal Highway Administration (FHWA) - Michigan Division',
-    'FHWA-MI',
-    'michigan.fhwa@dot.gov',
-    '+1-517-706-3100',
-    'US',
-    ST_GeomFromText('POLYGON((-90.0 41.5, -82.0 41.5, -82.0 47.5, -90.0 47.5, -90.0 41.5))', 4326)
-),
-(
-    'Michigan County Road Commission Association',
-    'CRCA-MI',
-    'info@crcami.org',
-    '+1-517-484-9355',
-    'US',
-    NULL
-);
--- GB: London / Camden area authorities
-INSERT INTO authorities (name, department_code, contact_email, contact_phone, region_code, geom_boundary) VALUES
-(
-    'Camden Borough Council - Highways Division',
-    'CBC-HIGHWAYS',
-    'highways@camden.gov.uk',
-    '+44-20-7974-4444',
-    'GB',
-    ST_GeomFromText('POLYGON((-0.20 51.52, -0.10 51.52, -0.10 51.57, -0.20 51.57, -0.20 51.52))', 4326)
-),
-(
-    'London Highways Joint Committee',
-    'LHJC-LON',
-    'enquiries@lhjc.org.uk',
-    '+44-20-7934-9999',
-    'GB',
-    ST_GeomFromText('POLYGON((-0.35 51.38, 0.05 51.38, 0.05 51.65, -0.35 51.65, -0.35 51.38))', 4326)
-),
-(
-    'National Highways - South East Division',
-    'NH-SE',
-    'info@nationalhighways.co.uk',
-    '+44-300-123-5000',
-    'GB',
-    ST_GeomFromText('POLYGON((-1.50 50.80, 1.00 50.80, 1.00 52.50, -1.50 52.50, -1.50 50.80))', 4326)
-),
-(
-    'Local Highway Authority Default',
-    'LHA-UK',
-    'enquiries@lha.gov.uk',
-    '+44-20-7000-0000',
-    'GB',
-    NULL
-);
--- KE: Nairobi area authorities
-INSERT INTO authorities (name, department_code, contact_email, contact_phone, region_code, geom_boundary) VALUES
-(
-    'Nairobi City County - Department of Roads & Transport',
-    'NCC-ROADS',
-    'roads@nairobi.go.ke',
-    '+254-20-2224281',
-    'KE',
-    ST_GeomFromText('POLYGON((36.70 -1.38, 36.95 -1.38, 36.95 -1.18, 36.70 -1.18, 36.70 -1.38))', 4326)
-),
-(
-    'Kenya Urban Roads Authority (KURA)',
-    'KURA-HQ',
-    'info@kura.go.ke',
-    '+254-20-8013844',
-    'KE',
-    ST_GeomFromText('POLYGON((36.50 -1.60, 37.20 -1.60, 37.20 -0.90, 36.50 -0.90, 36.50 -1.60))', 4326)
-),
-(
-    'Kenya National Highways Authority (KeNHA)',
-    'KeNHA-HQ',
-    'dg@kenha.co.ke',
-    '+254-20-4971200',
-    'KE',
-    ST_GeomFromText('POLYGON((33.5 -4.5, 42.0 -4.5, 42.0 5.0, 33.5 5.0, 33.5 -4.5))', 4326)
-),
-(
-    'County Department of Infrastructure',
-    'CDI-KE',
-    'infrastructure@county.go.ke',
-    '+254-20-1111111',
-    'KE',
-    NULL
-);
-
+-- IN: Mumbai area
+('City Municipal Corporation - Ward K-West', 'MCGM-KW', 'ward.kw@mcgm.gov.in', '+91-22-2623-0000', 'IN',
+ ST_GeomFromText('POLYGON((72.80 19.10, 72.87 19.10, 72.87 19.22, 72.80 19.22, 72.80 19.10))', 4326)),
+('City Municipal Corporation - Ward F-North', 'MCGM-FN', 'ward.fn@mcgm.gov.in', '+91-22-2402-1111', 'IN',
+ ST_GeomFromText('POLYGON((72.80 18.90, 72.88 18.90, 72.88 19.03, 72.80 19.03, 72.80 18.90))', 4326)),
+('City Municipal Corporation - Ward H-East', 'MCGM-HE', 'ward.he@mcgm.gov.in', '+91-22-2618-2222', 'IN',
+ ST_GeomFromText('POLYGON((72.87 19.00, 72.95 19.00, 72.95 19.10, 72.87 19.10, 72.87 19.00))', 4326)),
+('State Public Works Department - Mumbai Division', 'PWD-MUM', 'se.mumbai@pwd.gov.in', '+91-22-2202-3333', 'IN',
+ ST_GeomFromText('POLYGON((72.70 18.80, 73.05 18.80, 73.05 19.30, 72.70 19.30, 72.70 18.80))', 4326)),
+('National Highways Authority of India - RO Mumbai', 'NHAI-ROM', 'romumbai@nhai.org', '+91-22-2756-4444', 'IN',
+ ST_GeomFromText('POLYGON((72.60 18.70, 73.15 18.70, 73.15 19.45, 72.60 19.45, 72.60 18.70))', 4326)),
+-- US: Detroit area
+('Detroit Department of Public Works', 'DPW-DET', 'dpw.dispatch@detroitmi.gov', '+1-313-224-3901', 'US',
+ ST_GeomFromText('POLYGON((-83.15 42.25, -82.95 42.25, -82.95 42.42, -83.15 42.42, -83.15 42.25))', 4326)),
+('Michigan Department of Transportation', 'MDOT-LAN', 'mdot-info@michigan.gov', '+1-517-373-2064', 'US',
+ ST_GeomFromText('POLYGON((-84.50 41.70, -82.50 41.70, -82.50 43.50, -84.50 43.50, -84.50 41.70))', 4326)),
+('Federal Highway Administration - Michigan Division', 'FHWA-MI', 'michigan.fhwa@dot.gov', '+1-517-706-3100', 'US',
+ ST_GeomFromText('POLYGON((-90.0 41.5, -82.0 41.5, -82.0 47.5, -90.0 47.5, -90.0 41.5))', 4326)),
+('County Road Commission Association of Michigan', 'CRCA-MI', 'info@crcami.org', '+1-517-484-9355', 'US', NULL),
+-- GB: London area
+('Camden Borough Council - Highways Division', 'CBC-HIGHWAYS', 'highways@camden.gov.uk', '+44-20-7974-4444', 'GB',
+ ST_GeomFromText('POLYGON((-0.20 51.52, -0.10 51.52, -0.10 51.57, -0.20 51.57, -0.20 51.52))', 4326)),
+('London Highways Joint Committee', 'LHJC-LON', 'enquiries@lhjc.org.uk', '+44-20-7934-9999', 'GB',
+ ST_GeomFromText('POLYGON((-0.35 51.38, 0.05 51.38, 0.05 51.65, -0.35 51.65, -0.35 51.38))', 4326)),
+('National Highways - South East Division', 'NH-SE', 'info@nationalhighways.co.uk', '+44-300-123-5000', 'GB',
+ ST_GeomFromText('POLYGON((-1.50 50.80, 1.00 50.80, 1.00 52.50, -1.50 52.50, -1.50 50.80))', 4326)),
+('Local Highway Authority - Default', 'LHA-UK', 'enquiries@lha.gov.uk', '+44-20-7000-0000', 'GB', NULL),
+-- KE: Nairobi area
+('Nairobi City County - Department of Roads & Transport', 'NCC-ROADS', 'roads@nairobi.go.ke', '+254-20-2224281', 'KE',
+ ST_GeomFromText('POLYGON((36.70 -1.38, 36.95 -1.38, 36.95 -1.18, 36.70 -1.18, 36.70 -1.38))', 4326)),
+('Kenya Urban Roads Authority', 'KURA-HQ', 'info@kura.go.ke', '+254-20-8013844', 'KE',
+ ST_GeomFromText('POLYGON((36.50 -1.60, 37.20 -1.60, 37.20 -0.90, 36.50 -0.90, 36.50 -1.60))', 4326)),
+('Kenya National Highways Authority', 'KeNHA-HQ', 'dg@kenha.co.ke', '+254-20-4971200', 'KE',
+ ST_GeomFromText('POLYGON((33.5 -4.5, 42.0 -4.5, 42.0 5.0, 33.5 5.0, 33.5 -4.5))', 4326)),
+('County Department of Infrastructure', 'CDI-KE', 'infrastructure@county.go.ke', '+254-20-1111111', 'KE', NULL);
 
 -- =========================================================================
--- 2. SEED CONTRACTORS (12 Records)
+-- 2. CONTRACTORS (21 rows: 12 IN + 3 US + 3 GB + 3 KE)
 -- =========================================================================
-INSERT INTO contractors (name, license_number, registration_date, contact_email, contact_phone, rating, projects_completed, projects_delayed, blacklisted, blacklisted_reason)
-VALUES
-('L&T Infrastructure Engineering Ltd', 'LIC-2015-1102', '2015-04-12', 'contact@lntecc.com', '+91-22-6123-4567', 4.25, 24, 2, FALSE, NULL),
-('IRB Infrastructure Developers Ltd', 'LIC-2018-4903', '2018-09-20', 'gov@irb.co.in', '+91-22-6891-9988', 3.80, 18, 4, FALSE, NULL),
-('Dilip Buildcon Ltd', 'LIC-2012-0051', '2012-01-15', 'tenders@dilipbuildcon.com', '+91-22-5555-8888', 4.50, 42, 1, FALSE, NULL),
-('Ashoka Buildcon Ltd', 'LIC-2020-8812', '2020-06-30', 'projects@ashokabuildcon.in', '+91-98200-11223', 2.10, 8, 5, FALSE, NULL), -- Poor rating
-('PNC Infratech Ltd', 'LIC-2019-3321', '2019-11-05', 'projects@pncinfratech.com', '+91-22-2591-1020', 3.90, 15, 2, FALSE, NULL),
-('KNR Constructions Ltd', 'LIC-2014-9092', '2014-03-22', 'info@knrcl.com', '+91-22-4090-0909', 4.60, 31, 0, FALSE, NULL),
-('HG Infra Engineering Ltd', 'LIC-2021-0022', '2021-02-18', 'ops@hginfra.com', '+91-22-8812-3456', 4.10, 6, 2, FALSE, NULL),
-('Gawar Construction Ltd', 'LIC-2010-0010', '2010-05-05', 'contact@gawar.in', '+91-22-2651-1234', 4.75, 85, 3, FALSE, NULL),
-('Sadbhav Engineering Ltd', 'LIC-2022-7711', '2022-08-14', 'bids@sadbhav.co.in', '+91-99300-88899', 3.40, 4, 1, FALSE, NULL),
-('Vijay Infrastructure & Contracting', 'LIC-2016-5621', '2016-10-10', 'legal@vijayinfra.com', '+91-22-6712-9900', 1.80, 12, 8, TRUE, 'Failure to complete SV Road drainage project inside contract timelines and high rate of road surface peeling within 3 months of paving.'),
-('JMC Projects (India) Ltd', 'LIC-2023-1100', '2023-01-20', 'contact@jmcprojects.in', '+91-90040-55112', 4.00, 3, 0, FALSE, NULL),
-('NCC Infrastructure Holdings Ltd', 'LIC-2017-3829', '2017-07-07', 'nccinfra@nccltd.in', '+91-22-2877-6655', 3.20, 14, 4, FALSE, NULL);
-
-
--- =========================================================================
--- 3. SEED ROADS (12 Records)
--- =========================================================================
-INSERT INTO roads (name, road_code, status, length_km, authority_id, geom, road_type, last_relaying_date, contractor_id, surface_type, lane_count, width_m, aadt, last_inspection_date)
-VALUES
-(
-    'Western Express Highway',
-    'WEH-NH8',
-    'under_construction',
-    25.50,
-    5, -- NHAI
-    ST_GeomFromText('LINESTRING(72.8524 19.1012, 72.8530 19.1340, 72.8590 19.1860, 72.8610 19.2300)', 4326),
-    'NH',
-    '2025-03-15',
-    1, -- L&T
-    'asphalt', 6, 35.50, 185000, '2025-06-15'
-),
-(
-    'Eastern Express Highway',
-    'EEH-SH3',
-    'fair',
-    22.10,
-    4, -- PWD
-    ST_GeomFromText('LINESTRING(72.9210 19.0410, 72.9340 19.1020, 72.9460 19.1680, 72.9610 19.2150)', 4326),
-    'SH',
-    '2020-11-20',
-    2, -- IRB
-    'asphalt', 4, 22.00, 95000, '2024-12-10'
-),
-(
-    'S.V. Road',
-    'SV-RD-01',
-    'poor',
-    16.80,
-    1, -- MCGM-KW
-    ST_GeomFromText('LINESTRING(72.8354 19.0601, 72.8360 19.1020, 72.8398 19.1620, 72.8450 19.2080)', 4326),
-    'City',
-    '2018-06-10',
-    3, -- Dilip Buildcon
-    'asphalt', 4, 14.50, 62000, '2025-01-20'
-),
-(
-    'Link Road',
-    'LNK-RD-02',
-    'under_construction',
-    18.20,
-    1, -- MCGM-KW
-    ST_GeomFromText('LINESTRING(72.8250 19.0805, 72.8270 19.1240, 72.8310 19.1840, 72.8510 19.2450)', 4326),
-    'City',
-    '2025-10-01',
-    6, -- KNR
-    'concrete', 4, 18.00, 48000, '2025-04-10'
-),
-(
-    'LBS Marg',
-    'LBS-RD-03',
-    'poor',
-    21.00,
-    3, -- MCGM-HE
-    ST_GeomFromText('LINESTRING(72.8890 19.0305, 72.8980 19.0840, 72.9120 19.1360, 72.9350 19.1980)', 4326),
-    'City',
-    '2017-04-05',
-    4, -- Ashoka
-    'asphalt', 4, 16.00, 78000, '2024-08-05'
-),
-(
-    'Senapati Bapat Marg',
-    'SBM-RD-04',
-    'good',
-    7.50,
-    2, -- MCGM-FN
-    ST_GeomFromText('LINESTRING(72.8240 18.9510, 72.8260 18.9850, 72.8290 19.0180)', 4326),
-    'City',
-    '2023-12-10',
-    3, -- Dilip Buildcon
-    'concrete', 6, 28.00, 35000, '2025-05-30'
-),
-(
-    'Dr. Ambedkar Road',
-    'AMB-RD-05',
-    'good',
-    8.20,
-    2, -- MCGM-FN
-    ST_GeomFromText('LINESTRING(72.8480 18.9610, 72.8500 18.9950, 72.8520 19.0280)', 4326),
-    'City',
-    '2024-08-15',
-    8, -- Gawar
-    'asphalt', 4, 15.00, 42000, '2025-06-01'
-),
-(
-    'Jogeshwari-Vikhroli Link Road',
-    'JVLR-SH1',
-    'fair',
-    10.80,
-    4, -- PWD
-    ST_GeomFromText('LINESTRING(72.8520 19.1320, 72.8810 19.1290, 72.9050 19.1240, 72.9230 19.1200)', 4326),
-    'SH',
-    '2022-02-28',
-    5, -- PNC
-    'asphalt', 4, 16.50, 55000, '2025-03-15'
-),
-(
-    'Santa Cruz-Chembur Link Road',
-    'SCLR-SH2',
-    'fair',
-    6.40,
-    4, -- PWD
-    ST_GeomFromText('LINESTRING(72.8550 19.0710, 72.8790 19.0700, 72.8990 19.0680, 72.9110 19.0650)', 4326),
-    'SH',
-    '2021-09-12',
-    7, -- HG Infra
-    'asphalt', 4, 15.00, 38000, '2024-10-22'
-),
-(
-    'Ghodbunder Road',
-    'GB-SH42',
-    'good',
-    20.00,
-    4, -- PWD
-    ST_GeomFromText('LINESTRING(72.9550 19.2220, 72.9310 19.2520, 72.8990 19.2680, 72.8680 19.2810)', 4326),
-    'SH',
-    '2024-12-25',
-    8, -- Gawar
-    'asphalt', 6, 30.00, 85000, '2025-05-20'
-),
-(
-    'Marine Drive',
-    'MD-RD-06',
-    'good',
-    3.60,
-    2, -- MCGM-FN
-    ST_GeomFromText('LINESTRING(72.8205 18.9210, 72.8210 18.9320, 72.8235 18.9480)', 4326),
-    'City',
-    '2025-01-20',
-    3, -- Dilip Buildcon
-    'concrete', 4, 28.00, 15000, '2025-06-10'
-),
-(
-    'Sion-Panvel Highway',
-    'SPH-NH4',
-    'fair',
-    24.80,
-    5, -- NHAI
-    ST_GeomFromText('LINESTRING(72.9010 19.0390, 72.9450 19.0430, 72.9980 19.0400, 73.0610 19.0250)', 4326),
-    'NH',
-    '2023-06-30',
-    11, -- JMC
-    'asphalt', 6, 30.00, 125000, '2025-04-01'
-);
-
+INSERT INTO contractors (name, license_number, registration_date, contact_email, contact_phone, rating, projects_completed, projects_delayed, blacklisted, blacklisted_reason) VALUES
+-- IN (12)
+('Apex Infrastructure Ltd', 'LIC-IN-001', '2015-04-12', 'contact@apexinfra.in', '+91-22-61234567', 4.25, 24, 2, FALSE, NULL),
+('BuildWell Roadways Ltd', 'LIC-IN-002', '2018-09-20', 'projects@buildwell.in', '+91-22-68919988', 3.80, 18, 4, FALSE, NULL),
+('Zenith Construction Co', 'LIC-IN-003', '2012-01-15', 'tenders@zenithcon.in', '+91-22-55558888', 4.50, 42, 1, FALSE, NULL),
+('Shiva Earthmovers Pvt Ltd', 'LIC-IN-004', '2020-06-30', 'ops@shivaearth.in', '+91-9820011223', 2.10, 8, 5, FALSE, NULL),
+('Landmark Infra Projects', 'LIC-IN-005', '2019-11-05', 'info@landmarkinfra.in', '+91-22-25911020', 3.90, 15, 2, FALSE, NULL),
+('Metro Highway Consultants', 'LIC-IN-006', '2014-03-22', 'contact@metrohighway.in', '+91-22-40900909', 4.60, 31, 0, FALSE, NULL),
+('Coastal Paving Solutions', 'LIC-IN-007', '2021-02-18', 'ops@coastalpaving.in', '+91-22-88123456', 4.10, 6, 2, FALSE, NULL),
+('Bharat Roads & Infra', 'LIC-IN-008', '2010-05-05', 'contact@bharatroads.in', '+91-22-26511234', 4.75, 85, 3, FALSE, NULL),
+('Skyline Developers Ltd', 'LIC-IN-009', '2022-08-14', 'bids@skylinedev.in', '+91-9930088899', 3.40, 4, 1, FALSE, NULL),
+('Omega Infrastructure Corp', 'LIC-IN-010', '2016-10-10', 'legal@omegacorp.in', '+91-22-67129900', 1.80, 12, 8, TRUE, 'Failure to complete SV Road drainage project inside contract timelines; substandard materials causing surface peeling within 3 months.'),
+('Precision Asphalt Works', 'LIC-IN-011', '2023-01-20', 'contact@precisionasphalt.in', '+91-9004055112', 4.00, 3, 0, FALSE, NULL),
+('Pioneer Engineering Corp', 'LIC-IN-012', '2017-07-07', 'pioneer@pioneereng.in', '+91-22-28776655', 3.20, 14, 4, FALSE, NULL),
+-- US (3)
+('Great Lakes Infrastructure LLC', 'LIC-US-001', '2018-03-15', 'bids@greatlakesinfra.com', '+1-313-555-0101', 4.30, 35, 2, FALSE, NULL),
+('Michigan Paving Company', 'LIC-US-002', '2019-07-22', 'ops@michiganpaving.com', '+1-313-555-0102', 3.90, 22, 3, FALSE, NULL),
+('Detroit Roads Alliance', 'LIC-US-003', '2020-01-10', 'contracts@detroitroads.org', '+1-313-555-0103', 2.50, 10, 5, TRUE, 'Failure to complete I-94 resurfacing within contract timeline; substandard asphalt quality.'),
+-- GB (3)
+('Thames Highway Services', 'LIC-GB-001', '2016-11-01', 'tenders@thameshighways.co.uk', '+44-20-79460101', 4.50, 48, 1, FALSE, NULL),
+('Camden Civils Ltd', 'LIC-GB-002', '2021-02-14', 'projects@camdencivils.co.uk', '+44-20-79460102', 4.10, 12, 1, FALSE, NULL),
+('London Asphalt Works', 'LIC-GB-003', '2017-09-05', 'info@londonasphalt.co.uk', '+44-20-79460103', 3.60, 28, 6, FALSE, NULL),
+-- KE (3)
+('Nairobi Road Builders Ltd', 'LIC-KE-001', '2015-05-20', 'info@nairobiroadbuilders.co.ke', '+254-20-5550101', 4.20, 30, 3, FALSE, NULL),
+('Kenya Infrastructure Co Ltd', 'LIC-KE-002', '2018-08-12', 'tenders@kenyainfra.co.ke', '+254-20-5550102', 3.80, 18, 4, FALSE, NULL),
+('Mombasa Roadworks Ltd', 'LIC-KE-003', '2020-03-30', 'projects@mombasaroadworks.co.ke', '+254-20-5550103', 2.80, 8, 5, FALSE, NULL);
 
 -- =========================================================================
--- 4. SEED PROJECTS (Contracts to support Budget & Timeline features)
+-- 3. ROADS (22 rows: 8 IN + 4 US + 4 GB + 6 KE)
+-- Authority IDs: 1-5 IN, 6-9 US, 10-13 GB, 14-17 KE
+-- Contractor IDs: 1-12 IN, 13-15 US, 16-18 GB, 19-21 KE
 -- =========================================================================
-INSERT INTO projects (title, road_id, contractor_id, authority_id, budget_allocated, budget_spent, status, start_date, target_end_date, actual_end_date, delay_days)
-VALUES
--- Western Express Highway - Active
-('WEH Flyover Resurfacing & Structural Grouting', 1, 1, 5, 240000000.00, 185000000.00, 'in_progress', '2025-06-01', '2026-06-30', NULL, 0),
--- Eastern Express Highway - Completed with minor delay
-('EEH Pothole Remediation Campaign 2025', 2, 2, 4, 18000000.00, 19200000.00, 'completed', '2025-09-01', '2025-10-31', '2025-11-12', 12),
--- SV Road - Poor contractor blacklisted
-('SV Road Drainage Trenching and Microtunnelling', 3, 10, 1, 95000000.00, 45000000.00, 'halted', '2024-05-10', '2025-05-10', NULL, 378),
--- SV Road - New contractor assigned
-('SV Road Emergency Asphalt Laying', 3, 3, 1, 35000000.00, 12000000.00, 'in_progress', '2026-03-01', '2026-08-31', NULL, 0),
--- Link Road - Active
-('Link Road Concrete Pavement Upgrade Ph. 2', 4, 6, 1, 145000000.00, 75000000.00, 'in_progress', '2025-10-15', '2026-09-30', NULL, 0),
--- LBS Marg - Active but delayed
-('LBS Marg Sewer Line Laying and Patching', 5, 4, 3, 62000000.00, 60000000.00, 'in_progress', '2024-11-01', '2025-11-01', NULL, 203),
--- Senapati Bapat Marg - Completed
-('Senapati Bapat Marg Micro-silica concrete topping', 6, 3, 2, 85000000.00, 84200000.00, 'completed', '2023-01-15', '2023-12-15', '2023-12-10', 0),
--- Dr. Ambedkar Road - Completed
-('Dr. Ambedkar Road Junction Redesign & Lane Widening', 7, 8, 2, 110000000.00, 108000000.00, 'completed', '2024-02-01', '2025-01-31', '2025-01-20', 0),
--- JVLR - Completed
-('JVLR Pothole Repair and Guardrail installation', 8, 5, 4, 12500000.00, 12500000.00, 'completed', '2025-05-01', '2025-06-30', '2025-06-28', 0),
--- SCLR - Active
-('SCLR Connector Joint Replacement & Waterproofing', 9, 7, 4, 45000000.00, 22000000.00, 'in_progress', '2025-11-01', '2026-05-31', NULL, 0),
--- Ghodbunder Road - Completed
-('Ghodbunder Road Mast-Asphalt Overlay', 10, 8, 4, 190000000.00, 187000000.00, 'completed', '2024-03-01', '2024-12-31', '2024-12-25', 0),
--- Sion-Panvel Highway - Active
-('Sion-Panvel Expressway Maintenance & Repair', 12, 11, 5, 80000000.00, 31000000.00, 'in_progress', '2025-12-01', '2026-11-30', NULL, 0),
--- Marine Drive Resurfacing - Completed
-('Marine Drive Promenade Resurfacing', 11, 3, 2, 52000000.00, 51800000.00, 'completed', '2025-01-15', '2025-06-30', '2025-06-25', 0),
--- Mumbai-Nashik Highway - Active
-('NH-3 Mumbai-Nashik Widening Phase 4', 27, 1, 5, 850000000.00, 410000000.00, 'in_progress', '2025-04-01', '2027-03-31', NULL, 0),
--- MTHL Bridge Approach - Completed
-('MTHL Approach Road Connector & Lighting', 28, 8, 4, 180000000.00, 175000000.00, 'completed', '2024-06-01', '2025-05-31', '2025-05-15', 0),
--- Southfield Freeway - Active
-('Southfield Freeway Pavement Rehabilitation', 29, 13, 8, 22500000.00, 12000000.00, 'in_progress', '2025-10-01', '2026-09-30', NULL, 0),
--- M25 - Active
-('M25 Junction 8-12 Smart Motorway Upgrade', 30, 16, 12, 95000000.00, 40000000.00, 'in_progress', '2025-09-01', '2027-06-30', NULL, 0),
--- Waiyaki Way - Completed
-('Waiyaki Way Drainage & Resurfacing', 31, 21, 15, 45000000.00, 44000000.00, 'completed', '2024-11-01', '2025-08-31', '2025-09-05', 5);
-
-
--- =========================================================================
--- 5. SEED COMPLAINTS (20 Records)
--- =========================================================================
-INSERT INTO complaints (client_temp_id, title, description, category, geom, status, escalation_level, image_url, assigned_authority_id, road_id)
-VALUES
--- Complaint 1 (WEH - Pothole)
-(
-    '8f8b8c1a-289e-4b47-b8db-c8db05ab1c1b',
-    'Severe Potholes near Andheri Flyover',
-    'Multiple deep potholes on the southbound main road. Damaging tires and causing sudden braking.',
-    'pothole',
-    ST_GeomFromText('POINT(72.8531 19.1190)', 4326),
-    'in_progress',
-    0,
-    'https://images.roadwatch.civic/complaints/pothole_andheri.jpg',
-    5, -- NHAI
-    1  -- WEH
-),
--- Complaint 2 (WEH - Signage)
-(
-    'c25e8396-857e-4054-9426-1507df0a7b11',
-    'Missing diversion board near Metro work',
-    'The lane closure indicator is missing. Extremely hazardous at night.',
-    'missing_signage',
-    ST_GeomFromText('POINT(72.8580 19.1720)', 4326),
-    'resolved',
-    0,
-    'https://images.roadwatch.civic/complaints/missing_sign_weh.jpg',
-    5, -- NHAI
-    1  -- WEH
-),
--- Complaint 3 (SV Road - Paving defect)
-(
-    'df108bc5-7b56-4c4f-9562-ee2ee9108b34',
-    'Uneven Paver Blocks at Bandra Signal',
-    'The interlocking bricks have caved in. Creates a massive bump for motorbikes.',
-    'paving_defect',
-    ST_GeomFromText('POINT(72.8356 19.0620)', 4326),
-    'pending',
-    0,
-    NULL,
-    1, -- Ward K-West
-    3  -- SV Road
-),
--- Complaint 4 (SV Road - Waterlogging)
-(
-    'a3e0f9b6-8bb0-47b2-9011-477000cc55aa',
-    'Monsoon Waterlogging outside station',
-    'Water level reaches knee height during high tide rains. Drain inlets are fully clogged.',
-    'waterlogging',
-    ST_GeomFromText('POINT(72.8362 19.0980)', 4326),
-    'in_progress',
-    1,
-    'https://images.roadwatch.civic/complaints/waterlog_sv_station.jpg',
-    1, -- Ward K-West
-    3  -- SV Road
-),
--- Complaint 5 (Link Road - Debris)
-(
-    '0a82b012-e7b3-469b-83ee-0062f2bc88d2',
-    'Dumping of building debris on left lane',
-    'Truckloads of sand and broken concrete bricks left on the road blocking traffic.',
-    'debris',
-    ST_GeomFromText('POINT(72.8272 19.1260)', 4326),
-    'routed',
-    0,
-    'https://images.roadwatch.civic/complaints/debris_link_rd.jpg',
-    1, -- Ward K-West
-    4  -- Link Road
-),
--- Complaint 6 (LBS Marg - Pothole)
-(
-    '55d7b51b-1002-4fb0-a7d1-12ef891ab01e',
-    'Crater-sized pothole near Kurla junction',
-    'Nearly 1.5 feet deep. Several auto-rickshaws have overturned trying to avoid it.',
-    'pothole',
-    ST_GeomFromText('POINT(72.8982 19.0850)', 4326),
-    'in_progress',
-    0,
-    'https://images.roadwatch.civic/complaints/crater_lbs_kurla.jpg',
-    3, -- Ward H-East
-    5  -- LBS Marg
-),
--- Complaint 7 (LBS Marg - Waterlogging)
-(
-    'fe2e84c1-65b1-4f10-9111-ee44aa3312b9',
-    'Stagnant water near Phoenix mall entrance',
-    'Clogged drains from construction are backing up water onto the road.',
-    'waterlogging',
-    ST_GeomFromText('POINT(72.9030 19.1020)', 4326),
-    'pending',
-    2,
-    NULL,
-    3, -- Ward H-East
-    5  -- LBS Marg
-),
--- Complaint 8 (EEH - Pothole)
-(
-    '44cc8a0b-12d2-45e0-9002-12efee89b910',
-    'Potholes on Vikhroli stretch',
-    'Fast-moving traffic is lane-splitting dangerously to avoid three deep potholes.',
-    'pothole',
-    ST_GeomFromText('POINT(72.9345 19.1080)', 4326),
-    'resolved',
-    0,
-    'https://images.roadwatch.civic/complaints/pothole_eeh_vik.jpg',
-    4, -- PWD
-    2  -- EEH
-),
--- Complaint 9 (EEH - Debris)
-(
-    '11a0ff8e-a89e-4ff0-aa22-55dbcc234120',
-    'Scraped asphalt piles on side shoulder',
-    'Scraped road surface from roadwork left on the road shoulder. Blowing dust everywhere.',
-    'debris',
-    ST_GeomFromText('POINT(72.9465 19.1710)', 4326),
-    'routed',
-    0,
-    NULL,
-    4, -- PWD
-    2  -- EEH
-),
--- Complaint 10 (SBM - Signage)
-(
-    '33b0fc8a-a77b-4ee0-bb11-44ab0c239455',
-    'Fallen speed limit board near school zone',
-    'The pole was hit by a truck and is lying flat on the pavement.',
-    'missing_signage',
-    ST_GeomFromText('POINT(72.8262 18.9860)', 4326),
-    'resolved',
-    0,
-    'https://images.roadwatch.civic/complaints/fallen_sign_sbm.jpg',
-    2, -- Ward F-North
-    6  -- Senapati Bapat Marg
-),
--- Complaint 11 (Dr Ambedkar Road - Paving defect)
-(
-    'a2bc90fa-61c0-43eb-b8bb-0e0e010cb7c8',
-    'Sinking road surface near Dadar TT flyover base',
-    'The road surface has depressed, forming a deep depression that fills with water.',
-    'paving_defect',
-    ST_GeomFromText('POINT(72.8502 18.9960)', 4326),
-    'pending',
-    1,
-    NULL,
-    2, -- Ward F-North
-    7  -- Dr. Ambedkar Road
-),
--- Complaint 12 (JVLR - Pothole)
-(
-    '88ca3810-bb90-410a-810a-810aee00ff01',
-    'JVLR Metro Pillar 12 Potholes',
-    'Multiple defects right next to the metro construction barricade.',
-    'pothole',
-    ST_GeomFromText('POINT(72.8820 19.1285)', 4326),
-    'in_progress',
-    0,
-    'https://images.roadwatch.civic/complaints/pothole_jvlr_pillar12.jpg',
-    4, -- PWD
-    8  -- JVLR
-),
--- Complaint 13 (SCLR - Paving defect)
-(
-    'cba18b20-cc55-4e00-9900-33dbbfa10022',
-    'Expansion joint gaps on SCLR flyover',
-    'The steel bridge expansion joints are misaligned, causing heavy shocks to cars.',
-    'paving_defect',
-    ST_GeomFromText('POINT(72.8795 19.0695)', 4326),
-    'pending',
-    0,
-    NULL,
-    4, -- PWD
-    9  -- SCLR
-),
--- Complaint 14 (Ghodbunder Road - Debris)
-(
-    '23d4ee09-fa98-4c12-88bb-ee99abcc1234',
-    'Spilled gravel near Ovala junction',
-    'Dumper truck spilled small gravel stones on the fast lane, making it slippery for two-wheelers.',
-    'debris',
-    ST_GeomFromText('POINT(72.9315 19.2525)', 4326),
-    'resolved',
-    0,
-    'https://images.roadwatch.civic/complaints/spilled_gravel_gb.jpg',
-    4, -- PWD
-    10 -- Ghodbunder Road
-),
--- Complaint 15 (Marine Drive - Paving defect)
-(
-    '4c0a8b23-11bb-4ccb-b99b-ee33aa221199',
-    'Loose concrete flags near promenade',
-    'Footpath stones are loose. Pedestrians trip when stepping on them.',
-    'paving_defect',
-    ST_GeomFromText('POINT(72.8211 18.9325)', 4326),
-    'resolved',
-    0,
-    NULL,
-    2, -- Ward F-North
-    11 -- Marine Drive
-),
--- Complaint 16 (Sion-Panvel Highway - Pothole)
-(
-    '00c9e010-aa55-4cc0-8800-4747cc00f0fe',
-    'Highway potholes near Mankhurd T-junction',
-    'Large asphalt crater that slows down the highway bottleneck entry.',
-    'pothole',
-    ST_GeomFromText('POINT(72.9250 19.0415)', 4326),
-    'in_progress',
-    0,
-    'https://images.roadwatch.civic/complaints/mankhurd_highway_crater.jpg',
-    5, -- NHAI
-    12 -- Sion-Panvel Highway
-),
--- Complaint 17 (WEH - Pothole)
-(
-    'ee8890aa-9bb1-4aa0-bb02-33d3d3d3d3d3',
-    'Pothole on Malad flyover descent',
-    'Located in the middle lane, extremely dangerous due to highway speeds.',
-    'pothole',
-    ST_GeomFromText('POINT(72.8592 19.1865)', 4326),
-    'rejected', -- Rejected since duplicate of ongoing highway work
-    0,
-    'https://images.roadwatch.civic/complaints/malad_flyover_pothole.jpg',
-    5, -- NHAI
-    1  -- WEH
-),
--- Complaint 18 (Link Road - Waterlogging)
-(
-    'c092bbfa-ee98-40f8-bb99-383838382211',
-    'Water pooling under Oshiwara bridge',
-    'Even short showers result in water accumulating in the lower dip of the road.',
-    'waterlogging',
-    ST_GeomFromText('POINT(72.8312 19.1835)', 4326),
-    'pending',
-    0,
-    NULL,
-    1, -- Ward K-West
-    4  -- Link Road
-),
--- Complaint 19 (LBS Marg - Debris)
-(
-    'ab01ff23-bb55-4422-9900-121212121212',
-    'Discarded steel pipes near Bhandup station',
-    'Leftover water pipeline project pipes blocking the footpaths and active street lane.',
-    'debris',
-    ST_GeomFromText('POINT(72.9348 19.1975)', 4326),
-    'routed',
-    0,
-    'https://images.roadwatch.civic/complaints/lbs_pipes_bhandup.jpg',
-    3, -- Ward H-East
-    5  -- LBS Marg
-),
--- Complaint 20 (Sion-Panvel Highway - Signage)
-(
-    'aa88c0a9-1a00-47b2-bdcb-7c7c7c7c7c7c',
-    'Broken lane divider reflectors near Vashi Bridge',
-    'Cat-eye reflectors have broken off. Hard to see lane markings in heavy rain.',
-    'missing_signage',
-    ST_GeomFromText('POINT(72.9982 19.0402)', 4326),
-    'pending',
-    0,
-    NULL,
-    5, -- NHAI
-    12 -- Sion-Panvel Highway
-);
+INSERT INTO roads (name, road_code, status, length_km, authority_id, geom, road_type, last_relaying_date, contractor_id, surface_type, lane_count, width_m, aadt, last_inspection_date) VALUES
+-- IN roads (1-8)
+('Western Express Highway', 'WEH-NH8', 'under_construction', 25.50, 5,
+ ST_GeomFromText('LINESTRING(72.8524 19.1012, 72.8530 19.1340, 72.8590 19.1860, 72.8610 19.2300)', 4326),
+ 'NH', '2025-03-15', 1, 'asphalt', 6, 35.50, 185000, '2025-06-15'),
+('Eastern Express Highway', 'EEH-NH8', 'fair', 22.10, 4,
+ ST_GeomFromText('LINESTRING(72.9210 19.0410, 72.9340 19.1020, 72.9460 19.1680, 72.9610 19.2150)', 4326),
+ 'SH', '2020-11-20', 2, 'asphalt', 4, 22.00, 95000, '2024-12-10'),
+('S.V. Road', 'SV-RD-01', 'poor', 16.80, 1,
+ ST_GeomFromText('LINESTRING(72.8354 19.0601, 72.8360 19.1020, 72.8398 19.1620, 72.8450 19.2080)', 4326),
+ 'City', '2018-06-10', 10, 'asphalt', 4, 14.50, 62000, '2025-01-20'),
+('Link Road', 'LINK-RD-01', 'under_construction', 18.20, 1,
+ ST_GeomFromText('LINESTRING(72.8250 19.0805, 72.8270 19.1240, 72.8310 19.1840, 72.8510 19.2450)', 4326),
+ 'City', '2025-10-01', 6, 'concrete', 4, 18.00, 48000, '2025-04-10'),
+('LBS Marg', 'LBS-MARG-01', 'poor', 21.00, 3,
+ ST_GeomFromText('LINESTRING(72.8890 19.0305, 72.8980 19.0840, 72.9120 19.1360, 72.9350 19.1980)', 4326),
+ 'City', '2017-04-05', 4, 'asphalt', 4, 16.00, 78000, '2024-08-05'),
+('Senapati Bapat Marg', 'SBM-MARG-01', 'good', 7.50, 2,
+ ST_GeomFromText('LINESTRING(72.8240 18.9510, 72.8260 18.9850, 72.8290 19.0180)', 4326),
+ 'City', '2023-12-10', 3, 'concrete', 6, 28.00, 35000, '2025-05-30'),
+('Ghodbunder Road', 'GHODBUNDER-RD-01', 'good', 20.00, 4,
+ ST_GeomFromText('LINESTRING(72.9550 19.2220, 72.9310 19.2520, 72.8990 19.2680, 72.8680 19.2810)', 4326),
+ 'SH', '2024-12-25', 8, 'asphalt', 6, 30.00, 85000, '2025-05-20'),
+('Marine Drive', 'MARINE-DR-01', 'good', 3.60, 2,
+ ST_GeomFromText('LINESTRING(72.8205 18.9210, 72.8210 18.9320, 72.8235 18.9480)', 4326),
+ 'City', '2025-01-20', 3, 'concrete', 4, 28.00, 15000, '2025-06-10'),
+-- US roads (9-12)
+('I-94 (Edsel Ford Freeway)', 'I94-WD-01', 'fair', 45.20, 8,
+ ST_GeomFromText('LINESTRING(-83.1500 42.3500, -83.1000 42.3550, -83.0500 42.3600, -82.9900 42.3650, -82.9400 42.3700)', 4326),
+ 'Interstate', '2021-05-15', 13, 'asphalt', 6, 35.00, 155000, '2025-03-01'),
+('M-10 (Lodge Freeway)', 'M10-WD-01', 'poor', 21.50, 8,
+ ST_GeomFromText('LINESTRING(-83.1200 42.3200, -83.1150 42.3500, -83.1100 42.3800, -83.1050 42.4100)', 4326),
+ 'US-Highway', '2019-08-20', 14, 'asphalt', 4, 22.00, 85000, '2024-11-15'),
+('Woodward Avenue', 'WOODWARD-01', 'good', 27.00, 7,
+ ST_GeomFromText('LINESTRING(-83.0800 42.3500, -83.0750 42.3800, -83.0700 42.4100, -83.0650 42.4400)', 4326),
+ 'US-Highway', '2024-10-05', 13, 'asphalt', 4, 24.00, 72000, '2025-05-10'),
+('Gratiot Avenue', 'GRATIOT-01', 'fair', 35.80, 7,
+ ST_GeomFromText('LINESTRING(-82.9800 42.3500, -82.9700 42.3800, -82.9600 42.4100, -82.9500 42.4400)', 4326),
+ 'US-Highway', '2022-04-18', 14, 'asphalt', 4, 20.00, 55000, '2024-09-20'),
+-- GB roads (13-16)
+('M25 (Junction 8-12)', 'M25-01', 'fair', 18.90, 12,
+ ST_GeomFromText('LINESTRING(-0.3000 51.2800, -0.2500 51.2900, -0.2000 51.3000, -0.1500 51.3100)', 4326),
+ 'Motorway', '2023-05-20', 16, 'asphalt', 6, 36.00, 180000, '2025-04-01'),
+('A406 (North Circular Road)', 'A406-NCR-01', 'fair', 25.00, 12,
+ ST_GeomFromText('LINESTRING(-0.3000 51.5800, -0.2500 51.5700, -0.2000 51.5600, -0.1500 51.5500)', 4326),
+ 'A-Road', '2023-08-20', 18, 'asphalt', 4, 22.00, 85000, '2025-03-05'),
+('A1 (Holloway Road)', 'A1-HRW-01', 'fair', 10.00, 11,
+ ST_GeomFromText('LINESTRING(-0.1200 51.5400, -0.1150 51.5500, -0.1100 51.5600, -0.1000 51.5700)', 4326),
+ 'A-Road', '2022-06-15', 16, 'asphalt', 4, 20.00, 55000, '2024-12-10'),
+('Whitehall', 'WHITEHALL-01', 'good', 1.20, 11,
+ ST_GeomFromText('LINESTRING(-0.1280 51.5040, -0.1270 51.5060, -0.1260 51.5080, -0.1250 51.5100)', 4326),
+ 'A-Road', '2025-01-15', 17, 'pavers', 4, 28.00, 18000, '2025-06-10'),
+-- KE roads (17-22)
+('Uhuru Highway', 'UHURU-HWY-01', 'fair', 8.00, 16,
+ ST_GeomFromText('LINESTRING(36.8200 -1.2800, 36.8150 -1.2900, 36.8100 -1.3000, 36.8050 -1.3100)', 4326),
+ 'A-Road', '2021-12-15', 19, 'asphalt', 4, 20.00, 68000, '2025-03-25'),
+('Mombasa Road (A109)', 'MOMBASA-RD-01', 'poor', 15.00, 16,
+ ST_GeomFromText('LINESTRING(36.8500 -1.3000, 36.8700 -1.3100, 36.8900 -1.3200, 36.9100 -1.3250)', 4326),
+ 'A-Road', '2018-07-20', 20, 'asphalt', 4, 18.00, 55000, '2024-10-30'),
+('Thika Superhighway (A2)', 'THIKA-SHWY-01', 'good', 12.50, 15,
+ ST_GeomFromText('LINESTRING(36.8300 -1.2700, 36.8400 -1.2600, 36.8500 -1.2500, 36.8600 -1.2400)', 4326),
+ 'A-Road', '2024-03-30', 21, 'asphalt', 6, 35.00, 95000, '2025-05-05'),
+('Lang''ata Road', 'LANGATA-RD-01', 'under_construction', 10.20, 14,
+ ST_GeomFromText('LINESTRING(36.7800 -1.3200, 36.7900 -1.3150, 36.8000 -1.3100, 36.8100 -1.3050)', 4326),
+ 'C-Road', '2025-10-01', 20, 'gravel', 2, 8.00, 8500, '2025-01-12'),
+('Jogoo Road', 'JOGOO-RD-01', 'fair', 6.80, 14,
+ ST_GeomFromText('LINESTRING(36.8600 -1.2900, 36.8700 -1.2950, 36.8800 -1.3000, 36.8900 -1.3050)', 4326),
+ 'B-Road', '2022-10-10', 19, 'asphalt', 2, 10.00, 22000, '2024-11-18'),
+('Waiyaki Way (C62)', 'WAIYAKI-WY-01', 'fair', 9.50, 15,
+ ST_GeomFromText('LINESTRING(36.7700 -1.2600, 36.7800 -1.2750, 36.7900 -1.2900, 36.8000 -1.3050)', 4326),
+ 'C-Road', '2021-06-15', 21, 'asphalt', 4, 16.00, 38000, '2024-08-15');
 
 -- =========================================================================
--- 6. INTERNATIONAL CONTRACTORS (US, GB, KE)
--- =========================================================================
-INSERT INTO contractors (name, license_number, registration_date, contact_email, contact_phone, rating, projects_completed, projects_delayed, blacklisted, blacklisted_reason)
-VALUES
--- US Contractors
-('Great Lakes Infrastructure LLC', 'LIC-US-2018-001', '2018-03-15', 'bids@greatlakesinfra.com', '+1-313-555-0101', 4.30, 35, 2, FALSE, NULL),
-('Michigan Paving Company', 'LIC-US-2019-002', '2019-07-22', 'ops@michiganpaving.com', '+1-313-555-0102', 3.90, 22, 3, FALSE, NULL),
-('Detroit Roads Alliance', 'LIC-US-2020-003', '2020-01-10', 'contracts@detroitroads.org', '+1-313-555-0103', 2.50, 10, 5, TRUE, 'Failure to complete I-94 resurfacing within contract timeline; substandard asphalt quality.'),
-
--- GB Contractors
-('Thames Highway Contractors Ltd', 'LIC-GB-2016-001', '2016-11-01', 'tenders@thameshighways.co.uk', '+44-20-7946-0101', 4.50, 48, 1, FALSE, NULL),
-('Camden Civils & Paving', 'LIC-GB-2021-002', '2021-02-14', 'projects@camdencivils.co.uk', '+44-20-7946-0102', 4.10, 12, 1, FALSE, NULL),
-('London Asphalt Solutions', 'LIC-GB-2017-003', '2017-09-05', 'info@londonasphalt.co.uk', '+44-20-7946-0103', 3.60, 28, 6, FALSE, NULL),
-
--- KE Contractors
-('Nairobi Road Builders Ltd', 'LIC-KE-2015-001', '2015-05-20', 'info@nairobiroadbuilders.co.ke', '+254-20-555-0101', 4.20, 30, 3, FALSE, NULL),
-('Kenya Infrastructure Group', 'LIC-KE-2018-002', '2018-08-12', 'tenders@kenyainfra.co.ke', '+254-20-555-0102', 3.80, 18, 4, FALSE, NULL),
-('Mombasa Roadworks Ltd', 'LIC-KE-2020-003', '2020-03-30', 'projects@mombasaroadworks.co.ke', '+254-20-555-0103', 2.80, 8, 5, FALSE, NULL);
-
--- =========================================================================
--- 7. INTERNATIONAL ROADS (US, GB, KE)
--- =========================================================================
-INSERT INTO roads (name, road_code, status, length_km, authority_id, geom, road_type, last_relaying_date, contractor_id, surface_type, lane_count, width_m, aadt, last_inspection_date)
-VALUES
--- US: Detroit area roads
-(
-    'I-94 (Edsel Ford Freeway)',
-    'US-I94',
-    'fair',
-    45.20,
-    8, -- FHWA-MI
-    ST_GeomFromText('LINESTRING(-83.1500 42.3500, -83.1000 42.3550, -83.0500 42.3600, -82.9900 42.3650, -82.9400 42.3700)', 4326),
-    'Interstate',
-    '2021-05-15',
-    13, -- Great Lakes
-    'asphalt', 6, 35.00, 155000, '2025-03-01'
-),
-(
-    'M-10 (Lodge Freeway)',
-    'US-M10',
-    'poor',
-    21.50,
-    8, -- FHWA-MI
-    ST_GeomFromText('LINESTRING(-83.1200 42.3200, -83.1150 42.3500, -83.1100 42.3800, -83.1050 42.4100)', 4326),
-    'US-Highway',
-    '2019-08-20',
-    14, -- Michigan Paving
-    'asphalt', 4, 22.00, 85000, '2024-11-15'
-),
-(
-    'Woodward Avenue',
-    'US-M1',
-    'good',
-    27.00,
-    7, -- MDOT
-    ST_GeomFromText('LINESTRING(-83.0800 42.3500, -83.0750 42.3800, -83.0700 42.4100, -83.0650 42.4400)', 4326),
-    'US-Highway',
-    '2024-10-05',
-    13, -- Great Lakes
-    'asphalt', 4, 24.00, 72000, '2025-05-10'
-),
-(
-    'Gratiot Avenue',
-    'US-M3',
-    'fair',
-    35.80,
-    7, -- MDOT
-    ST_GeomFromText('LINESTRING(-82.9800 42.3500, -82.9700 42.3800, -82.9600 42.4100, -82.9500 42.4400)', 4326),
-    'US-Highway',
-    '2022-04-18',
-    14, -- Michigan Paving
-    'asphalt', 4, 20.00, 55000, '2024-09-20'
-),
-(
-    'Michigan Avenue',
-    'US-M12',
-    'under_construction',
-    18.60,
-    6, -- DPW-DET
-    ST_GeomFromText('LINESTRING(-83.1200 42.3300, -83.1000 42.3350, -83.0800 42.3400, -83.0600 42.3450)', 4326),
-    'State-Highway',
-    '2025-11-01',
-    15, -- Detroit Roads
-    'asphalt', 4, 18.00, 42000, '2025-02-20'
-),
-
--- GB: London / Camden area roads
-(
-    'A41 (Camden High Street)',
-    'GB-A41',
-    'fair',
-    8.50,
-    10, -- CBC-HIGHWAYS
-    ST_GeomFromText('LINESTRING(-0.1500 51.5300, -0.1450 51.5400, -0.1400 51.5500, -0.1350 51.5600)', 4326),
-    'A-Road',
-    '2023-03-10',
-    17, -- Camden Civils
-    'asphalt', 2, 10.00, 28000, '2025-01-30'
-),
-(
-    'A502 (Parkway / Finchley Road)',
-    'GB-A502',
-    'good',
-    6.20,
-    11, -- LHJC-LON
-    ST_GeomFromText('LINESTRING(-0.1700 51.5350, -0.1650 51.5450, -0.1600 51.5550, -0.1550 51.5650)', 4326),
-    'A-Road',
-    '2024-06-22',
-    16, -- Thames
-    'asphalt', 2, 12.00, 32000, '2025-04-15'
-),
-(
-    'Euston Road (A501)',
-    'GB-A501',
-    'poor',
-    3.80,
-    12, -- NH-SE
-    ST_GeomFromText('LINESTRING(-0.1400 51.5250, -0.1300 51.5270, -0.1200 51.5280, -0.1100 51.5300)', 4326),
-    'A-Road',
-    '2019-11-30',
-    18, -- London Asphalt
-    'asphalt', 4, 24.00, 65000, '2024-12-05'
-),
-(
-    'Camden High Street',
-    'GB-CAMDEN-HS',
-    'fair',
-    2.10,
-    10, -- CBC-HIGHWAYS
-    ST_GeomFromText('LINESTRING(-0.1420 51.5340, -0.1410 51.5420, -0.1400 51.5500)', 4326),
-    'Urban',
-    '2022-09-05',
-    17, -- Camden Civils
-    'pavers', 2, 9.00, 12000, '2025-02-10'
-),
-
--- KE: Nairobi area roads
-(
-    'Uhuru Highway',
-    'KE-A104',
-    'fair',
-    8.00,
-    16, -- KeNHA-HQ
-    ST_GeomFromText('LINESTRING(36.8200 -1.2800, 36.8150 -1.2900, 36.8100 -1.3000, 36.8050 -1.3100)', 4326),
-    'A-Road',
-    '2021-12-15',
-    19, -- Nairobi Road Builders
-    'asphalt', 4, 20.00, 68000, '2025-03-25'
-),
-(
-    'Mombasa Road (A109)',
-    'KE-A109',
-    'poor',
-    15.00,
-    16, -- KeNHA-HQ
-    ST_GeomFromText('LINESTRING(36.8500 -1.3000, 36.8700 -1.3100, 36.8900 -1.3200, 36.9100 -1.3250)', 4326),
-    'A-Road',
-    '2018-07-20',
-    20, -- Kenya Infrastructure
-    'asphalt', 4, 18.00, 55000, '2024-10-30'
-),
-(
-    'Thika Superhighway (A2)',
-    'KE-A2',
-    'good',
-    12.50,
-    15, -- KURA-HQ
-    ST_GeomFromText('LINESTRING(36.8300 -1.2700, 36.8400 -1.2600, 36.8500 -1.2500, 36.8600 -1.2400)', 4326),
-    'A-Road',
-    '2024-03-30',
-    21, -- Mombasa Roadworks
-    'asphalt', 6, 35.00, 95000, '2025-05-05'
-),
-(
-    'Jogoo Road',
-    'KE-B301',
-    'fair',
-    6.80,
-    14, -- NCC-ROADS
-    ST_GeomFromText('LINESTRING(36.8600 -1.2900, 36.8700 -1.2950, 36.8800 -1.3000, 36.8900 -1.3050)', 4326),
-    'B-Road',
-    '2022-10-10',
-    19, -- Nairobi Road Builders
-    'asphalt', 2, 10.00, 22000, '2024-11-18'
-),
-(
-    'Lang''ata Road',
-    'KE-C401',
-    'under_construction',
-    10.20,
-    14, -- NCC-ROADS
-    ST_GeomFromText('LINESTRING(36.7800 -1.3200, 36.7900 -1.3150, 36.8000 -1.3100, 36.8100 -1.3050)', 4326),
-    'C-Road',
-    '2025-10-01',
-    20, -- Kenya Infrastructure
-    'gravel', 2, 8.00, 8500, '2025-01-12'
-),
--- ============= ADDITIONAL ROADS (roads 27-71) =============
--- IN: Mumbai-Nashik Highway (NH-3) — road 27
-(
-    'Mumbai-Nashik Highway',
-    'IN-NH3',
-    'fair',
-    165.00,
-    5, -- NHAI
-    ST_GeomFromText('LINESTRING(72.9000 19.0000, 73.0500 19.2000, 73.3500 19.5000, 73.7500 19.9000)', 4326),
-    'NH',
-    '2023-01-15',
-    1, -- L&T
-    'asphalt', 4, 24.00, 45000, '2025-02-28'
-),
--- IN: MTHL Bridge Approach Road — road 28
-(
-    'MTHL Bridge Approach Road',
-    'IN-MTHL',
-    'good',
-    12.30,
-    4, -- PWD
-    ST_GeomFromText('LINESTRING(72.9500 18.9700, 72.9800 18.9700, 73.0100 18.9700, 73.0400 18.9700)', 4326),
-    'SH',
-    '2025-06-01',
-    8, -- Gawar
-    'concrete', 6, 32.00, 28000, '2025-06-05'
-),
--- US: Southfield Freeway (M-39) — road 29
-(
-    'Southfield Freeway',
-    'US-M39',
-    'fair',
-    16.40,
-    8, -- FHWA-MI
-    ST_GeomFromText('LINESTRING(-83.2000 42.2500, -83.1900 42.3000, -83.1800 42.3500, -83.1700 42.4000)', 4326),
-    'US-Highway',
-    '2022-08-01',
-    13, -- Great Lakes
-    'asphalt', 4, 20.00, 65000, '2024-12-20'
-),
--- GB: M25 Motorway (Junction 8-12) — road 30
-(
-    'M25 (Junction 8-12)',
-    'GB-M25',
-    'fair',
-    18.90,
-    12, -- NH-SE
-    ST_GeomFromText('LINESTRING(-0.3000 51.2800, -0.2500 51.2900, -0.2000 51.3000, -0.1500 51.3100)', 4326),
-    'Motorway',
-    '2023-05-20',
-    16, -- Thames
-    'asphalt', 6, 36.00, 180000, '2025-04-01'
-),
--- KE: Waiyaki Way (C62) — road 31
-(
-    'Waiyaki Way',
-    'KE-C62',
-    'fair',
-    9.50,
-    15, -- KURA-HQ
-    ST_GeomFromText('LINESTRING(36.7700 -1.2600, 36.7800 -1.2750, 36.7900 -1.2900, 36.8000 -1.3050)', 4326),
-    'C-Road',
-    '2021-06-15',
-    21, -- Mombasa Roadworks
-    'asphalt', 4, 16.00, 38000, '2024-08-15'
-),
--- ============= ROADS 32-61 (New additions for A2: Data Accuracy) =============
--- US: Detroit area roads (32-41) — 10 additional US roads
-(
-    'I-75 (Fisher Freeway)',
-    'US-I75',
-    'good',
-    62.50,
-    8, -- FHWA-MI
-    ST_GeomFromText('LINESTRING(-83.1500 42.2500, -83.1400 42.3000, -83.1200 42.3500, -83.1000 42.4000, -83.0800 42.4500)', 4326),
-    'Interstate',
-    '2024-11-15',
-    13,
-    'asphalt', 6, 36.00, 195000, '2025-06-01'
-),
-(
-    'I-696 (Reuther Freeway)',
-    'US-I696',
-    'fair',
-    45.80,
-    8, -- FHWA-MI
-    ST_GeomFromText('LINESTRING(-83.2000 42.4800, -83.1500 42.4900, -83.1000 42.5000, -83.0500 42.5100)', 4326),
-    'Interstate',
-    '2022-10-30',
-    13,
-    'asphalt', 6, 32.00, 165000, '2025-03-10'
-),
-(
-    'M-8 (Davison Freeway)',
-    'US-M8',
-    'fair',
-    9.20,
-    8, -- FHWA-MI
-    ST_GeomFromText('LINESTRING(-83.1000 42.3800, -83.0800 42.3850, -83.0600 42.3900)', 4326),
-    'US-Highway',
-    '2023-06-01',
-    14,
-    'asphalt', 4, 18.00, 52000, '2025-01-25'
-),
-(
-    'Telegraph Road',
-    'US-24',
-    'fair',
-    35.00,
-    6, -- DPW-DET
-    ST_GeomFromText('LINESTRING(-83.3000 42.2500, -83.2900 42.3200, -83.2800 42.3800, -83.2700 42.4500)', 4326),
-    'US-Highway',
-    '2021-04-20',
-    14,
-    'asphalt', 4, 20.00, 58000, '2024-07-30'
-),
-(
-    'Van Dyke Avenue',
-    'US-M53',
-    'good',
-    28.00,
-    7, -- MDOT
-    ST_GeomFromText('LINESTRING(-83.0500 42.3500, -83.0400 42.3900, -83.0300 42.4300, -83.0200 42.4700)', 4326),
-    'US-Highway',
-    '2024-08-01',
-    13,
-    'asphalt', 4, 18.00, 42000, '2025-04-20'
-),
-(
-    'Fort Street',
-    'US-M85',
-    'poor',
-    22.00,
-    6, -- DPW-DET
-    ST_GeomFromText('LINESTRING(-83.1500 42.2800, -83.1300 42.3000, -83.1100 42.3200, -83.0900 42.3400)', 4326),
-    'US-Highway',
-    '2018-12-15',
-    15,
-    'asphalt', 4, 16.00, 35000, '2024-06-10'
-),
-(
-    '8 Mile Road',
-    'US-M102',
-    'fair',
-    32.00,
-    7, -- MDOT
-    ST_GeomFromText('LINESTRING(-83.3000 42.4500, -83.2000 42.4500, -83.1000 42.4500, -83.0000 42.4500)', 4326),
-    'US-Highway',
-    '2022-05-15',
-    14,
-    'asphalt', 4, 22.00, 48000, '2024-11-05'
-),
-(
-    'Grand River Avenue',
-    'US-GRAND',
-    'fair',
-    40.00,
-    7, -- MDOT
-    ST_GeomFromText('LINESTRING(-83.2500 42.3000, -83.2000 42.3200, -83.1500 42.3400, -83.1000 42.3600)', 4326),
-    'US-Highway',
-    '2020-09-01',
-    14,
-    'asphalt', 4, 18.00, 38000, '2024-08-25'
-),
-(
-    'John R Road',
-    'US-JOHNR',
-    'good',
-    18.50,
-    6, -- DPW-DET
-    ST_GeomFromText('LINESTRING(-83.0800 42.3800, -83.0750 42.4100, -83.0700 42.4400, -83.0650 42.4700)', 4326),
-    'City',
-    '2024-03-10',
-    13,
-    'asphalt', 4, 14.00, 25000, '2025-02-15'
-),
-(
-    'Jefferson Avenue',
-    'US-JEFF',
-    'fair',
-    25.00,
-    6, -- DPW-DET
-    ST_GeomFromText('LINESTRING(-83.0500 42.3200, -83.0000 42.3300, -82.9500 42.3400, -82.9000 42.3500)', 4326),
-    'City',
-    '2021-07-01',
-    14,
-    'asphalt', 4, 16.00, 30000, '2024-10-15'
-),
--- GB: London roads (52-61)
-(
-    'A4 (Great West Road)',
-    'GB-A4',
-    'fair',
-    14.50,
-    11, -- LHJC-LON
-    ST_GeomFromText('LINESTRING(-0.2800 51.4900, -0.2400 51.4950, -0.2000 51.5000, -0.1600 51.5050)', 4326),
-    'A-Road',
-    '2022-04-10',
-    16,
-    'asphalt', 4, 20.00, 52000, '2025-01-20'
-),
-(
-    'A406 (North Circular Road)',
-    'GB-A406',
-    'fair',
-    25.00,
-    12, -- NH-SE
-    ST_GeomFromText('LINESTRING(-0.3000 51.5800, -0.2500 51.5700, -0.2000 51.5600, -0.1500 51.5500)', 4326),
-    'A-Road',
-    '2023-08-20',
-    18,
-    'asphalt', 4, 22.00, 85000, '2025-03-05'
-),
-(
-    'A40 (Westway)',
-    'GB-A40',
-    'good',
-    8.00,
-    11, -- LHJC-LON
-    ST_GeomFromText('LINESTRING(-0.2200 51.5200, -0.2000 51.5250, -0.1800 51.5300, -0.1600 51.5350)', 4326),
-    'Motorway',
-    '2024-09-01',
-    16,
-    'concrete', 4, 26.00, 72000, '2025-05-15'
-),
-(
-    'A10 (Great Cambridge Road)',
-    'GB-A10',
-    'fair',
-    12.00,
-    12, -- NH-SE
-    ST_GeomFromText('LINESTRING(-0.0800 51.5300, -0.0700 51.5500, -0.0600 51.5700, -0.0500 51.5900)', 4326),
-    'A-Road',
-    '2021-11-05',
-    18,
-    'asphalt', 4, 18.00, 48000, '2024-09-15'
-),
-(
-    'B522 (Camden Road)',
-    'GB-B522',
-    'poor',
-    3.50,
-    10, -- CBC-HIGHWAYS
-    ST_GeomFromText('LINESTRING(-0.1450 51.5450, -0.1400 51.5480, -0.1350 51.5510, -0.1300 51.5540)', 4326),
-    'B-Road',
-    '2018-03-20',
-    17,
-    'asphalt', 2, 8.00, 9500, '2024-05-30'
-),
-(
-    'A1 (Holloway Road)',
-    'GB-A1',
-    'fair',
-    10.00,
-    11, -- LHJC-LON
-    ST_GeomFromText('LINESTRING(-0.1200 51.5400, -0.1150 51.5500, -0.1100 51.5600, -0.1000 51.5700)', 4326),
-    'A-Road',
-    '2022-06-15',
-    16,
-    'asphalt', 4, 20.00, 55000, '2024-12-10'
-),
-(
-    'Whitehall',
-    'GB-WHITE',
-    'good',
-    1.20,
-    11, -- LHJC-LON
-    ST_GeomFromText('LINESTRING(-0.1280 51.5040, -0.1270 51.5060, -0.1260 51.5080, -0.1250 51.5100)', 4326),
-    'A-Road',
-    '2025-01-15',
-    17,
-    'pavers', 4, 28.00, 18000, '2025-06-10'
-),
-(
-    'Oxford Street',
-    'GB-OXFORD',
-    'good',
-    2.50,
-    11, -- LHJC-LON
-    ST_GeomFromText('LINESTRING(-0.1500 51.5140, -0.1400 51.5150, -0.1300 51.5160, -0.1200 51.5170)', 4326),
-    'Urban',
-    '2024-05-01',
-    17,
-    'pavers', 2, 12.00, 25000, '2025-04-25'
-),
-(
-    'B516 (Marylebone Road)',
-    'GB-B516',
-    'fair',
-    2.80,
-    10, -- CBC-HIGHWAYS
-    ST_GeomFromText('LINESTRING(-0.1650 51.5200, -0.1550 51.5220, -0.1450 51.5240, -0.1350 51.5260)', 4326),
-    'B-Road',
-    '2023-03-10',
-    18,
-    'asphalt', 4, 18.00, 32000, '2025-02-01'
-),
-(
-    'A23 (Brighton Road)',
-    'GB-A23',
-    'fair',
-    18.00,
-    12, -- NH-SE
-    ST_GeomFromText('LINESTRING(-0.1300 51.3800, -0.1200 51.4000, -0.1100 51.4200, -0.1000 51.4400)', 4326),
-    'A-Road',
-    '2020-08-01',
-    16,
-    'asphalt', 4, 20.00, 45000, '2024-07-15'
-),
--- KE: Nairobi roads (62-71)
-(
-    'Ngong Road',
-    'KE-C58',
-    'poor',
-    8.50,
-    14, -- NCC-ROADS
-    ST_GeomFromText('LINESTRING(36.7800 -1.2900, 36.7900 -1.3050, 36.8000 -1.3200, 36.8100 -1.3350)', 4326),
-    'C-Road',
-    '2019-05-20',
-    20,
-    'asphalt', 2, 10.00, 18000, '2024-04-10'
-),
-(
-    'Kiambu Road',
-    'KE-KIAMBU',
-    'fair',
-    12.00,
-    15, -- KURA-HQ
-    ST_GeomFromText('LINESTRING(36.8300 -1.2200, 36.8400 -1.2000, 36.8500 -1.1800, 36.8600 -1.1600)', 4326),
-    'B-Road',
-    '2022-03-15',
-    19,
-    'asphalt', 2, 12.00, 25000, '2024-10-05'
-),
-(
-    'Haile Selassie Avenue',
-    'KE-HAILE',
-    'good',
-    3.00,
-    16, -- KeNHA-HQ
-    ST_GeomFromText('LINESTRING(36.8200 -1.2850, 36.8250 -1.2880, 36.8300 -1.2910, 36.8350 -1.2940)', 4326),
-    'A-Road',
-    '2024-12-01',
-    19,
-    'asphalt', 4, 20.00, 45000, '2025-05-20'
-),
-(
-    'Kenyatta Avenue',
-    'KE-KENYA',
-    'good',
-    2.50,
-    14, -- NCC-ROADS
-    ST_GeomFromText('LINESTRING(36.8200 -1.2800, 36.8250 -1.2820, 36.8300 -1.2840, 36.8350 -1.2860)', 4326),
-    'A-Road',
-    '2025-02-15',
-    19,
-    'asphalt', 4, 22.00, 35000, '2025-06-01'
-),
-(
-    'Limuru Road',
-    'KE-B3',
-    'fair',
-    14.00,
-    15, -- KURA-HQ
-    ST_GeomFromText('LINESTRING(36.7000 -1.2000, 36.7200 -1.1800, 36.7400 -1.1600, 36.7600 -1.1400)', 4326),
-    'B-Road',
-    '2021-11-20',
-    20,
-    'asphalt', 2, 10.00, 15000, '2024-06-30'
-),
-(
-    'Enterprise Road',
-    'KE-ENTER',
-    'fair',
-    5.00,
-    14, -- NCC-ROADS
-    ST_GeomFromText('LINESTRING(36.8600 -1.3100, 36.8700 -1.3150, 36.8800 -1.3200, 36.8900 -1.3250)', 4326),
-    'C-Road',
-    '2023-04-01',
-    21,
-    'asphalt', 2, 12.00, 22000, '2024-11-20'
-),
-(
-    'Outer Ring Road',
-    'KE-OUTER',
-    'poor',
-    11.00,
-    15, -- KURA-HQ
-    ST_GeomFromText('LINESTRING(36.8500 -1.2700, 36.8600 -1.2850, 36.8700 -1.3000, 36.8800 -1.3150)', 4326),
-    'B-Road',
-    '2017-09-10',
-    20,
-    'asphalt', 2, 10.00, 28000, '2024-03-15'
-),
-(
-    'Bunyala Road',
-    'KE-BUNY',
-    'good',
-    3.00,
-    14, -- NCC-ROADS
-    ST_GeomFromText('LINESTRING(36.8100 -1.2950, 36.8150 -1.2980, 36.8200 -1.3010, 36.8250 -1.3040)', 4326),
-    'C-Road',
-    '2024-07-01',
-    19,
-    'asphalt', 2, 8.00, 12000, '2025-03-20'
-),
-(
-    'Forest Road',
-    'KE-FOREST',
-    'good',
-    2.00,
-    14, -- NCC-ROADS
-    ST_GeomFromText('LINESTRING(36.7900 -1.2800, 36.7950 -1.2830, 36.8000 -1.2860, 36.8050 -1.2890)', 4326),
-    'C-Road',
-    '2024-10-01',
-    21,
-    'asphalt', 2, 8.00, 8000, '2025-04-10'
-),
-(
-    'Likoni Road',
-    'KE-LIKONI',
-    'fair',
-    4.50,
-    14, -- NCC-ROADS
-    ST_GeomFromText('LINESTRING(36.8300 -1.3050, 36.8400 -1.3100, 36.8500 -1.3150, 36.8600 -1.3200)', 4326),
-    'C-Road',
-    '2022-12-10',
-    21,
-    'asphalt', 2, 10.00, 16000, '2024-09-25'
-),
--- IN: Mumbai area roads (62-71) — 10 additional India roads
-(
-    'Andheri-Ghatkopar Link Road',
-    'IN-AGLR',
-    'fair',
-    8.50,
-    1, -- MCGM-KW
-    ST_GeomFromText('LINESTRING(72.8600 19.1100, 72.8700 19.1050, 72.8800 19.1000, 72.8900 19.0950)', 4326),
-    'City',
-    '2021-08-15',
-    5,
-    'asphalt', 4, 16.00, 45000, '2024-05-20'
-),
-(
-    'Bandra-Worli Sea Link Approach',
-    'IN-BWSL',
-    'good',
-    4.20,
-    2, -- MCGM-FN
-    ST_GeomFromText('LINESTRING(72.8200 19.0300, 72.8250 19.0250, 72.8300 19.0200, 72.8350 19.0150)', 4326),
-    'City',
-    '2024-11-01',
-    8,
-    'concrete', 6, 32.00, 85000, '2025-05-10'
-),
-(
-    'Juhu-Vile Parle Link Road',
-    'IN-JVPL',
-    'good',
-    5.00,
-    1, -- MCGM-KW
-    ST_GeomFromText('LINESTRING(72.8300 19.1000, 72.8350 19.0950, 72.8400 19.0900, 72.8450 19.0850)', 4326),
-    'City',
-    '2024-06-20',
-    3,
-    'asphalt', 4, 14.00, 32000, '2025-04-15'
-),
-(
-    'Aarey Road',
-    'IN-AAREY',
-    'fair',
-    6.00,
-    1, -- MCGM-KW
-    ST_GeomFromText('LINESTRING(72.8600 19.1400, 72.8550 19.1350, 72.8500 19.1300, 72.8450 19.1250)', 4326),
-    'City',
-    '2022-03-10',
-    7,
-    'asphalt', 2, 10.00, 18000, '2024-10-05'
-),
-(
-    'Mahakali Caves Road',
-    'IN-MAHK',
-    'poor',
-    4.50,
-    1, -- MCGM-KW
-    ST_GeomFromText('LINESTRING(72.8700 19.1250, 72.8750 19.1200, 72.8800 19.1150, 72.8850 19.1100)', 4326),
-    'City',
-    '2019-05-01',
-    10,
-    'asphalt', 2, 8.00, 12000, '2024-03-01'
-),
-(
-    'Film City Road',
-    'IN-FILM',
-    'fair',
-    3.00,
-    3, -- MCGM-HE
-    ST_GeomFromText('LINESTRING(72.8900 19.1400, 72.8950 19.1350, 72.9000 19.1300)', 4326),
-    'City',
-    '2023-01-20',
-    5,
-    'asphalt', 2, 8.00, 8000, '2024-12-15'
-),
-(
-    'New Link Road (Kandivali-Borivali)',
-    'IN-NLNK',
-    'good',
-    8.00,
-    1, -- MCGM-KW
-    ST_GeomFromText('LINESTRING(72.8400 19.2000, 72.8450 19.1950, 72.8500 19.1900, 72.8550 19.1850)', 4326),
-    'City',
-    '2024-09-10',
-    6,
-    'asphalt', 4, 18.00, 38000, '2025-05-25'
-),
-(
-    'Lokhandwala Complex Road',
-    'IN-LOKH',
-    'fair',
-    2.50,
-    1, -- MCGM-KW
-    ST_GeomFromText('LINESTRING(72.8250 19.1200, 72.8300 19.1180, 72.8350 19.1160, 72.8400 19.1140)', 4326),
-    'City',
-    '2020-11-30',
-    4,
-    'asphalt', 2, 10.00, 15000, '2024-04-20'
-),
-(
-    'Yari Road (Versova)',
-    'IN-YARI',
-    'good',
-    3.20,
-    1, -- MCGM-KW
-    ST_GeomFromText('LINESTRING(72.8200 19.1300, 72.8250 19.1280, 72.8300 19.1260, 72.8350 19.1240)', 4326),
-    'City',
-    '2024-04-01',
-    3,
-    'asphalt', 2, 12.00, 22000, '2025-04-30'
-),
-(
-    'Malad-Marve Road',
-    'IN-MLMR',
-    'fair',
-    5.50,
-    1, -- MCGM-KW
-    ST_GeomFromText('LINESTRING(72.8400 19.1800, 72.8450 19.1750, 72.8500 19.1700, 72.8550 19.1650)', 4326),
-    'City',
-    '2022-07-15',
-    5,
-    'asphalt', 2, 10.00, 14000, '2024-08-10'
-);
-
--- =========================================================================
--- 8. INTERNATIONAL PROJECTS (US, GB, KE)
--- =========================================================================
-INSERT INTO projects (title, road_id, contractor_id, authority_id, budget_allocated, budget_spent, status, start_date, target_end_date, actual_end_date, delay_days)
-VALUES
--- US Projects
-('I-94 Resurfacing & Bridge Repairs', 13, 13, 8, 45000000.00, 28000000.00, 'in_progress', '2025-06-01', '2026-12-31', NULL, 0),
-('M-10 Freeway Pothole Remediation', 14, 14, 8, 8500000.00, 8500000.00, 'completed', '2025-03-01', '2025-08-31', '2025-09-15', 15),
-('Woodward Avenue Streetscape Phase 2', 15, 13, 7, 12000000.00, 5000000.00, 'in_progress', '2025-11-01', '2026-10-31', NULL, 0),
-('Michigan Avenue Drainage Upgrade', 17, 15, 6, 6500000.00, 6500000.00, 'completed', '2024-01-15', '2024-12-31', '2024-12-15', 0),
-
--- GB Projects
-('Camden High Street Safety Improvements', 18, 17, 10, 3500000.00, 2100000.00, 'in_progress', '2025-09-01', '2026-06-30', NULL, 0),
-('A502 Finchley Road Carriageway Repair', 19, 16, 11, 4800000.00, 4600000.00, 'completed', '2025-04-01', '2025-10-31', '2025-10-28', 0),
-('Euston Road Bus Lane Resurfacing', 20, 18, 12, 2200000.00, 800000.00, 'in_progress', '2026-01-15', '2026-07-31', NULL, 0),
-
--- KE Projects
-('Uhuru Highway Bridge Expansion Joint Repair', 22, 19, 16, 85000000.00, 55000000.00, 'in_progress', '2025-08-01', '2026-08-31', NULL, 0),
-('Mombasa Road Drainage Channel Desilting', 23, 20, 16, 25000000.00, 24000000.00, 'completed', '2025-02-01', '2025-07-31', '2025-08-10', 10),
-('Lang''ata Road Widening & Overlay', 26, 21, 14, 120000000.00, 45000000.00, 'in_progress', '2025-10-01', '2027-03-31', NULL, 0),
-('Gratiot Avenue Resurfacing Phase 3', 16, 14, 7, 9500000.00, 3500000.00, 'in_progress', '2026-02-01', '2026-12-31', NULL, 0),
-('Thika Superhighway Overlay & Safety', 24, 19, 15, 32000000.00, 30000000.00, 'completed', '2024-09-01', '2025-06-30', '2025-07-15', 15),
-('Jogoo Road Drainage Improvement', 25, 20, 14, 18000000.00, 6000000.00, 'in_progress', '2026-01-01', '2026-09-30', NULL, 0);
-
--- =========================================================================
--- 9. INTERNATIONAL COMPLAINTS (US, GB, KE)
--- =========================================================================
-INSERT INTO complaints (client_temp_id, title, description, category, geom, status, escalation_level, image_url, assigned_authority_id, road_id)
-VALUES
--- US Complaints (I-94, Woodward Ave, Michigan Ave)
-(
-    '7f7f7f7f-1001-4000-8000-100000000001',
-    'Deep potholes on I-94 near Dearborn',
-    'Multiple 6-inch deep potholes in the right lane causing tire blowouts.',
-    'pothole',
-    ST_GeomFromText('POINT(-83.1000 42.3550)', 4326),
-    'in_progress',
-    0,
-    NULL,
-    8, -- FHWA-MI
-    13 -- I-94
-),
-(
-    '7f7f7f7f-1001-4000-8000-100000000002',
-    'Missing lane markings on Woodward Ave',
-    'Lane divider paint has completely worn off between 7 Mile and 8 Mile Road.',
-    'missing_signage',
-    ST_GeomFromText('POINT(-83.0750 42.3800)', 4326),
-    'pending',
-    0,
-    NULL,
-    7, -- MDOT
-    15 -- Woodward Ave
-),
-(
-    '7f7f7f7f-1001-4000-8000-100000000003',
-    'Water pooling on Michigan Ave underpass',
-    'Storm drain is clogged causing 6-inch standing water across all lanes.',
-    'waterlogging',
-    ST_GeomFromText('POINT(-83.0900 42.3380)', 4326),
-    'routed',
-    1,
-    NULL,
-    6, -- DPW-DET
-    17 -- Michigan Ave
-),
--- GB Complaints (Camden High Street, Euston Road)
-(
-    '7f7f7f7f-1001-4000-8000-200000000001',
-    'Sunken manhole cover on Camden High Street',
-    'Manhole cover has sunk 4cm below road surface creating hazard for cyclists.',
-    'paving_defect',
-    ST_GeomFromText('POINT(-0.1420 51.5400)', 4326),
-    'in_progress',
-    0,
-    NULL,
-    10, -- CBC-HIGHWAYS
-    18 -- A41 / Camden High Street
-),
-(
-    '7f7f7f7f-1001-4000-8000-200000000002',
-    'Uneven asphalt patches on Euston Road',
-    'Multiple patches from utility works creating bumpy surface for buses.',
-    'paving_defect',
-    ST_GeomFromText('POINT(-0.1250 51.5280)', 4326),
-    'pending',
-    0,
-    NULL,
-    12, -- NH-SE
-    20 -- Euston Road
-),
--- KE Complaints (Mombasa Road, Jogoo Road)
-(
-    '7f7f7f7f-1001-4000-8000-300000000001',
-    'Large crater on Mombasa Road near Industrial Area',
-    'Deep crater spanning half the lane, causing traffic to merge dangerously.',
-    'pothole',
-    ST_GeomFromText('POINT(36.8800 -1.3150)', 4326),
-    'in_progress',
-    1,
-    NULL,
-    16, -- KeNHA-HQ
-    23 -- Mombasa Road
-),
-(
-    '7f7f7f7f-1001-4000-8000-300000000002',
-    'Flooded underpass on Jogoo Road',
-    'Heavy rain has flooded the Makadara underpass to waist height.',
-    'waterlogging',
-    ST_GeomFromText('POINT(36.8750 -1.2970)', 4326),
-    'routed',
-    2,
-    NULL,
-    14, -- NCC-ROADS
-    25 -- Jogoo Road
-),
-(
-    '7f7f7f7f-1001-4000-8000-300000000003',
-    'Debris from construction on Lang''ata Road',
-    'Construction debris and gravel scattered across the road near Carnivore junction.',
-    'debris',
-    ST_GeomFromText('POINT(36.7950 -1.3120)', 4326),
-    'pending',
-    0,
-    NULL,
-    14, -- NCC-ROADS
-    26 -- Lang''ata Road
-);
-
--- =========================================================================
--- 10. CROSS-REGION SPLIT COMPLAINT (parent + child)
--- Simulates a complaint filed near a region boundary that gets split
--- =========================================================================
-INSERT INTO complaints (client_temp_id, title, description, category, geom, status, escalation_level, image_url, assigned_authority_id, road_id, parent_complaint_id, region_override)
-VALUES
-(
-    '7f7f7f7f-1001-4000-8000-400000000001',
-    'Pothole on I-94 near Dearborn (primary)',
-    'Deep pothole on I-94 westbound near the Michigan Ave interchange.',
-    'pothole',
-    ST_GeomFromText('POINT(-83.1000 42.3550)', 4326),
-    'routed',
-    0,
-    NULL,
-    8,
-    13,
-    NULL,
-    'US'
-),
-(
-    '7f7f7f7f-1001-4000-8000-400000000002',
-    'Pothole on I-94 near Dearborn (secondary split)',
-    'Duplicate notification for I-94 pothole — forwarded to secondary jurisdiction.',
-    'pothole',
-    ST_GeomFromText('POINT(-83.1000 42.3550)', 4326),
-    'pending',
-    0,
-    NULL,
-    6,
-    13,
-    29,
-    'US'
-);
-
--- =========================================================================
--- BACKFILL CONTRACTOR CODES (for existing contractors)
--- ORDER must match INSERT order in sections 2 and 7
--- Indian contractors (id 1-12) + International (id 13-21)
--- =========================================================================
-UPDATE contractors SET contractor_code = 'CON-00001', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 1;
-UPDATE contractors SET contractor_code = 'CON-00002', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 2;
-UPDATE contractors SET contractor_code = 'CON-00003', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 3;
-UPDATE contractors SET contractor_code = 'CON-00004', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 4;
-UPDATE contractors SET contractor_code = 'CON-00005', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 5;
-UPDATE contractors SET contractor_code = 'CON-00006', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 6;
-UPDATE contractors SET contractor_code = 'CON-00007', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 7;
-UPDATE contractors SET contractor_code = 'CON-00008', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 8;
-UPDATE contractors SET contractor_code = 'CON-00009', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 9;
-UPDATE contractors SET contractor_code = 'CON-00010', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 10;
-UPDATE contractors SET contractor_code = 'CON-00011', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 11;
-UPDATE contractors SET contractor_code = 'CON-00012', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 12;
-UPDATE contractors SET contractor_code = 'CON-00013', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 13;
-UPDATE contractors SET contractor_code = 'CON-00014', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 14;
-UPDATE contractors SET contractor_code = 'CON-00015', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 15;
-UPDATE contractors SET contractor_code = 'CON-00016', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 16;
-UPDATE contractors SET contractor_code = 'CON-00017', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 17;
-UPDATE contractors SET contractor_code = 'CON-00018', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 18;
-UPDATE contractors SET contractor_code = 'CON-00019', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 19;
-UPDATE contractors SET contractor_code = 'CON-00020', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 20;
-UPDATE contractors SET contractor_code = 'CON-00021', performance_index = ROUND((projects_completed::NUMERIC / GREATEST(projects_completed + projects_delayed, 1)) * rating * 20, 2) WHERE id = 21;
-
--- =========================================================================
--- SEED AUDIT LOG (sample entries for testing)
--- =========================================================================
-INSERT INTO audit_log (table_name, record_id, action, old_values, new_values, changed_by)
-VALUES
-('complaints', 1, 'INSERT', NULL, '{"title":"Severe Potholes near Andheri Flyover","category":"pothole","status":"routed"}', 'system'),
-('complaints', 1, 'UPDATE', '{"status":"routed"}', '{"title":"Severe Potholes near Andheri Flyover","category":"pothole","status":"in_progress"}', 'operator_mcgm'),
-('complaints', 1, 'UPDATE', '{"status":"in_progress"}', '{"title":"Severe Potholes near Andheri Flyover","category":"pothole","status":"resolved"}', 'operator_mcgm'),
-('projects', 1, 'INSERT', NULL, '{"title":"WEH Resurfacing Phase 1","status":"planned"}', 'system'),
-('projects', 1, 'UPDATE', '{"status":"planned"}', '{"title":"WEH Resurfacing Phase 1","status":"in_progress"}', 'admin'),
-('contractors', 10, 'UPDATE', '{"name":"Vijay Infrastructure & Contracting","rating":2.50}', '{"name":"Vijay Infrastructure & Contracting","rating":1.80,"blacklisted":true}', 'auditor'),
-('roads', 1, 'UPDATE', '{"name":"Western Express Highway","status":"fair"}', '{"name":"Western Express Highway","status":"under_construction"}', 'system');
-
--- ===========================================================================
--- 11. ROAD DEFECT HISTORY - MONTHLY SNAPSHOTS (Jan 2022 - Jun 2026)
--- Generated with realistic deterioration patterns for all 31 roads
--- ===========================================================================
-INSERT INTO road_defect_history (road_id, snapshot_date, status_at_time, complaint_count, project_count, source)
-VALUES
-    (1, '2022-01-01', 'good', 2, 0, 'complaint'),
-    (1, '2022-02-01', 'good', 2, 0, 'complaint'),
-    (1, '2022-03-01', 'good', 2, 0, 'complaint'),
-    (1, '2022-04-01', 'good', 2, 0, 'complaint'),
-    (1, '2022-05-01', 'good', 2, 0, 'complaint'),
-    (1, '2022-06-01', 'good', 2, 0, 'complaint'),
-    (1, '2022-07-01', 'good', 3, 0, 'complaint'),
-    (1, '2022-08-01', 'good', 3, 0, 'complaint'),
-    (1, '2022-09-01', 'good', 3, 0, 'complaint'),
-    (1, '2022-10-01', 'good', 3, 0, 'complaint'),
-    (1, '2022-11-01', 'good', 3, 0, 'complaint'),
-    (1, '2022-12-01', 'good', 3, 0, 'complaint'),
-    (1, '2023-01-01', 'good', 4, 0, 'complaint'),
-    (1, '2023-02-01', 'good', 4, 0, 'complaint'),
-    (1, '2023-03-01', 'good', 4, 0, 'complaint'),
-    (1, '2023-04-01', 'good', 4, 0, 'complaint'),
-    (1, '2023-05-01', 'good', 4, 0, 'complaint'),
-    (1, '2023-06-01', 'good', 4, 0, 'complaint'),
-    (1, '2023-07-01', 'good', 5, 0, 'complaint'),
-    (1, '2023-08-01', 'good', 5, 0, 'complaint'),
-    (1, '2023-09-01', 'good', 5, 0, 'complaint'),
-    (1, '2023-10-01', 'good', 5, 0, 'complaint'),
-    (1, '2023-11-01', 'good', 5, 0, 'complaint'),
-    (1, '2023-12-01', 'good', 5, 0, 'complaint'),
-    (1, '2024-01-01', 'good', 7, 0, 'complaint'),
-    (1, '2024-02-01', 'good', 7, 0, 'complaint'),
-    (1, '2024-03-01', 'good', 7, 0, 'complaint'),
-    (1, '2024-04-01', 'good', 7, 0, 'complaint'),
-    (1, '2024-05-01', 'good', 7, 0, 'complaint'),
-    (1, '2024-06-01', 'good', 7, 0, 'complaint'),
-    (1, '2024-07-01', 'fair', 9, 0, 'complaint'),
-    (1, '2024-08-01', 'fair', 9, 0, 'complaint'),
-    (1, '2024-09-01', 'fair', 9, 0, 'complaint'),
-    (1, '2024-10-01', 'fair', 9, 0, 'complaint'),
-    (1, '2024-11-01', 'fair', 9, 0, 'complaint'),
-    (1, '2024-12-01', 'fair', 9, 0, 'complaint'),
-    (1, '2025-01-01', 'fair', 11, 0, 'complaint'),
-    (1, '2025-02-01', 'fair', 11, 0, 'complaint'),
-    (1, '2025-03-01', 'under_construction', 11, 1, 'project'),
-    (1, '2025-04-01', 'under_construction', 11, 1, 'project'),
-    (1, '2025-05-01', 'under_construction', 11, 1, 'project'),
-    (1, '2025-06-01', 'under_construction', 11, 1, 'project'),
-    (1, '2025-07-01', 'under_construction', 14, 1, 'project'),
-    (1, '2025-08-01', 'under_construction', 14, 1, 'project'),
-    (1, '2025-09-01', 'under_construction', 14, 1, 'project'),
-    (1, '2025-10-01', 'under_construction', 14, 1, 'project'),
-    (1, '2025-11-01', 'under_construction', 14, 1, 'project'),
-    (1, '2025-12-01', 'under_construction', 14, 1, 'project'),
-    (1, '2026-01-01', 'under_construction', 18, 1, 'project'),
-    (1, '2026-02-01', 'under_construction', 18, 1, 'project'),
-    (1, '2026-03-01', 'under_construction', 18, 1, 'project'),
-    (1, '2026-04-01', 'under_construction', 18, 1, 'project'),
-    (1, '2026-05-01', 'under_construction', 18, 1, 'project'),
-    (1, '2026-06-01', 'under_construction', 18, 1, 'project'),
-    (2, '2022-01-01', 'good', 3, 0, 'complaint'),
-    (2, '2022-02-01', 'good', 3, 0, 'complaint'),
-    (2, '2022-03-01', 'good', 3, 0, 'complaint'),
-    (2, '2022-04-01', 'good', 3, 0, 'complaint'),
-    (2, '2022-05-01', 'good', 3, 0, 'complaint'),
-    (2, '2022-06-01', 'good', 3, 0, 'complaint'),
-    (2, '2022-07-01', 'good', 4, 0, 'complaint'),
-    (2, '2022-08-01', 'good', 4, 0, 'complaint'),
-    (2, '2022-09-01', 'good', 4, 0, 'complaint'),
-    (2, '2022-10-01', 'good', 4, 0, 'complaint'),
-    (2, '2022-11-01', 'good', 4, 0, 'complaint'),
-    (2, '2022-12-01', 'good', 4, 0, 'complaint'),
-    (2, '2023-01-01', 'fair', 5, 0, 'complaint'),
-    (2, '2023-02-01', 'fair', 5, 0, 'complaint'),
-    (2, '2023-03-01', 'fair', 5, 0, 'complaint'),
-    (2, '2023-04-01', 'fair', 5, 0, 'complaint'),
-    (2, '2023-05-01', 'fair', 5, 0, 'complaint'),
-    (2, '2023-06-01', 'fair', 5, 0, 'complaint'),
-    (2, '2023-07-01', 'fair', 7, 0, 'complaint'),
-    (2, '2023-08-01', 'fair', 7, 0, 'complaint'),
-    (2, '2023-09-01', 'fair', 7, 0, 'complaint'),
-    (2, '2023-10-01', 'fair', 7, 0, 'complaint'),
-    (2, '2023-11-01', 'fair', 7, 0, 'complaint'),
-    (2, '2023-12-01', 'fair', 7, 0, 'complaint'),
-    (2, '2024-01-01', 'fair', 9, 0, 'complaint'),
-    (2, '2024-02-01', 'fair', 9, 0, 'complaint'),
-    (2, '2024-03-01', 'fair', 9, 0, 'complaint'),
-    (2, '2024-04-01', 'fair', 9, 0, 'complaint'),
-    (2, '2024-05-01', 'fair', 9, 0, 'complaint'),
-    (2, '2024-06-01', 'fair', 9, 0, 'complaint'),
-    (2, '2024-07-01', 'fair', 12, 0, 'complaint'),
-    (2, '2024-08-01', 'fair', 12, 0, 'complaint'),
-    (2, '2024-09-01', 'fair', 12, 0, 'complaint'),
-    (2, '2024-10-01', 'fair', 12, 0, 'complaint'),
-    (2, '2024-11-01', 'fair', 12, 0, 'complaint'),
-    (2, '2024-12-01', 'fair', 12, 0, 'complaint'),
-    (2, '2025-01-01', 'fair', 15, 0, 'complaint'),
-    (2, '2025-02-01', 'fair', 15, 0, 'complaint'),
-    (2, '2025-03-01', 'fair', 15, 0, 'complaint'),
-    (2, '2025-04-01', 'fair', 15, 0, 'complaint'),
-    (2, '2025-05-01', 'fair', 15, 0, 'complaint'),
-    (2, '2025-06-01', 'fair', 15, 0, 'complaint'),
-    (2, '2025-07-01', 'fair', 19, 0, 'complaint'),
-    (2, '2025-08-01', 'fair', 19, 0, 'complaint'),
-    (2, '2025-09-01', 'under_construction', 19, 1, 'project'),
-    (2, '2025-10-01', 'under_construction', 19, 1, 'project'),
-    (2, '2025-11-01', 'under_construction', 19, 1, 'project'),
-    (2, '2025-12-01', 'fair', 19, 0, 'complaint'),
-    (2, '2026-01-01', 'fair', 24, 0, 'complaint'),
-    (2, '2026-02-01', 'fair', 24, 0, 'complaint'),
-    (2, '2026-03-01', 'fair', 24, 0, 'complaint'),
-    (2, '2026-04-01', 'fair', 24, 0, 'complaint'),
-    (2, '2026-05-01', 'fair', 24, 0, 'complaint'),
-    (2, '2026-06-01', 'fair', 24, 0, 'complaint'),
-    (3, '2022-01-01', 'fair', 6, 0, 'complaint'),
-    (3, '2022-02-01', 'fair', 6, 0, 'complaint'),
-    (3, '2022-03-01', 'fair', 6, 0, 'complaint'),
-    (3, '2022-04-01', 'fair', 6, 0, 'complaint'),
-    (3, '2022-05-01', 'fair', 6, 0, 'complaint'),
-    (3, '2022-06-01', 'fair', 6, 0, 'complaint'),
-    (3, '2022-07-01', 'fair', 9, 0, 'complaint'),
-    (3, '2022-08-01', 'fair', 9, 0, 'complaint'),
-    (3, '2022-09-01', 'fair', 9, 0, 'complaint'),
-    (3, '2022-10-01', 'fair', 9, 0, 'complaint'),
-    (3, '2022-11-01', 'fair', 9, 0, 'complaint'),
-    (3, '2022-12-01', 'fair', 9, 0, 'complaint'),
-    (3, '2023-01-01', 'fair', 13, 0, 'complaint'),
-    (3, '2023-02-01', 'fair', 13, 0, 'complaint'),
-    (3, '2023-03-01', 'fair', 13, 0, 'complaint'),
-    (3, '2023-04-01', 'fair', 13, 0, 'complaint'),
-    (3, '2023-05-01', 'fair', 13, 0, 'complaint'),
-    (3, '2023-06-01', 'fair', 13, 0, 'complaint'),
-    (3, '2023-07-01', 'poor', 18, 0, 'complaint'),
-    (3, '2023-08-01', 'poor', 18, 0, 'complaint'),
-    (3, '2023-09-01', 'poor', 18, 0, 'complaint'),
-    (3, '2023-10-01', 'poor', 18, 0, 'complaint'),
-    (3, '2023-11-01', 'poor', 18, 0, 'complaint'),
-    (3, '2023-12-01', 'poor', 18, 0, 'complaint'),
-    (3, '2024-01-01', 'poor', 24, 0, 'complaint'),
-    (3, '2024-02-01', 'poor', 24, 0, 'complaint'),
-    (3, '2024-03-01', 'poor', 24, 0, 'complaint'),
-    (3, '2024-04-01', 'poor', 24, 0, 'complaint'),
-    (3, '2024-05-01', 'poor', 24, 1, 'project'),
-    (3, '2024-06-01', 'poor', 24, 1, 'project'),
-    (3, '2024-07-01', 'poor', 31, 1, 'project'),
-    (3, '2024-08-01', 'poor', 31, 1, 'project'),
-    (3, '2024-09-01', 'poor', 31, 1, 'project'),
-    (3, '2024-10-01', 'poor', 31, 1, 'project'),
-    (3, '2024-11-01', 'poor', 31, 1, 'project'),
-    (3, '2024-12-01', 'poor', 31, 1, 'project'),
-    (3, '2025-01-01', 'poor', 37, 1, 'project'),
-    (3, '2025-02-01', 'poor', 37, 1, 'project'),
-    (3, '2025-03-01', 'poor', 37, 1, 'project'),
-    (3, '2025-04-01', 'poor', 37, 1, 'project'),
-    (3, '2025-05-01', 'poor', 37, 1, 'project'),
-    (3, '2025-06-01', 'poor', 37, 1, 'project'),
-    (3, '2025-07-01', 'poor', 44, 1, 'project'),
-    (3, '2025-08-01', 'poor', 44, 1, 'project'),
-    (3, '2025-09-01', 'poor', 44, 1, 'project'),
-    (3, '2025-10-01', 'poor', 44, 1, 'project'),
-    (3, '2025-11-01', 'poor', 44, 1, 'project'),
-    (3, '2025-12-01', 'poor', 44, 1, 'project'),
-    (3, '2026-01-01', 'poor', 52, 1, 'project'),
-    (3, '2026-02-01', 'poor', 52, 1, 'project'),
-    (3, '2026-03-01', 'poor', 52, 2, 'project'),
-    (3, '2026-04-01', 'poor', 52, 2, 'project'),
-    (3, '2026-05-01', 'poor', 52, 2, 'project'),
-    (3, '2026-06-01', 'poor', 52, 2, 'project'),
-    (4, '2022-01-01', 'good', 1, 0, 'complaint'),
-    (4, '2022-02-01', 'good', 1, 0, 'complaint'),
-    (4, '2022-03-01', 'good', 1, 0, 'complaint'),
-    (4, '2022-04-01', 'good', 1, 0, 'complaint'),
-    (4, '2022-05-01', 'good', 1, 0, 'complaint'),
-    (4, '2022-06-01', 'good', 1, 0, 'complaint'),
-    (4, '2022-07-01', 'good', 2, 0, 'complaint'),
-    (4, '2022-08-01', 'good', 2, 0, 'complaint'),
-    (4, '2022-09-01', 'good', 2, 0, 'complaint'),
-    (4, '2022-10-01', 'good', 2, 0, 'complaint'),
-    (4, '2022-11-01', 'good', 2, 0, 'complaint'),
-    (4, '2022-12-01', 'good', 2, 0, 'complaint'),
-    (4, '2023-01-01', 'good', 3, 0, 'complaint'),
-    (4, '2023-02-01', 'good', 3, 0, 'complaint'),
-    (4, '2023-03-01', 'good', 3, 0, 'complaint'),
-    (4, '2023-04-01', 'good', 3, 0, 'complaint'),
-    (4, '2023-05-01', 'good', 3, 0, 'complaint'),
-    (4, '2023-06-01', 'good', 3, 0, 'complaint'),
-    (4, '2023-07-01', 'good', 4, 0, 'complaint'),
-    (4, '2023-08-01', 'good', 4, 0, 'complaint'),
-    (4, '2023-09-01', 'good', 4, 0, 'complaint'),
-    (4, '2023-10-01', 'good', 4, 0, 'complaint'),
-    (4, '2023-11-01', 'good', 4, 0, 'complaint'),
-    (4, '2023-12-01', 'good', 4, 0, 'complaint'),
-    (4, '2024-01-01', 'fair', 5, 0, 'complaint'),
-    (4, '2024-02-01', 'fair', 5, 0, 'complaint'),
-    (4, '2024-03-01', 'fair', 5, 0, 'complaint'),
-    (4, '2024-04-01', 'fair', 5, 0, 'complaint'),
-    (4, '2024-05-01', 'fair', 5, 0, 'complaint'),
-    (4, '2024-06-01', 'fair', 5, 0, 'complaint'),
-    (4, '2024-07-01', 'fair', 6, 0, 'complaint'),
-    (4, '2024-08-01', 'fair', 6, 0, 'complaint'),
-    (4, '2024-09-01', 'fair', 6, 0, 'complaint'),
-    (4, '2024-10-01', 'fair', 6, 0, 'complaint'),
-    (4, '2024-11-01', 'fair', 6, 0, 'complaint'),
-    (4, '2024-12-01', 'fair', 6, 0, 'complaint'),
-    (4, '2025-01-01', 'fair', 7, 0, 'complaint'),
-    (4, '2025-02-01', 'fair', 7, 0, 'complaint'),
-    (4, '2025-03-01', 'fair', 7, 0, 'complaint'),
-    (4, '2025-04-01', 'fair', 7, 0, 'complaint'),
-    (4, '2025-05-01', 'fair', 7, 0, 'complaint'),
-    (4, '2025-06-01', 'fair', 7, 0, 'complaint'),
-    (4, '2025-07-01', 'fair', 9, 0, 'complaint'),
-    (4, '2025-08-01', 'fair', 9, 0, 'complaint'),
-    (4, '2025-09-01', 'fair', 9, 0, 'complaint'),
-    (4, '2025-10-01', 'under_construction', 9, 1, 'project'),
-    (4, '2025-11-01', 'under_construction', 9, 1, 'project'),
-    (4, '2025-12-01', 'under_construction', 9, 1, 'project'),
-    (4, '2026-01-01', 'under_construction', 11, 1, 'project'),
-    (4, '2026-02-01', 'under_construction', 11, 1, 'project'),
-    (4, '2026-03-01', 'under_construction', 11, 1, 'project'),
-    (4, '2026-04-01', 'under_construction', 11, 1, 'project'),
-    (4, '2026-05-01', 'under_construction', 11, 1, 'project'),
-    (4, '2026-06-01', 'under_construction', 11, 1, 'project'),
-    (5, '2022-01-01', 'fair', 4, 0, 'complaint'),
-    (5, '2022-02-01', 'fair', 4, 0, 'complaint'),
-    (5, '2022-03-01', 'fair', 4, 0, 'complaint'),
-    (5, '2022-04-01', 'fair', 4, 0, 'complaint'),
-    (5, '2022-05-01', 'fair', 4, 0, 'complaint'),
-    (5, '2022-06-01', 'fair', 4, 0, 'complaint'),
-    (5, '2022-07-01', 'fair', 6, 0, 'complaint'),
-    (5, '2022-08-01', 'fair', 6, 0, 'complaint'),
-    (5, '2022-09-01', 'fair', 6, 0, 'complaint'),
-    (5, '2022-10-01', 'fair', 6, 0, 'complaint'),
-    (5, '2022-11-01', 'fair', 6, 0, 'complaint'),
-    (5, '2022-12-01', 'fair', 6, 0, 'complaint'),
-    (5, '2023-01-01', 'poor', 9, 0, 'complaint'),
-    (5, '2023-02-01', 'poor', 9, 0, 'complaint'),
-    (5, '2023-03-01', 'poor', 9, 0, 'complaint'),
-    (5, '2023-04-01', 'poor', 9, 0, 'complaint'),
-    (5, '2023-05-01', 'poor', 9, 0, 'complaint'),
-    (5, '2023-06-01', 'poor', 9, 0, 'complaint'),
-    (5, '2023-07-01', 'poor', 13, 0, 'complaint'),
-    (5, '2023-08-01', 'poor', 13, 0, 'complaint'),
-    (5, '2023-09-01', 'poor', 13, 0, 'complaint'),
-    (5, '2023-10-01', 'poor', 13, 0, 'complaint'),
-    (5, '2023-11-01', 'poor', 13, 0, 'complaint'),
-    (5, '2023-12-01', 'poor', 13, 0, 'complaint'),
-    (5, '2024-01-01', 'poor', 18, 0, 'complaint'),
-    (5, '2024-02-01', 'poor', 18, 0, 'complaint'),
-    (5, '2024-03-01', 'poor', 18, 0, 'complaint'),
-    (5, '2024-04-01', 'poor', 18, 0, 'complaint'),
-    (5, '2024-05-01', 'poor', 18, 0, 'complaint'),
-    (5, '2024-06-01', 'poor', 18, 0, 'complaint'),
-    (5, '2024-07-01', 'poor', 23, 0, 'complaint'),
-    (5, '2024-08-01', 'poor', 23, 0, 'complaint'),
-    (5, '2024-09-01', 'poor', 23, 0, 'complaint'),
-    (5, '2024-10-01', 'poor', 23, 0, 'complaint'),
-    (5, '2024-11-01', 'poor', 23, 1, 'project'),
-    (5, '2024-12-01', 'poor', 23, 1, 'project'),
-    (5, '2025-01-01', 'poor', 27, 1, 'project'),
-    (5, '2025-02-01', 'poor', 27, 1, 'project'),
-    (5, '2025-03-01', 'poor', 27, 1, 'project'),
-    (5, '2025-04-01', 'poor', 27, 1, 'project'),
-    (5, '2025-05-01', 'poor', 27, 1, 'project'),
-    (5, '2025-06-01', 'poor', 27, 1, 'project'),
-    (5, '2025-07-01', 'poor', 32, 1, 'project'),
-    (5, '2025-08-01', 'poor', 32, 1, 'project'),
-    (5, '2025-09-01', 'poor', 32, 1, 'project'),
-    (5, '2025-10-01', 'poor', 32, 1, 'project'),
-    (5, '2025-11-01', 'poor', 32, 1, 'project'),
-    (5, '2025-12-01', 'poor', 32, 1, 'project'),
-    (5, '2026-01-01', 'poor', 37, 1, 'project'),
-    (5, '2026-02-01', 'poor', 37, 1, 'project'),
-    (5, '2026-03-01', 'poor', 37, 1, 'project'),
-    (5, '2026-04-01', 'poor', 37, 1, 'project'),
-    (5, '2026-05-01', 'poor', 37, 1, 'project'),
-    (5, '2026-06-01', 'poor', 37, 1, 'project'),
-    (6, '2022-01-01', 'good', 0, 0, 'complaint'),
-    (6, '2022-02-01', 'good', 0, 0, 'complaint'),
-    (6, '2022-03-01', 'good', 0, 0, 'complaint'),
-    (6, '2022-04-01', 'good', 0, 0, 'complaint'),
-    (6, '2022-05-01', 'good', 0, 0, 'complaint'),
-    (6, '2022-06-01', 'good', 0, 0, 'complaint'),
-    (6, '2022-07-01', 'good', 0, 0, 'complaint'),
-    (6, '2022-08-01', 'good', 0, 0, 'complaint'),
-    (6, '2022-09-01', 'good', 0, 0, 'complaint'),
-    (6, '2022-10-01', 'good', 0, 0, 'complaint'),
-    (6, '2022-11-01', 'good', 0, 0, 'complaint'),
-    (6, '2022-12-01', 'good', 0, 0, 'complaint'),
-    (6, '2023-01-01', 'under_construction', 0, 1, 'project'),
-    (6, '2023-02-01', 'under_construction', 0, 1, 'project'),
-    (6, '2023-03-01', 'under_construction', 0, 1, 'project'),
-    (6, '2023-04-01', 'under_construction', 0, 1, 'project'),
-    (6, '2023-05-01', 'under_construction', 0, 1, 'project'),
-    (6, '2023-06-01', 'under_construction', 0, 1, 'project'),
-    (6, '2023-07-01', 'under_construction', 1, 1, 'project'),
-    (6, '2023-08-01', 'under_construction', 1, 1, 'project'),
-    (6, '2023-09-01', 'under_construction', 1, 1, 'project'),
-    (6, '2023-10-01', 'under_construction', 1, 1, 'project'),
-    (6, '2023-11-01', 'under_construction', 1, 1, 'project'),
-    (6, '2023-12-01', 'good', 1, 1, 'project'),
-    (6, '2024-01-01', 'good', 2, 0, 'complaint'),
-    (6, '2024-02-01', 'good', 2, 0, 'complaint'),
-    (6, '2024-03-01', 'good', 2, 0, 'complaint'),
-    (6, '2024-04-01', 'good', 2, 0, 'complaint'),
-    (6, '2024-05-01', 'good', 2, 0, 'complaint'),
-    (6, '2024-06-01', 'good', 2, 0, 'complaint'),
-    (6, '2024-07-01', 'good', 2, 0, 'complaint'),
-    (6, '2024-08-01', 'good', 2, 0, 'complaint'),
-    (6, '2024-09-01', 'good', 2, 0, 'complaint'),
-    (6, '2024-10-01', 'good', 2, 0, 'complaint'),
-    (6, '2024-11-01', 'good', 2, 0, 'complaint'),
-    (6, '2024-12-01', 'good', 2, 0, 'complaint'),
-    (6, '2025-01-01', 'good', 2, 0, 'complaint'),
-    (6, '2025-02-01', 'good', 2, 0, 'complaint'),
-    (6, '2025-03-01', 'good', 2, 0, 'complaint'),
-    (6, '2025-04-01', 'good', 2, 0, 'complaint'),
-    (6, '2025-05-01', 'good', 2, 0, 'complaint'),
-    (6, '2025-06-01', 'good', 2, 0, 'complaint'),
-    (6, '2025-07-01', 'good', 3, 0, 'complaint'),
-    (6, '2025-08-01', 'good', 3, 0, 'complaint'),
-    (6, '2025-09-01', 'good', 3, 0, 'complaint'),
-    (6, '2025-10-01', 'good', 3, 0, 'complaint'),
-    (6, '2025-11-01', 'good', 3, 0, 'complaint'),
-    (6, '2025-12-01', 'good', 3, 0, 'complaint'),
-    (6, '2026-01-01', 'good', 4, 0, 'complaint'),
-    (6, '2026-02-01', 'good', 4, 0, 'complaint'),
-    (6, '2026-03-01', 'good', 4, 0, 'complaint'),
-    (6, '2026-04-01', 'good', 4, 0, 'complaint'),
-    (6, '2026-05-01', 'good', 4, 0, 'complaint'),
-    (6, '2026-06-01', 'good', 4, 0, 'complaint'),
-    (7, '2022-01-01', 'fair', 2, 0, 'complaint'),
-    (7, '2022-02-01', 'fair', 2, 0, 'complaint'),
-    (7, '2022-03-01', 'fair', 2, 0, 'complaint'),
-    (7, '2022-04-01', 'fair', 2, 0, 'complaint'),
-    (7, '2022-05-01', 'fair', 2, 0, 'complaint'),
-    (7, '2022-06-01', 'fair', 2, 0, 'complaint'),
-    (7, '2022-07-01', 'fair', 3, 0, 'complaint'),
-    (7, '2022-08-01', 'fair', 3, 0, 'complaint'),
-    (7, '2022-09-01', 'fair', 3, 0, 'complaint'),
-    (7, '2022-10-01', 'fair', 3, 0, 'complaint'),
-    (7, '2022-11-01', 'fair', 3, 0, 'complaint'),
-    (7, '2022-12-01', 'fair', 3, 0, 'complaint'),
-    (7, '2023-01-01', 'fair', 4, 0, 'complaint'),
-    (7, '2023-02-01', 'fair', 4, 0, 'complaint'),
-    (7, '2023-03-01', 'fair', 4, 0, 'complaint'),
-    (7, '2023-04-01', 'fair', 4, 0, 'complaint'),
-    (7, '2023-05-01', 'fair', 4, 0, 'complaint'),
-    (7, '2023-06-01', 'fair', 4, 0, 'complaint'),
-    (7, '2023-07-01', 'fair', 5, 0, 'complaint'),
-    (7, '2023-08-01', 'fair', 5, 0, 'complaint'),
-    (7, '2023-09-01', 'fair', 5, 0, 'complaint'),
-    (7, '2023-10-01', 'fair', 5, 0, 'complaint'),
-    (7, '2023-11-01', 'fair', 5, 0, 'complaint'),
-    (7, '2023-12-01', 'fair', 5, 0, 'complaint'),
-    (7, '2024-01-01', 'fair', 6, 0, 'complaint'),
-    (7, '2024-02-01', 'under_construction', 6, 1, 'project'),
-    (7, '2024-03-01', 'under_construction', 6, 1, 'project'),
-    (7, '2024-04-01', 'under_construction', 6, 1, 'project'),
-    (7, '2024-05-01', 'under_construction', 6, 1, 'project'),
-    (7, '2024-06-01', 'under_construction', 6, 1, 'project'),
-    (7, '2024-07-01', 'under_construction', 7, 1, 'project'),
-    (7, '2024-08-01', 'under_construction', 7, 1, 'project'),
-    (7, '2024-09-01', 'under_construction', 7, 1, 'project'),
-    (7, '2024-10-01', 'under_construction', 7, 1, 'project'),
-    (7, '2024-11-01', 'under_construction', 7, 1, 'project'),
-    (7, '2024-12-01', 'under_construction', 7, 1, 'project'),
-    (7, '2025-01-01', 'under_construction', 8, 1, 'project'),
-    (7, '2025-02-01', 'good', 8, 0, 'complaint'),
-    (7, '2025-03-01', 'good', 8, 0, 'complaint'),
-    (7, '2025-04-01', 'good', 8, 0, 'complaint'),
-    (7, '2025-05-01', 'good', 8, 0, 'complaint'),
-    (7, '2025-06-01', 'good', 8, 0, 'complaint'),
-    (7, '2025-07-01', 'good', 9, 0, 'complaint'),
-    (7, '2025-08-01', 'good', 9, 0, 'complaint'),
-    (7, '2025-09-01', 'good', 9, 0, 'complaint'),
-    (7, '2025-10-01', 'good', 9, 0, 'complaint'),
-    (7, '2025-11-01', 'good', 9, 0, 'complaint'),
-    (7, '2025-12-01', 'good', 9, 0, 'complaint'),
-    (7, '2026-01-01', 'good', 10, 0, 'complaint'),
-    (7, '2026-02-01', 'good', 10, 0, 'complaint'),
-    (7, '2026-03-01', 'good', 10, 0, 'complaint'),
-    (7, '2026-04-01', 'good', 10, 0, 'complaint'),
-    (7, '2026-05-01', 'good', 10, 0, 'complaint'),
-    (7, '2026-06-01', 'good', 10, 0, 'complaint'),
-    (8, '2022-01-01', 'good', 1, 0, 'complaint'),
-    (8, '2022-02-01', 'good', 1, 0, 'complaint'),
-    (8, '2022-03-01', 'fair', 1, 0, 'complaint'),
-    (8, '2022-04-01', 'fair', 1, 0, 'complaint'),
-    (8, '2022-05-01', 'fair', 1, 0, 'complaint'),
-    (8, '2022-06-01', 'fair', 1, 0, 'complaint'),
-    (8, '2022-07-01', 'fair', 2, 0, 'complaint'),
-    (8, '2022-08-01', 'fair', 2, 0, 'complaint'),
-    (8, '2022-09-01', 'fair', 2, 0, 'complaint'),
-    (8, '2022-10-01', 'fair', 2, 0, 'complaint'),
-    (8, '2022-11-01', 'fair', 2, 0, 'complaint'),
-    (8, '2022-12-01', 'fair', 2, 0, 'complaint'),
-    (8, '2023-01-01', 'fair', 3, 0, 'complaint'),
-    (8, '2023-02-01', 'fair', 3, 0, 'complaint'),
-    (8, '2023-03-01', 'fair', 3, 0, 'complaint'),
-    (8, '2023-04-01', 'fair', 3, 0, 'complaint'),
-    (8, '2023-05-01', 'fair', 3, 0, 'complaint'),
-    (8, '2023-06-01', 'fair', 3, 0, 'complaint'),
-    (8, '2023-07-01', 'fair', 4, 0, 'complaint'),
-    (8, '2023-08-01', 'fair', 4, 0, 'complaint'),
-    (8, '2023-09-01', 'fair', 4, 0, 'complaint'),
-    (8, '2023-10-01', 'fair', 4, 0, 'complaint'),
-    (8, '2023-11-01', 'fair', 4, 0, 'complaint'),
-    (8, '2023-12-01', 'fair', 4, 0, 'complaint'),
-    (8, '2024-01-01', 'fair', 5, 0, 'complaint'),
-    (8, '2024-02-01', 'fair', 5, 0, 'complaint'),
-    (8, '2024-03-01', 'fair', 5, 0, 'complaint'),
-    (8, '2024-04-01', 'fair', 5, 0, 'complaint'),
-    (8, '2024-05-01', 'fair', 5, 0, 'complaint'),
-    (8, '2024-06-01', 'fair', 5, 0, 'complaint'),
-    (8, '2024-07-01', 'fair', 7, 0, 'complaint'),
-    (8, '2024-08-01', 'fair', 7, 0, 'complaint'),
-    (8, '2024-09-01', 'fair', 7, 0, 'complaint'),
-    (8, '2024-10-01', 'fair', 7, 0, 'complaint'),
-    (8, '2024-11-01', 'fair', 7, 0, 'complaint'),
-    (8, '2024-12-01', 'fair', 7, 0, 'complaint'),
-    (8, '2025-01-01', 'fair', 9, 0, 'complaint'),
-    (8, '2025-02-01', 'fair', 9, 0, 'complaint'),
-    (8, '2025-03-01', 'fair', 9, 0, 'complaint'),
-    (8, '2025-04-01', 'fair', 9, 0, 'complaint'),
-    (8, '2025-05-01', 'under_construction', 9, 1, 'project'),
-    (8, '2025-06-01', 'under_construction', 9, 1, 'project'),
-    (8, '2025-07-01', 'fair', 11, 0, 'complaint'),
-    (8, '2025-08-01', 'fair', 11, 0, 'complaint'),
-    (8, '2025-09-01', 'fair', 11, 0, 'complaint'),
-    (8, '2025-10-01', 'fair', 11, 0, 'complaint'),
-    (8, '2025-11-01', 'fair', 11, 0, 'complaint'),
-    (8, '2025-12-01', 'fair', 11, 0, 'complaint'),
-    (8, '2026-01-01', 'fair', 12, 0, 'complaint'),
-    (8, '2026-02-01', 'fair', 12, 0, 'complaint'),
-    (8, '2026-03-01', 'fair', 12, 0, 'complaint'),
-    (8, '2026-04-01', 'fair', 12, 0, 'complaint'),
-    (8, '2026-05-01', 'fair', 12, 0, 'complaint'),
-    (8, '2026-06-01', 'fair', 12, 0, 'complaint'),
-    (9, '2022-01-01', 'good', 2, 0, 'complaint'),
-    (9, '2022-02-01', 'good', 2, 0, 'complaint'),
-    (9, '2022-03-01', 'good', 2, 0, 'complaint'),
-    (9, '2022-04-01', 'good', 2, 0, 'complaint'),
-    (9, '2022-05-01', 'good', 2, 0, 'complaint'),
-    (9, '2022-06-01', 'good', 2, 0, 'complaint'),
-    (9, '2022-07-01', 'good', 3, 0, 'complaint'),
-    (9, '2022-08-01', 'good', 3, 0, 'complaint'),
-    (9, '2022-09-01', 'good', 3, 0, 'complaint'),
-    (9, '2022-10-01', 'good', 3, 0, 'complaint'),
-    (9, '2022-11-01', 'good', 3, 0, 'complaint'),
-    (9, '2022-12-01', 'good', 3, 0, 'complaint'),
-    (9, '2023-01-01', 'good', 4, 0, 'complaint'),
-    (9, '2023-02-01', 'good', 4, 0, 'complaint'),
-    (9, '2023-03-01', 'good', 4, 0, 'complaint'),
-    (9, '2023-04-01', 'good', 4, 0, 'complaint'),
-    (9, '2023-05-01', 'good', 4, 0, 'complaint'),
-    (9, '2023-06-01', 'good', 4, 0, 'complaint'),
-    (9, '2023-07-01', 'fair', 5, 0, 'complaint'),
-    (9, '2023-08-01', 'fair', 5, 0, 'complaint'),
-    (9, '2023-09-01', 'fair', 5, 0, 'complaint'),
-    (9, '2023-10-01', 'fair', 5, 0, 'complaint'),
-    (9, '2023-11-01', 'fair', 5, 0, 'complaint'),
-    (9, '2023-12-01', 'fair', 5, 0, 'complaint'),
-    (9, '2024-01-01', 'fair', 6, 0, 'complaint'),
-    (9, '2024-02-01', 'fair', 6, 0, 'complaint'),
-    (9, '2024-03-01', 'fair', 6, 0, 'complaint'),
-    (9, '2024-04-01', 'fair', 6, 0, 'complaint'),
-    (9, '2024-05-01', 'fair', 6, 0, 'complaint'),
-    (9, '2024-06-01', 'fair', 6, 0, 'complaint'),
-    (9, '2024-07-01', 'fair', 8, 0, 'complaint'),
-    (9, '2024-08-01', 'fair', 8, 0, 'complaint'),
-    (9, '2024-09-01', 'fair', 8, 0, 'complaint'),
-    (9, '2024-10-01', 'fair', 8, 0, 'complaint'),
-    (9, '2024-11-01', 'fair', 8, 0, 'complaint'),
-    (9, '2024-12-01', 'fair', 8, 0, 'complaint'),
-    (9, '2025-01-01', 'fair', 10, 0, 'complaint'),
-    (9, '2025-02-01', 'fair', 10, 0, 'complaint'),
-    (9, '2025-03-01', 'fair', 10, 0, 'complaint'),
-    (9, '2025-04-01', 'fair', 10, 0, 'complaint'),
-    (9, '2025-05-01', 'fair', 10, 0, 'complaint'),
-    (9, '2025-06-01', 'fair', 10, 0, 'complaint'),
-    (9, '2025-07-01', 'fair', 12, 0, 'complaint'),
-    (9, '2025-08-01', 'fair', 12, 0, 'complaint'),
-    (9, '2025-09-01', 'fair', 12, 0, 'complaint'),
-    (9, '2025-10-01', 'fair', 12, 0, 'complaint'),
-    (9, '2025-11-01', 'under_construction', 12, 1, 'project'),
-    (9, '2025-12-01', 'under_construction', 12, 1, 'project'),
-    (9, '2026-01-01', 'under_construction', 14, 1, 'project'),
-    (9, '2026-02-01', 'under_construction', 14, 1, 'project'),
-    (9, '2026-03-01', 'under_construction', 14, 1, 'project'),
-    (9, '2026-04-01', 'under_construction', 14, 1, 'project'),
-    (9, '2026-05-01', 'under_construction', 14, 1, 'project'),
-    (9, '2026-06-01', 'under_construction', 14, 1, 'project'),
-    (10, '2022-01-01', 'fair', 2, 0, 'complaint'),
-    (10, '2022-02-01', 'fair', 2, 0, 'complaint'),
-    (10, '2022-03-01', 'fair', 2, 0, 'complaint'),
-    (10, '2022-04-01', 'fair', 2, 0, 'complaint'),
-    (10, '2022-05-01', 'fair', 2, 0, 'complaint'),
-    (10, '2022-06-01', 'fair', 2, 0, 'complaint'),
-    (10, '2022-07-01', 'fair', 3, 0, 'complaint'),
-    (10, '2022-08-01', 'fair', 3, 0, 'complaint'),
-    (10, '2022-09-01', 'fair', 3, 0, 'complaint'),
-    (10, '2022-10-01', 'fair', 3, 0, 'complaint'),
-    (10, '2022-11-01', 'fair', 3, 0, 'complaint'),
-    (10, '2022-12-01', 'fair', 3, 0, 'complaint'),
-    (10, '2023-01-01', 'fair', 4, 0, 'complaint'),
-    (10, '2023-02-01', 'fair', 4, 0, 'complaint'),
-    (10, '2023-03-01', 'fair', 4, 0, 'complaint'),
-    (10, '2023-04-01', 'fair', 4, 0, 'complaint'),
-    (10, '2023-05-01', 'fair', 4, 0, 'complaint'),
-    (10, '2023-06-01', 'fair', 4, 0, 'complaint'),
-    (10, '2023-07-01', 'fair', 6, 0, 'complaint'),
-    (10, '2023-08-01', 'fair', 6, 0, 'complaint'),
-    (10, '2023-09-01', 'fair', 6, 0, 'complaint'),
-    (10, '2023-10-01', 'fair', 6, 0, 'complaint'),
-    (10, '2023-11-01', 'fair', 6, 0, 'complaint'),
-    (10, '2023-12-01', 'fair', 6, 0, 'complaint'),
-    (10, '2024-01-01', 'fair', 8, 0, 'complaint'),
-    (10, '2024-02-01', 'fair', 8, 0, 'complaint'),
-    (10, '2024-03-01', 'under_construction', 8, 1, 'project'),
-    (10, '2024-04-01', 'under_construction', 8, 1, 'project'),
-    (10, '2024-05-01', 'under_construction', 8, 1, 'project'),
-    (10, '2024-06-01', 'under_construction', 8, 1, 'project'),
-    (10, '2024-07-01', 'under_construction', 10, 1, 'project'),
-    (10, '2024-08-01', 'under_construction', 10, 1, 'project'),
-    (10, '2024-09-01', 'under_construction', 10, 1, 'project'),
-    (10, '2024-10-01', 'under_construction', 10, 1, 'project'),
-    (10, '2024-11-01', 'under_construction', 10, 1, 'project'),
-    (10, '2024-12-01', 'under_construction', 10, 1, 'project'),
-    (10, '2025-01-01', 'good', 12, 0, 'complaint'),
-    (10, '2025-02-01', 'good', 12, 0, 'complaint'),
-    (10, '2025-03-01', 'good', 12, 0, 'complaint'),
-    (10, '2025-04-01', 'good', 12, 0, 'complaint'),
-    (10, '2025-05-01', 'good', 12, 0, 'complaint'),
-    (10, '2025-06-01', 'good', 12, 0, 'complaint'),
-    (10, '2025-07-01', 'good', 12, 0, 'complaint'),
-    (10, '2025-08-01', 'good', 12, 0, 'complaint'),
-    (10, '2025-09-01', 'good', 12, 0, 'complaint'),
-    (10, '2025-10-01', 'good', 12, 0, 'complaint'),
-    (10, '2025-11-01', 'good', 12, 0, 'complaint'),
-    (10, '2025-12-01', 'good', 12, 0, 'complaint'),
-    (10, '2026-01-01', 'good', 12, 0, 'complaint'),
-    (10, '2026-02-01', 'good', 12, 0, 'complaint'),
-    (10, '2026-03-01', 'good', 12, 0, 'complaint'),
-    (10, '2026-04-01', 'good', 12, 0, 'complaint'),
-    (10, '2026-05-01', 'good', 12, 0, 'complaint'),
-    (10, '2026-06-01', 'good', 12, 0, 'complaint'),
-    (11, '2022-01-01', 'good', 0, 0, 'complaint'),
-    (11, '2022-02-01', 'good', 0, 0, 'complaint'),
-    (11, '2022-03-01', 'good', 0, 0, 'complaint'),
-    (11, '2022-04-01', 'good', 0, 0, 'complaint'),
-    (11, '2022-05-01', 'good', 0, 0, 'complaint'),
-    (11, '2022-06-01', 'good', 0, 0, 'complaint'),
-    (11, '2022-07-01', 'good', 0, 0, 'complaint'),
-    (11, '2022-08-01', 'good', 0, 0, 'complaint'),
-    (11, '2022-09-01', 'good', 0, 0, 'complaint'),
-    (11, '2022-10-01', 'good', 0, 0, 'complaint'),
-    (11, '2022-11-01', 'good', 0, 0, 'complaint'),
-    (11, '2022-12-01', 'good', 0, 0, 'complaint'),
-    (11, '2023-01-01', 'good', 0, 0, 'complaint'),
-    (11, '2023-02-01', 'good', 0, 0, 'complaint'),
-    (11, '2023-03-01', 'good', 0, 0, 'complaint'),
-    (11, '2023-04-01', 'good', 0, 0, 'complaint'),
-    (11, '2023-05-01', 'good', 0, 0, 'complaint'),
-    (11, '2023-06-01', 'good', 0, 0, 'complaint'),
-    (11, '2023-07-01', 'good', 0, 0, 'complaint'),
-    (11, '2023-08-01', 'good', 0, 0, 'complaint'),
-    (11, '2023-09-01', 'good', 0, 0, 'complaint'),
-    (11, '2023-10-01', 'good', 0, 0, 'complaint'),
-    (11, '2023-11-01', 'good', 0, 0, 'complaint'),
-    (11, '2023-12-01', 'good', 0, 0, 'complaint'),
-    (11, '2024-01-01', 'good', 0, 0, 'complaint'),
-    (11, '2024-02-01', 'good', 0, 0, 'complaint'),
-    (11, '2024-03-01', 'good', 0, 0, 'complaint'),
-    (11, '2024-04-01', 'good', 0, 0, 'complaint'),
-    (11, '2024-05-01', 'good', 0, 0, 'complaint'),
-    (11, '2024-06-01', 'good', 0, 0, 'complaint'),
-    (11, '2024-07-01', 'good', 0, 0, 'complaint'),
-    (11, '2024-08-01', 'good', 0, 0, 'complaint'),
-    (11, '2024-09-01', 'good', 0, 0, 'complaint'),
-    (11, '2024-10-01', 'good', 0, 0, 'complaint'),
-    (11, '2024-11-01', 'good', 0, 0, 'complaint'),
-    (11, '2024-12-01', 'good', 0, 0, 'complaint'),
-    (11, '2025-01-01', 'under_construction', 0, 1, 'project'),
-    (11, '2025-02-01', 'under_construction', 0, 1, 'project'),
-    (11, '2025-03-01', 'under_construction', 0, 1, 'project'),
-    (11, '2025-04-01', 'under_construction', 0, 1, 'project'),
-    (11, '2025-05-01', 'under_construction', 0, 1, 'project'),
-    (11, '2025-06-01', 'under_construction', 0, 1, 'project'),
-    (11, '2025-07-01', 'good', 1, 0, 'complaint'),
-    (11, '2025-08-01', 'good', 1, 0, 'complaint'),
-    (11, '2025-09-01', 'good', 1, 0, 'complaint'),
-    (11, '2025-10-01', 'good', 1, 0, 'complaint'),
-    (11, '2025-11-01', 'good', 1, 0, 'complaint'),
-    (11, '2025-12-01', 'good', 1, 0, 'complaint'),
-    (11, '2026-01-01', 'good', 1, 0, 'complaint'),
-    (11, '2026-02-01', 'good', 1, 0, 'complaint'),
-    (11, '2026-03-01', 'good', 1, 0, 'complaint'),
-    (11, '2026-04-01', 'good', 1, 0, 'complaint'),
-    (11, '2026-05-01', 'good', 1, 0, 'complaint'),
-    (11, '2026-06-01', 'good', 1, 0, 'complaint'),
-    (12, '2022-01-01', 'good', 2, 0, 'complaint'),
-    (12, '2022-02-01', 'good', 2, 0, 'complaint'),
-    (12, '2022-03-01', 'good', 2, 0, 'complaint'),
-    (12, '2022-04-01', 'good', 2, 0, 'complaint'),
-    (12, '2022-05-01', 'good', 2, 0, 'complaint'),
-    (12, '2022-06-01', 'good', 2, 0, 'complaint'),
-    (12, '2022-07-01', 'good', 3, 0, 'complaint'),
-    (12, '2022-08-01', 'good', 3, 0, 'complaint'),
-    (12, '2022-09-01', 'good', 3, 0, 'complaint'),
-    (12, '2022-10-01', 'good', 3, 0, 'complaint'),
-    (12, '2022-11-01', 'good', 3, 0, 'complaint'),
-    (12, '2022-12-01', 'good', 3, 0, 'complaint'),
-    (12, '2023-01-01', 'good', 4, 0, 'complaint'),
-    (12, '2023-02-01', 'good', 4, 0, 'complaint'),
-    (12, '2023-03-01', 'good', 4, 0, 'complaint'),
-    (12, '2023-04-01', 'good', 4, 0, 'complaint'),
-    (12, '2023-05-01', 'good', 4, 0, 'complaint'),
-    (12, '2023-06-01', 'under_construction', 4, 1, 'project'),
-    (12, '2023-07-01', 'fair', 6, 0, 'complaint'),
-    (12, '2023-08-01', 'fair', 6, 0, 'complaint'),
-    (12, '2023-09-01', 'fair', 6, 0, 'complaint'),
-    (12, '2023-10-01', 'fair', 6, 0, 'complaint'),
-    (12, '2023-11-01', 'fair', 6, 0, 'complaint'),
-    (12, '2023-12-01', 'fair', 6, 0, 'complaint'),
-    (12, '2024-01-01', 'fair', 8, 0, 'complaint'),
-    (12, '2024-02-01', 'fair', 8, 0, 'complaint'),
-    (12, '2024-03-01', 'fair', 8, 0, 'complaint'),
-    (12, '2024-04-01', 'fair', 8, 0, 'complaint'),
-    (12, '2024-05-01', 'fair', 8, 0, 'complaint'),
-    (12, '2024-06-01', 'fair', 8, 0, 'complaint'),
-    (12, '2024-07-01', 'fair', 10, 0, 'complaint'),
-    (12, '2024-08-01', 'fair', 10, 0, 'complaint'),
-    (12, '2024-09-01', 'fair', 10, 0, 'complaint'),
-    (12, '2024-10-01', 'fair', 10, 0, 'complaint'),
-    (12, '2024-11-01', 'fair', 10, 0, 'complaint'),
-    (12, '2024-12-01', 'fair', 10, 0, 'complaint'),
-    (12, '2025-01-01', 'fair', 12, 0, 'complaint'),
-    (12, '2025-02-01', 'fair', 12, 0, 'complaint'),
-    (12, '2025-03-01', 'fair', 12, 0, 'complaint'),
-    (12, '2025-04-01', 'fair', 12, 0, 'complaint'),
-    (12, '2025-05-01', 'fair', 12, 0, 'complaint'),
-    (12, '2025-06-01', 'fair', 12, 0, 'complaint'),
-    (12, '2025-07-01', 'fair', 15, 0, 'complaint'),
-    (12, '2025-08-01', 'fair', 15, 0, 'complaint'),
-    (12, '2025-09-01', 'fair', 15, 0, 'complaint'),
-    (12, '2025-10-01', 'fair', 15, 0, 'complaint'),
-    (12, '2025-11-01', 'fair', 15, 0, 'complaint'),
-    (12, '2025-12-01', 'under_construction', 15, 1, 'project'),
-    (12, '2026-01-01', 'under_construction', 18, 1, 'project'),
-    (12, '2026-02-01', 'under_construction', 18, 1, 'project'),
-    (12, '2026-03-01', 'under_construction', 18, 1, 'project'),
-    (12, '2026-04-01', 'under_construction', 18, 1, 'project'),
-    (12, '2026-05-01', 'under_construction', 18, 1, 'project'),
-    (12, '2026-06-01', 'under_construction', 18, 1, 'project'),
-    (13, '2022-01-01', 'good', 3, 0, 'complaint'),
-    (13, '2022-02-01', 'good', 3, 0, 'complaint'),
-    (13, '2022-03-01', 'good', 3, 0, 'complaint'),
-    (13, '2022-04-01', 'good', 3, 0, 'complaint'),
-    (13, '2022-05-01', 'good', 3, 0, 'complaint'),
-    (13, '2022-06-01', 'good', 3, 0, 'complaint'),
-    (13, '2022-07-01', 'good', 4, 0, 'complaint'),
-    (13, '2022-08-01', 'good', 4, 0, 'complaint'),
-    (13, '2022-09-01', 'good', 4, 0, 'complaint'),
-    (13, '2022-10-01', 'good', 4, 0, 'complaint'),
-    (13, '2022-11-01', 'good', 4, 0, 'complaint'),
-    (13, '2022-12-01', 'good', 4, 0, 'complaint'),
-    (13, '2023-01-01', 'good', 5, 0, 'complaint'),
-    (13, '2023-02-01', 'good', 5, 0, 'complaint'),
-    (13, '2023-03-01', 'good', 5, 0, 'complaint'),
-    (13, '2023-04-01', 'good', 5, 0, 'complaint'),
-    (13, '2023-05-01', 'good', 5, 0, 'complaint'),
-    (13, '2023-06-01', 'good', 5, 0, 'complaint'),
-    (13, '2023-07-01', 'fair', 7, 0, 'complaint'),
-    (13, '2023-08-01', 'fair', 7, 0, 'complaint'),
-    (13, '2023-09-01', 'fair', 7, 0, 'complaint'),
-    (13, '2023-10-01', 'fair', 7, 0, 'complaint'),
-    (13, '2023-11-01', 'fair', 7, 0, 'complaint'),
-    (13, '2023-12-01', 'fair', 7, 0, 'complaint'),
-    (13, '2024-01-01', 'fair', 9, 0, 'complaint'),
-    (13, '2024-02-01', 'fair', 9, 0, 'complaint'),
-    (13, '2024-03-01', 'fair', 9, 0, 'complaint'),
-    (13, '2024-04-01', 'fair', 9, 0, 'complaint'),
-    (13, '2024-05-01', 'fair', 9, 0, 'complaint'),
-    (13, '2024-06-01', 'fair', 9, 0, 'complaint'),
-    (13, '2024-07-01', 'fair', 11, 0, 'complaint'),
-    (13, '2024-08-01', 'fair', 11, 0, 'complaint'),
-    (13, '2024-09-01', 'fair', 11, 0, 'complaint'),
-    (13, '2024-10-01', 'fair', 11, 0, 'complaint'),
-    (13, '2024-11-01', 'fair', 11, 0, 'complaint'),
-    (13, '2024-12-01', 'fair', 11, 0, 'complaint'),
-    (13, '2025-01-01', 'fair', 13, 0, 'complaint'),
-    (13, '2025-02-01', 'fair', 13, 0, 'complaint'),
-    (13, '2025-03-01', 'fair', 13, 0, 'complaint'),
-    (13, '2025-04-01', 'fair', 13, 0, 'complaint'),
-    (13, '2025-05-01', 'fair', 13, 0, 'complaint'),
-    (13, '2025-06-01', 'under_construction', 13, 1, 'project'),
-    (13, '2025-07-01', 'under_construction', 16, 1, 'project'),
-    (13, '2025-08-01', 'under_construction', 16, 1, 'project'),
-    (13, '2025-09-01', 'under_construction', 16, 1, 'project'),
-    (13, '2025-10-01', 'under_construction', 16, 1, 'project'),
-    (13, '2025-11-01', 'under_construction', 16, 1, 'project'),
-    (13, '2025-12-01', 'under_construction', 16, 1, 'project'),
-    (13, '2026-01-01', 'under_construction', 18, 1, 'project'),
-    (13, '2026-02-01', 'under_construction', 18, 1, 'project'),
-    (13, '2026-03-01', 'under_construction', 18, 1, 'project'),
-    (13, '2026-04-01', 'under_construction', 18, 1, 'project'),
-    (13, '2026-05-01', 'under_construction', 18, 1, 'project'),
-    (13, '2026-06-01', 'under_construction', 18, 1, 'project'),
-    (14, '2022-01-01', 'fair', 5, 0, 'complaint'),
-    (14, '2022-02-01', 'fair', 5, 0, 'complaint'),
-    (14, '2022-03-01', 'fair', 5, 0, 'complaint'),
-    (14, '2022-04-01', 'fair', 5, 0, 'complaint'),
-    (14, '2022-05-01', 'fair', 5, 0, 'complaint'),
-    (14, '2022-06-01', 'fair', 5, 0, 'complaint'),
-    (14, '2022-07-01', 'fair', 7, 0, 'complaint'),
-    (14, '2022-08-01', 'fair', 7, 0, 'complaint'),
-    (14, '2022-09-01', 'fair', 7, 0, 'complaint'),
-    (14, '2022-10-01', 'fair', 7, 0, 'complaint'),
-    (14, '2022-11-01', 'fair', 7, 0, 'complaint'),
-    (14, '2022-12-01', 'fair', 7, 0, 'complaint'),
-    (14, '2023-01-01', 'poor', 10, 0, 'complaint'),
-    (14, '2023-02-01', 'poor', 10, 0, 'complaint'),
-    (14, '2023-03-01', 'poor', 10, 0, 'complaint'),
-    (14, '2023-04-01', 'poor', 10, 0, 'complaint'),
-    (14, '2023-05-01', 'poor', 10, 0, 'complaint'),
-    (14, '2023-06-01', 'poor', 10, 0, 'complaint'),
-    (14, '2023-07-01', 'poor', 14, 0, 'complaint'),
-    (14, '2023-08-01', 'poor', 14, 0, 'complaint'),
-    (14, '2023-09-01', 'poor', 14, 0, 'complaint'),
-    (14, '2023-10-01', 'poor', 14, 0, 'complaint'),
-    (14, '2023-11-01', 'poor', 14, 0, 'complaint'),
-    (14, '2023-12-01', 'poor', 14, 0, 'complaint'),
-    (14, '2024-01-01', 'poor', 19, 0, 'complaint'),
-    (14, '2024-02-01', 'poor', 19, 0, 'complaint'),
-    (14, '2024-03-01', 'poor', 19, 0, 'complaint'),
-    (14, '2024-04-01', 'poor', 19, 0, 'complaint'),
-    (14, '2024-05-01', 'poor', 19, 0, 'complaint'),
-    (14, '2024-06-01', 'poor', 19, 0, 'complaint'),
-    (14, '2024-07-01', 'poor', 24, 0, 'complaint'),
-    (14, '2024-08-01', 'poor', 24, 0, 'complaint'),
-    (14, '2024-09-01', 'poor', 24, 0, 'complaint'),
-    (14, '2024-10-01', 'poor', 24, 0, 'complaint'),
-    (14, '2024-11-01', 'poor', 24, 0, 'complaint'),
-    (14, '2024-12-01', 'poor', 24, 0, 'complaint'),
-    (14, '2025-01-01', 'poor', 29, 0, 'complaint'),
-    (14, '2025-02-01', 'poor', 29, 0, 'complaint'),
-    (14, '2025-03-01', 'under_construction', 29, 1, 'project'),
-    (14, '2025-04-01', 'under_construction', 29, 1, 'project'),
-    (14, '2025-05-01', 'under_construction', 29, 1, 'project'),
-    (14, '2025-06-01', 'under_construction', 29, 1, 'project'),
-    (14, '2025-07-01', 'under_construction', 35, 1, 'project'),
-    (14, '2025-08-01', 'under_construction', 35, 1, 'project'),
-    (14, '2025-09-01', 'under_construction', 35, 1, 'project'),
-    (14, '2025-10-01', 'fair', 35, 0, 'complaint'),
-    (14, '2025-11-01', 'fair', 35, 0, 'complaint'),
-    (14, '2025-12-01', 'fair', 35, 0, 'complaint'),
-    (14, '2026-01-01', 'fair', 39, 0, 'complaint'),
-    (14, '2026-02-01', 'fair', 39, 0, 'complaint'),
-    (14, '2026-03-01', 'fair', 39, 0, 'complaint'),
-    (14, '2026-04-01', 'fair', 39, 0, 'complaint'),
-    (14, '2026-05-01', 'fair', 39, 0, 'complaint'),
-    (14, '2026-06-01', 'fair', 39, 0, 'complaint'),
-    (15, '2022-01-01', 'fair', 2, 0, 'complaint'),
-    (15, '2022-02-01', 'fair', 2, 0, 'complaint'),
-    (15, '2022-03-01', 'fair', 2, 0, 'complaint'),
-    (15, '2022-04-01', 'fair', 2, 0, 'complaint'),
-    (15, '2022-05-01', 'fair', 2, 0, 'complaint'),
-    (15, '2022-06-01', 'fair', 2, 0, 'complaint'),
-    (15, '2022-07-01', 'fair', 3, 0, 'complaint'),
-    (15, '2022-08-01', 'fair', 3, 0, 'complaint'),
-    (15, '2022-09-01', 'fair', 3, 0, 'complaint'),
-    (15, '2022-10-01', 'fair', 3, 0, 'complaint'),
-    (15, '2022-11-01', 'fair', 3, 0, 'complaint'),
-    (15, '2022-12-01', 'fair', 3, 0, 'complaint'),
-    (15, '2023-01-01', 'fair', 4, 0, 'complaint'),
-    (15, '2023-02-01', 'fair', 4, 0, 'complaint'),
-    (15, '2023-03-01', 'fair', 4, 0, 'complaint'),
-    (15, '2023-04-01', 'fair', 4, 0, 'complaint'),
-    (15, '2023-05-01', 'fair', 4, 0, 'complaint'),
-    (15, '2023-06-01', 'fair', 4, 0, 'complaint'),
-    (15, '2023-07-01', 'fair', 5, 0, 'complaint'),
-    (15, '2023-08-01', 'fair', 5, 0, 'complaint'),
-    (15, '2023-09-01', 'fair', 5, 0, 'complaint'),
-    (15, '2023-10-01', 'fair', 5, 0, 'complaint'),
-    (15, '2023-11-01', 'fair', 5, 0, 'complaint'),
-    (15, '2023-12-01', 'fair', 5, 0, 'complaint'),
-    (15, '2024-01-01', 'fair', 6, 0, 'complaint'),
-    (15, '2024-02-01', 'fair', 6, 0, 'complaint'),
-    (15, '2024-03-01', 'fair', 6, 0, 'complaint'),
-    (15, '2024-04-01', 'fair', 6, 0, 'complaint'),
-    (15, '2024-05-01', 'fair', 6, 0, 'complaint'),
-    (15, '2024-06-01', 'fair', 6, 0, 'complaint'),
-    (15, '2024-07-01', 'fair', 8, 0, 'complaint'),
-    (15, '2024-08-01', 'fair', 8, 0, 'complaint'),
-    (15, '2024-09-01', 'fair', 8, 0, 'complaint'),
-    (15, '2024-10-01', 'good', 8, 0, 'complaint'),
-    (15, '2024-11-01', 'good', 8, 0, 'complaint'),
-    (15, '2024-12-01', 'good', 8, 0, 'complaint'),
-    (15, '2025-01-01', 'good', 10, 0, 'complaint'),
-    (15, '2025-02-01', 'good', 10, 0, 'complaint'),
-    (15, '2025-03-01', 'good', 10, 0, 'complaint'),
-    (15, '2025-04-01', 'good', 10, 0, 'complaint'),
-    (15, '2025-05-01', 'good', 10, 0, 'complaint'),
-    (15, '2025-06-01', 'good', 10, 0, 'complaint'),
-    (15, '2025-07-01', 'good', 11, 0, 'complaint'),
-    (15, '2025-08-01', 'good', 11, 0, 'complaint'),
-    (15, '2025-09-01', 'good', 11, 0, 'complaint'),
-    (15, '2025-10-01', 'good', 11, 0, 'complaint'),
-    (15, '2025-11-01', 'under_construction', 11, 1, 'project'),
-    (15, '2025-12-01', 'under_construction', 11, 1, 'project'),
-    (15, '2026-01-01', 'under_construction', 12, 1, 'project'),
-    (15, '2026-02-01', 'under_construction', 12, 1, 'project'),
-    (15, '2026-03-01', 'under_construction', 12, 1, 'project'),
-    (15, '2026-04-01', 'under_construction', 12, 1, 'project'),
-    (15, '2026-05-01', 'under_construction', 12, 1, 'project'),
-    (15, '2026-06-01', 'under_construction', 12, 1, 'project'),
-    (16, '2022-01-01', 'good', 2, 0, 'complaint'),
-    (16, '2022-02-01', 'good', 2, 0, 'complaint'),
-    (16, '2022-03-01', 'good', 2, 0, 'complaint'),
-    (16, '2022-04-01', 'good', 2, 0, 'complaint'),
-    (16, '2022-05-01', 'fair', 2, 0, 'complaint'),
-    (16, '2022-06-01', 'fair', 2, 0, 'complaint'),
-    (16, '2022-07-01', 'fair', 3, 0, 'complaint'),
-    (16, '2022-08-01', 'fair', 3, 0, 'complaint'),
-    (16, '2022-09-01', 'fair', 3, 0, 'complaint'),
-    (16, '2022-10-01', 'fair', 3, 0, 'complaint'),
-    (16, '2022-11-01', 'fair', 3, 0, 'complaint'),
-    (16, '2022-12-01', 'fair', 3, 0, 'complaint'),
-    (16, '2023-01-01', 'fair', 4, 0, 'complaint'),
-    (16, '2023-02-01', 'fair', 4, 0, 'complaint'),
-    (16, '2023-03-01', 'fair', 4, 0, 'complaint'),
-    (16, '2023-04-01', 'fair', 4, 0, 'complaint'),
-    (16, '2023-05-01', 'fair', 4, 0, 'complaint'),
-    (16, '2023-06-01', 'fair', 4, 0, 'complaint'),
-    (16, '2023-07-01', 'fair', 5, 0, 'complaint'),
-    (16, '2023-08-01', 'fair', 5, 0, 'complaint'),
-    (16, '2023-09-01', 'fair', 5, 0, 'complaint'),
-    (16, '2023-10-01', 'fair', 5, 0, 'complaint'),
-    (16, '2023-11-01', 'fair', 5, 0, 'complaint'),
-    (16, '2023-12-01', 'fair', 5, 0, 'complaint'),
-    (16, '2024-01-01', 'fair', 6, 0, 'complaint'),
-    (16, '2024-02-01', 'fair', 6, 0, 'complaint'),
-    (16, '2024-03-01', 'fair', 6, 0, 'complaint'),
-    (16, '2024-04-01', 'fair', 6, 0, 'complaint'),
-    (16, '2024-05-01', 'fair', 6, 0, 'complaint'),
-    (16, '2024-06-01', 'fair', 6, 0, 'complaint'),
-    (16, '2024-07-01', 'fair', 8, 0, 'complaint'),
-    (16, '2024-08-01', 'fair', 8, 0, 'complaint'),
-    (16, '2024-09-01', 'fair', 8, 0, 'complaint'),
-    (16, '2024-10-01', 'fair', 8, 0, 'complaint'),
-    (16, '2024-11-01', 'fair', 8, 0, 'complaint'),
-    (16, '2024-12-01', 'fair', 8, 0, 'complaint'),
-    (16, '2025-01-01', 'fair', 10, 0, 'complaint'),
-    (16, '2025-02-01', 'fair', 10, 0, 'complaint'),
-    (16, '2025-03-01', 'fair', 10, 0, 'complaint'),
-    (16, '2025-04-01', 'fair', 10, 0, 'complaint'),
-    (16, '2025-05-01', 'fair', 10, 0, 'complaint'),
-    (16, '2025-06-01', 'fair', 10, 0, 'complaint'),
-    (16, '2025-07-01', 'fair', 12, 0, 'complaint'),
-    (16, '2025-08-01', 'fair', 12, 0, 'complaint'),
-    (16, '2025-09-01', 'fair', 12, 0, 'complaint'),
-    (16, '2025-10-01', 'fair', 12, 0, 'complaint'),
-    (16, '2025-11-01', 'fair', 12, 0, 'complaint'),
-    (16, '2025-12-01', 'fair', 12, 0, 'complaint'),
-    (16, '2026-01-01', 'fair', 14, 0, 'complaint'),
-    (16, '2026-02-01', 'under_construction', 14, 1, 'project'),
-    (16, '2026-03-01', 'under_construction', 14, 1, 'project'),
-    (16, '2026-04-01', 'under_construction', 14, 1, 'project'),
-    (16, '2026-05-01', 'under_construction', 14, 1, 'project'),
-    (16, '2026-06-01', 'under_construction', 14, 1, 'project'),
-    (17, '2022-01-01', 'fair', 2, 0, 'complaint'),
-    (17, '2022-02-01', 'fair', 2, 0, 'complaint'),
-    (17, '2022-03-01', 'fair', 2, 0, 'complaint'),
-    (17, '2022-04-01', 'fair', 2, 0, 'complaint'),
-    (17, '2022-05-01', 'fair', 2, 0, 'complaint'),
-    (17, '2022-06-01', 'fair', 2, 0, 'complaint'),
-    (17, '2022-07-01', 'fair', 3, 0, 'complaint'),
-    (17, '2022-08-01', 'fair', 3, 0, 'complaint'),
-    (17, '2022-09-01', 'fair', 3, 0, 'complaint'),
-    (17, '2022-10-01', 'fair', 3, 0, 'complaint'),
-    (17, '2022-11-01', 'fair', 3, 0, 'complaint'),
-    (17, '2022-12-01', 'fair', 3, 0, 'complaint'),
-    (17, '2023-01-01', 'fair', 4, 0, 'complaint'),
-    (17, '2023-02-01', 'fair', 4, 0, 'complaint'),
-    (17, '2023-03-01', 'fair', 4, 0, 'complaint'),
-    (17, '2023-04-01', 'fair', 4, 0, 'complaint'),
-    (17, '2023-05-01', 'fair', 4, 0, 'complaint'),
-    (17, '2023-06-01', 'fair', 4, 0, 'complaint'),
-    (17, '2023-07-01', 'fair', 6, 0, 'complaint'),
-    (17, '2023-08-01', 'fair', 6, 0, 'complaint'),
-    (17, '2023-09-01', 'fair', 6, 0, 'complaint'),
-    (17, '2023-10-01', 'fair', 6, 0, 'complaint'),
-    (17, '2023-11-01', 'fair', 6, 0, 'complaint'),
-    (17, '2023-12-01', 'fair', 6, 0, 'complaint'),
-    (17, '2024-01-01', 'under_construction', 8, 1, 'project'),
-    (17, '2024-02-01', 'under_construction', 8, 1, 'project'),
-    (17, '2024-03-01', 'under_construction', 8, 1, 'project'),
-    (17, '2024-04-01', 'under_construction', 8, 1, 'project'),
-    (17, '2024-05-01', 'under_construction', 8, 1, 'project'),
-    (17, '2024-06-01', 'under_construction', 8, 1, 'project'),
-    (17, '2024-07-01', 'under_construction', 10, 1, 'project'),
-    (17, '2024-08-01', 'under_construction', 10, 1, 'project'),
-    (17, '2024-09-01', 'under_construction', 10, 1, 'project'),
-    (17, '2024-10-01', 'under_construction', 10, 1, 'project'),
-    (17, '2024-11-01', 'under_construction', 10, 1, 'project'),
-    (17, '2024-12-01', 'under_construction', 10, 1, 'project'),
-    (17, '2025-01-01', 'fair', 12, 0, 'complaint'),
-    (17, '2025-02-01', 'fair', 12, 0, 'complaint'),
-    (17, '2025-03-01', 'fair', 12, 0, 'complaint'),
-    (17, '2025-04-01', 'fair', 12, 0, 'complaint'),
-    (17, '2025-05-01', 'fair', 12, 0, 'complaint'),
-    (17, '2025-06-01', 'fair', 12, 0, 'complaint'),
-    (17, '2025-07-01', 'fair', 13, 0, 'complaint'),
-    (17, '2025-08-01', 'fair', 13, 0, 'complaint'),
-    (17, '2025-09-01', 'fair', 13, 0, 'complaint'),
-    (17, '2025-10-01', 'fair', 13, 0, 'complaint'),
-    (17, '2025-11-01', 'under_construction', 13, 1, 'project'),
-    (17, '2025-12-01', 'under_construction', 13, 1, 'project'),
-    (17, '2026-01-01', 'under_construction', 15, 1, 'project'),
-    (17, '2026-02-01', 'under_construction', 15, 1, 'project'),
-    (17, '2026-03-01', 'under_construction', 15, 1, 'project'),
-    (17, '2026-04-01', 'under_construction', 15, 1, 'project'),
-    (17, '2026-05-01', 'under_construction', 15, 1, 'project'),
-    (17, '2026-06-01', 'under_construction', 15, 1, 'project'),
-    (18, '2022-01-01', 'fair', 2, 0, 'complaint'),
-    (18, '2022-02-01', 'fair', 2, 0, 'complaint'),
-    (18, '2022-03-01', 'fair', 2, 0, 'complaint'),
-    (18, '2022-04-01', 'fair', 2, 0, 'complaint'),
-    (18, '2022-05-01', 'fair', 2, 0, 'complaint'),
-    (18, '2022-06-01', 'fair', 2, 0, 'complaint'),
-    (18, '2022-07-01', 'fair', 3, 0, 'complaint'),
-    (18, '2022-08-01', 'fair', 3, 0, 'complaint'),
-    (18, '2022-09-01', 'fair', 3, 0, 'complaint'),
-    (18, '2022-10-01', 'fair', 3, 0, 'complaint'),
-    (18, '2022-11-01', 'fair', 3, 0, 'complaint'),
-    (18, '2022-12-01', 'fair', 3, 0, 'complaint'),
-    (18, '2023-01-01', 'fair', 4, 0, 'complaint'),
-    (18, '2023-02-01', 'fair', 4, 0, 'complaint'),
-    (18, '2023-03-01', 'under_construction', 4, 0, 'complaint'),
-    (18, '2023-04-01', 'good', 4, 0, 'complaint'),
-    (18, '2023-05-01', 'good', 4, 0, 'complaint'),
-    (18, '2023-06-01', 'good', 4, 0, 'complaint'),
-    (18, '2023-07-01', 'good', 5, 0, 'complaint'),
-    (18, '2023-08-01', 'good', 5, 0, 'complaint'),
-    (18, '2023-09-01', 'good', 5, 0, 'complaint'),
-    (18, '2023-10-01', 'good', 5, 0, 'complaint'),
-    (18, '2023-11-01', 'good', 5, 0, 'complaint'),
-    (18, '2023-12-01', 'good', 5, 0, 'complaint'),
-    (18, '2024-01-01', 'good', 6, 0, 'complaint'),
-    (18, '2024-02-01', 'good', 6, 0, 'complaint'),
-    (18, '2024-03-01', 'good', 6, 0, 'complaint'),
-    (18, '2024-04-01', 'good', 6, 0, 'complaint'),
-    (18, '2024-05-01', 'good', 6, 0, 'complaint'),
-    (18, '2024-06-01', 'good', 6, 0, 'complaint'),
-    (18, '2024-07-01', 'good', 7, 0, 'complaint'),
-    (18, '2024-08-01', 'good', 7, 0, 'complaint'),
-    (18, '2024-09-01', 'good', 7, 0, 'complaint'),
-    (18, '2024-10-01', 'good', 7, 0, 'complaint'),
-    (18, '2024-11-01', 'good', 7, 0, 'complaint'),
-    (18, '2024-12-01', 'good', 7, 0, 'complaint'),
-    (18, '2025-01-01', 'good', 8, 0, 'complaint'),
-    (18, '2025-02-01', 'good', 8, 0, 'complaint'),
-    (18, '2025-03-01', 'good', 8, 0, 'complaint'),
-    (18, '2025-04-01', 'good', 8, 0, 'complaint'),
-    (18, '2025-05-01', 'good', 8, 0, 'complaint'),
-    (18, '2025-06-01', 'good', 8, 0, 'complaint'),
-    (18, '2025-07-01', 'good', 10, 0, 'complaint'),
-    (18, '2025-08-01', 'good', 10, 0, 'complaint'),
-    (18, '2025-09-01', 'under_construction', 10, 1, 'project'),
-    (18, '2025-10-01', 'under_construction', 10, 1, 'project'),
-    (18, '2025-11-01', 'under_construction', 10, 1, 'project'),
-    (18, '2025-12-01', 'under_construction', 10, 1, 'project'),
-    (18, '2026-01-01', 'under_construction', 12, 1, 'project'),
-    (18, '2026-02-01', 'under_construction', 12, 1, 'project'),
-    (18, '2026-03-01', 'under_construction', 12, 1, 'project'),
-    (18, '2026-04-01', 'under_construction', 12, 1, 'project'),
-    (18, '2026-05-01', 'under_construction', 12, 1, 'project'),
-    (18, '2026-06-01', 'under_construction', 12, 1, 'project'),
-    (19, '2022-01-01', 'fair', 1, 0, 'complaint'),
-    (19, '2022-02-01', 'fair', 1, 0, 'complaint'),
-    (19, '2022-03-01', 'fair', 1, 0, 'complaint'),
-    (19, '2022-04-01', 'fair', 1, 0, 'complaint'),
-    (19, '2022-05-01', 'fair', 1, 0, 'complaint'),
-    (19, '2022-06-01', 'fair', 1, 0, 'complaint'),
-    (19, '2022-07-01', 'fair', 2, 0, 'complaint'),
-    (19, '2022-08-01', 'fair', 2, 0, 'complaint'),
-    (19, '2022-09-01', 'fair', 2, 0, 'complaint'),
-    (19, '2022-10-01', 'fair', 2, 0, 'complaint'),
-    (19, '2022-11-01', 'fair', 2, 0, 'complaint'),
-    (19, '2022-12-01', 'fair', 2, 0, 'complaint'),
-    (19, '2023-01-01', 'fair', 3, 0, 'complaint'),
-    (19, '2023-02-01', 'fair', 3, 0, 'complaint'),
-    (19, '2023-03-01', 'fair', 3, 0, 'complaint'),
-    (19, '2023-04-01', 'fair', 3, 0, 'complaint'),
-    (19, '2023-05-01', 'fair', 3, 0, 'complaint'),
-    (19, '2023-06-01', 'fair', 3, 0, 'complaint'),
-    (19, '2023-07-01', 'fair', 4, 0, 'complaint'),
-    (19, '2023-08-01', 'fair', 4, 0, 'complaint'),
-    (19, '2023-09-01', 'fair', 4, 0, 'complaint'),
-    (19, '2023-10-01', 'fair', 4, 0, 'complaint'),
-    (19, '2023-11-01', 'fair', 4, 0, 'complaint'),
-    (19, '2023-12-01', 'fair', 4, 0, 'complaint'),
-    (19, '2024-01-01', 'fair', 5, 0, 'complaint'),
-    (19, '2024-02-01', 'fair', 5, 0, 'complaint'),
-    (19, '2024-03-01', 'fair', 5, 0, 'complaint'),
-    (19, '2024-04-01', 'under_construction', 5, 1, 'project'),
-    (19, '2024-05-01', 'under_construction', 5, 1, 'project'),
-    (19, '2024-06-01', 'under_construction', 5, 1, 'project'),
-    (19, '2024-07-01', 'under_construction', 6, 1, 'project'),
-    (19, '2024-08-01', 'under_construction', 6, 1, 'project'),
-    (19, '2024-09-01', 'under_construction', 6, 1, 'project'),
-    (19, '2024-10-01', 'under_construction', 6, 1, 'project'),
-    (19, '2024-11-01', 'good', 6, 0, 'complaint'),
-    (19, '2024-12-01', 'good', 6, 0, 'complaint'),
-    (19, '2025-01-01', 'good', 7, 0, 'complaint'),
-    (19, '2025-02-01', 'good', 7, 0, 'complaint'),
-    (19, '2025-03-01', 'good', 7, 0, 'complaint'),
-    (19, '2025-04-01', 'good', 7, 0, 'complaint'),
-    (19, '2025-05-01', 'good', 7, 0, 'complaint'),
-    (19, '2025-06-01', 'good', 7, 0, 'complaint'),
-    (19, '2025-07-01', 'good', 7, 0, 'complaint'),
-    (19, '2025-08-01', 'good', 7, 0, 'complaint'),
-    (19, '2025-09-01', 'good', 7, 0, 'complaint'),
-    (19, '2025-10-01', 'good', 7, 0, 'complaint'),
-    (19, '2025-11-01', 'good', 7, 0, 'complaint'),
-    (19, '2025-12-01', 'good', 7, 0, 'complaint'),
-    (19, '2026-01-01', 'good', 7, 0, 'complaint'),
-    (19, '2026-02-01', 'good', 7, 0, 'complaint'),
-    (19, '2026-03-01', 'good', 7, 0, 'complaint'),
-    (19, '2026-04-01', 'good', 7, 0, 'complaint'),
-    (19, '2026-05-01', 'good', 7, 0, 'complaint'),
-    (19, '2026-06-01', 'good', 7, 0, 'complaint'),
-    (20, '2022-01-01', 'fair', 4, 0, 'complaint'),
-    (20, '2022-02-01', 'fair', 4, 0, 'complaint'),
-    (20, '2022-03-01', 'fair', 4, 0, 'complaint'),
-    (20, '2022-04-01', 'fair', 4, 0, 'complaint'),
-    (20, '2022-05-01', 'fair', 4, 0, 'complaint'),
-    (20, '2022-06-01', 'fair', 4, 0, 'complaint'),
-    (20, '2022-07-01', 'fair', 6, 0, 'complaint'),
-    (20, '2022-08-01', 'fair', 6, 0, 'complaint'),
-    (20, '2022-09-01', 'fair', 6, 0, 'complaint'),
-    (20, '2022-10-01', 'fair', 6, 0, 'complaint'),
-    (20, '2022-11-01', 'fair', 6, 0, 'complaint'),
-    (20, '2022-12-01', 'fair', 6, 0, 'complaint'),
-    (20, '2023-01-01', 'poor', 9, 0, 'complaint'),
-    (20, '2023-02-01', 'poor', 9, 0, 'complaint'),
-    (20, '2023-03-01', 'poor', 9, 0, 'complaint'),
-    (20, '2023-04-01', 'poor', 9, 0, 'complaint'),
-    (20, '2023-05-01', 'poor', 9, 0, 'complaint'),
-    (20, '2023-06-01', 'poor', 9, 0, 'complaint'),
-    (20, '2023-07-01', 'poor', 12, 0, 'complaint'),
-    (20, '2023-08-01', 'poor', 12, 0, 'complaint'),
-    (20, '2023-09-01', 'poor', 12, 0, 'complaint'),
-    (20, '2023-10-01', 'poor', 12, 0, 'complaint'),
-    (20, '2023-11-01', 'poor', 12, 0, 'complaint'),
-    (20, '2023-12-01', 'poor', 12, 0, 'complaint'),
-    (20, '2024-01-01', 'poor', 16, 0, 'complaint'),
-    (20, '2024-02-01', 'poor', 16, 0, 'complaint'),
-    (20, '2024-03-01', 'poor', 16, 0, 'complaint'),
-    (20, '2024-04-01', 'poor', 16, 0, 'complaint'),
-    (20, '2024-05-01', 'poor', 16, 0, 'complaint'),
-    (20, '2024-06-01', 'poor', 16, 0, 'complaint'),
-    (20, '2024-07-01', 'poor', 20, 0, 'complaint'),
-    (20, '2024-08-01', 'poor', 20, 0, 'complaint'),
-    (20, '2024-09-01', 'poor', 20, 0, 'complaint'),
-    (20, '2024-10-01', 'poor', 20, 0, 'complaint'),
-    (20, '2024-11-01', 'poor', 20, 0, 'complaint'),
-    (20, '2024-12-01', 'poor', 20, 0, 'complaint'),
-    (20, '2025-01-01', 'poor', 24, 0, 'complaint'),
-    (20, '2025-02-01', 'poor', 24, 0, 'complaint'),
-    (20, '2025-03-01', 'poor', 24, 0, 'complaint'),
-    (20, '2025-04-01', 'poor', 24, 0, 'complaint'),
-    (20, '2025-05-01', 'poor', 24, 0, 'complaint'),
-    (20, '2025-06-01', 'poor', 24, 0, 'complaint'),
-    (20, '2025-07-01', 'poor', 27, 0, 'complaint'),
-    (20, '2025-08-01', 'poor', 27, 0, 'complaint'),
-    (20, '2025-09-01', 'poor', 27, 0, 'complaint'),
-    (20, '2025-10-01', 'poor', 27, 0, 'complaint'),
-    (20, '2025-11-01', 'poor', 27, 0, 'complaint'),
-    (20, '2025-12-01', 'poor', 27, 0, 'complaint'),
-    (20, '2026-01-01', 'under_construction', 30, 1, 'project'),
-    (20, '2026-02-01', 'under_construction', 30, 1, 'project'),
-    (20, '2026-03-01', 'under_construction', 30, 1, 'project'),
-    (20, '2026-04-01', 'under_construction', 30, 1, 'project'),
-    (20, '2026-05-01', 'under_construction', 30, 1, 'project'),
-    (20, '2026-06-01', 'under_construction', 30, 1, 'project'),
-    (21, '2022-01-01', 'fair', 1, 0, 'complaint'),
-    (21, '2022-02-01', 'fair', 1, 0, 'complaint'),
-    (21, '2022-03-01', 'fair', 1, 0, 'complaint'),
-    (21, '2022-04-01', 'fair', 1, 0, 'complaint'),
-    (21, '2022-05-01', 'fair', 1, 0, 'complaint'),
-    (21, '2022-06-01', 'fair', 1, 0, 'complaint'),
-    (21, '2022-07-01', 'fair', 2, 0, 'complaint'),
-    (21, '2022-08-01', 'fair', 2, 0, 'complaint'),
-    (21, '2022-09-01', 'under_construction', 2, 0, 'complaint'),
-    (21, '2022-10-01', 'fair', 2, 0, 'complaint'),
-    (21, '2022-11-01', 'fair', 2, 0, 'complaint'),
-    (21, '2022-12-01', 'fair', 2, 0, 'complaint'),
-    (21, '2023-01-01', 'fair', 3, 0, 'complaint'),
-    (21, '2023-02-01', 'fair', 3, 0, 'complaint'),
-    (21, '2023-03-01', 'fair', 3, 0, 'complaint'),
-    (21, '2023-04-01', 'fair', 3, 0, 'complaint'),
-    (21, '2023-05-01', 'fair', 3, 0, 'complaint'),
-    (21, '2023-06-01', 'fair', 3, 0, 'complaint'),
-    (21, '2023-07-01', 'fair', 4, 0, 'complaint'),
-    (21, '2023-08-01', 'fair', 4, 0, 'complaint'),
-    (21, '2023-09-01', 'fair', 4, 0, 'complaint'),
-    (21, '2023-10-01', 'fair', 4, 0, 'complaint'),
-    (21, '2023-11-01', 'fair', 4, 0, 'complaint'),
-    (21, '2023-12-01', 'fair', 4, 0, 'complaint'),
-    (21, '2024-01-01', 'fair', 5, 0, 'complaint'),
-    (21, '2024-02-01', 'fair', 5, 0, 'complaint'),
-    (21, '2024-03-01', 'fair', 5, 0, 'complaint'),
-    (21, '2024-04-01', 'fair', 5, 0, 'complaint'),
-    (21, '2024-05-01', 'fair', 5, 0, 'complaint'),
-    (21, '2024-06-01', 'fair', 5, 0, 'complaint'),
-    (21, '2024-07-01', 'fair', 6, 0, 'complaint'),
-    (21, '2024-08-01', 'fair', 6, 0, 'complaint'),
-    (21, '2024-09-01', 'fair', 6, 0, 'complaint'),
-    (21, '2024-10-01', 'fair', 6, 0, 'complaint'),
-    (21, '2024-11-01', 'fair', 6, 0, 'complaint'),
-    (21, '2024-12-01', 'fair', 6, 0, 'complaint'),
-    (21, '2025-01-01', 'fair', 7, 0, 'complaint'),
-    (21, '2025-02-01', 'fair', 7, 0, 'complaint'),
-    (21, '2025-03-01', 'fair', 7, 0, 'complaint'),
-    (21, '2025-04-01', 'fair', 7, 0, 'complaint'),
-    (21, '2025-05-01', 'fair', 7, 0, 'complaint'),
-    (21, '2025-06-01', 'fair', 7, 0, 'complaint'),
-    (21, '2025-07-01', 'fair', 9, 0, 'complaint'),
-    (21, '2025-08-01', 'fair', 9, 0, 'complaint'),
-    (21, '2025-09-01', 'fair', 9, 0, 'complaint'),
-    (21, '2025-10-01', 'fair', 9, 0, 'complaint'),
-    (21, '2025-11-01', 'fair', 9, 0, 'complaint'),
-    (21, '2025-12-01', 'fair', 9, 0, 'complaint'),
-    (21, '2026-01-01', 'fair', 11, 0, 'complaint'),
-    (21, '2026-02-01', 'fair', 11, 0, 'complaint'),
-    (21, '2026-03-01', 'fair', 11, 0, 'complaint'),
-    (21, '2026-04-01', 'fair', 11, 0, 'complaint'),
-    (21, '2026-05-01', 'fair', 11, 0, 'complaint'),
-    (21, '2026-06-01', 'fair', 11, 0, 'complaint'),
-    (22, '2022-01-01', 'good', 2, 0, 'complaint'),
-    (22, '2022-02-01', 'good', 2, 0, 'complaint'),
-    (22, '2022-03-01', 'good', 2, 0, 'complaint'),
-    (22, '2022-04-01', 'good', 2, 0, 'complaint'),
-    (22, '2022-05-01', 'good', 2, 0, 'complaint'),
-    (22, '2022-06-01', 'good', 2, 0, 'complaint'),
-    (22, '2022-07-01', 'good', 3, 0, 'complaint'),
-    (22, '2022-08-01', 'good', 3, 0, 'complaint'),
-    (22, '2022-09-01', 'good', 3, 0, 'complaint'),
-    (22, '2022-10-01', 'good', 3, 0, 'complaint'),
-    (22, '2022-11-01', 'good', 3, 0, 'complaint'),
-    (22, '2022-12-01', 'good', 3, 0, 'complaint'),
-    (22, '2023-01-01', 'good', 4, 0, 'complaint'),
-    (22, '2023-02-01', 'good', 4, 0, 'complaint'),
-    (22, '2023-03-01', 'good', 4, 0, 'complaint'),
-    (22, '2023-04-01', 'good', 4, 0, 'complaint'),
-    (22, '2023-05-01', 'good', 4, 0, 'complaint'),
-    (22, '2023-06-01', 'good', 4, 0, 'complaint'),
-    (22, '2023-07-01', 'fair', 5, 0, 'complaint'),
-    (22, '2023-08-01', 'fair', 5, 0, 'complaint'),
-    (22, '2023-09-01', 'fair', 5, 0, 'complaint'),
-    (22, '2023-10-01', 'fair', 5, 0, 'complaint'),
-    (22, '2023-11-01', 'fair', 5, 0, 'complaint'),
-    (22, '2023-12-01', 'fair', 5, 0, 'complaint'),
-    (22, '2024-01-01', 'fair', 6, 0, 'complaint'),
-    (22, '2024-02-01', 'fair', 6, 0, 'complaint'),
-    (22, '2024-03-01', 'fair', 6, 0, 'complaint'),
-    (22, '2024-04-01', 'fair', 6, 0, 'complaint'),
-    (22, '2024-05-01', 'fair', 6, 0, 'complaint'),
-    (22, '2024-06-01', 'fair', 6, 0, 'complaint'),
-    (22, '2024-07-01', 'fair', 8, 0, 'complaint'),
-    (22, '2024-08-01', 'fair', 8, 0, 'complaint'),
-    (22, '2024-09-01', 'fair', 8, 0, 'complaint'),
-    (22, '2024-10-01', 'fair', 8, 0, 'complaint'),
-    (22, '2024-11-01', 'fair', 8, 0, 'complaint'),
-    (22, '2024-12-01', 'fair', 8, 0, 'complaint'),
-    (22, '2025-01-01', 'fair', 10, 0, 'complaint'),
-    (22, '2025-02-01', 'fair', 10, 0, 'complaint'),
-    (22, '2025-03-01', 'fair', 10, 0, 'complaint'),
-    (22, '2025-04-01', 'fair', 10, 0, 'complaint'),
-    (22, '2025-05-01', 'fair', 10, 0, 'complaint'),
-    (22, '2025-06-01', 'fair', 10, 0, 'complaint'),
-    (22, '2025-07-01', 'fair', 12, 0, 'complaint'),
-    (22, '2025-08-01', 'under_construction', 12, 1, 'project'),
-    (22, '2025-09-01', 'under_construction', 12, 1, 'project'),
-    (22, '2025-10-01', 'under_construction', 12, 1, 'project'),
-    (22, '2025-11-01', 'under_construction', 12, 1, 'project'),
-    (22, '2025-12-01', 'under_construction', 12, 1, 'project'),
-    (22, '2026-01-01', 'under_construction', 15, 1, 'project'),
-    (22, '2026-02-01', 'under_construction', 15, 1, 'project'),
-    (22, '2026-03-01', 'under_construction', 15, 1, 'project'),
-    (22, '2026-04-01', 'under_construction', 15, 1, 'project'),
-    (22, '2026-05-01', 'under_construction', 15, 1, 'project'),
-    (22, '2026-06-01', 'under_construction', 15, 1, 'project'),
-    (23, '2022-01-01', 'fair', 5, 0, 'complaint'),
-    (23, '2022-02-01', 'fair', 5, 0, 'complaint'),
-    (23, '2022-03-01', 'fair', 5, 0, 'complaint'),
-    (23, '2022-04-01', 'fair', 5, 0, 'complaint'),
-    (23, '2022-05-01', 'fair', 5, 0, 'complaint'),
-    (23, '2022-06-01', 'fair', 5, 0, 'complaint'),
-    (23, '2022-07-01', 'fair', 8, 0, 'complaint'),
-    (23, '2022-08-01', 'fair', 8, 0, 'complaint'),
-    (23, '2022-09-01', 'fair', 8, 0, 'complaint'),
-    (23, '2022-10-01', 'fair', 8, 0, 'complaint'),
-    (23, '2022-11-01', 'fair', 8, 0, 'complaint'),
-    (23, '2022-12-01', 'fair', 8, 0, 'complaint'),
-    (23, '2023-01-01', 'poor', 11, 0, 'complaint'),
-    (23, '2023-02-01', 'poor', 11, 0, 'complaint'),
-    (23, '2023-03-01', 'poor', 11, 0, 'complaint'),
-    (23, '2023-04-01', 'poor', 11, 0, 'complaint'),
-    (23, '2023-05-01', 'poor', 11, 0, 'complaint'),
-    (23, '2023-06-01', 'poor', 11, 0, 'complaint'),
-    (23, '2023-07-01', 'poor', 15, 0, 'complaint'),
-    (23, '2023-08-01', 'poor', 15, 0, 'complaint'),
-    (23, '2023-09-01', 'poor', 15, 0, 'complaint'),
-    (23, '2023-10-01', 'poor', 15, 0, 'complaint'),
-    (23, '2023-11-01', 'poor', 15, 0, 'complaint'),
-    (23, '2023-12-01', 'poor', 15, 0, 'complaint'),
-    (23, '2024-01-01', 'poor', 20, 0, 'complaint'),
-    (23, '2024-02-01', 'poor', 20, 0, 'complaint'),
-    (23, '2024-03-01', 'poor', 20, 0, 'complaint'),
-    (23, '2024-04-01', 'poor', 20, 0, 'complaint'),
-    (23, '2024-05-01', 'poor', 20, 0, 'complaint'),
-    (23, '2024-06-01', 'poor', 20, 0, 'complaint'),
-    (23, '2024-07-01', 'poor', 25, 0, 'complaint'),
-    (23, '2024-08-01', 'poor', 25, 0, 'complaint'),
-    (23, '2024-09-01', 'poor', 25, 0, 'complaint'),
-    (23, '2024-10-01', 'poor', 25, 0, 'complaint'),
-    (23, '2024-11-01', 'poor', 25, 0, 'complaint'),
-    (23, '2024-12-01', 'poor', 25, 0, 'complaint'),
-    (23, '2025-01-01', 'poor', 30, 0, 'complaint'),
-    (23, '2025-02-01', 'under_construction', 30, 1, 'project'),
-    (23, '2025-03-01', 'under_construction', 30, 1, 'project'),
-    (23, '2025-04-01', 'under_construction', 30, 1, 'project'),
-    (23, '2025-05-01', 'under_construction', 30, 1, 'project'),
-    (23, '2025-06-01', 'under_construction', 30, 1, 'project'),
-    (23, '2025-07-01', 'under_construction', 36, 1, 'project'),
-    (23, '2025-08-01', 'fair', 36, 0, 'complaint'),
-    (23, '2025-09-01', 'fair', 36, 0, 'complaint'),
-    (23, '2025-10-01', 'fair', 36, 0, 'complaint'),
-    (23, '2025-11-01', 'fair', 36, 0, 'complaint'),
-    (23, '2025-12-01', 'fair', 36, 0, 'complaint'),
-    (23, '2026-01-01', 'fair', 40, 0, 'complaint'),
-    (23, '2026-02-01', 'fair', 40, 0, 'complaint'),
-    (23, '2026-03-01', 'fair', 40, 0, 'complaint'),
-    (23, '2026-04-01', 'fair', 40, 0, 'complaint'),
-    (23, '2026-05-01', 'fair', 40, 0, 'complaint'),
-    (23, '2026-06-01', 'fair', 40, 0, 'complaint'),
-    (24, '2022-01-01', 'fair', 2, 0, 'complaint'),
-    (24, '2022-02-01', 'fair', 2, 0, 'complaint'),
-    (24, '2022-03-01', 'fair', 2, 0, 'complaint'),
-    (24, '2022-04-01', 'fair', 2, 0, 'complaint'),
-    (24, '2022-05-01', 'fair', 2, 0, 'complaint'),
-    (24, '2022-06-01', 'fair', 2, 0, 'complaint'),
-    (24, '2022-07-01', 'fair', 3, 0, 'complaint'),
-    (24, '2022-08-01', 'fair', 3, 0, 'complaint'),
-    (24, '2022-09-01', 'fair', 3, 0, 'complaint'),
-    (24, '2022-10-01', 'fair', 3, 0, 'complaint'),
-    (24, '2022-11-01', 'fair', 3, 0, 'complaint'),
-    (24, '2022-12-01', 'fair', 3, 0, 'complaint'),
-    (24, '2023-01-01', 'fair', 4, 0, 'complaint'),
-    (24, '2023-02-01', 'fair', 4, 0, 'complaint'),
-    (24, '2023-03-01', 'fair', 4, 0, 'complaint'),
-    (24, '2023-04-01', 'fair', 4, 0, 'complaint'),
-    (24, '2023-05-01', 'fair', 4, 0, 'complaint'),
-    (24, '2023-06-01', 'fair', 4, 0, 'complaint'),
-    (24, '2023-07-01', 'fair', 6, 0, 'complaint'),
-    (24, '2023-08-01', 'fair', 6, 0, 'complaint'),
-    (24, '2023-09-01', 'fair', 6, 0, 'complaint'),
-    (24, '2023-10-01', 'fair', 6, 0, 'complaint'),
-    (24, '2023-11-01', 'fair', 6, 0, 'complaint'),
-    (24, '2023-12-01', 'fair', 6, 0, 'complaint'),
-    (24, '2024-01-01', 'fair', 8, 0, 'complaint'),
-    (24, '2024-02-01', 'fair', 8, 0, 'complaint'),
-    (24, '2024-03-01', 'under_construction', 8, 0, 'complaint'),
-    (24, '2024-04-01', 'under_construction', 8, 0, 'complaint'),
-    (24, '2024-05-01', 'under_construction', 8, 0, 'complaint'),
-    (24, '2024-06-01', 'under_construction', 8, 0, 'complaint'),
-    (24, '2024-07-01', 'under_construction', 10, 0, 'complaint'),
-    (24, '2024-08-01', 'under_construction', 10, 0, 'complaint'),
-    (24, '2024-09-01', 'under_construction', 10, 1, 'project'),
-    (24, '2024-10-01', 'under_construction', 10, 1, 'project'),
-    (24, '2024-11-01', 'under_construction', 10, 1, 'project'),
-    (24, '2024-12-01', 'under_construction', 10, 1, 'project'),
-    (24, '2025-01-01', 'under_construction', 12, 1, 'project'),
-    (24, '2025-02-01', 'under_construction', 12, 1, 'project'),
-    (24, '2025-03-01', 'under_construction', 12, 1, 'project'),
-    (24, '2025-04-01', 'under_construction', 12, 1, 'project'),
-    (24, '2025-05-01', 'under_construction', 12, 1, 'project'),
-    (24, '2025-06-01', 'under_construction', 12, 1, 'project'),
-    (24, '2025-07-01', 'under_construction', 14, 0, 'complaint'),
-    (24, '2025-08-01', 'good', 14, 0, 'complaint'),
-    (24, '2025-09-01', 'good', 14, 0, 'complaint'),
-    (24, '2025-10-01', 'good', 14, 0, 'complaint'),
-    (24, '2025-11-01', 'good', 14, 0, 'complaint'),
-    (24, '2025-12-01', 'good', 14, 0, 'complaint'),
-    (24, '2026-01-01', 'good', 16, 0, 'complaint'),
-    (24, '2026-02-01', 'good', 16, 0, 'complaint'),
-    (24, '2026-03-01', 'good', 16, 0, 'complaint'),
-    (24, '2026-04-01', 'good', 16, 0, 'complaint'),
-    (24, '2026-05-01', 'good', 16, 0, 'complaint'),
-    (24, '2026-06-01', 'good', 16, 0, 'complaint'),
-    (25, '2022-01-01', 'fair', 2, 0, 'complaint'),
-    (25, '2022-02-01', 'fair', 2, 0, 'complaint'),
-    (25, '2022-03-01', 'fair', 2, 0, 'complaint'),
-    (25, '2022-04-01', 'fair', 2, 0, 'complaint'),
-    (25, '2022-05-01', 'fair', 2, 0, 'complaint'),
-    (25, '2022-06-01', 'fair', 2, 0, 'complaint'),
-    (25, '2022-07-01', 'fair', 3, 0, 'complaint'),
-    (25, '2022-08-01', 'fair', 3, 0, 'complaint'),
-    (25, '2022-09-01', 'fair', 3, 0, 'complaint'),
-    (25, '2022-10-01', 'under_construction', 3, 0, 'complaint'),
-    (25, '2022-11-01', 'fair', 3, 0, 'complaint'),
-    (25, '2022-12-01', 'fair', 3, 0, 'complaint'),
-    (25, '2023-01-01', 'fair', 4, 0, 'complaint'),
-    (25, '2023-02-01', 'fair', 4, 0, 'complaint'),
-    (25, '2023-03-01', 'fair', 4, 0, 'complaint'),
-    (25, '2023-04-01', 'fair', 4, 0, 'complaint'),
-    (25, '2023-05-01', 'fair', 4, 0, 'complaint'),
-    (25, '2023-06-01', 'fair', 4, 0, 'complaint'),
-    (25, '2023-07-01', 'fair', 5, 0, 'complaint'),
-    (25, '2023-08-01', 'fair', 5, 0, 'complaint'),
-    (25, '2023-09-01', 'fair', 5, 0, 'complaint'),
-    (25, '2023-10-01', 'fair', 5, 0, 'complaint'),
-    (25, '2023-11-01', 'fair', 5, 0, 'complaint'),
-    (25, '2023-12-01', 'fair', 5, 0, 'complaint'),
-    (25, '2024-01-01', 'fair', 6, 0, 'complaint'),
-    (25, '2024-02-01', 'fair', 6, 0, 'complaint'),
-    (25, '2024-03-01', 'fair', 6, 0, 'complaint'),
-    (25, '2024-04-01', 'fair', 6, 0, 'complaint'),
-    (25, '2024-05-01', 'fair', 6, 0, 'complaint'),
-    (25, '2024-06-01', 'fair', 6, 0, 'complaint'),
-    (25, '2024-07-01', 'fair', 7, 0, 'complaint'),
-    (25, '2024-08-01', 'fair', 7, 0, 'complaint'),
-    (25, '2024-09-01', 'fair', 7, 0, 'complaint'),
-    (25, '2024-10-01', 'fair', 7, 0, 'complaint'),
-    (25, '2024-11-01', 'fair', 7, 0, 'complaint'),
-    (25, '2024-12-01', 'fair', 7, 0, 'complaint'),
-    (25, '2025-01-01', 'fair', 8, 0, 'complaint'),
-    (25, '2025-02-01', 'fair', 8, 0, 'complaint'),
-    (25, '2025-03-01', 'fair', 8, 0, 'complaint'),
-    (25, '2025-04-01', 'fair', 8, 0, 'complaint'),
-    (25, '2025-05-01', 'fair', 8, 0, 'complaint'),
-    (25, '2025-06-01', 'fair', 8, 0, 'complaint'),
-    (25, '2025-07-01', 'fair', 10, 0, 'complaint'),
-    (25, '2025-08-01', 'fair', 10, 0, 'complaint'),
-    (25, '2025-09-01', 'fair', 10, 0, 'complaint'),
-    (25, '2025-10-01', 'fair', 10, 0, 'complaint'),
-    (25, '2025-11-01', 'fair', 10, 0, 'complaint'),
-    (25, '2025-12-01', 'fair', 10, 0, 'complaint'),
-    (25, '2026-01-01', 'under_construction', 12, 1, 'project'),
-    (25, '2026-02-01', 'under_construction', 12, 1, 'project'),
-    (25, '2026-03-01', 'under_construction', 12, 1, 'project'),
-    (25, '2026-04-01', 'under_construction', 12, 1, 'project'),
-    (25, '2026-05-01', 'under_construction', 12, 1, 'project'),
-    (25, '2026-06-01', 'under_construction', 12, 1, 'project'),
-    (26, '2022-01-01', 'fair', 2, 0, 'complaint'),
-    (26, '2022-02-01', 'fair', 2, 0, 'complaint'),
-    (26, '2022-03-01', 'fair', 2, 0, 'complaint'),
-    (26, '2022-04-01', 'fair', 2, 0, 'complaint'),
-    (26, '2022-05-01', 'fair', 2, 0, 'complaint'),
-    (26, '2022-06-01', 'fair', 2, 0, 'complaint'),
-    (26, '2022-07-01', 'fair', 3, 0, 'complaint'),
-    (26, '2022-08-01', 'fair', 3, 0, 'complaint'),
-    (26, '2022-09-01', 'fair', 3, 0, 'complaint'),
-    (26, '2022-10-01', 'fair', 3, 0, 'complaint'),
-    (26, '2022-11-01', 'fair', 3, 0, 'complaint'),
-    (26, '2022-12-01', 'fair', 3, 0, 'complaint'),
-    (26, '2023-01-01', 'fair', 4, 0, 'complaint'),
-    (26, '2023-02-01', 'fair', 4, 0, 'complaint'),
-    (26, '2023-03-01', 'fair', 4, 0, 'complaint'),
-    (26, '2023-04-01', 'fair', 4, 0, 'complaint'),
-    (26, '2023-05-01', 'fair', 4, 0, 'complaint'),
-    (26, '2023-06-01', 'fair', 4, 0, 'complaint'),
-    (26, '2023-07-01', 'fair', 5, 0, 'complaint'),
-    (26, '2023-08-01', 'fair', 5, 0, 'complaint'),
-    (26, '2023-09-01', 'fair', 5, 0, 'complaint'),
-    (26, '2023-10-01', 'fair', 5, 0, 'complaint'),
-    (26, '2023-11-01', 'fair', 5, 0, 'complaint'),
-    (26, '2023-12-01', 'fair', 5, 0, 'complaint'),
-    (26, '2024-01-01', 'fair', 6, 0, 'complaint'),
-    (26, '2024-02-01', 'fair', 6, 0, 'complaint'),
-    (26, '2024-03-01', 'fair', 6, 0, 'complaint'),
-    (26, '2024-04-01', 'fair', 6, 0, 'complaint'),
-    (26, '2024-05-01', 'fair', 6, 0, 'complaint'),
-    (26, '2024-06-01', 'fair', 6, 0, 'complaint'),
-    (26, '2024-07-01', 'fair', 8, 0, 'complaint'),
-    (26, '2024-08-01', 'fair', 8, 0, 'complaint'),
-    (26, '2024-09-01', 'fair', 8, 0, 'complaint'),
-    (26, '2024-10-01', 'fair', 8, 0, 'complaint'),
-    (26, '2024-11-01', 'fair', 8, 0, 'complaint'),
-    (26, '2024-12-01', 'fair', 8, 0, 'complaint'),
-    (26, '2025-01-01', 'fair', 10, 0, 'complaint'),
-    (26, '2025-02-01', 'fair', 10, 0, 'complaint'),
-    (26, '2025-03-01', 'fair', 10, 0, 'complaint'),
-    (26, '2025-04-01', 'fair', 10, 0, 'complaint'),
-    (26, '2025-05-01', 'fair', 10, 0, 'complaint'),
-    (26, '2025-06-01', 'fair', 10, 0, 'complaint'),
-    (26, '2025-07-01', 'fair', 12, 0, 'complaint'),
-    (26, '2025-08-01', 'fair', 12, 0, 'complaint'),
-    (26, '2025-09-01', 'fair', 12, 0, 'complaint'),
-    (26, '2025-10-01', 'under_construction', 12, 1, 'project'),
-    (26, '2025-11-01', 'under_construction', 12, 1, 'project'),
-    (26, '2025-12-01', 'under_construction', 12, 1, 'project'),
-    (26, '2026-01-01', 'under_construction', 14, 1, 'project'),
-    (26, '2026-02-01', 'under_construction', 14, 1, 'project'),
-    (26, '2026-03-01', 'under_construction', 14, 1, 'project'),
-    (26, '2026-04-01', 'under_construction', 14, 1, 'project'),
-    (26, '2026-05-01', 'under_construction', 14, 1, 'project'),
-    (26, '2026-06-01', 'under_construction', 14, 1, 'project'),
-    (27, '2022-01-01', 'good', 3, 0, 'complaint'),
-    (27, '2022-02-01', 'good', 3, 0, 'complaint'),
-    (27, '2022-03-01', 'good', 3, 0, 'complaint'),
-    (27, '2022-04-01', 'good', 3, 0, 'complaint'),
-    (27, '2022-05-01', 'good', 3, 0, 'complaint'),
-    (27, '2022-06-01', 'good', 3, 0, 'complaint'),
-    (27, '2022-07-01', 'good', 5, 0, 'complaint'),
-    (27, '2022-08-01', 'good', 5, 0, 'complaint'),
-    (27, '2022-09-01', 'good', 5, 0, 'complaint'),
-    (27, '2022-10-01', 'good', 5, 0, 'complaint'),
-    (27, '2022-11-01', 'good', 5, 0, 'complaint'),
-    (27, '2022-12-01', 'good', 5, 0, 'complaint'),
-    (27, '2023-01-01', 'under_construction', 7, 0, 'complaint'),
-    (27, '2023-02-01', 'fair', 7, 0, 'complaint'),
-    (27, '2023-03-01', 'fair', 7, 0, 'complaint'),
-    (27, '2023-04-01', 'fair', 7, 0, 'complaint'),
-    (27, '2023-05-01', 'fair', 7, 0, 'complaint'),
-    (27, '2023-06-01', 'fair', 7, 0, 'complaint'),
-    (27, '2023-07-01', 'fair', 9, 0, 'complaint'),
-    (27, '2023-08-01', 'fair', 9, 0, 'complaint'),
-    (27, '2023-09-01', 'fair', 9, 0, 'complaint'),
-    (27, '2023-10-01', 'fair', 9, 0, 'complaint'),
-    (27, '2023-11-01', 'fair', 9, 0, 'complaint'),
-    (27, '2023-12-01', 'fair', 9, 0, 'complaint'),
-    (27, '2024-01-01', 'fair', 11, 0, 'complaint'),
-    (27, '2024-02-01', 'fair', 11, 0, 'complaint'),
-    (27, '2024-03-01', 'fair', 11, 0, 'complaint'),
-    (27, '2024-04-01', 'fair', 11, 0, 'complaint'),
-    (27, '2024-05-01', 'fair', 11, 0, 'complaint'),
-    (27, '2024-06-01', 'fair', 11, 0, 'complaint'),
-    (27, '2024-07-01', 'fair', 13, 0, 'complaint'),
-    (27, '2024-08-01', 'fair', 13, 0, 'complaint'),
-    (27, '2024-09-01', 'fair', 13, 0, 'complaint'),
-    (27, '2024-10-01', 'fair', 13, 0, 'complaint'),
-    (27, '2024-11-01', 'fair', 13, 0, 'complaint'),
-    (27, '2024-12-01', 'fair', 13, 0, 'complaint'),
-    (27, '2025-01-01', 'fair', 15, 0, 'complaint'),
-    (27, '2025-02-01', 'fair', 15, 0, 'complaint'),
-    (27, '2025-03-01', 'fair', 15, 0, 'complaint'),
-    (27, '2025-04-01', 'under_construction', 15, 1, 'project'),
-    (27, '2025-05-01', 'under_construction', 15, 1, 'project'),
-    (27, '2025-06-01', 'under_construction', 15, 1, 'project'),
-    (27, '2025-07-01', 'under_construction', 18, 1, 'project'),
-    (27, '2025-08-01', 'under_construction', 18, 1, 'project'),
-    (27, '2025-09-01', 'under_construction', 18, 1, 'project'),
-    (27, '2025-10-01', 'under_construction', 18, 1, 'project'),
-    (27, '2025-11-01', 'under_construction', 18, 1, 'project'),
-    (27, '2025-12-01', 'under_construction', 18, 1, 'project'),
-    (27, '2026-01-01', 'under_construction', 20, 1, 'project'),
-    (27, '2026-02-01', 'under_construction', 20, 1, 'project'),
-    (27, '2026-03-01', 'under_construction', 20, 1, 'project'),
-    (27, '2026-04-01', 'under_construction', 20, 1, 'project'),
-    (27, '2026-05-01', 'under_construction', 20, 1, 'project'),
-    (27, '2026-06-01', 'under_construction', 20, 1, 'project'),
-    (28, '2022-01-01', 'fair', 1, 0, 'complaint'),
-    (28, '2022-02-01', 'fair', 1, 0, 'complaint'),
-    (28, '2022-03-01', 'fair', 1, 0, 'complaint'),
-    (28, '2022-04-01', 'fair', 1, 0, 'complaint'),
-    (28, '2022-05-01', 'fair', 1, 0, 'complaint'),
-    (28, '2022-06-01', 'fair', 1, 0, 'complaint'),
-    (28, '2022-07-01', 'fair', 1, 0, 'complaint'),
-    (28, '2022-08-01', 'fair', 1, 0, 'complaint'),
-    (28, '2022-09-01', 'fair', 1, 0, 'complaint'),
-    (28, '2022-10-01', 'fair', 1, 0, 'complaint'),
-    (28, '2022-11-01', 'fair', 1, 0, 'complaint'),
-    (28, '2022-12-01', 'fair', 1, 0, 'complaint'),
-    (28, '2023-01-01', 'fair', 1, 0, 'complaint'),
-    (28, '2023-02-01', 'fair', 1, 0, 'complaint'),
-    (28, '2023-03-01', 'fair', 1, 0, 'complaint'),
-    (28, '2023-04-01', 'fair', 1, 0, 'complaint'),
-    (28, '2023-05-01', 'fair', 1, 0, 'complaint'),
-    (28, '2023-06-01', 'fair', 1, 0, 'complaint'),
-    (28, '2023-07-01', 'fair', 2, 0, 'complaint'),
-    (28, '2023-08-01', 'fair', 2, 0, 'complaint'),
-    (28, '2023-09-01', 'fair', 2, 0, 'complaint'),
-    (28, '2023-10-01', 'fair', 2, 0, 'complaint'),
-    (28, '2023-11-01', 'fair', 2, 0, 'complaint'),
-    (28, '2023-12-01', 'fair', 2, 0, 'complaint'),
-    (28, '2024-01-01', 'fair', 3, 0, 'complaint'),
-    (28, '2024-02-01', 'fair', 3, 0, 'complaint'),
-    (28, '2024-03-01', 'fair', 3, 0, 'complaint'),
-    (28, '2024-04-01', 'fair', 3, 0, 'complaint'),
-    (28, '2024-05-01', 'fair', 3, 0, 'complaint'),
-    (28, '2024-06-01', 'under_construction', 3, 1, 'project'),
-    (28, '2024-07-01', 'under_construction', 4, 1, 'project'),
-    (28, '2024-08-01', 'under_construction', 4, 1, 'project'),
-    (28, '2024-09-01', 'under_construction', 4, 1, 'project'),
-    (28, '2024-10-01', 'under_construction', 4, 1, 'project'),
-    (28, '2024-11-01', 'under_construction', 4, 1, 'project'),
-    (28, '2024-12-01', 'under_construction', 4, 1, 'project'),
-    (28, '2025-01-01', 'under_construction', 5, 1, 'project'),
-    (28, '2025-02-01', 'under_construction', 5, 1, 'project'),
-    (28, '2025-03-01', 'under_construction', 5, 1, 'project'),
-    (28, '2025-04-01', 'under_construction', 5, 1, 'project'),
-    (28, '2025-05-01', 'under_construction', 5, 1, 'project'),
-    (28, '2025-06-01', 'good', 5, 0, 'complaint'),
-    (28, '2025-07-01', 'good', 6, 0, 'complaint'),
-    (28, '2025-08-01', 'good', 6, 0, 'complaint'),
-    (28, '2025-09-01', 'good', 6, 0, 'complaint'),
-    (28, '2025-10-01', 'good', 6, 0, 'complaint'),
-    (28, '2025-11-01', 'good', 6, 0, 'complaint'),
-    (28, '2025-12-01', 'good', 6, 0, 'complaint'),
-    (28, '2026-01-01', 'good', 7, 0, 'complaint'),
-    (28, '2026-02-01', 'good', 7, 0, 'complaint'),
-    (28, '2026-03-01', 'good', 7, 0, 'complaint'),
-    (28, '2026-04-01', 'good', 7, 0, 'complaint'),
-    (28, '2026-05-01', 'good', 7, 0, 'complaint'),
-    (28, '2026-06-01', 'good', 7, 0, 'complaint'),
-    (29, '2022-01-01', 'good', 2, 0, 'complaint'),
-    (29, '2022-02-01', 'good', 2, 0, 'complaint'),
-    (29, '2022-03-01', 'good', 2, 0, 'complaint'),
-    (29, '2022-04-01', 'good', 2, 0, 'complaint'),
-    (29, '2022-05-01', 'good', 2, 0, 'complaint'),
-    (29, '2022-06-01', 'good', 2, 0, 'complaint'),
-    (29, '2022-07-01', 'good', 3, 0, 'complaint'),
-    (29, '2022-08-01', 'under_construction', 3, 0, 'complaint'),
-    (29, '2022-09-01', 'fair', 3, 0, 'complaint'),
-    (29, '2022-10-01', 'fair', 3, 0, 'complaint'),
-    (29, '2022-11-01', 'fair', 3, 0, 'complaint'),
-    (29, '2022-12-01', 'fair', 3, 0, 'complaint'),
-    (29, '2023-01-01', 'fair', 4, 0, 'complaint'),
-    (29, '2023-02-01', 'fair', 4, 0, 'complaint'),
-    (29, '2023-03-01', 'fair', 4, 0, 'complaint'),
-    (29, '2023-04-01', 'fair', 4, 0, 'complaint'),
-    (29, '2023-05-01', 'fair', 4, 0, 'complaint'),
-    (29, '2023-06-01', 'fair', 4, 0, 'complaint'),
-    (29, '2023-07-01', 'fair', 5, 0, 'complaint'),
-    (29, '2023-08-01', 'fair', 5, 0, 'complaint'),
-    (29, '2023-09-01', 'fair', 5, 0, 'complaint'),
-    (29, '2023-10-01', 'fair', 5, 0, 'complaint'),
-    (29, '2023-11-01', 'fair', 5, 0, 'complaint'),
-    (29, '2023-12-01', 'fair', 5, 0, 'complaint'),
-    (29, '2024-01-01', 'fair', 6, 0, 'complaint'),
-    (29, '2024-02-01', 'fair', 6, 0, 'complaint'),
-    (29, '2024-03-01', 'fair', 6, 0, 'complaint'),
-    (29, '2024-04-01', 'fair', 6, 0, 'complaint'),
-    (29, '2024-05-01', 'fair', 6, 0, 'complaint'),
-    (29, '2024-06-01', 'fair', 6, 0, 'complaint'),
-    (29, '2024-07-01', 'fair', 8, 0, 'complaint'),
-    (29, '2024-08-01', 'fair', 8, 0, 'complaint'),
-    (29, '2024-09-01', 'fair', 8, 0, 'complaint'),
-    (29, '2024-10-01', 'fair', 8, 0, 'complaint'),
-    (29, '2024-11-01', 'fair', 8, 0, 'complaint'),
-    (29, '2024-12-01', 'fair', 8, 0, 'complaint'),
-    (29, '2025-01-01', 'fair', 10, 0, 'complaint'),
-    (29, '2025-02-01', 'fair', 10, 0, 'complaint'),
-    (29, '2025-03-01', 'fair', 10, 0, 'complaint'),
-    (29, '2025-04-01', 'fair', 10, 0, 'complaint'),
-    (29, '2025-05-01', 'fair', 10, 0, 'complaint'),
-    (29, '2025-06-01', 'fair', 10, 0, 'complaint'),
-    (29, '2025-07-01', 'fair', 12, 0, 'complaint'),
-    (29, '2025-08-01', 'fair', 12, 0, 'complaint'),
-    (29, '2025-09-01', 'fair', 12, 0, 'complaint'),
-    (29, '2025-10-01', 'under_construction', 12, 1, 'project'),
-    (29, '2025-11-01', 'under_construction', 12, 1, 'project'),
-    (29, '2025-12-01', 'under_construction', 12, 1, 'project'),
-    (29, '2026-01-01', 'under_construction', 14, 1, 'project'),
-    (29, '2026-02-01', 'under_construction', 14, 1, 'project'),
-    (29, '2026-03-01', 'under_construction', 14, 1, 'project'),
-    (29, '2026-04-01', 'under_construction', 14, 1, 'project'),
-    (29, '2026-05-01', 'under_construction', 14, 1, 'project'),
-    (29, '2026-06-01', 'under_construction', 14, 1, 'project'),
-    (30, '2022-01-01', 'good', 2, 0, 'complaint'),
-    (30, '2022-02-01', 'good', 2, 0, 'complaint'),
-    (30, '2022-03-01', 'good', 2, 0, 'complaint'),
-    (30, '2022-04-01', 'good', 2, 0, 'complaint'),
-    (30, '2022-05-01', 'good', 2, 0, 'complaint'),
-    (30, '2022-06-01', 'good', 2, 0, 'complaint'),
-    (30, '2022-07-01', 'good', 3, 0, 'complaint'),
-    (30, '2022-08-01', 'good', 3, 0, 'complaint'),
-    (30, '2022-09-01', 'good', 3, 0, 'complaint'),
-    (30, '2022-10-01', 'good', 3, 0, 'complaint'),
-    (30, '2022-11-01', 'good', 3, 0, 'complaint'),
-    (30, '2022-12-01', 'good', 3, 0, 'complaint'),
-    (30, '2023-01-01', 'good', 4, 0, 'complaint'),
-    (30, '2023-02-01', 'good', 4, 0, 'complaint'),
-    (30, '2023-03-01', 'good', 4, 0, 'complaint'),
-    (30, '2023-04-01', 'good', 4, 0, 'complaint'),
-    (30, '2023-05-01', 'under_construction', 4, 0, 'complaint'),
-    (30, '2023-06-01', 'fair', 4, 0, 'complaint'),
-    (30, '2023-07-01', 'fair', 6, 0, 'complaint'),
-    (30, '2023-08-01', 'fair', 6, 0, 'complaint'),
-    (30, '2023-09-01', 'fair', 6, 0, 'complaint'),
-    (30, '2023-10-01', 'fair', 6, 0, 'complaint'),
-    (30, '2023-11-01', 'fair', 6, 0, 'complaint'),
-    (30, '2023-12-01', 'fair', 6, 0, 'complaint'),
-    (30, '2024-01-01', 'fair', 8, 0, 'complaint'),
-    (30, '2024-02-01', 'fair', 8, 0, 'complaint'),
-    (30, '2024-03-01', 'fair', 8, 0, 'complaint'),
-    (30, '2024-04-01', 'fair', 8, 0, 'complaint'),
-    (30, '2024-05-01', 'fair', 8, 0, 'complaint'),
-    (30, '2024-06-01', 'fair', 8, 0, 'complaint'),
-    (30, '2024-07-01', 'fair', 10, 0, 'complaint'),
-    (30, '2024-08-01', 'fair', 10, 0, 'complaint'),
-    (30, '2024-09-01', 'fair', 10, 0, 'complaint'),
-    (30, '2024-10-01', 'fair', 10, 0, 'complaint'),
-    (30, '2024-11-01', 'fair', 10, 0, 'complaint'),
-    (30, '2024-12-01', 'fair', 10, 0, 'complaint'),
-    (30, '2025-01-01', 'fair', 12, 0, 'complaint'),
-    (30, '2025-02-01', 'fair', 12, 0, 'complaint'),
-    (30, '2025-03-01', 'fair', 12, 0, 'complaint'),
-    (30, '2025-04-01', 'fair', 12, 0, 'complaint'),
-    (30, '2025-05-01', 'fair', 12, 0, 'complaint'),
-    (30, '2025-06-01', 'fair', 12, 0, 'complaint'),
-    (30, '2025-07-01', 'fair', 14, 0, 'complaint'),
-    (30, '2025-08-01', 'fair', 14, 0, 'complaint'),
-    (30, '2025-09-01', 'under_construction', 14, 1, 'project'),
-    (30, '2025-10-01', 'under_construction', 14, 1, 'project'),
-    (30, '2025-11-01', 'under_construction', 14, 1, 'project'),
-    (30, '2025-12-01', 'under_construction', 14, 1, 'project'),
-    (30, '2026-01-01', 'under_construction', 16, 1, 'project'),
-    (30, '2026-02-01', 'under_construction', 16, 1, 'project'),
-    (30, '2026-03-01', 'under_construction', 16, 1, 'project'),
-    (30, '2026-04-01', 'under_construction', 16, 1, 'project'),
-    (30, '2026-05-01', 'under_construction', 16, 1, 'project'),
-    (30, '2026-06-01', 'under_construction', 16, 1, 'project'),
-    (31, '2022-01-01', 'fair', 2, 0, 'complaint'),
-    (31, '2022-02-01', 'fair', 2, 0, 'complaint'),
-    (31, '2022-03-01', 'fair', 2, 0, 'complaint'),
-    (31, '2022-04-01', 'fair', 2, 0, 'complaint'),
-    (31, '2022-05-01', 'fair', 2, 0, 'complaint'),
-    (31, '2022-06-01', 'fair', 2, 0, 'complaint'),
-    (31, '2022-07-01', 'fair', 3, 0, 'complaint'),
-    (31, '2022-08-01', 'fair', 3, 0, 'complaint'),
-    (31, '2022-09-01', 'fair', 3, 0, 'complaint'),
-    (31, '2022-10-01', 'fair', 3, 0, 'complaint'),
-    (31, '2022-11-01', 'fair', 3, 0, 'complaint'),
-    (31, '2022-12-01', 'fair', 3, 0, 'complaint'),
-    (31, '2023-01-01', 'fair', 4, 0, 'complaint'),
-    (31, '2023-02-01', 'fair', 4, 0, 'complaint'),
-    (31, '2023-03-01', 'fair', 4, 0, 'complaint'),
-    (31, '2023-04-01', 'fair', 4, 0, 'complaint'),
-    (31, '2023-05-01', 'fair', 4, 0, 'complaint'),
-    (31, '2023-06-01', 'fair', 4, 0, 'complaint'),
-    (31, '2023-07-01', 'fair', 5, 0, 'complaint'),
-    (31, '2023-08-01', 'fair', 5, 0, 'complaint'),
-    (31, '2023-09-01', 'fair', 5, 0, 'complaint'),
-    (31, '2023-10-01', 'fair', 5, 0, 'complaint'),
-    (31, '2023-11-01', 'fair', 5, 0, 'complaint'),
-    (31, '2023-12-01', 'fair', 5, 0, 'complaint'),
-    (31, '2024-01-01', 'fair', 6, 0, 'complaint'),
-    (31, '2024-02-01', 'fair', 6, 0, 'complaint'),
-    (31, '2024-03-01', 'fair', 6, 0, 'complaint'),
-    (31, '2024-04-01', 'fair', 6, 0, 'complaint'),
-    (31, '2024-05-01', 'fair', 6, 0, 'complaint'),
-    (31, '2024-06-01', 'fair', 6, 0, 'complaint'),
-    (31, '2024-07-01', 'fair', 8, 0, 'complaint'),
-    (31, '2024-08-01', 'fair', 8, 0, 'complaint'),
-    (31, '2024-09-01', 'fair', 8, 0, 'complaint'),
-    (31, '2024-10-01', 'fair', 8, 0, 'complaint'),
-    (31, '2024-11-01', 'under_construction', 8, 1, 'project'),
-    (31, '2024-12-01', 'under_construction', 8, 1, 'project'),
-    (31, '2025-01-01', 'under_construction', 10, 1, 'project'),
-    (31, '2025-02-01', 'under_construction', 10, 1, 'project'),
-    (31, '2025-03-01', 'under_construction', 10, 1, 'project'),
-    (31, '2025-04-01', 'under_construction', 10, 1, 'project'),
-    (31, '2025-05-01', 'under_construction', 10, 1, 'project'),
-    (31, '2025-06-01', 'under_construction', 10, 1, 'project'),
-    (31, '2025-07-01', 'under_construction', 12, 1, 'project'),
-    (31, '2025-08-01', 'under_construction', 12, 1, 'project'),
-    (31, '2025-09-01', 'under_construction', 12, 0, 'complaint'),
-    (31, '2025-10-01', 'good', 12, 0, 'complaint'),
-    (31, '2025-11-01', 'good', 12, 0, 'complaint'),
-    (31, '2025-12-01', 'good', 12, 0, 'complaint'),
-    (31, '2026-01-01', 'good', 13, 0, 'complaint'),
-    (31, '2026-02-01', 'good', 13, 0, 'complaint'),
-    (31, '2026-03-01', 'good', 13, 0, 'complaint'),
-    (31, '2026-04-01', 'good', 13, 0, 'complaint'),
-    (31, '2026-05-01', 'good', 13, 0, 'complaint'),
-    (31, '2026-06-01', 'good', 13, 0, 'complaint');
-
-
--- =========================================================================
--- SEED FUND SOURCES (per-project funding allocations)
--- =========================================================================
-INSERT INTO fund_sources (project_id, source_name, amount) VALUES
--- WEH Flyover: 240Cr — mostly central + state
-(1, 'Central Road Fund', 140000000.00),
-(1, 'State PWD Allocations', 70000000.00),
-(1, 'Municipal General Tier', 30000000.00),
--- EEH Pothole: 1.8Cr — local
-(2, 'Municipal General Portfolios', 10800000.00),
-(2, 'State PWD Capital Tiers', 7200000.00),
--- SV Road Drainage: 9.5Cr — halted
-(3, 'State PWD Allocations', 50000000.00),
-(3, 'Municipal General Portfolios', 30000000.00),
-(3, 'Taxpayer Distribution Ratios', 15000000.00),
--- SV Road Asphalt: 3.5Cr — new contractor
-(4, 'Municipal General Portfolios', 20000000.00),
-(4, 'State PWD Capital Tiers', 15000000.00),
--- Link Road Concrete: 14.5Cr
-(5, 'Central Road Infrastructure Fund', 80000000.00),
-(5, 'State PWD Capital Tiers', 40000000.00),
-(5, 'Municipal General Portfolios', 25000000.00),
--- LBS Marg Sewer: 6.2Cr
-(6, 'State PWD Allocations', 32000000.00),
-(6, 'Municipal General Portfolios', 18000000.00),
-(6, 'Taxpayer Distribution Ratios', 12000000.00),
--- Senapati Bapat Marg: 8.5Cr
-(7, 'Central Road Fund', 50000000.00),
-(7, 'State PWD Allocations', 35000000.00),
--- Dr. Ambedkar Road: 11Cr
-(8, 'Central Road Infrastructure Fund', 60000000.00),
-(8, 'State PWD Capital Tiers', 30000000.00),
-(8, 'Municipal General Portfolios', 20000000.00),
--- JVLR: 1.25Cr
-(9, 'Municipal General Portfolios', 7500000.00),
-(9, 'State PWD Capital Tiers', 5000000.00),
--- SCLR: 4.5Cr
-(10, 'State PWD Allocations', 25000000.00),
-(10, 'Municipal General Portfolios', 12000000.00),
-(10, 'Central Road Fund', 8000000.00),
--- Ghodbunder Road: 19Cr
-(11, 'Central Road Infrastructure Fund', 100000000.00),
-(11, 'State PWD Capital Tiers', 60000000.00),
-(11, 'Municipal General Portfolios', 30000000.00),
--- Sion-Panvel: 8Cr
-(12, 'Central Road Fund', 50000000.00),
-(12, 'State PWD Allocations', 30000000.00),
--- I-94 Resurfacing: $45M (project 19)
-(19, 'FHWA Federal Aid', 30000000.00),
-(19, 'MDOT State Trunkline Fund', 15000000.00),
--- M-10 Pothole: $8.5M (project 20)
-(20, 'MDOT State Trunkline Fund', 5000000.00),
-(20, 'Municipal General Portfolios', 3500000.00),
--- Woodward Ave: $12M (project 21)
-(21, 'FHWA Federal Aid', 7000000.00),
-(21, 'Local Municipal Bond', 5000000.00),
--- Michigan Ave: $6.5M (project 22)
-(22, 'MDOT State Trunkline Fund', 4000000.00),
-(22, 'Local Municipal Bond', 2500000.00),
--- Camden High Street: £3.5M (project 23)
-(23, 'UK Department for Transport Grant', 2500000.00),
-(23, 'Municipal General Portfolios', 1000000.00),
--- A502 Finchley: £4.8M (project 24)
-(24, 'UK Department for Transport Grant', 3000000.00),
-(24, 'Municipal General Portfolios', 1800000.00),
--- Euston Road: £2.2M (project 25)
-(25, 'UK Department for Transport Grant', 1500000.00),
-(25, 'Municipal General Tier', 700000.00),
--- Uhuru Highway: KES 85M (project 26)
-(26, 'Kenya RMLF', 50000000.00),
-(26, 'International Multilateral Loans', 35000000.00),
--- Mombasa Road: KES 25M (project 27)
-(27, 'Kenya RMLF', 15000000.00),
-(27, 'State Budget', 10000000.00),
--- Lang'ata Road: KES 120M (project 28)
-(28, 'World Bank Loan', 70000000.00),
-(28, 'Kenya RMLF', 30000000.00),
-(28, 'State Budget', 20000000.00),
--- Southfield Freeway: $22.5M (project 16)
-(16, 'FHWA Federal Aid', 14000000.00),
-(16, 'MDOT State Trunkline Fund', 8500000.00),
--- M25 Smart Motorway: £95M (project 17)
-(17, 'UK Department for Transport Grant', 65000000.00),
-(17, 'International Multilateral Loans', 30000000.00),
--- Waiyaki Way: KES 45M (project 18)
-(18, 'Kenya RMLF', 25000000.00),
-(18, 'State Budget', 20000000.00),
--- Gratiot Avenue: $9.5M (project 29)
-(29, 'MDOT State Trunkline Fund', 5500000.00),
-(29, 'FHWA Federal Aid', 4000000.00),
--- Thika Superhighway: KES 32M (project 30)
-(30, 'Kenya RMLF', 17000000.00),
-(30, 'International Multilateral Loans', 15000000.00),
--- Jogoo Road: KES 18M (project 31)
-(31, 'State Budget', 10000000.00),
-(31, 'Kenya RMLF', 8000000.00);
-
--- =========================================================================
--- SEED BUDGET VARIANCE REASONS (55 records covering all 31 projects)
--- Includes both overruns (positive variance) and underruns (negative variance)
--- =========================================================================
-INSERT INTO budget_variance_reasons (project_id, original_budget, revised_budget, variance_amount, variance_pct, reason, approved_by, approval_date)
-VALUES
--- Project 1: WEH Flyover Resurfacing & Structural Grouting (INR, in_progress)
-(1, 240000000.00, 255000000.00, 15000000.00, 6.25, 'Structural grouting scope expanded after pier G4 core samples revealed deeper cracks than anticipated. Additional 3 spans required full-depth grouting per revised NHAI structural audit.', 'Dr. S. Venkataraman (Chief Technical Advisor, NHAI)', '2025-09-20'),
-(1, 255000000.00, 250000000.00, -5000000.00, -1.96, 'Material optimization — geopolymer concrete mix design approved by IIT Bombay reduced cement consumption by 12% on southbound carriageway while meeting strength specifications.', 'Rajesh Kumar (Chief Engineer, PWD)', '2026-01-15'),
-
--- Project 2: EEH Pothole Remediation Campaign 2025 (INR, completed)
-(2, 18000000.00, 19200000.00, 1200000.00, 6.67, 'Unforeseen asphalt price hike due to Q4 2025 global bitumen shortage. Additional quantity required for deep-patch zones discovered during milling.', 'Rajesh Kumar (Chief Engineer, PWD)', '2025-10-15'),
-
--- Project 3: SV Road Drainage Trenching and Microtunnelling (INR, halted)
-(3, 95000000.00, 45000000.00, -50000000.00, -52.63, 'Work halted due to contractor blacklisting (substandard material). Balance reallocated to emergency asphalt contract. All recoverable materials and equipment returned to MCGM stores.', 'PWD Tender Review Committee', '2025-06-01'),
-
--- Project 4: SV Road Emergency Asphalt Laying (INR, in_progress)
-(4, 35000000.00, 28000000.00, -7000000.00, -20.00, 'Scope reduced after partial completion of halted drainage project — only 60% of originally planned stretch requires emergency asphalt. Rest covered under separate pavement contract.', 'Anita Deshmukh (Project Director, MCGM)', '2026-04-10'),
-(4, 28000000.00, 32000000.00, 4000000.00, 14.29, 'Emergency mobilization premium — contractor deployed triple-shift crew and imported polymer-modified bitumen to complete stretch before monsoon onset. Approved under urgency clause.', 'Vikram Singh (Superintending Engineer, PWD)', '2026-05-22'),
-
--- Project 5: Link Road Concrete Pavement Upgrade Ph. 2 (INR, in_progress)
-(5, 145000000.00, 158000000.00, 13000000.00, 8.97, 'Unforeseen utility relocation at Oshiwara junction — 400mm water main and 33kV underground cable found intersecting pavement alignment. Relocation involved BMC water dept and MSEDCL.', 'Meena Iyer (Financial Advisor, PWD)', '2026-02-28'),
-(5, 158000000.00, 152000000.00, -6000000.00, -3.80, 'Concrete mix optimization — roller-compacted concrete (RCC) substituted for traditional pavement-grade concrete across 1.2km median section, saving 4,200 cu.m. of material without compromising design life.', 'Anita Deshmukh (Project Director, MCGM)', '2026-05-10'),
-
--- Project 6: LBS Marg Sewer Line Laying and Patching (INR, in_progress)
-(6, 62000000.00, 60000000.00, -2000000.00, -3.23, 'Final sewer alignment optimization reduced trench length by 120m. Savings redirected to junction box upgrades per site instruction SI-042.', 'Anita Deshmukh (Project Director, MCGM)', '2025-08-20'),
-(6, 60000000.00, 63000000.00, 3000000.00, 5.00, 'Additional sewer laterals required for 47 residential connections not mapped in original survey. Scope added per MCGM drainage department directive D-2025/331.', 'Rajesh Kumar (Chief Engineer, PWD)', '2025-11-03'),
-
--- Project 7: Senapati Bapat Marg Micro-silica concrete topping (INR, completed)
-(7, 85000000.00, 86500000.00, 1500000.00, 1.76, 'Micro-silica import cost escalation — sole supplier Elkem Materials increased ex-works price by 8% due to European shipping disruption. Three alternative quotes obtained; price accepted.', 'Anita Deshmukh (Project Director, MCGM)', '2023-06-20'),
-(7, 86500000.00, 84200000.00, -2300000.00, -2.66, 'Labor efficiency savings — mechanized screeding reduced manual finishing crew by 40%. Overall project delivered 0.94% under revised budget with zero safety incidents.', 'Col. R. S. Dhillon (Retd., Independent Project Reviewer)', '2023-12-05'),
-
--- Project 8: Dr. Ambedkar Road Junction Redesign & Lane Widening (INR, completed)
-(8, 110000000.00, 108000000.00, -2000000.00, -1.82, 'Junction redesign optimization — traffic simulation model showed 3-lane approach sufficient at Dadar TT junction, eliminating need for 4th lane acquisition. Land cost saved.', 'Dr. S. Venkataraman (Chief Technical Advisor, NHAI)', '2024-09-15'),
-(8, 108000000.00, 109000000.00, 1000000.00, 0.93, 'Additional thermoplastic road marking and cat-eye reflector installation requested by Traffic Police Dept after safety audit. 2.3km of additional lane marking executed.', 'Vikram Singh (Superintending Engineer, PWD)', '2024-12-10'),
-
--- Project 9: JVLR Pothole Repair and Guardrail installation (INR, completed)
-(9, 12500000.00, 12500000.00, 0.00, 0.00, 'On-budget delivery — accurate estimation and fixed-price contract with PNC Infratech. Minor savings on guardrail posts offset by additional reflectors, net zero variance.', 'Rajesh Kumar (Chief Engineer, PWD)', '2025-06-20'),
-
--- Project 10: SCLR Connector Joint Replacement & Waterproofing (INR, in_progress)
-(10, 45000000.00, 38000000.00, -7000000.00, -15.56, 'Phased approach adopted after joint assessment revealed 6 of 24 joints can be repaired in-situ rather than replaced. Repair-only joints cost 60% less than full replacement.', 'Vikram Singh (Superintending Engineer, PWD)', '2026-01-20'),
-(10, 38000000.00, 41000000.00, 3000000.00, 7.89, 'Three additional expansion joints found beyond repair during demolition — corrosion damage under bearing plates was not visible in initial survey. Contingency released.', 'PWD Bridges Division Chief Engineer', '2026-03-15'),
-
--- Project 11: Ghodbunder Road Mast-Asphalt Overlay (INR, completed)
-(11, 190000000.00, 187000000.00, -3000000.00, -1.58, 'Efficient material usage — mast-asphalt yield exceeded estimates by 4.2% due to consistent surface profile requiring less levelling course. 180 tonnes of material saved.', 'Meena Iyer (Financial Advisor, PWD)', '2024-11-20'),
-(11, 187000000.00, 189000000.00, 2000000.00, 1.07, 'Safety barrier upgrade — MORTH circular dated 2024-08-15 mandated TL-4 crash barriers at all median openings. 12 additional openings retrofitted with W-beam profiles.', 'Anita Deshmukh (Project Director, MCGM)', '2024-12-10'),
-
--- Project 12: Sion-Panvel Expressway Maintenance & Repair (INR, in_progress)
-(12, 80000000.00, 88000000.00, 8000000.00, 10.00, 'Additional drainage scope — monsoon damage revealed 600m of side drain collapse requiring reconstruction. Stormwater outfall redesign needed at Mankhurd T-junction.', 'Rajesh Kumar (Chief Engineer, PWD)', '2026-03-20'),
-(12, 88000000.00, 82000000.00, -6000000.00, -6.82, 'Phased spending profile — contractor achieved 85% completion in first phase with 75% budget utilization. Remaining Rs. 60 lakh held for final quality assurance testing.', 'Dr. S. Venkataraman (Chief Technical Advisor, NHAI)', '2026-05-18'),
-
--- Project 13: Marine Drive Promenade Resurfacing (INR, completed)
-(13, 52000000.00, 51800000.00, -200000.00, -0.38, 'Promenade material savings — recycled granite from MCGM demolition yard used for 40% of paver block base layer. Heritage committee approved after quality demonstration.', 'Anita Deshmukh (Project Director, MCGM)', '2025-05-10'),
-
--- Project 14: NH-3 Mumbai-Nashik Widening Phase 4 (INR, in_progress)
-(14, 850000000.00, 920000000.00, 70000000.00, 8.24, 'Land acquisition cost escalation — 23 additional private parcels required at Kasara Ghat section due to revised alignment avoiding geologically unstable zone. Compensation per LAAR 2013.', 'NHAI Land Acquisition Committee', '2025-09-30'),
-(14, 920000000.00, 945000000.00, 25000000.00, 2.72, 'Environmental compliance costs — forest clearance conditions mandated 3 wildlife underpasses and 5km of noise barriers. MoEF&CC approval conditions incorporated into revised DPR.', 'Dr. S. Venkataraman (Chief Technical Advisor, NHAI)', '2025-12-15'),
-(14, 945000000.00, 960000000.00, 15000000.00, 1.59, 'Utility relocation — 66kV transmission line and BSNL optical fiber cable found along 3.2km of proposed widening. MSEDCL and BSNL relocation charges as per standard tariff.', 'NHAI Project Implementation Unit', '2026-03-22'),
-
--- Project 15: MTHL Approach Road Connector & Lighting (INR, completed)
-(15, 180000000.00, 175000000.00, -5000000.00, -2.78, 'Lighting design optimization — LED luminaire specification revised from 150W to 120W with improved optics, reducing pole count by 18% while maintaining lux levels per IRC:SP:126.', 'Vikram Singh (Superintending Engineer, PWD)', '2024-12-20'),
-(15, 175000000.00, 177000000.00, 2000000.00, 1.14, 'Additional safety barriers — crash barrier requirement extended beyond design to cover 600m of elevated approach where ground survey revealed 8m drop-off previously unmapped.', 'Meena Iyer (Financial Advisor, PWD)', '2025-03-10'),
-
--- Project 16: Southfield Freeway Pavement Rehabilitation (USD, in_progress)
-(16, 22500000.00, 24500000.00, 2000000.00, 8.89, 'Bridge joint replacement scope expanded — 4 additional expansion joints at Southfield Rd overpass found deteriorated beyond repair during milling. MDOT bridge inspection report B-2025-44.', 'James Mitchell (PE, MDOT District Engineer)', '2026-02-14'),
-(16, 24500000.00, 23000000.00, -1500000.00, -6.12, 'Phased pavement rehabilitation — 1.8 miles of asphalt base course found structurally sound after coring, allowing mill-and-fill instead of full-depth replacement. $1.5M saved.', 'Sarah Thompson (FHWA Project Manager)', '2026-04-30'),
-
--- Project 17: M25 Junction 8-12 Smart Motorway Upgrade (GBP, in_progress)
-(17, 95000000.00, 108000000.00, 13000000.00, 13.68, 'Technology upgrade — all- lane running system specification upgraded to include stopped vehicle detection (SVD) radar at 500m intervals, mandated by DfT safety directive SM-2025/02.', 'Sir Nigel Thornton (Chair, National Highways Board)', '2026-01-20'),
-(17, 108000000.00, 112000000.00, 4000000.00, 3.70, 'Environmental mitigation — additional 2.4km of ecological fencing required after protected great crested newt population discovered during construction. Natural England licence condition.', 'Dr. Amelia Foster (Camden Borough Engineer)', '2026-03-12'),
-(17, 112000000.00, 115000000.00, 3000000.00, 2.68, 'Smart motorway technology add-on — variable mandatory speed limit (VMSL) gantries upgraded from MS1 to MS4 specification per revised DfT standards. Includes 8 additional gantries.', 'David Hughes (Transport for London, Head of Roads)', '2026-05-08'),
-
--- Project 18: Waiyaki Way Drainage & Resurfacing (KES, completed)
-(18, 45000000.00, 44000000.00, -1000000.00, -2.22, 'Drainage design optimization — redesign of outfall structure at Lavington junction eliminated need for 200m of jacked pipe. Gravity outfall utilized existing drainage easement.', 'Engineer John Mwangi (KeNHA Director General)', '2025-04-15'),
-
--- Project 19: I-94 Resurfacing & Bridge Repairs (USD, in_progress)
-(19, 45000000.00, 49000000.00, 4000000.00, 8.89, 'Steel bridge repair scope expanded — all 12 bridge decks on I-94 corridor required hydro-demolition and latex-modified concrete overlay after chloride ion testing exceeded threshold.', 'James Mitchell (PE, MDOT District Engineer)', '2025-11-20'),
-(19, 49000000.00, 46000000.00, -3000000.00, -6.12, 'Phased delivery — 2.8 miles of pavement found suitable for preservation treatment (micro-surfacing) instead of full mill-and-fill. Remaining $3M reallocated to FY2027 program.', 'Sarah Thompson (FHWA Project Manager)', '2026-03-25'),
-
--- Project 20: M-10 Freeway Pothole Remediation (USD, completed)
-(20, 8500000.00, 9200000.00, 700000.00, 8.24, 'Extended paving area — additional 1.2 lane-miles of patching required after spring thaw revealed 37 new potholes not present during winter survey. Emergency repair directive.', 'Robert Chen (Detroit DPW Director)', '2025-06-15'),
-(20, 9200000.00, 8500000.00, -700000.00, -7.61, 'Final cost savings — contractor achieved 11% material savings through use of recycled asphalt pavement (RAP) at 35% blend, approved by MDOT as pilot for urban freeway repairs.', 'Karen Williams (State Transportation Board Member)', '2025-09-10'),
-
--- Project 21: Woodward Avenue Streetscape Phase 2 (USD, in_progress)
-(21, 12000000.00, 13500000.00, 1500000.00, 12.50, 'Streetscape scope expansion — 8 additional pedestrian-scale LED streetlights and 12 ADA-compliant curb ramps added per City Council resolution 2025-87. Community engagement feedback.', 'Karen Williams (State Transportation Board Member)', '2026-02-28'),
-(21, 13500000.00, 12800000.00, -700000.00, -5.19, 'Phased approach — decorative paver section reduced from 1.2 miles to 0.8 miles, replaced with stamped concrete achieving similar aesthetic at 40% lower cost. Savings held for Phase 3.', 'James Mitchell (PE, MDOT District Engineer)', '2026-05-12'),
-
--- Project 22: Michigan Avenue Drainage Upgrade (USD, completed)
-(22, 6500000.00, 7100000.00, 600000.00, 9.23, 'Stormwater compliance — EGLE permit conditions required 2 additional retention basins and oil-grit separator at outfall 4. Design revised per NPDES Phase II requirements.', 'Sarah Thompson (FHWA Project Manager)', '2024-08-10'),
-(22, 7100000.00, 6500000.00, -600000.00, -8.45, 'Final cost alignment — competitive bids for stormwater structures came in 18% below estimate. Savings applied to reduce overall project cost to original budget.', 'Robert Chen (Detroit DPW Director)', '2024-12-01'),
-
--- Project 23: Camden High Street Safety Improvements (GBP, in_progress)
-(23, 3500000.00, 3900000.00, 400000.00, 11.43, 'Utility diversions — Thames Water 300mm trunk main and Virgin Media fiber duct found conflicting with proposed raised-table crossing. Statutory undertaker charges as per NRSWA.', 'Dr. Amelia Foster (Camden Borough Engineer)', '2025-12-10'),
-(23, 3900000.00, 3600000.00, -300000.00, -7.69, 'Phased implementation — signal-controlled crossing deferred to Phase 2 (separate TfL funding). Pedestrian refuge island installed as interim measure at 40% of crossing cost.', 'David Hughes (Transport for London, Head of Roads)', '2026-03-20'),
-
--- Project 24: A502 Finchley Road Carriageway Repair (GBP, completed)
-(24, 4800000.00, 4600000.00, -200000.00, -4.17, 'Carriageway material savings — cold-mix asphalt used for 600m of side road repairs instead of hot-mix, reducing carbon footprint and material cost by 22% per mile. TfL innovation trial.', 'Sir Nigel Thornton (Chair, National Highways Board)', '2025-09-22'),
-
--- Project 25: Euston Road Bus Lane Resurfacing (GBP, in_progress)
-(25, 2200000.00, 2600000.00, 400000.00, 18.18, 'Night work premium — TfL restrictions limited working hours to 22:00-05:00 with noise covenants. Contractor productivity reduced by 35%, requiring extended duration and shift premiums.', 'David Hughes (Transport for London, Head of Roads)', '2026-03-05'),
-(25, 2600000.00, 2300000.00, -300000.00, -11.54, 'Reduced scope — bus lane resurfacing limited to 1.2km instead of planned 1.8km after TfL route review deferred Euston station approach to Crossrail 2 coordination program.', 'Dr. Amelia Foster (Camden Borough Engineer)', '2026-05-20'),
-
--- Project 26: Uhuru Highway Bridge Expansion Joint Repair (KES, in_progress)
-(26, 85000000.00, 93000000.00, 8000000.00, 9.41, 'Expansion joint import cost escalation — modular bridge joints sourced from Germany incurred 15% forex loss due to KES depreciation against EUR. Customs and freight charges also rose.', 'Engineer John Mwangi (KeNHA Director General)', '2026-01-25'),
-(26, 93000000.00, 88000000.00, -5000000.00, -5.38, 'Phased delivery — 30% of joints found repairable in-situ after specialized inspection. Saved 3 joints worth of replacement cost. Repairs executed by local fabricator under KeNHA supervision.', 'Grace Wanjiku (KURA Project Manager)', '2026-04-18'),
-
--- Project 27: Mombasa Road Drainage Channel Desilting (KES, completed)
-(27, 25000000.00, 24000000.00, -1000000.00, -4.00, 'Desilting efficiency — contractor mobilized long-reach excavators and silt barge, achieving 40% higher productivity than estimated. 1.8km of channel cleaned in 22 days vs 35-day estimate.', 'Peter Kamau (NCC Roads Executive Director)', '2025-07-10'),
-
--- Project 28: Lang''ata Road Widening & Overlay (KES, in_progress)
-(28, 120000000.00, 138000000.00, 18000000.00, 15.00, 'Land acquisition — 17 additional plots required for 2.5km widening at Carnivore-Karen junction. Compensation at government valuation rates plus 30% solatium per Land Act 2012.', 'Dr. Samwel Otiato (World Bank Infrastructure Lead)', '2026-02-28'),
-(28, 138000000.00, 145000000.00, 7000000.00, 5.07, 'Utility relocation — Kenya Power 11kV line and Safaricom fiber optic cable relocation required along 1.6km of widening. Works coordinated with Nairobi City County utility forum.', 'Grace Wanjiku (KURA Project Manager)', '2026-05-10'),
-
--- Project 29: Gratiot Avenue Resurfacing Phase 3 (USD, in_progress)
-(29, 9500000.00, 10600000.00, 1100000.00, 11.58, 'Asphalt price adjustment — liquid asphalt binder index rose 22% between tender and construction due to Midwest refinery outages. MDOT price adjustment clause invoked per contract 2025-331.', 'Sarah Thompson (FHWA Project Manager)', '2026-04-15'),
-(29, 10600000.00, 10100000.00, -500000.00, -4.72, 'Phased resurfacing — 0.6 miles deferred to Phase 4 after subsurface drainage assessment showed need for underdrain installation. Funds held for coordinated drainage + paving contract.', 'James Mitchell (PE, MDOT District Engineer)', '2026-06-01'),
-
--- Project 30: Thika Superhighway Overlay & Safety (KES, completed)
-(30, 32000000.00, 30000000.00, -2000000.00, -6.25, 'Overlay efficiency — single-layer stone mastic asphalt (SMA) of 40mm depth achieved required structural number, eliminating need for second layer. 5,200 tonnes of SMA saved.', 'Engineer John Mwangi (KeNHA Director General)', '2025-06-25'),
-
--- Project 31: Jogoo Road Drainage Improvement (KES, in_progress)
-(31, 18000000.00, 20500000.00, 2500000.00, 13.89, 'Drainage redesign — existing 900mm pipe insufficient per revised hydrological model. Upgrade to 1200mm RCC pipe with additional catch basins at Makadara market junction required.', 'Peter Kamau (NCC Roads Executive Director)', '2026-03-15'),
-(31, 20500000.00, 19200000.00, -1300000.00, -6.34, 'Phased execution — 300m of secondary drainage channel de-scoped to Phase 2 as it serves undeveloped plots. Primary drainage complete and functional for 2026 monsoon season.', 'Grace Wanjiku (KURA Project Manager)', '2026-05-30');
-
--- =========================================================================
--- SEED PROJECT MILESTONES
--- =========================================================================
-INSERT INTO project_milestones (project_id, title, description, amount, status, due_date, completion_date, verified_by, payment_release_date, notes) VALUES
--- WEH Flyover milestones (6 milestones)
-(1, 'Design & Survey', 'Detailed engineering survey and structural assessment of existing flyover', 24000000.00, 'completed', '2025-07-15', '2025-07-10', 'NHAI Engineering Wing', '2025-08-01', 'Survey revealed additional grouting needed at pier G4'),
-(1, 'Traffic Diversion Setup', 'Install temporary barriers, signage, and alternate route markings', 12000000.00, 'completed', '2025-08-01', '2025-07-28', 'Traffic Police Dept', '2025-08-15', 'No major delays during setup'),
-(1, 'Structural Grouting Phase 1', 'Grouting of pier caps and deck soffits — spans 1-8', 50000000.00, 'completed', '2025-11-30', '2025-11-25', 'NHAI Quality Control', '2025-12-15', '15% material saved via optimized mix design'),
-(1, 'Resurfacing — Northbound', 'Milling and overlay of northbound carriageway (6.2 km)', 60000000.00, 'in_progress', '2026-03-31', NULL, NULL, NULL, NULL),
-(1, 'Resurfacing — Southbound', 'Milling and overlay of southbound carriageway (6.2 km)', 64000000.00, 'pending', '2026-05-31', NULL, NULL, NULL, NULL),
-(1, 'Final Inspection & Handover', 'Quality audit, defect rectification, and project close-out', 30000000.00, 'pending', '2026-06-30', NULL, NULL, NULL, NULL),
--- EEH Pothole Remediation (3 milestones)
-(2, 'Pothole Mapping & Classification', 'Drone survey and manual inspection of all potholes on EEH', 3000000.00, 'completed', '2025-09-10', '2025-09-08', 'PWD Road Inspections', '2025-09-20', 'Identified 47 potholes, 12 deep-patch zones'),
-(2, 'Patching & Resurfacing', 'Hot-mix asphalt patching of all identified defects (incl. material escalation)', 13200000.00, 'completed', '2025-10-15', '2025-10-30', 'PWD Quality Control', '2025-11-10', 'Bitumen price hike added ₹1.2M — approved via contingency'),
-(2, 'Quality Verification', 'Core sampling and ride quality assessment', 3000000.00, 'completed', '2025-10-31', '2025-11-12', 'Independent Auditor: IIT Bombay', '2025-11-20', '3 cores failed density test — reworked'),
--- SV Road Drainage (halted, partial milestones)
-(3, 'Feasibility & Route Survey', 'Utility mapping and soil investigation for microtunnelling', 5000000.00, 'completed', '2024-06-15', '2024-06-10', 'MCGM Drainage Dept', '2024-07-01', NULL),
-(3, 'Pipe Procurement', 'Procurement of 1200mm RCC pipes and trench support system', 15000000.00, 'completed', '2024-08-30', '2024-09-15', 'Store Verification', '2024-10-01', 'Supplier delivery delayed 15 days'),
-(3, 'Trenching Phase 1', 'Trench excavation and shoring for first 800m', 20000000.00, 'halted', '2024-12-31', NULL, NULL, NULL, 'Halted due to contractor blacklisting'),
--- Ghodbunder Road Overlay (completed, 3 milestones)
-(11, 'Surface Preparation', 'Milling, crack sealing, and tack coat application (20km)', 40000000.00, 'completed', '2024-05-15', '2024-05-12', 'PWD Superintending Engineer', '2024-06-01', NULL),
-(11, 'Mast-Asphalt Laying', 'Mast-asphalt overlay in 2 lifts (40mm + 30mm)', 130000000.00, 'completed', '2024-10-31', '2024-10-25', 'PWD Quality Control', '2024-11-15', NULL),
-(11, 'Road Markings & Safety', 'Thermoplastic markings, reflectors, and crash barrier installation', 20000000.00, 'completed', '2024-12-15', '2024-12-20', 'Traffic Police Dept', '2024-12-28', '5-day delay due to rain'),
--- SCLR Joint Replacement (3 milestones)
-(10, 'Joint Assessment & Procurement', 'Inspection of all 24 expansion joints and procurement of replacements', 8000000.00, 'completed', '2025-12-01', '2025-11-28', 'PWD Bridges Division', '2025-12-15', '3 joints beyond repair — full replacement'),
-(10, 'Joint Replacement', 'Remove and replace expansion joints (spans 12-24)', 25000000.00, 'in_progress', '2026-03-31', NULL, NULL, NULL, NULL),
-(10, 'Waterproofing & QC', 'Waterproof membrane application and load testing', 12000000.00, 'pending', '2026-05-31', NULL, NULL, NULL, NULL),
--- SV Road Emergency Asphalt Laying (3 milestones — fast-track)
-(4, 'Emergency Patching Phase 1', 'Cold-mix patching of critical depressions at Bandra junction (2000 sqm)', 8000000.00, 'completed', '2026-03-31', '2026-03-28', 'MCGM Ward K-West', '2026-04-10', 'Night work to avoid peak-hour disruption'),
-(4, 'Hot-Mix Overlay & Utility Adjustments', 'Full-width hot-mix overlay (5000 sqm) plus manhole cover realignment', 18000000.00, 'in_progress', '2026-06-30', NULL, NULL, NULL, NULL),
-(4, 'Markings & Street Furniture', 'Thermoplastic lane markings, reflectors, and guardrail repairs', 9000000.00, 'pending', '2026-08-31', NULL, NULL, NULL, NULL),
--- Link Road Concrete Pavement Upgrade Ph. 2 (4 milestones)
-(5, 'Base Preparation & Subgrade', 'Subgrade stabilization, geotextile laying, and lean concrete base (2.5 km)', 35000000.00, 'completed', '2026-01-15', '2026-01-10', 'MCGM Roads Division', '2026-02-01', 'Subgrade CBR values met design spec'),
-(5, 'Pavement Joints & Reinforcement', 'Steel dowel bar installation, joint forming, and DLC layer', 40000000.00, 'completed', '2026-04-30', '2026-04-25', 'MCGM Quality Control', '2026-05-15', NULL),
-(5, 'Concrete Paving — 3 Lifts', 'RCC pavement in 3 continuous lifts (8 MPa, 12 MPa, 15 MPa)', 55000000.00, 'in_progress', '2026-07-31', NULL, NULL, NULL, 'Day-1 section strength 14.2 MPa — above threshold'),
-(5, 'Curing, Grooving & Opening to Traffic', 'Wet curing (14 days), diamond grooving, joint sealing, and traffic reopening', 15000000.00, 'pending', '2026-09-30', NULL, NULL, NULL, NULL),
--- LBS Marg Sewer Line Laying and Patching (4 milestones — delayed)
-(6, 'Alignment Survey & Utility Marking', 'Ground-penetrating radar survey and mark-up of all underground utilities', 5000000.00, 'completed', '2024-12-01', '2024-12-30', 'BMC Sewerage Dept', '2025-01-15', 'GPR found 3 unrecorded gas lines — re-routing required'),
-(6, 'Trench Excavation & Shoring', 'Open-cut trenching (3.2 km) with hydraulic shoring system', 22000000.00, 'completed', '2025-04-30', '2025-06-15', 'BMC Infrastructure', '2025-07-01', 'Encountered granite boulders — 45-day delay'),
-(6, 'Sewer Pipe Laying & Manhole Construction', '600mm HDPE pipe laying, precast manholes, and junction connections', 25000000.00, 'in_progress', '2025-09-30', NULL, NULL, NULL, 'Pipe fusion tests 100% pass rate'),
-(6, 'Backfill, Restoration & Surface Patching', 'Granular backfill, compaction testing, and asphalt patching (3 km)', 10000000.00, 'in_progress', '2025-11-01', NULL, NULL, NULL, '209 days delayed from original schedule'),
--- Senapati Bapat Marg Micro-silica Concrete Topping (4 milestones — all completed)
-(7, 'Concrete Milling & Substrate Prep', 'Diamond grinding to remove 15mm existing topping and expose aggregate', 12000000.00, 'completed', '2023-03-15', '2023-03-12', 'PWD Superintending Engineer', '2023-04-01', NULL),
-(7, 'Micro-Silica Concrete Laying Phase 1', 'Cast-in-situ micro-silica modified topping (2 km, 80mm thick)', 35000000.00, 'completed', '2023-07-31', '2023-07-28', 'IIT Madras Materials Lab', '2023-08-15', '28-day compressive strength: 62 MPa (spec: 55 MPa)'),
-(7, 'Micro-Silica Concrete Laying Phase 2', 'Remaining sections (1.8 km) with expansion joint integration', 28000000.00, 'completed', '2023-10-31', '2023-10-25', 'PWD Quality Control', '2023-11-15', 'Mix design optimized — cement reduced 8%'),
-(7, 'Grinding, Grooving & Final Inspection', 'Surface grinding for skid resistance, grooving at crosswalks, and smoothness testing', 10000000.00, 'completed', '2023-12-15', '2023-12-10', 'Independent Auditor: VJTI Mumbai', '2023-12-28', 'IRI value 2.1 m/km — excellent ride quality'),
--- Dr. Ambedkar Road Junction Redesign & Lane Widening (4 milestones — all completed)
-(8, 'Traffic Study & Junction Design', 'Traffic volume survey, signal timing optimization, and 3D junction layout', 8000000.00, 'completed', '2024-04-30', '2024-04-25', 'Traffic Engineering Dept', '2024-05-15', NULL),
-(8, 'Utility Relocation & Footpath Construction', 'Relocation of water mains, electrical ducts, and new 2.5m footpaths', 35000000.00, 'completed', '2024-08-31', '2024-08-28', 'BMC Utilities Cell', '2024-09-15', 'Water main diversion completed without supply interruption'),
-(8, 'Carriageway Widening & Asphalt Overlay', 'Lane widening from 2 to 3 lanes (1.5 km), deep-strength asphalt overlay', 52000000.00, 'completed', '2024-12-31', '2024-12-20', 'PWD Roads Division', '2025-01-10', 'Night construction minimized disruption'),
-(8, 'Signalization, Lighting & Landscaping', 'LED traffic signals, street lighting, median planting, and avenue trees', 15000000.00, 'completed', '2025-01-31', '2025-01-20', 'BMC Gardens Dept', '2025-02-05', 'All trees survived transplant shock'),
--- JVLR Pothole Repair and Guardrail Installation (3 milestones — all completed)
-(9, 'Pothole Survey & Categorization', 'Manual and drone survey of 8 km JVLR corridor — 92 defects identified', 1500000.00, 'completed', '2025-05-15', '2025-05-12', 'PWD Road Inspections', '2025-05-25', '42 potholes, 33 edge cracks, 17 utility depressions'),
-(9, 'Pothole Patching & Crack Sealing', 'Machine-laid hot-mix patching, crack sealing with rubberized bitumen', 7500000.00, 'completed', '2025-06-15', '2025-06-12', 'PWD Quality Control', '2025-06-28', NULL),
-(9, 'Guardrail Replacement', 'Replace 1.2 km of damaged W-beam guardrail with galvanized steel', 3500000.00, 'completed', '2025-06-30', '2025-06-28', 'Traffic Safety Division', '2025-07-05', 'All anchorages concrete-tested to AASHTO M180'),
--- Sion-Panvel Expressway Maintenance & Repair (4 milestones)
-(12, 'Expressway Condition Assessment', 'Full-length pavement condition index (PCI) survey and bridge deck inspection (22 km)', 8000000.00, 'completed', '2026-01-31', '2026-01-28', 'MSRDC Inspection Wing', '2026-02-15', 'PCI score 62 — moderate deterioration'),
-(12, 'Pothole & Crack Repair Campaign', 'Machine hot-mix patching of 230 identified potholes and 14 km crack sealing', 25000000.00, 'completed', '2026-03-31', '2026-04-10', 'MSRDC Quality Control', '2026-04-25', 'Extended to cover monsoon-accelerated damage'),
-(12, 'Bridge Joint Replacement & Waterproofing', 'Replace 8 expansion joints on major bridges and apply waterproof membrane', 28000000.00, 'in_progress', '2026-08-31', NULL, NULL, NULL, NULL),
-(12, 'Road Markings, Reflectors & Signage', 'Thermoplastic lane markings, cat''s eyes, and gantry-mounted variable message signs', 19000000.00, 'pending', '2026-11-30', NULL, NULL, NULL, NULL),
--- Marine Drive Promenade Resurfacing (3 milestones — all completed)
-(13, 'Promenade Surface Milling', 'Milling of existing 30mm asphalt wearing course along 3.6 km sea-face', 12000000.00, 'completed', '2025-02-28', '2025-02-25', 'MCGM Bridges & Roads', '2025-03-15', 'Night milling to preserve tourist access'),
-(13, 'Anti-Skid Asphalt Laying', 'Laying of red anti-skid asphalt with polymer-modified binder', 32000000.00, 'completed', '2025-05-31', '2025-05-28', 'MCGM Quality Control', '2025-06-15', 'Skid resistance value 68 — exceeds 55 minimum'),
-(13, 'Seating, Lighting & Handrailling', 'Granite seating blocks, heritage-style lampposts, and stainless-steel handrail restoration', 8000000.00, 'completed', '2025-06-30', '2025-06-25', 'MCGM Heritage Cell', '2025-07-10', 'Heritage committee approved all designs'),
--- NH-3 Mumbai-Nashik Widening Phase 4 (5 milestones — major highway)
-(14, 'Land Acquisition & Relocation', 'Compensation and relocation of 48 structures in widening corridor (15-25m)', 120000000.00, 'completed', '2025-08-31', '2025-08-25', 'NHAI Land Acquisition', '2025-09-20', 'All 48 families resettled per R&R policy'),
-(14, 'Earthwork & Embankment Construction', 'Cut-and-fill earthwork (1.2M cum), embankment compaction, and culvert extension', 180000000.00, 'completed', '2026-02-28', '2026-03-05', 'NHAI Project Management', '2026-03-25', 'Borrow pit sourced from adjacent hill cutting'),
-(14, 'Pavement Base & DLC', 'Granular sub-base (300mm), wet-mix macadam base (250mm), and DLC (150mm)', 200000000.00, 'in_progress', '2026-08-31', NULL, NULL, NULL, NULL),
-(14, 'Bituminous Wearing Course', 'BC laying in 2 lifts (50mm + 40mm) with PMB binder (4-lane, 35 km)', 220000000.00, 'pending', '2027-01-31', NULL, NULL, NULL, NULL),
-(14, 'Junction Structures & Safety', 'Grade-separated junctions at 3 major intersections, service roads, and crash barriers', 130000000.00, 'pending', '2027-03-31', NULL, NULL, NULL, NULL),
--- MTHL Approach Road Connector & Lighting (3 milestones — all completed)
-(15, 'Approach Road Reclamation & Subbase', 'Reclamation of 2.8 km approach alignment, subbase laying, and compaction', 55000000.00, 'completed', '2024-09-30', '2024-09-25', 'MSRDC Coastal Division', '2024-10-15', 'Marine clay surcharge treatment completed'),
-(15, 'Rigid Pavement & Connector Bridges', 'RCC pavement (350mm thick) and 2 connector bridge approaches per MTHL design', 85000000.00, 'completed', '2025-02-28', '2025-02-20', 'MSRDC Quality Assurance', '2025-03-15', NULL),
-(15, 'Lighting, Drainage & Signage', 'Marine-grade LED lighting poles (80 units), stormwater drains, and approach signage', 40000000.00, 'completed', '2025-05-31', '2025-05-15', 'MSRDC Electrical Wing', '2025-06-01', 'Solar hybrid poles integrated'),
--- Southfield Freeway Pavement Rehabilitation (3 milestones — US project)
-(16, 'Pavement Milling & Crack Sealing', 'Full-width milling (50mm) of 2.6 mi, full-depth crack sealing, and tack coat', 6500000.00, 'completed', '2025-12-15', '2025-12-10', 'MDOT District 1', '2025-12-31', NULL),
-(16, 'Hot-Mix Asphalt Overlay', 'Superpave HMA overlay (2 lifts, 4 inch total) on both directions', 11000000.00, 'in_progress', '2026-04-30', NULL, NULL, NULL, 'Night closures in effect'),
-(16, 'Bridge Approach Slabs & Guardrail', 'Replace 4 bridge approach slabs, install MGS guardrail at 82N bridge', 5000000.00, 'pending', '2026-09-30', NULL, NULL, NULL, NULL),
--- M25 Junction 8-12 Smart Motorway Upgrade (5 milestones — GB project)
-(17, 'Environmental Assessment & Planning', 'EIA, noise surveys, and bat/bird pre-construction ecology checks (J8-J12)', 5000000.00, 'completed', '2025-11-30', '2025-11-25', 'National Highways SE Region', '2025-12-15', 'Bat activity found near J9 — mitigation plan approved'),
-(17, 'Hard Shoulder Running Conversion', 'Hedge removal, barrier relocation, and hard shoulder strengthening (16 lane-km)', 22000000.00, 'completed', '2026-03-31', '2026-04-05', 'National Highways Structures', '2026-04-25', '5-day overrun due to asbestos in existing barrier'),
-(17, 'Overhead Gantry & VMS Installation', 'Install 12 overhead gantries with variable message signs and MIDAS loops', 28000000.00, 'in_progress', '2026-08-31', NULL, NULL, NULL, 'Gantry J8 steelwork erected'),
-(17, 'Emergency Refuge Areas & CCTV', 'Build 8 ERA lay-bys, install CCTV coverage, and emergency telephones', 25000000.00, 'in_progress', '2026-12-31', NULL, NULL, NULL, NULL),
-(17, 'System Integration & Go-Live', 'Traffic management system cutover, migration from temporary to permanent 60 mph limit', 15000000.00, 'pending', '2027-06-30', NULL, NULL, NULL, NULL),
--- Waiyaki Way Drainage & Resurfacing (3 milestones — KE project, completed)
-(18, 'Drainage Channel Desilting & Repairs', 'Full desilting of 5.2 km of side drains, repair of 12 collapsed culverts', 15000000.00, 'completed', '2025-02-28', '2025-02-25', 'KeNHA Nairobi Region', '2025-03-15', '3000 tonnes of silt removed — recycled as fill'),
-(18, 'Carriageway Resurfacing', '40mm asphalt concrete overlay (4.8 km, 2 lanes each direction)', 22000000.00, 'completed', '2025-06-30', '2025-07-05', 'KeNHA Quality Assurance', '2025-07-20', '5-day overrun — one section had failed subgrade'),
-(18, 'Footpath Reconstruction & Street Lighting', 'New paved footpaths (2m wide both sides) and solar LED street lighting', 8000000.00, 'completed', '2025-08-31', '2025-09-05', 'Nairobi County Transport', '2025-09-15', 'Community requested additional lighting points'),
--- I-94 Resurfacing & Bridge Repairs (4 milestones — US project)
-(19, 'Bridge Deck Inspection & Repair Design', 'Hands-on inspection of 12 bridge decks, concrete coring, and repair plans', 4500000.00, 'completed', '2025-08-31', '2025-08-28', 'FHWA Bridge Division', '2025-09-15', '7 bridges need deck patching, 2 need full deck replacement'),
-(19, 'Concrete Deck Repairs (Bridges)', 'Deck patching, overlay with silica-fume concrete, and joint replacement on 9 bridges', 14000000.00, 'completed', '2026-03-31', '2026-04-05', 'MDOT Bridge Management', '2026-04-25', 'Extended curing required due to cold weather'),
-(19, 'Pavement Milling & HMA Overlay', 'Full-depth milling (3 inch) and HMA overlay (12 lane-miles)', 20000000.00, 'in_progress', '2026-09-30', NULL, NULL, NULL, NULL),
-(19, 'Guardrail Upgrade & Pavement Markings', 'Replace 8 mi of median guardrail to MGS standard, durable pavement markings', 6500000.00, 'pending', '2026-12-31', NULL, NULL, NULL, NULL),
--- M-10 Freeway Pothole Remediation (3 milestones — US project, completed)
-(20, 'Pothole Survey & Mapping', 'Laser crack measurement system survey of 8.4 mi of M-10 freeway', 1000000.00, 'completed', '2025-04-15', '2025-04-12', 'MDOT Metro Region', '2025-04-30', '349 linear ft of cracking mapped'),
-(20, 'Hot-In-Place Recycling & Patching', 'HIR train patching of all mapped potholes and distressed sections', 5500000.00, 'completed', '2025-07-31', '2025-08-15', 'MDOT Quality Control', '2025-08-30', '15-day schedule overrun — equipment breakdown'),
-(20, 'Crack Sealing & Fog Seal', 'Rubberized crack sealing (all longitudinal joints) and polymer fog seal', 2000000.00, 'completed', '2025-08-31', '2025-09-15', 'MDOT Materials Lab', '2025-09-30', 'Fog seal delayed by rain — 15-day extension'),
--- Woodward Avenue Streetscape Phase 2 (4 milestones — US project)
-(21, 'Sidewalk Reconstruction & Ramps', 'Replace 2.4 mi of sidewalks with decorative pavers, ADA-compliant curb ramps', 3500000.00, 'completed', '2025-12-31', '2025-12-28', 'Detroit DPW', '2026-01-15', 'All 48 ramps compliant with ADA standards'),
-(21, 'Median Landscaping & Irrigation', 'Wide medians with native planting, drip irrigation system, and seat walls', 3000000.00, 'in_progress', '2026-04-30', NULL, NULL, NULL, NULL),
-(21, 'Street Furniture & Pedestrian Lighting', 'Benches, bike racks, waste bins, and period-style LED pedestrian lighting', 3500000.00, 'in_progress', '2026-08-31', NULL, NULL, NULL, NULL),
-(21, 'Intersection Improvements & Signals', 'Signal modernization at 6 intersections, pedestrian countdown timers, crosswalk enhancements', 2000000.00, 'pending', '2026-10-31', NULL, NULL, NULL, NULL),
--- Michigan Avenue Drainage Upgrade (3 milestones — US project, completed)
-(22, 'Storm Sewer CCTV & Assessment', 'CCTV inspection of 3.8 mi of storm sewer, manhole condition assessment, flow monitoring', 800000.00, 'completed', '2024-03-31', '2024-03-28', 'Detroit Water & Sewerage', '2024-04-15', '45% of pipes rated poor — full lining recommended'),
-(22, 'Cured-In-Place Pipe (CIPP) Lining', 'CIPP lining of 4200 LF of 24-inch-48-inch RCP storm sewer', 4000000.00, 'completed', '2024-09-30', '2024-09-25', 'DWSD Construction Mgmt', '2024-10-15', '3 bypass pumping setups required'),
-(22, 'Manhole Rehabilitation & Outfall Repairs', 'Structural manhole rehab (12 units), outfall gate valve replacement (2 units)', 1700000.00, 'completed', '2024-12-31', '2024-12-15', 'DWSD Quality Control', '2025-01-05', NULL),
--- Camden High Street Safety Improvements (3 milestones — GB project)
-(23, 'Traffic Calming & Raised Tables', 'Install 6 raised pedestrian crossings/tables and 3 speed cushions', 900000.00, 'completed', '2025-11-30', '2025-11-28', 'Camden Borough Highways', '2025-12-15', 'Anti-skid surface on all tables'),
-(23, 'Cycle Lane Separation & Wayfinding', 'Segregated cycle lanes (1.5 km), cycle-specific signals, and signage', 1500000.00, 'completed', '2026-02-28', '2026-02-25', 'Camden Transport Strategy', '2026-03-15', 'TfL Cycleway 27 integration completed'),
-(23, 'Junction Realignment & Pedestrian Refuge', 'Junction geometry improvement at 3 key intersections, central pedestrian islands', 1100000.00, 'in_progress', '2026-06-30', NULL, NULL, NULL, NULL),
--- A502 Finchley Road Carriageway Repair (3 milestones — GB project, completed)
-(24, 'Carriageway Survey & Design', 'Detailed condition survey (2.4 mi), deflection testing, and overlay design', 500000.00, 'completed', '2025-05-15', '2025-05-12', 'Transport for London (TfL)', '2025-05-31', 'Deflection data showed need for 150mm overlay'),
-(24, 'Planing & Bituminous Overlay', 'Full-width planing (60mm) and HRA overlay in 2 lifts (2.4 mi)', 3200000.00, 'completed', '2025-08-31', '2025-08-28', 'TfL Road Maintenance', '2025-09-15', 'Night works — 7 closures completed'),
-(24, 'Safety Barrier & Road Studs', 'Vehicle restraint system upgrade at 3 curves, retroreflective road studs', 1100000.00, 'completed', '2025-10-31', '2025-10-28', 'TfL Safety Audit', '2025-11-10', 'Stage 2 safety audit signed off'),
--- Euston Road Bus Lane Resurfacing (3 milestones — GB project)
-(25, 'Bus Lane Milling & Base Repair', 'Selective milling of bus lane (1.1 mi) and base course repairs at utility cuts', 600000.00, 'completed', '2026-02-28', '2026-02-25', 'TfL Bus Operations', '2026-03-15', '8 utility cut areas identified for deep patching'),
-(25, 'Bus Lane Asphalt Resurfacing', 'Hot-rolled asphalt resurfacing of all bus lanes (1.1 mi) with anti-skid treatment', 1100000.00, 'completed', '2026-04-30', '2026-05-05', 'TfL Quality Control', '2026-05-20', 'Anti-skid PSV exceeded 68 specification'),
-(25, 'Bus Stop Access Improvements', 'Raised kerb bus stops (8 locations), tactile paving, shelter relocation', 500000.00, 'in_progress', '2026-07-31', NULL, NULL, NULL, NULL),
--- Uhuru Highway Bridge Expansion Joint Repair (4 milestones — KE project)
-(26, 'Expansion Joint Survey & Design', 'Inspection of 18 expansion joints on Uhuru Highway bridges, structural design for replacements', 8000000.00, 'completed', '2025-10-31', '2025-10-28', 'KeNHA Bridges Division', '2025-11-15', '4 joints require custom fabrication — non-standard span gaps'),
-(26, 'Joint Removal & Grouting', 'Demolition of failed joints, substrate preparation, and epoxy grouting of recesses', 25000000.00, 'completed', '2026-01-31', '2026-02-05', 'KeNHA Quality Assurance', '2026-02-20', 'Nose-to-tail lane closures implemented'),
-(26, 'New Joint Installation', 'Installation of 18 modular expansion joints with water bars', 35000000.00, 'in_progress', '2026-05-31', NULL, NULL, NULL, 'Custom joints arrived on schedule'),
-(26, 'Deck Waterproofing & Load Testing', 'Waterproof membrane application over joint transitions, proof load testing', 17000000.00, 'pending', '2026-08-31', NULL, NULL, NULL, NULL),
--- Mombasa Road Drainage Channel Desilting (3 milestones — KE project, completed)
-(27, 'Channel Survey & Sludge Assessment', 'Survey of 8.2 km open drain channels, sludge volume estimation, and water sampling', 3000000.00, 'completed', '2025-03-15', '2025-03-12', 'KeNHA Nairobi Region', '2025-04-01', 'Estimated 18,000 cum of silt and solid waste'),
-(27, 'Mechanical Desilting & Haulage', 'Long-reach excavator desilting, sludge dewatering, and haulage to licensed tip', 15000000.00, 'completed', '2025-06-30', '2025-07-10', 'KeNHA Environment Unit', '2025-07-25', '10-day overrun due to heavy rains limiting haulage'),
-(27, 'Channel Lining & Outfall Repairs', 'Stone pitching of channel bed, concrete lining at 8 critical outfalls', 7000000.00, 'completed', '2025-07-31', '2025-08-10', 'KeNHA Quality Control', '2025-08-20', 'Outfall 3 required emergency reconstruction'),
--- Lang''ata Road Widening & Overlay (5 milestones — KE project)
-(28, 'Preliminary Design & Resettlement Action', 'Topographical survey, detailed design for widening, and RAP for 32 structures', 12000000.00, 'completed', '2025-12-31', '2025-12-28', 'KeNHA Planning Division', '2026-01-15', 'All 32 PAPs compensated per World Bank standards'),
-(28, 'Bulk Earthwork & Drainage', 'Cut-and-fill (650K cum), subgrade preparation, and lined side drains (6.5 km)', 30000000.00, 'completed', '2026-04-30', '2026-05-05', 'KeNHA Infrastructure', '2026-05-25', 'Rock encountered at 3 cuts — blasting required'),
-(28, 'Pavement Base & Subbase', 'Granular subbase (200mm) and cement-treated base (250mm) for 6.5 km', 35000000.00, 'in_progress', '2026-09-30', NULL, NULL, NULL, NULL),
-(28, 'Asphalt Concrete Overlay', 'AC overlay (2 lifts, 100mm total) on widened carriageway', 30000000.00, 'pending', '2027-01-31', NULL, NULL, NULL, NULL),
-(28, 'Signalization, Lighting & Landscaping', 'Signalized junctions (4), solar street lighting, and avenue tree planting', 13000000.00, 'pending', '2027-03-31', NULL, NULL, NULL, NULL),
--- Gratiot Avenue Resurfacing Phase 3 (3 milestones — US project)
-(29, 'Concrete Pavement Breaking & Rubblization', 'Rubblization of existing 8-inch concrete pavement (2.8 lane-mi)', 2500000.00, 'completed', '2026-04-30', '2026-04-28', 'MDOT Metro Region', '2026-05-15', 'Settlement monitoring installed'),
-(29, 'Asphalt Overlay & Shoulder Widening', 'HMA overlay in 2 lifts (6 inch total), aggregate shoulder widening (8 ft)', 5000000.00, 'in_progress', '2026-08-31', NULL, NULL, NULL, NULL),
-(29, 'Pavement Markings & Rumble Strips', 'Durable epoxy markings, centerline and shoulder rumble strips (2.8 mi)', 2000000.00, 'pending', '2026-12-31', NULL, NULL, NULL, NULL),
--- Thika Superhighway Overlay & Safety (3 milestones — KE project, completed)
-(30, 'Overlay Design & Pavement Testing', 'Falling-weight deflectometer testing, core sampling, and overlay thickness design', 3000000.00, 'completed', '2024-11-30', '2024-11-25', 'KeNHA Materials Lab', '2024-12-15', 'Remaining structural life: 7 years on most sections'),
-(30, 'Asphalt Overlay & Surface Course', '50mm asphalt overlay (12 km dual carriageway) with PMB binder', 20000000.00, 'completed', '2025-04-30', '2025-05-10', 'KeNHA Quality Assurance', '2025-05-30', '10-day overrun — one section had full-depth replacement'),
-(30, 'Safety Barriers, Signs & Lighting', 'Install median W-beam barrier (12 km), upgraded signage, solar lighting at 5 junctions', 9000000.00, 'completed', '2025-06-30', '2025-07-15', 'KeNHA Safety Division', '2025-07-30', 'Accident data post-installation showing 30% reduction'),
--- Jogoo Road Drainage Improvement (3 milestones — KE project)
-(31, 'Drainage Survey & Design', 'Hydrological survey, drainage design for 4.5 km corridor, and NEMA approval', 3000000.00, 'completed', '2026-02-28', '2026-02-25', 'KeNHA Nairobi Region', '2026-03-15', 'NEMA EIA conditions incorporated'),
-(31, 'Box Culvert Construction & Cross Drains', 'Build 6 reinforced concrete box culverts (3m x 2m) and 20 cross-drain pipes', 9000000.00, 'completed', '2026-05-31', '2026-06-05', 'KeNHA Infrastructure', '2026-06-25', 'One culvert required deeper foundation — rock excavation'),
-(31, 'Channel Lining & Outlet Protection', 'Stone-pitched channel lining (4.5 km), gabion check dams, outlet riprap', 6000000.00, 'in_progress', '2026-09-30', NULL, NULL, NULL, NULL);
-
--- =========================================================================
--- SEED CONTINGENCY RESERVES
--- =========================================================================
-INSERT INTO contingency_reserves (project_id, allocated_amount, utilized_amount, status, approval_required, release_notes) VALUES
-(1, 24000000.00, 5000000.00, 'partially_utilized', TRUE, '₹50L released for additional grouting at pier G4 discovered during structural survey'),
-(2, 900000.00, 900000.00, 'fully_utilized', TRUE, 'Full contingency used for asphalt price escalation — market rate exceeded estimate by 8%'),
-(11, 19000000.00, 0.00, 'available', TRUE, 'Standard 10% contingency — unutilized as project completed under budget'),
-(5, 14500000.00, 0.00, 'available', TRUE, 'Contingency held for potential utility relocation costs during pavement upgrade'),
-(7, 4250000.00, 4200000.00, 'fully_utilized', TRUE, '₹42L released for micro-silica additive cost overrun — material imported from Germany'),
-(10, 4500000.00, 1500000.00, 'partially_utilized', TRUE, '₹15L used for emergency procurement of 3 additional expansion joints'),
-(12, 8000000.00, 0.00, 'available', TRUE, NULL);
-
--- =========================================================================
--- SEED APPROVAL TRAIL
--- =========================================================================
-INSERT INTO approval_trail (entity_type, entity_id, action, requested_by, approved_by, approved_at, status, comments) VALUES
-('contingency', 2, 'contingency_release', 'Site Engineer (EEH)', 'Rajesh Kumar (Chief Engineer)', '2025-10-10 10:30:00+05:30', 'approved', 'Approved — asphalt price escalation within contingency policy limits'),
-('contingency', 5, 'contingency_release', 'Project Manager (Senapati Bapat)', 'Anita Deshmukh (Project Director)', '2024-06-15 14:00:00+05:30', 'approved', 'Micro-silica import cost confirmed by 3 quotes. Release approved.'),
-('variance', 1, 'budget_variance', 'Contractor (L&T Infrastructure)', 'Rajesh Kumar (Chief Engineer)', '2025-10-15 16:00:00+05:30', 'approved', 'Bitumen price index clause invoked per contract clause 14.2'),
-('variance', 2, 'budget_underrun', 'Project Manager (LBS Marg)', 'Anita Deshmukh (Project Director)', '2025-08-20 11:00:00+05:30', 'approved', 'Savings from optimized alignment — acceptable rerouting per site instruction SI-042'),
-('contingency', 6, 'contingency_release', 'Bridges Division Engineer (SCLR)', 'PWD Chief Engineer', '2026-01-10 09:45:00+05:30', 'approved', '3 additional expansion joints needed — original survey missed corrosion damage under bearing plates');
-
--- =========================================================================
--- SEED ROAD REGION CROSSINGS (roads that span multiple regions)
--- =========================================================================
--- I-94 crosses from MI into other states; simulate a region boundary crossing
-INSERT INTO road_region_crossings (road_id, region_code, geom_segment, authority_id) VALUES
-(13, 'US', ST_GeomFromText('LINESTRING(-83.1500 42.3500, -83.1000 42.3550, -83.0500 42.3600, -82.9900 42.3650, -82.9400 42.3700)', 4326), 8);
-
--- =========================================================================
--- SEED CONFLICT GROUPS (simulated duplicate roads/authorities)
--- =========================================================================
-INSERT INTO road_conflict_groups (conflict_key, primary_road_id, merged_metadata, resolved) VALUES
-('dup-london-camden-high-st', 18, '{"detected_by":"global_search","similarity":0.85,"duplicate_ids":[18,21],"resolution":"linked"}', FALSE);
-
-INSERT INTO authority_conflict_groups (conflict_key, primary_authority_id, merged_metadata, resolved) VALUES
-('dup-michigan-road-authorities', 7, '{"detected_by":"boundary_overlap","overlap_pct":0.45,"duplicate_ids":[7,8],"resolution":"pending_review"}', FALSE);
-
--- =========================================================================
--- SEED CPI DATA (C3: Inflation-Adjusted Comparisons)
--- Annual CPI 2020-2026 for IN, US, GB, KE
--- Base year 2020 = 100 for all regions
--- =========================================================================
-INSERT INTO cpi_data (region_code, year, cpi_value) VALUES
--- India (CPI-IW combined)
-('IN', 2020, 100.0), ('IN', 2021, 105.1), ('IN', 2022, 111.6), ('IN', 2023, 118.4), ('IN', 2024, 124.8), ('IN', 2025, 131.0), ('IN', 2026, 136.5),
--- US (CPI-U)
-('US', 2020, 100.0), ('US', 2021, 104.7), ('US', 2022, 112.0), ('US', 2023, 115.8), ('US', 2024, 119.0), ('US', 2025, 121.5), ('US', 2026, 123.8),
--- UK (CPI)
-('GB', 2020, 100.0), ('GB', 2021, 102.6), ('GB', 2022, 109.1), ('GB', 2023, 115.4), ('GB', 2024, 118.2), ('GB', 2025, 120.8), ('GB', 2026, 123.0),
--- Kenya (CPI)
-('KE', 2020, 100.0), ('KE', 2021, 106.2), ('KE', 2022, 113.8), ('KE', 2023, 121.5), ('KE', 2024, 128.1), ('KE', 2025, 133.6), ('KE', 2026, 138.2);
-
--- =========================================================================
--- SEED TENDERS (C1: Procurement Audit Trail)
--- =========================================================================
-INSERT INTO tenders (reference_no, title, description, authority_id, project_id, estimated_value, status, published_date, bid_deadline, award_date, award_letter_url) VALUES
--- Mumbai — WEH Flyover (tender linked to project 1)
-('BMC-2025/T-0042', 'WEH Flyover Structural Grouting & Resurfacing', 'Comprehensive structural rehabilitation of Western Express Highway flyover including pier grouting, deck repairs, and full-width resurfacing. Estimated 6.2km per carriageway.', 4, 1, 240000000.00, 'awarded', '2025-06-01', '2025-07-15', '2025-08-10', '/docs/awards/WEH-Flyover-Award-2025.pdf'),
--- Mumbai — SV Road Drainage (tender linked to halted project 3 — led to blacklisting)
-('BMC-2024/T-0081', 'SV Road Drainage Trenching & Microtunnelling', 'Design-build microtunnelling for stormwater drainage along S.V. Road from Bandra to Khar. Includes 2.8km of 1200mm RCC pipe and 8 catch basins.', 4, 3, 95000000.00, 'cancelled', '2024-03-15', '2024-04-30', NULL, NULL),
--- Mumbai — Ghodbunder Road Overlay (project 11)
-('BMC-2024/T-0112', 'Ghodbunder Road Mast-Asphalt Overlay', '20km mast-asphalt overlay on Ghodbunder Road from Thane to Bhayander. Two-lift application with PMB binder.', 4, 11, 190000000.00, 'awarded', '2024-02-01', '2024-03-15', '2024-04-10', '/docs/awards/Ghodbunder-Overlay-Award-2024.pdf'),
--- Mumbai — Sion-Panvel Expressway (project 12)
-('MSRDC-2025/T-0007', 'Sion-Panvel Expressway Maintenance & Repair', 'Comprehensive maintenance of Sion-Panvel Expressway including pothole repair, bridge joint replacement, drainage, and road markings. 22km corridor.', 5, 12, 80000000.00, 'published', '2025-10-01', '2025-11-15', NULL, NULL),
--- Detroit — Southfield Freeway (project 16)
-('MDOT-2025/T-009', 'Southfield Freeway Pavement Rehabilitation', 'Full-width milling and HMA overlay of Southfield Freeway (2.6 miles). Includes bridge approach slab repairs and guardrail upgrade to MGS standard.', 7, 16, 22500000.00, 'awarded', '2025-07-01', '2025-08-15', '2025-09-05', '/docs/awards/Southfield-Freeway-Award-2025.pdf'),
--- London — M25 Smart Motorway (project 17)
-('NH-2025/T-0033', 'M25 J8-12 Smart Motorway Upgrade', 'All-lane running conversion of M25 junctions 8 to 12. Includes hard shoulder running, overhead gantries, ERA lay-bys, and MIDAS loops.', 12, 17, 95000000.00, 'awarded', '2025-04-01', '2025-06-15', '2025-07-20', '/docs/awards/M25-Smart-Motorway-Award-2025.pdf'),
--- Nairobi — Langata Road (project 28)
-('KeNHA-2025/T-0018', 'Lang''ata Road Widening & Overlay', 'Widening of Langata Road from 2 to 4 lanes (6.5km) including bulk earthwork, drainage, asphalt overlay, and junction improvements.', 16, 28, 120000000.00, 'under_evaluation', '2025-09-01', '2025-10-31', NULL, NULL);
-
--- =========================================================================
--- SEED EVALUATION CRITERIA (C1: Scoring framework per tender)
--- =========================================================================
-INSERT INTO evaluation_criteria (tender_id, criterion_name, weight_pct, max_score) VALUES
--- WEH Flyover (tender 1)
-(1, 'Technical Capability & Methodology', 35, 100),
-(1, 'Financial Competitiveness (L1)', 30, 100),
-(1, 'Past Performance & Similar Projects', 20, 100),
-(1, 'Safety Record & Compliance', 10, 100),
-(1, 'Local Content & Labor Utilization', 5, 100),
--- SV Road Drainage (tender 2 — cancelled)
-(2, 'Microtunnelling Experience', 40, 100),
-(2, 'Financial Quote', 30, 100),
-(2, 'Subsurface Risk Management', 15, 100),
-(2, 'Project Timeline & Delivery', 15, 100),
--- Ghodbunder Road (tender 3)
-(3, 'Technical Approach', 30, 100),
-(3, 'Financial Quote', 35, 100),
-(3, 'Similar Scale Projects', 20, 100),
-(3, 'Quality Assurance Plan', 15, 100),
--- Sion-Panvel (tender 4 — published, not yet evaluated)
-(4, 'Technical Capability', 30, 100),
-(4, 'Financial Quote', 30, 100),
-(4, 'Expressway Maintenance Experience', 25, 100),
-(4, 'Emergency Response Capability', 15, 100),
--- Southfield Freeway (tender 5)
-(5, 'Pavement Rehabilitation Experience', 35, 100),
-(5, 'Cost Competitiveness', 30, 100),
-(5, 'Bridge Repair Capability', 20, 100),
-(5, 'DBE/MBE Participation', 15, 100),
--- M25 Smart Motorway (tender 6)
-(6, 'Smart Motorway Delivery Experience', 40, 100),
-(6, 'Financial Competitiveness', 25, 100),
-(6, 'Technology Integration & Systems', 20, 100),
-(6, 'Environmental & Community', 15, 100),
--- Langata Road (tender 7)
-(7, 'Road Widening Experience', 35, 100),
-(7, 'Financial Proposal', 30, 100),
-(7, 'Resettlement & Community Engagement', 20, 100),
-(7, 'Environmental Compliance', 15, 100);
-
--- =========================================================================
--- SEED TENDER BIDS (C1: Bid submissions with evaluation scores)
--- =========================================================================
-INSERT INTO tender_bids (tender_id, contractor_id, financial_quote, technical_score, financial_score, weighted_total, evaluator_notes, is_winner) VALUES
--- WEH Flyover — 4 bidders
-(1, 1, 238000000.00, 92.00, 88.00, 90.20, 'Exceptional technical proposal with detailed grouting methodology. Strongest past performance on similar flyover projects.', FALSE),
-(1, 2, 235000000.00, 85.00, 90.00, 87.00, 'Competitive financial quote but technical proposal lacked detail on structural grouting procedure.', FALSE),
-(1, 6, 242000000.00, 78.00, 82.00, 79.60, 'Adequate proposal — limited experience with high-traffic flyover structural repairs.', FALSE),
-(1, 3, 240000000.00, 95.00, 85.00, 90.75, 'WINNER — Best technical score. Proven track record on NHAI flyover projects. Strong safety record.', TRUE),
--- SV Road Drainage (cancelled — contractor 10 was winner but later blacklisted)
-(2, 10, 92000000.00, 82.00, 78.00, 80.20, 'Initially selected — lowest L1 bidder. Later blacklisted for substandard material on another project.', TRUE),
-(2, 1, 95000000.00, 90.00, 72.00, 82.20, 'Strong technical proposal (microtunnelling specialist) but higher financial quote by 3.2%.', FALSE),
-(2, 2, 93000000.00, 75.00, 80.00, 77.25, 'Acceptable technical submission but limited microtunnelling experience.', FALSE),
--- Ghodbunder Road — 3 bidders
-(3, 4, 185000000.00, 88.00, 92.00, 89.60, 'WINNER — Best overall value. Strong financial competitiveness and extensive mast-asphalt experience.', TRUE),
-(3, 6, 190000000.00, 85.00, 85.00, 85.00, 'Competitive technical and financial scores — marginal difference of 4.6% on weighted total.', FALSE),
-(3, 2, 188000000.00, 78.00, 88.00, 82.50, 'Lower technical score due to limited experience with mast-asphalt overlay specifications.', FALSE),
--- Southfield Freeway — 3 bidders
-(5, 13, 21800000.00, 90.00, 92.00, 90.80, 'WINNER — Strongest proposal overall. Proven pavement rehabilitation experience on I-75 corridor.', TRUE),
-(5, 14, 22500000.00, 85.00, 88.00, 86.35, 'Competitive bid but limited bridge approach slab experience.', FALSE),
-(5, 15, 22000000.00, 82.00, 90.00, 85.60, 'Adequate pavement experience but weaker on safety management plan.', FALSE),
--- M25 Smart Motorway — 3 bidders
-(6, 16, 93000000.00, 93.00, 90.00, 91.80, 'WINNER — Unmatched smart motorway experience including M1 J10-13 delivery. Strong tech integration.', TRUE),
-(6, 17, 95000000.00, 85.00, 85.00, 85.00, 'Good regional knowledge but limited all-lane running system experience.', FALSE),
-(6, 18, 92000000.00, 78.00, 92.00, 84.10, 'Lowest financial quote but technical scoring insufficient on gantry installation methodology.', FALSE),
--- Langata Road (under evaluation — no winner yet)
-(7, 19, 115000000.00, 82.00, 85.00, 83.35, 'Strong local knowledge of Nairobi road network. Good resettlement plan.', FALSE),
-(7, 20, 118000000.00, 88.00, 80.00, 84.40, 'Best technical score. Comprehensive environmental and community engagement plan.', FALSE),
-(7, 21, 120000000.00, 75.00, 78.00, 76.35, 'Adequate proposal — weaker on utility relocation methodology.', FALSE);
-
--- =========================================================================
--- SEED PROJECT BENEFICIARIES (C5: Beneficiary Tracking)
--- =========================================================================
-INSERT INTO project_beneficiaries (project_id, population_served, estimated_daily_traffic, household_count, beneficiary_type, data_source, census_year, notes) VALUES
--- WEH Flyover (project 1) — major commuter artery
-(1, 850000, 275000, 212500, 'commuters', 'Mumbai Traffic Survey 2024', 2024, 'WEH carries ~275K vehicles daily. Serves western suburbs and Thane commuter corridor.'),
--- EEH Pothole Remediation (project 2) — mixed corridor
-(2, 320000, 95000, 80000, 'mixed', 'PWD Road Usage Report 2024', 2024, 'EEH serves industrial zones, residential areas, and airport-bound traffic.'),
--- SV Road Drainage (project 3) — halted project
-(3, 450000, 120000, 112500, 'mixed', 'BMC Ward Data 2023', 2023, 'SV Road is a major north-south arterial through Bandra-Khar. Project halted mid-execution.'),
--- SV Road Emergency Asphalt (project 4) — same corridor
-(4, 450000, 120000, 112500, 'commuters', 'BMC Ward Data 2023', 2023, 'Emergency overlay replacing halted drainage project. Same corridor as project 3.'),
--- Link Road Concrete Upgrade (project 5)
-(5, 280000, 85000, 70000, 'mixed', 'MCGM Traffic Census 2023', 2023, 'Link Road connects western suburbs to Western Express Highway. Key commuter route.'),
--- LBS Marg Sewer Line (project 6)
-(6, 180000, 40000, 45000, 'residential', 'BMC Sewerage Zone Data', 2022, 'LBS Marg serves densely populated residential neighborhoods in Kurla and Ghatkopar.'),
--- Senapati Bapat Marg (project 7)
-(7, 150000, 55000, 37500, 'commuters', 'PWD Traffic Count 2022', 2022, 'SB Marg connects Lower Parel commercial district to Dadar. Office commuter corridor.'),
--- Dr. Ambedkar Road (project 8)
-(8, 220000, 65000, 55000, 'mixed', 'BMC Road Network Plan', 2023, 'Major junction redesign at Dadar TT — serves rail commuters, shoppers, and local traffic.'),
--- JVLR (project 9)
-(9, 310000, 90000, 77500, 'commuters', 'Jogeshwari-Vikhroli Link Road Survey', 2024, 'JVLR connects western and eastern suburbs. Critical alternative to WEH/EEH corridor.'),
--- SCLR (project 10)
-(10, 250000, 70000, 62500, 'mixed', 'MCGM Connector Road Study', 2023, 'Santa Cruz-Chembur Link Road serves both residential and industrial zones.'),
--- Ghodbunder Road (project 11)
-(11, 500000, 130000, 125000, 'mixed', 'Thane Municipal Corporation Data', 2024, '20km arterial connecting Thane to Mira-Bhayander. Rapid urbanization zone.'),
--- Sion-Panvel Expressway (project 12)
-(12, 650000, 180000, 162500, 'commuters', 'MSRDC Expressway Usage Report', 2024, 'Major commuter expressway serving Navi Mumbai and Panvel corridor. 22km length.'),
--- Marine Drive Promenade (project 13)
-(13, 420000, 50000, 105000, 'mixed', 'MCGM Tourism & Recreation Data', 2023, 'Iconic promenade serving both daily commuters and recreational users. Heritage zone.'),
--- NH-3 Mumbai-Nashik (project 14) — major highway widening
-(14, 1200000, 350000, 300000, 'mixed', 'NHAI Traffic Survey 2024', 2024, 'National Highway widening serving entire Mumbai-Nashik industrial corridor. 35km widening scope.'),
--- MTHL Approach (project 15)
-(15, 580000, 160000, 145000, 'commuters', 'MSRDC MTHL Traffic Projections', 2023, 'MTHL approach road connecting to Mumbai Trans Harbour Link. Major commuter connector.'),
--- Southfield Freeway (project 16) — US
-(16, 340000, 125000, 130000, 'commuters', 'MDOT Traffic Volume Report 2024', 2024, 'Southfield Freeway (M-39) serves western Detroit suburbs. Key commuter corridor.'),
--- M25 Smart Motorway (project 17) — UK
-(17, 1500000, 420000, 600000, 'commuters', 'National Highways Traffic Statistics 2024', 2024, 'M25 J8-12 serves London orbital corridor. Heaviest-trafficked motorway section in UK.'),
--- Waiyaki Way (project 18) — Kenya
-(18, 450000, 110000, 90000, 'commuters', 'KeNHA Nairobi Traffic Survey 2024', 2024, 'Waiyaki Way connects Nairobi CBD to Westlands and Kiambu corridor. Major commuter route.'),
--- I-94 Resurfacing (project 19) — US
-(19, 520000, 195000, 200000, 'commuters', 'MDOT I-94 Corridor Study 2023', 2023, 'I-94 is Detroit primary east-west freeway. Serves airport, industrial, and commuter traffic.'),
--- M-10 Freeway (project 20) — US
-(20, 280000, 100000, 107000, 'commuters', 'Detroit DPW Traffic Data 2024', 2024, 'Lodge Freeway (M-10) serves Detroit CBD and northern suburbs.'),
--- Woodward Avenue (project 21) — US
-(21, 180000, 45000, 72000, 'mixed', 'City of Detroit Streetscape Plan', 2024, 'Woodward Avenue is Detroit main cultural corridor. Streetscape serves residents and businesses.'),
--- Michigan Avenue (project 22) — US
-(22, 120000, 35000, 48000, 'mixed', 'Detroit Water & Sewerage District Data', 2023, 'Michigan Avenue drainage serves southwest Detroit industrial and residential area.'),
--- Camden High Street (project 23) — UK
-(23, 85000, 25000, 34000, 'mixed', 'Camden Borough Transport Survey', 2024, 'Camden High Street (A41) serves local businesses, residents, and tourists. Safety improvement zone.'),
--- A502 Finchley Road (project 24) — UK
-(24, 150000, 40000, 60000, 'commuters', 'TfL Road Network Report 2024', 2024, 'Finchley Road (A502) is major north London bus corridor and commuter route.'),
--- Euston Road (project 25) — UK
-(25, 350000, 85000, 140000, 'commuters', 'TfL Bus Lane Usage Data 2024', 2024, 'Euston Road bus lane serves 80+ bus routes per hour. Major transport interchange zone.'),
--- Uhuru Highway (project 26) — Kenya
-(26, 600000, 150000, 150000, 'commuters', 'KeNHA Bridge Inventory Report', 2024, 'Uhuru Highway is Nairobi primary north-south corridor. Bridge joints serve CBD approach.'),
--- Mombasa Road (project 27) — Kenya
-(27, 480000, 120000, 96000, 'commuters', 'KeNHA Drainage Assessment', 2024, 'Mombasa Road (A109) serves Nairobi industrial area and JKIA airport corridor.'),
--- Langata Road (project 28) — Kenya
-(28, 350000, 80000, 70000, 'mixed', 'KeNHA Widening Feasibility Study', 2023, 'Langata Road connects Nairobi CBD to Karen and Ongata Rongai residential areas.'),
--- Gratiot Avenue (project 29) — US
-(29, 160000, 42000, 64000, 'mixed', 'MDOT Metro Region Traffic Data', 2024, 'Gratiot Avenue (M-3) serves Detroit east side and Macomb County commuter corridor.'),
--- Thika Superhighway (project 30) — Kenya
-(30, 750000, 200000, 187500, 'commuters', 'KeNHA Superhighway Usage Report', 2024, 'Thika Superhighway (A2) is Nairobi-Thika commuter corridor. Highest traffic volume in Kenya.'),
--- Jogoo Road (project 31) — Kenya
-(31, 220000, 55000, 44000, 'mixed', 'Nairobi County Drainage Master Plan', 2023, 'Jogoo Road (B301) serves eastern Nairobi residential areas and light industrial zone.');
-
--- =========================================================================
--- MAINTENANCE WORK ORDERS (32-51)
--- Small-scale maintenance tasks across all regions
+-- 4. PROJECTS (26 rows: 10 IN + 4 US + 4 GB + 8 KE)
+-- 1-2 projects per road. Budgets: IN=crores, US=millions USD, GB=millions GBP, KE=millions KES
 -- =========================================================================
 INSERT INTO projects (title, road_id, contractor_id, authority_id, budget_allocated, budget_spent, status, start_date, target_end_date, actual_end_date, delay_days) VALUES
-('WEH Pothole Patching Q1 2024', 1, 3, 5, 2500000.00, 2500000.00, 'completed', '2024-01-15', '2024-02-15', '2024-02-10', 0),
-('SV Road Crack Sealing', 3, 4, 1, 1800000.00, 1950000.00, 'completed', '2023-11-01', '2023-12-15', '2024-01-05', 21),
-('LBS Marg Shoulder Repair', 5, 10, 3, 3200000.00, 3100000.00, 'completed', '2024-03-01', '2024-04-30', '2024-04-25', 0),
-('JVLR Drain Cleaning', 8, 7, 4, 850000.00, 850000.00, 'completed', '2024-06-01', '2024-06-30', '2024-06-28', 0),
-('SCLR Guardrail Replacement', 9, 5, 4, 1200000.00, 1200000.00, 'completed', '2024-04-01', '2024-05-15', '2024-05-10', 0),
-('WEH Median Repair', 1, 1, 5, 4500000.00, 4800000.00, 'completed', '2023-08-01', '2023-10-31', '2023-11-15', 15),
-('SV Road Drain Unclogging', 3, 6, 1, 600000.00, 600000.00, 'completed', '2024-07-01', '2024-07-15', '2024-07-12', 0),
-('EEH Asphalt Patching', 2, 2, 4, 2100000.00, 2100000.00, 'completed', '2024-05-01', '2024-06-15', '2024-06-10', 0),
-('I-94 Pothole Emergency Repair', 13, 14, 8, 1500000.00, 1500000.00, 'completed', '2025-02-01', '2025-02-15', '2025-02-14', 0),
-('M-10 Crack Sealing', 14, 13, 8, 800000.00, 820000.00, 'completed', '2024-10-01', '2024-10-31', '2024-11-05', 5),
-('Woodward Ave Signage Replacement', 15, 13, 7, 350000.00, 350000.00, 'completed', '2024-08-01', '2024-08-15', '2024-08-12', 0),
-('A41 Paving Patch Repair', 18, 17, 10, 450000.00, 460000.00, 'completed', '2024-09-01', '2024-09-30', '2024-09-28', 0),
-('Euston Road Drain Cleaning', 20, 18, 12, 280000.00, 280000.00, 'completed', '2024-11-01', '2024-11-15', '2024-11-14', 0),
-('Mombasa Road Pothole Fill', 23, 20, 16, 1800000.00, 1850000.00, 'completed', '2024-12-01', '2025-01-15', '2025-01-20', 5),
-('Uhuru Highway Joint Seal', 22, 19, 16, 2200000.00, 2100000.00, 'completed', '2024-05-15', '2024-06-30', '2024-06-25', 0),
-('WEH Street Light Repair', 1, 8, 5, 950000.00, 950000.00, 'completed', '2024-09-01', '2024-09-30', '2024-09-28', 0),
-('Link Road Median Landscaping', 4, 6, 1, 450000.00, 480000.00, 'completed', '2024-03-15', '2024-04-15', '2024-04-18', 3),
-('Ghodbunder Road Signage Refresh', 10, 8, 4, 520000.00, 520000.00, 'completed', '2024-07-15', '2024-08-15', '2024-08-10', 0),
-('Sion-Panvel Highway Barrier Repair', 12, 11, 5, 3800000.00, 3500000.00, 'completed', '2024-04-01', '2024-05-31', '2024-05-25', 0),
-('Marine Drive Footpath Repair', 11, 3, 2, 1800000.00, 1850000.00, 'completed', '2024-02-01', '2024-03-31', '2024-03-28', 0);
+-- IN projects (road 1-8, some with 2 projects)
+('WEH Flyover Resurfacing & Structural Grouting', 1, 1, 5, 240000000.00, 185000000.00, 'in_progress', '2025-06-01', '2026-06-30', NULL, 0),
+('EEH Pothole Remediation Campaign 2025', 2, 2, 4, 18000000.00, 19200000.00, 'completed', '2025-09-01', '2025-10-31', '2025-11-12', 12),
+('SV Road Drainage Trenching & Microtunnelling', 3, 10, 1, 95000000.00, 45000000.00, 'halted', '2024-05-10', '2025-05-10', NULL, 378),
+('SV Road Emergency Asphalt Laying', 3, 3, 1, 35000000.00, 12000000.00, 'in_progress', '2026-03-01', '2026-08-31', NULL, 0),
+('Link Road Concrete Pavement Upgrade Ph.2', 4, 6, 1, 145000000.00, 75000000.00, 'in_progress', '2025-10-15', '2026-09-30', NULL, 0),
+('LBS Marg Sewer Line Laying & Patching', 5, 4, 3, 62000000.00, 60000000.00, 'in_progress', '2024-11-01', '2025-11-01', NULL, 203),
+('SBM Micro-Silica Concrete Topping', 6, 3, 2, 85000000.00, 84200000.00, 'completed', '2023-01-15', '2023-12-15', '2023-12-10', 0),
+('Ghodbunder Road Mast-Asphalt Overlay', 7, 8, 4, 190000000.00, 187000000.00, 'completed', '2024-03-01', '2024-12-31', '2024-12-25', 0),
+('Marine Drive Promenade Resurfacing', 8, 3, 2, 52000000.00, 51800000.00, 'completed', '2025-01-15', '2025-06-30', '2025-06-25', 0),
+('WEH Safety Barrier & Lighting Upgrade', 1, 5, 5, 85000000.00, 32000000.00, 'in_progress', '2026-01-01', '2026-12-31', NULL, 0),
+-- US projects (road 9-12)
+('I-94 Resurfacing & Bridge Repairs', 9, 13, 8, 45000000.00, 28000000.00, 'in_progress', '2025-06-01', '2026-12-31', NULL, 0),
+('M-10 Freeway Pothole Remediation', 10, 14, 8, 8500000.00, 8500000.00, 'completed', '2025-03-01', '2025-08-31', '2025-09-15', 15),
+('Woodward Avenue Streetscape Phase 2', 11, 13, 7, 12000000.00, 5000000.00, 'in_progress', '2025-11-01', '2026-10-31', NULL, 0),
+('Gratiot Avenue Resurfacing Phase 3', 12, 14, 7, 9500000.00, 3500000.00, 'in_progress', '2026-02-01', '2026-12-31', NULL, 0),
+-- GB projects (road 13-16)
+('M25 Junction 8-12 Smart Motorway Upgrade', 13, 16, 12, 95000000.00, 40000000.00, 'in_progress', '2025-09-01', '2027-06-30', NULL, 0),
+('A406 North Circular Carriageway Repair', 14, 18, 12, 18000000.00, 6000000.00, 'in_progress', '2026-01-15', '2026-12-31', NULL, 0),
+('A1 Holloway Road Safety Improvements', 15, 16, 11, 4800000.00, 4600000.00, 'completed', '2025-04-01', '2025-10-31', '2025-10-28', 0),
+('Whitehall Pavement Restoration', 16, 17, 11, 2200000.00, 2100000.00, 'completed', '2025-02-01', '2025-06-30', '2025-06-25', 0),
+-- KE projects (road 17-22)
+('Uhuru Highway Bridge Expansion Joint Repair', 17, 19, 16, 85000000.00, 55000000.00, 'in_progress', '2025-08-01', '2026-08-31', NULL, 0),
+('Mombasa Road Drainage Channel Desilting', 18, 20, 16, 25000000.00, 24000000.00, 'completed', '2025-02-01', '2025-07-31', '2025-08-10', 10),
+('Thika Superhighway Overlay & Safety Works', 19, 19, 15, 32000000.00, 30000000.00, 'completed', '2024-09-01', '2025-06-30', '2025-07-15', 15),
+('Lang''ata Road Widening & Overlay', 20, 20, 14, 120000000.00, 45000000.00, 'in_progress', '2025-10-01', '2027-03-31', NULL, 0),
+('Jogoo Road Drainage Improvement', 21, 19, 14, 18000000.00, 6000000.00, 'in_progress', '2026-01-01', '2026-09-30', NULL, 0),
+('Waiyaki Way Drainage & Resurfacing', 22, 21, 15, 45000000.00, 44000000.00, 'completed', '2024-11-01', '2025-08-31', '2025-09-05', 5),
+('Uhuru Highway Street Lighting Installation', 17, 21, 16, 12000000.00, 2000000.00, 'planned', '2026-07-01', '2026-12-31', NULL, 0),
+('Thika Superhighway Footbridge Construction', 19, 20, 15, 15000000.00, 0.00, 'planned', '2026-08-01', '2027-01-31', NULL, 0);
 
 -- =========================================================================
--- ROAD MATERIALS (20 records)
--- Quality assurance and material certification records
+-- 5. FUND SOURCES (1-3 per project, 50 rows)
 -- =========================================================================
-INSERT INTO road_materials (project_id, material_type, specification_grade, mix_design_ref, source_quarry, test_report_url, test_date, approved_by, notes) VALUES
-(7, 'concrete', 'M40', 'JMF-SBM-2023-001', 'Wadala Concrete Plant', 'https://docs.roadwatch.civic/materials/sbm_m40_2023.pdf', '2023-02-15', 'Rajesh Kumar (Chief Engineer)', 'Micro-silica modified concrete for high-traffic urban road. 28-day strength: 48.2 MPa.'),
-(7, 'asphalt', 'VG-40', 'JMF-SBM-2023-002', 'Mankhurd Asphalt Plant', 'https://docs.roadwatch.civic/materials/sbm_vg40_2023.pdf', '2023-03-01', 'Rajesh Kumar (Chief Engineer)', 'Bituminous concrete wearing course. Marshall stability: 14.2 kN.'),
-(8, 'asphalt', 'VG-30', 'JMF-AMB-2024-001', 'Airoli Asphalt Plant', 'https://docs.roadwatch.civic/materials/amb_vg30_2024.pdf', '2024-03-10', 'Anita Deshmukh (Project Director)', 'Dense graded bituminous macadam for road widening.'),
-(11, 'asphalt', 'VG-40', 'JMF-GB-2024-001', 'Thane Asphalt Plant', 'https://docs.roadwatch.civic/materials/gb_vg40_2024.pdf', '2024-04-05', 'Rajesh Kumar (Chief Engineer)', 'Mastic asphalt overlay for high-speed corridor. Rut resistance optimized.'),
-(13, 'concrete', 'M35', 'JMF-MD-2025-001', 'Worli RMC Plant', 'https://docs.roadwatch.civic/materials/md_m35_2025.pdf', '2025-02-01', 'Anita Deshmukh (Project Director)', 'Colored concrete for promenade aesthetic finish.'),
-(15, 'concrete', 'M40', 'JMF-MTHL-2024-001', 'Navi Mumbai RMC Plant', NULL, '2024-07-15', 'Rajesh Kumar (Chief Engineer)', 'High-performance concrete for bridge approach. 56-day strength target: 52 MPa.'),
-(2, 'asphalt', 'VG-30', 'JMF-EEH-2025-001', 'Mankhurd Asphalt Plant', 'https://docs.roadwatch.civic/materials/eeh_vg30_2025.pdf', '2025-09-15', 'PWD Quality Cell', 'Pothole repair patching mix. Polymer modified for improved adhesion.'),
-(9, 'asphalt', 'VG-10', 'JMF-JVLR-2025-001', 'Airoli Asphalt Plant', 'https://docs.roadwatch.civic/materials/jvlr_vg10_2025.pdf', '2025-05-10', 'PWD Quality Cell', 'Thin overlay for pothole repair. Rapid-set formulation.'),
-(24, 'asphalt', 'VG-40', 'JMF-A502-2025-001', 'Brentwood Asphalt Plant', 'https://docs.roadwatch.civic/materials/a502_vg40_2025.pdf', '2025-05-01', 'TfL Materials Lab', 'Low-noise asphalt surface for residential area.'),
-(27, 'asphalt', 'VG-30', 'JMF-MOMB-2025-001', 'Athi River Asphalt Plant', 'https://docs.roadwatch.civic/materials/momb_vg30_2025.pdf', '2025-03-10', 'KeNHA Materials Engineer', 'Heavy-duty asphalt for truck corridor.'),
-(30, 'asphalt', 'VG-40', 'JMF-THIKA-2024-001', 'Ruiru Asphalt Plant', NULL, '2024-10-01', 'KURA Quality Control', 'High-modulus asphalt for BRT lane.'),
-(22, 'asphalt', 'VG-30', 'JMF-MICH-2024-001', 'Detroit Asphalt Terminal', 'https://docs.roadwatch.civic/materials/mich_vg30_2024.pdf', '2024-06-15', 'MDOT Materials Engineer', 'Dense-graded mix for Michigan Avenue drainage works restoration.'),
-(20, 'asphalt', 'VG-40', 'JMF-M10-2025-001', 'Taylor Asphalt Plant', 'https://docs.roadwatch.civic/materials/m10_vg40_2025.pdf', '2025-04-01', 'FHWA MI Division', 'Polymer-modified for freeze-thaw resistance.'),
-(33, 'asphalt', 'VG-10', 'JMF-PATCH-SV-2024-001', 'Wadala Concrete Plant', NULL, '2024-01-20', NULL, 'Emergency patching material. No formal approval due to urgency.'),
-(1, 'concrete', 'M50', 'JMF-WEH-2025-001', 'Airoli RMC Plant', 'https://docs.roadwatch.civic/materials/weh_m50_2025.pdf', '2025-07-01', 'NHAI Quality Assurance', 'High-strength structural grout for flyover pier rehabilitation.'),
-(5, 'base_course', 'WMM Grade 3', 'JMF-LINK-2025-001', 'Vashi Quarry', 'https://docs.roadwatch.civic/materials/link_wmm_2025.pdf', '2025-11-01', 'KNR Projects QC', 'Wet mix macadam for concrete pavement sub-base.'),
-(3, 'asphalt', 'VG-10', NULL, NULL, NULL, NULL, NULL, 'Materials record missing — contractor failed to submit lab reports before project halted.'),
-(21, 'asphalt', 'VG-30', 'JMF-WOOD-2025-001', 'Southfield Asphalt Terminal', 'https://docs.roadwatch.civic/materials/wood_vg30_2025.pdf', '2025-12-01', 'MDOT Materials Lab', 'Streetscape asphalt mix with light-colored aggregate.'),
-(26, 'asphalt', 'VG-40', 'JMF-UHURU-2025-001', 'Mombasa Road Asphalt Plant', 'https://docs.roadwatch.civic/materials/uhuru_vg40_2025.pdf', '2025-09-01', 'KeNHA Bridge Engineer', 'Expansion joint approach mix. High skid resistance required.'),
-(18, 'concrete', 'M40', 'JMF-WAIYAKI-2024-001', 'Limuru Concrete Plant', 'https://docs.roadwatch.civic/materials/waiyaki_m40_2024.pdf', '2024-12-01', 'KURA Quality Control', 'Curb and channel concrete for drainage works.');
+INSERT INTO fund_sources (project_id, source_name, amount) VALUES
+-- Project 1: WEH Resurfacing
+(1, 'Central Road Infrastructure Fund', 150000000.00),
+(1, 'State PWD Capital Tiers', 90000000.00),
+-- Project 2: EEH Pothole
+(2, 'State PWD Allocations', 18000000.00),
+-- Project 3: SV Drainage (halted)
+(3, 'Municipal General Tier', 50000000.00),
+(3, 'State PWD Allocations', 45000000.00),
+-- Project 4: SV Emergency
+(4, 'Municipal General Portfolios', 35000000.00),
+-- Project 5: Link Road Concrete
+(5, 'Central Road Fund', 100000000.00),
+(5, 'Municipal General Portfolios', 45000000.00),
+-- Project 6: LBS Marg Sewer
+(6, 'Municipal General Tier', 35000000.00),
+(6, 'State PWD Allocations', 27000000.00),
+-- Project 7: SBM Concrete
+(7, 'Municipal General Portfolios', 50000000.00),
+(7, 'State PWD Allocations', 35000000.00),
+-- Project 8: Ghodbunder Overlay
+(8, 'State PWD Capital Tiers', 120000000.00),
+(8, 'Central Road Infrastructure Fund', 70000000.00),
+-- Project 9: Marine Drive
+(9, 'Municipal General Portfolios', 52000000.00),
+-- Project 10: WEH Safety
+(10, 'Central Road Fund', 50000000.00),
+(10, 'State PWD Capital Tiers', 35000000.00),
+-- Project 11: I-94 Resurfacing
+(11, 'FHWA Federal Aid', 30000000.00),
+(11, 'MDOT State Trunkline Fund', 15000000.00),
+-- Project 12: M-10 Pothole
+(12, 'MDOT State Trunkline Fund', 6000000.00),
+(12, 'Local Municipal Bond', 2500000.00),
+-- Project 13: Woodward Streetscape
+(13, 'Local Municipal Bond', 7000000.00),
+(13, 'MDOT State Trunkline Fund', 5000000.00),
+-- Project 14: Gratiot Resurfacing
+(14, 'MDOT State Trunkline Fund', 6000000.00),
+(14, 'Local Municipal Bond', 3500000.00),
+-- Project 15: M25 Smart Motorway
+(15, 'UK Department for Transport Grant', 95000000.00),
+-- Project 16: A406 Carriageway
+(16, 'UK Department for Transport Grant', 18000000.00),
+-- Project 17: A1 Safety
+(17, 'UK Department for Transport Grant', 4800000.00),
+-- Project 18: Whitehall
+(18, 'UK Department for Transport Grant', 2200000.00),
+-- Project 19: Uhuru Highway Bridge
+(19, 'Kenya RMLF', 50000000.00),
+(19, 'International Multilateral Loans', 35000000.00),
+-- Project 20: Mombasa Road Drainage
+(20, 'Kenya RMLF', 15000000.00),
+(20, 'World Bank Loan', 10000000.00),
+-- Project 21: Thika Overlay
+(21, 'Kenya RMLF', 20000000.00),
+(21, 'International Multilateral Loans', 12000000.00),
+-- Project 22: Lang'ata Widening
+(22, 'Kenya RMLF', 70000000.00),
+(22, 'World Bank Loan', 50000000.00),
+-- Project 23: Jogoo Drainage
+(23, 'Kenya RMLF', 12000000.00),
+(23, 'International Multilateral Loans', 6000000.00),
+-- Project 24: Waiyaki Way
+(24, 'Kenya RMLF', 30000000.00),
+(24, 'World Bank Loan', 15000000.00),
+-- Project 25: Uhuru Lighting
+(25, 'Kenya RMLF', 8000000.00),
+(25, 'International Multilateral Loans', 4000000.00),
+-- Project 26: Thika Footbridge
+(26, 'International Multilateral Loans', 10000000.00),
+(26, 'World Bank Loan', 5000000.00);
 
 -- =========================================================================
--- PROJECT WARRANTIES (12 records)
--- Defect liability and maintenance periods
+-- 6. BUDGET VARIANCE REASONS (8 rows)
 -- =========================================================================
-INSERT INTO project_warranties (project_id, warranty_period_months, warranty_start_date, warranty_end_date, warranty_type, defect_amount, status, claim_count, notes) VALUES
-(7, 60, '2023-12-10', '2028-12-10', 'defect_liability', 8500000.00, 'active', 0, 'Senapati Bapat Marg micro-silica concrete topping — standard 5yr defect liability. Retention: 10%.'),
-(8, 36, '2025-01-20', '2028-01-20', 'defect_liability', 5500000.00, 'active', 0, 'Dr. Ambedkar Road junction redesign — 3yr defect period.'),
-(9, 12, '2025-06-28', '2026-06-28', 'defect_liability', 625000.00, 'active', 1, 'JVLR pothole repair and guardrail — 1yr warranty. Claim filed for guardrail bolt loosening.'),
-(11, 60, '2024-12-25', '2029-12-25', 'defect_liability', 9500000.00, 'active', 0, 'Ghodbunder Road mastic asphalt overlay — 5yr performance warranty.'),
-(13, 36, '2025-06-25', '2028-06-25', 'defect_liability', 2600000.00, 'active', 0, 'Marine Drive promenade resurfacing — 3yr warranty on colored concrete.'),
-(15, 60, '2025-05-15', '2030-05-15', 'defect_liability', 9000000.00, 'active', 0, 'MTHL approach road connector — 5yr structural warranty.'),
-(24, 24, '2025-10-28', '2027-10-28', 'defect_liability', 240000.00, 'active', 0, 'A502 Finchley Road carriageway repair — 2yr standard warranty.'),
-(27, 24, '2025-08-10', '2027-08-10', 'defect_liability', 1250000.00, 'active', 0, 'Mombasa Road drainage desilting — 2yr works warranty.'),
-(30, 60, '2025-07-15', '2030-07-15', 'performance', 1600000.00, 'active', 0, 'Thika Superhighway overlay — 5yr performance warranty. Pavement smoothness incentive.'),
-(2, 12, '2025-11-12', '2026-11-12', 'defect_liability', 1800000.00, 'active', 2, 'EEH pothole remediation — 1yr warranty. Two claims for patch failure within 6 months.'),
-(22, 24, '2024-12-15', '2026-12-15', 'defect_liability', 325000.00, 'active', 0, 'Michigan Avenue drainage upgrade — 2yr warranty on civil works.'),
-(18, 36, '2025-09-05', '2028-09-05', 'maintenance', 2250000.00, 'active', 0, 'Waiyaki Way drainage and resurfacing — 3yr maintenance period.');
+INSERT INTO budget_variance_reasons (project_id, original_budget, revised_budget, variance_amount, variance_pct, reason, approved_by, approval_date) VALUES
+(2, 18000000.00, 19200000.00, 1200000.00, 6.67, 'Cost overrun due to additional utility relocation work required during excavation', 'Chief Engineer, PWD Mumbai', '2025-10-20'),
+(3, 95000000.00, 45000000.00, -50000000.00, -52.63, 'Project halted after contractor blacklisted; funds reallocated pending fresh tender', 'Secretary, MCGM', '2025-06-15'),
+(6, 62000000.00, 60000000.00, -2000000.00, -3.23, 'Revised scope reduction after O&M survey revealed fewer sewer blockages than estimated', 'Chief Engineer, MCGM HE', '2025-02-10'),
+(11, 45000000.00, 28000000.00, -17000000.00, -37.78, 'Phased approach adopted; Phase 1 only. Remaining budget held for FY2026', 'State Transportation Director, MDOT', '2025-11-01'),
+(15, 95000000.00, 40000000.00, -55000000.00, -57.89, 'Smart motorway scope reduced to junction 8-10; junctions 10-12 deferred to next spending review', 'Programme Director, National Highways', '2025-12-01'),
+(22, 120000000.00, 45000000.00, -75000000.00, -62.50, 'Value engineering: Widening deferred to Phase 2; only overlay and drainage executed in Phase 1', 'County Engineer, Nairobi', '2026-01-15'),
+(24, 45000000.00, 44000000.00, -1000000.00, -2.22, 'Minor savings from competitive re-tendering of asphalt supply contract', 'Director, KURA', '2025-07-20'),
+(12, 8500000.00, 8500000.00, 0.00, 0.00, 'On-budget delivery; delay caused by utility coordination, not cost overrun', 'Project Manager, MDOT', '2025-09-20');
 
 -- =========================================================================
--- ROAD DOCUMENTS (15 records)
--- Inspection photos, design docs, material certs per road
+-- 7. COMPLAINTS (15 rows: 7 IN + 3 US + 2 GB + 3 KE)
 -- =========================================================================
-INSERT INTO road_documents (road_id, doc_type, title, file_url, file_size_bytes, mime_type, uploaded_by) VALUES
-(1, 'inspection_photo', 'WEH Flyover Pier G4 Crack', 'https://docs.roadwatch.civic/roads/1/inspection_weh_pier_g4.jpg', 2457600, 'image/jpeg', 'inspector_01'),
-(1, 'design_document', 'WEH Resurfacing Structural Drawings', 'https://docs.roadwatch.civic/roads/1/weh_resurfacing_dwg_v2.pdf', 5242880, 'application/pdf', 'engineering_dept'),
-(3, 'inspection_photo', 'SV Road Drainage Trench Collapse', 'https://docs.roadwatch.civic/roads/3/sv_drainage_collapse.jpg', 1894400, 'image/jpeg', 'inspector_02'),
-(3, 'contractor_report', 'SV Road Project Halt Notice', 'https://docs.roadwatch.civic/roads/3/sv_halt_notice.pdf', 102400, 'application/pdf', 'legal_dept'),
-(5, 'inspection_photo', 'LBS Marg Pothole Survey Q1 2025', 'https://docs.roadwatch.civic/roads/5/lbs_pothole_survey_q1_2025.jpg', 3123200, 'image/jpeg', 'inspector_03'),
-(6, 'design_document', 'Senapati Bapat Cross Section Design', 'https://docs.roadwatch.civic/roads/6/sbm_cross_section.pdf', 4194304, 'application/pdf', 'engineering_dept'),
-(10, 'material_certificate', 'Ghodbunder Asphalt Mix Design Certificate', 'https://docs.roadwatch.civic/roads/10/gb_mix_design_cert.pdf', 204800, 'application/pdf', 'qa_engineer'),
-(13, 'inspection_photo', 'I-94 Dearborn Pothole Documentation', 'https://docs.roadwatch.civic/roads/13/i94_pothole_dearborn.jpg', 2048000, 'image/jpeg', 'mdot_inspector'),
-(15, 'material_certificate', 'Woodward Ave Polymer Modified Asphalt Cert', 'https://docs.roadwatch.civic/roads/15/woodward_pma_cert.pdf', 153600, 'application/pdf', 'mdot_lab'),
-(18, 'inspection_photo', 'Camden High Street Sunken Manhole', 'https://docs.roadwatch.civic/roads/18/camden_sunken_manhole.jpg', 1126400, 'image/jpeg', 'camden_inspector'),
-(20, 'contractor_report', 'Euston Road Bus Lane Progress Report', 'https://docs.roadwatch.civic/roads/20/euston_progress_report_q2_2026.pdf', 307200, 'application/pdf', 'contractor_18'),
-(23, 'inspection_photo', 'Mombasa Road Industrial Area Crater', 'https://docs.roadwatch.civic/roads/23/mombasa_crater_industrial.jpg', 2867200, 'image/jpeg', 'kenha_inspector'),
-(24, 'design_document', 'Thika Superhighway Overlay Design', 'https://docs.roadwatch.civic/roads/24/thika_overlay_design.pdf', 3670016, 'application/pdf', 'kura_engineering'),
-(27, 'inspection_photo', 'NH-3 Mumbai-Nashik Widening Progress', 'https://docs.roadwatch.civic/roads/27/nh3_widening_progress.jpg', 1576960, 'image/jpeg', 'nhai_inspector'),
-(28, 'contractor_report', 'MTHL Approach Road Completion Certificate', 'https://docs.roadwatch.civic/roads/28/mthl_completion_cert.pdf', 819200, 'application/pdf', 'pwd_engineer');
+INSERT INTO complaints (client_temp_id, title, description, category, geom, status, escalation_level, priority, target_resolution_hours, citizen_contact, assigned_authority_id, road_id, created_at) VALUES
+-- IN complaints
+('8f8b8c1a-289e-4b47-b8db-c8db05ab1c1b', 'Severe Potholes near Andheri Flyover', 'Multiple deep potholes on the southbound main road. Damaging tires and causing sudden braking.', 'pothole', ST_GeomFromText('POINT(72.8531 19.1190)', 4326), 'in_progress', 0, 4, 48, '+91-9876543210', 5, 1, '2025-12-01T08:30:00Z'),
+('c25e8396-857e-4054-9426-1507df0a7b11', 'Missing diversion board near Metro work', 'The lane closure indicator is missing. Extremely hazardous at night.', 'missing_signage', ST_GeomFromText('POINT(72.8580 19.1720)', 4326), 'resolved', 0, 3, 72, '+91-9876543211', 5, 1, '2025-10-15T14:00:00Z'),
+('df108bc5-7b56-4c4f-9562-ee2ee9108b34', 'Uneven Paver Blocks at Bandra Signal', 'The interlocking bricks have caved in. Creates a massive bump for motorbikes.', 'paving_defect', ST_GeomFromText('POINT(72.8356 19.0620)', 4326), 'pending', 0, 2, 72, '+91-9876543212', 1, 3, '2026-06-20T09:15:00Z'),
+('a3e0f9b6-8bb0-47b2-9011-477000cc55aa', 'Monsoon Waterlogging outside station', 'Water level reaches knee height during high tide rains. Drain inlets are fully clogged.', 'waterlogging', ST_GeomFromText('POINT(72.8362 19.0980)', 4326), 'in_progress', 1, 5, 24, '+91-9876543213', 1, 3, '2026-07-05T07:00:00Z'),
+('0a82b012-e7b3-469b-83ee-0062f2bc88d2', 'Dumping of building debris on left lane', 'Truckloads of sand and broken concrete bricks left on the road blocking traffic.', 'debris', ST_GeomFromText('POINT(72.8272 19.1260)', 4326), 'routed', 0, 3, 48, '+91-9876543214', 1, 4, '2026-06-28T11:45:00Z'),
+('55d7b51b-1002-4fb0-a7d1-12ef891ab01e', 'Crater-sized pothole near Kurla junction', 'Nearly 1.5 feet deep. Several auto-rickshaws have overturned trying to avoid it.', 'pothole', ST_GeomFromText('POINT(72.8982 19.0850)', 4326), 'in_progress', 0, 5, 48, '+91-9876543215', 3, 5, '2026-07-08T16:30:00Z'),
+('fe2e84c1-65b1-4f10-9111-ee44aa3312b9', 'Stagnant water near Phoenix mall entrance', 'Clogged drains from construction are backing up water onto the road.', 'waterlogging', ST_GeomFromText('POINT(72.9030 19.1020)', 4326), 'pending', 2, 4, 24, '+91-9876543216', 3, 5, '2026-07-09T06:00:00Z'),
+-- US complaints
+('7f7f7f7f-1001-4000-8000-100000000001', 'Deep potholes on I-94 near Dearborn', 'Multiple 6-inch deep potholes in the right lane causing tire blowouts.', 'pothole', ST_GeomFromText('POINT(-83.1000 42.3550)', 4326), 'in_progress', 0, 4, 24, '+1-313-555-1001', 8, 9, '2026-06-15T10:00:00Z'),
+('7f7f7f7f-1001-4000-8000-100000000002', 'Missing lane markings on Woodward Ave', 'Lane divider paint has completely worn off between 7 Mile and 8 Mile Road.', 'missing_signage', ST_GeomFromText('POINT(-83.0750 42.3800)', 4326), 'pending', 0, 2, 36, '+1-313-555-1002', 7, 11, '2026-07-01T14:30:00Z'),
+('7f7f7f7f-1001-4000-8000-100000000003', 'Water pooling on M-10 underpass', 'Storm drain is clogged causing 6-inch standing water across all lanes.', 'waterlogging', ST_GeomFromText('POINT(-83.1120 42.3500)', 4326), 'routed', 1, 3, 12, '+1-313-555-1003', 8, 10, '2026-07-06T09:00:00Z'),
+-- GB complaints
+('7f7f7f7f-1001-4000-8000-200000000001', 'Sunken manhole cover on A1 Holloway Road', 'Manhole cover has sunk 4cm below road surface creating hazard for cyclists.', 'paving_defect', ST_GeomFromText('POINT(-0.1150 51.5500)', 4326), 'in_progress', 0, 3, 48, '+44-20-79460001', 11, 15, '2026-06-20T11:00:00Z'),
+('7f7f7f7f-1001-4000-8000-200000000002', 'Uneven asphalt patches on A406', 'Multiple patches from utility works creating bumpy surface for buses.', 'paving_defect', ST_GeomFromText('POINT(-0.2200 51.5650)', 4326), 'pending', 0, 2, 48, '+44-20-79460002', 12, 14, '2026-07-03T08:00:00Z'),
+-- KE complaints
+('7f7f7f7f-1001-4000-8000-300000000001', 'Large crater on Mombasa Road near Industrial Area', 'Deep crater spanning half the lane, causing traffic to merge dangerously.', 'pothole', ST_GeomFromText('POINT(36.8800 -1.3150)', 4326), 'in_progress', 1, 5, 72, '+254-20-5552001', 16, 18, '2026-06-10T07:30:00Z'),
+('7f7f7f7f-1001-4000-8000-300000000002', 'Flooded underpass on Jogoo Road', 'Heavy rain has flooded the Makadara underpass to waist height.', 'waterlogging', ST_GeomFromText('POINT(36.8750 -1.2970)', 4326), 'routed', 2, 4, 48, '+254-20-5552002', 14, 21, '2026-07-07T06:00:00Z'),
+('7f7f7f7f-1001-4000-8000-300000000003', 'Debris from construction on Lang''ata Road', 'Construction debris and gravel scattered across the road near Carnivore junction.', 'debris', ST_GeomFromText('POINT(36.7950 -1.3120)', 4326), 'pending', 0, 2, 72, '+254-20-5552003', 14, 20, '2026-07-09T10:00:00Z');
 
 -- =========================================================================
--- ROAD DEFECT HISTORY BASELINE (roads 32-71)
--- Single baseline row per new road
+-- 8. PROJECT MILESTONES (2-3 per project, 52 rows)
 -- =========================================================================
-INSERT INTO road_defect_history (road_id, snapshot_date, status_at_time, complaint_count, project_count, source)
-SELECT r.id, CURRENT_DATE, r.status, 0, 0, 'inspection' FROM roads r WHERE r.id >= 32;
+INSERT INTO project_milestones (project_id, title, description, amount, status, due_date, completion_date, verified_by, payment_release_date) VALUES
+-- Project 1: WEH Resurfacing
+(1, 'Site Mobilization & Traffic Management Setup', 'Deploy signage, barriers, and diversion plans', 5000000.00, 'completed', '2025-07-01', '2025-06-28', 'Project Engineer, NHAI', '2025-07-15'),
+(1, 'Asphalt Milling & Base Course Repair', 'Mill 50mm of existing surface, repair base failures', 80000000.00, 'in_progress', '2026-01-31', NULL, NULL, NULL),
+(1, 'Final Wearing Course & Line Marking', 'Lay SMA wearing course, apply thermoplastic markings', 100000000.00, 'pending', '2026-06-15', NULL, NULL, NULL),
+-- Project 2: EEH Pothole
+(2, 'Pothole Survey & Quantification', 'GPS-tagged survey of all potholes on EEH stretch', 1000000.00, 'completed', '2025-09-15', '2025-09-10', 'Junior Engineer, PWD', '2025-09-25'),
+(2, 'Cold Mix Patching & Compaction', 'Patch 450 potholes with cold mix asphalt', 12000000.00, 'completed', '2025-10-15', '2025-10-20', 'Section Officer, PWD', '2025-11-05'),
+(2, 'Final Inspection & Quality Check', 'Core sampling and ride quality assessment', 5000000.00, 'completed', '2025-10-31', '2025-11-12', 'Chief Engineer, PWD', '2025-11-20'),
+-- Project 3: SV Drainage (halted)
+(3, 'Trench Excavation & Pipe Laying (Phase 1)', 'Excavate 2km of drainage trench', 30000000.00, 'completed', '2024-08-31', '2024-08-25', 'Site Supervisor, MCGM', '2024-09-15'),
+(3, 'Phase 2 Trenching & Microtunnelling', 'Continue trenching and start microtunnelling under junctions', 45000000.00, 'cancelled', '2025-03-31', NULL, NULL, NULL),
+-- Project 4: SV Emergency
+(4, 'Emergency Surface Milling', 'Mill damaged surface layer', 5000000.00, 'completed', '2026-03-15', '2026-03-12', 'Project Manager, MCGM', '2026-03-25'),
+(4, 'Asphalt Overlay 50mm Thick', 'Lay DBM + BC overlay', 25000000.00, 'in_progress', '2026-07-31', NULL, NULL, NULL),
+-- Project 5: Link Road Concrete
+(5, 'Subgrade Preparation & DLC Laying', 'Prepare subgrade and lay dry lean concrete base', 30000000.00, 'completed', '2025-12-31', '2025-12-28', 'Quality Engineer, MCGM', '2026-01-15'),
+(5, 'PQC Pavement Construction', 'Lay 300mm PQC in 7m panels', 80000000.00, 'in_progress', '2026-06-30', NULL, NULL, NULL),
+(5, 'Joint Cutting & Sealing', 'Cut and seal contraction joints', 15000000.00, 'pending', '2026-09-15', NULL, NULL, NULL),
+-- Project 6: LBS Marg Sewer
+(6, 'Stage 1: Khar to Bandra Sewer Laying', 'Lay 600mm dia sewer pipe for 3km', 25000000.00, 'completed', '2025-03-31', '2025-03-28', 'Project Engineer, MCGM', '2025-04-15'),
+(6, 'Stage 2: Bandra to Kurla Sewer Laying', 'Lay 600mm dia sewer pipe for 4km', 25000000.00, 'in_progress', '2026-06-30', NULL, NULL, NULL),
+-- Project 7: SBM Concrete
+(7, 'Demolition & Subgrade Work', 'Remove old asphalt, prepare subgrade', 15000000.00, 'completed', '2023-03-15', '2023-03-10', 'Engineer, MCGM FN', '2023-03-30'),
+(7, 'PQC Laying & Curing', 'Lay 250mm PQC with curing compound', 50000000.00, 'completed', '2023-09-30', '2023-09-25', 'Chief Engineer, MCGM', '2023-10-15'),
+(7, 'Footpath & Median Finishing', 'Complete paver block footpaths and median', 20000000.00, 'completed', '2023-12-15', '2023-12-10', 'Superintendent, MCGM', '2023-12-28'),
+-- Project 8: Ghodbunder Overlay
+(8, 'Milling & Tack Coat', 'Mill 40mm surface, apply tack coat', 30000000.00, 'completed', '2024-05-31', '2024-05-25', 'Engineer, PWD', '2024-06-15'),
+(8, 'Mast-Asphalt Overlay Laying', 'Lay 50mm SMA mast-asphalt', 120000000.00, 'completed', '2024-10-31', '2024-10-28', 'Chief Engineer, PWD', '2024-11-15'),
+(8, 'Road Markings & Signage', 'Apply thermoplastic markings, install signs', 20000000.00, 'completed', '2024-12-31', '2024-12-25', 'Safety Officer, PWD', '2025-01-10'),
+-- Project 9: Marine Drive
+(9, 'Promenade Demolition', 'Remove old concrete flags', 8000000.00, 'completed', '2025-02-28', '2025-02-20', 'Engineer, MCGM FN', '2025-03-10'),
+(9, 'New Concrete Flag Laying', 'Lay interlocking concrete flags', 30000000.00, 'completed', '2025-05-31', '2025-05-25', 'Supervisor, MCGM', '2025-06-10'),
+(9, 'Lighting & Handrail Installation', 'Install LED lighting and SS handrails', 10000000.00, 'completed', '2025-06-30', '2025-06-25', 'Safety Officer, MCGM', '2025-07-10'),
+-- Project 10: WEH Safety
+(10, 'Design & Engineering', 'Detailed design of barrier and lighting system', 5000000.00, 'completed', '2026-02-28', '2026-02-20', 'Design Engineer, NHAI', '2026-03-10'),
+(10, 'Crash Barrier Installation', 'Install metal beam crash barriers', 45000000.00, 'in_progress', '2026-08-31', NULL, NULL, NULL),
+(10, 'LED Lighting Installation', 'Install LED streetlights', 30000000.00, 'pending', '2026-12-15', NULL, NULL, NULL),
+-- Project 11: I-94
+(11, 'Pavement Assessment & Design', 'FWD testing and pavement design', 2000000.00, 'completed', '2025-07-31', '2025-07-25', 'Pavement Engineer, FHWA', '2025-08-15'),
+(11, 'Milling & Base Repair (Eastbound)', 'Mill and repair 5 miles eastbound', 15000000.00, 'in_progress', '2026-06-30', NULL, NULL, NULL),
+(11, 'Overlay & Markings (Eastbound)', 'Pave and mark eastbound lanes', 20000000.00, 'pending', '2026-12-15', NULL, NULL, NULL),
+-- Project 12: M-10 Pothole
+(12, 'Pothole Patching (All Lanes)', 'Machine-patch all potholes on M-10', 5000000.00, 'completed', '2025-05-31', '2025-05-28', 'Project Manager, MDOT', '2025-06-15'),
+(12, 'Crack Sealing & Surface Treatment', 'Seal cracks and apply fog seal', 3500000.00, 'completed', '2025-08-31', '2025-09-15', 'Supervisor, MDOT', '2025-09-30'),
+-- Project 15: M25 Smart Motorway
+(15, 'Detailed Design & Consultation', 'Stakeholder consultation and detailed design', 5000000.00, 'completed', '2025-12-31', '2025-12-20', 'Design Manager, NHSE', '2026-01-15'),
+(15, 'Gantry Installation (J8-J10)', 'Install 12 electronic information gantries', 35000000.00, 'in_progress', '2026-09-30', NULL, NULL, NULL),
+(15, 'Control System Integration', 'Integrate with National Highways control centre', 25000000.00, 'pending', '2027-04-30', NULL, NULL, NULL),
+-- Project 19: Uhuru Highway Bridge
+(19, 'Bridge Joint Removal', 'Remove old expansion joints', 10000000.00, 'completed', '2025-09-30', '2025-09-25', 'Bridge Engineer, KeNHA', '2025-10-15'),
+(19, 'New Joint Installation', 'Install modular expansion joints', 45000000.00, 'in_progress', '2026-04-30', NULL, NULL, NULL),
+(19, 'Deck Waterproofing & Asphalt Overlay', 'Waterproof deck and relay asphalt', 20000000.00, 'pending', '2026-08-15', NULL, NULL, NULL),
+-- Project 22: Lang'ata
+(22, 'Drainage Design & Earthworks', 'Design drainage system, start earthworks', 15000000.00, 'completed', '2026-01-31', '2026-01-25', 'Engineer, NCC', '2026-02-15'),
+(22, 'Pavement Overlay', 'Lay 100mm asphalt overlay', 60000000.00, 'in_progress', '2026-09-30', NULL, NULL, NULL),
+(22, 'Sidewalk & Drainage Finishing', 'Complete sidewalks and drainage channels', 25000000.00, 'pending', '2027-03-15', NULL, NULL, NULL),
+-- Project 24: Waiyaki Way
+(24, 'Drainage Channel Construction', 'Construct 2km of lined drainage channels', 15000000.00, 'completed', '2025-02-28', '2025-02-22', 'Engineer, KURA', '2025-03-15'),
+(24, 'Asphalt Resurfacing', 'Mill and relay 50mm asphalt', 20000000.00, 'completed', '2025-07-31', '2025-08-05', 'Chief Engineer, KURA', '2025-08-20'),
+(24, 'Road Markings & Signage', 'Line marking and sign installation', 5000000.00, 'completed', '2025-08-31', '2025-09-05', 'Safety Officer, KURA', '2025-09-20');
+
+-- =========================================================================
+-- 9. CONTINGENCY RESERVES (1-2 per project, 26 rows)
+-- =========================================================================
+INSERT INTO contingency_reserves (project_id, allocated_amount, utilized_amount, status, release_notes) VALUES
+(1, 12000000.00, 5000000.00, 'partially_utilized', 'Released for unexpected rock excavation during milling'),
+(2, 900000.00, 900000.00, 'fully_utilized', 'Fully utilized for additional utility relocation'),
+(3, 5000000.00, 5000000.00, 'exhausted', 'Exhausted on contractor termination costs'),
+(4, 3500000.00, 0.00, 'available', 'Held for potential night work surcharges'),
+(5, 10000000.00, 2000000.00, 'partially_utilized', 'Partial release for concrete mix design optimization'),
+(6, 3000000.00, 3000000.00, 'fully_utilized', 'Used for unexpected rock excavation'),
+(7, 5000000.00, 1000000.00, 'partially_utilized', 'Minor release for decorative paver adjustment'),
+(8, 10000000.00, 0.00, 'available', 'Unused - project completed under budget'),
+(9, 3000000.00, 0.00, 'available', 'Unused - project completed on time'),
+(10, 5000000.00, 0.00, 'available', 'Held for potential traffic management extensions'),
+(11, 3000000.00, 0.00, 'available', 'Reserved for unforeseen ground conditions'),
+(12, 500000.00, 500000.00, 'fully_utilized', 'Used for extended lane closure permits'),
+(13, 1000000.00, 0.00, 'available', 'Held for streetscape material cost fluctuations'),
+(14, 500000.00, 0.00, 'available', 'Reserved for traffic management'),
+(15, 5000000.00, 1000000.00, 'partially_utilized', 'Partial release for ecological survey'),
+(16, 1000000.00, 0.00, 'available', 'Held for utility coordination'),
+(17, 250000.00, 0.00, 'available', 'Unused - project completed on budget'),
+(18, 150000.00, 0.00, 'available', 'Unused - minor project completed'),
+(19, 5000000.00, 1000000.00, 'partially_utilized', 'Released for additional traffic management'),
+(20, 1500000.00, 1500000.00, 'fully_utilized', 'Used for emergency desilting of blocked channels'),
+(21, 2000000.00, 0.00, 'available', 'Reserved for material price escalation'),
+(22, 8000000.00, 2000000.00, 'partially_utilized', 'Partial release for land acquisition compensation'),
+(23, 1000000.00, 0.00, 'available', 'Held for potential rock excavation'),
+(24, 2500000.00, 2500000.00, 'fully_utilized', 'Used for additional drainage outlets'),
+(25, 800000.00, 0.00, 'available', 'Reserved for design changes'),
+(26, 1000000.00, 0.00, 'available', 'Held for foundation investigation');
+
+-- =========================================================================
+-- 10. SLA CONFIG (8 rows: per category + region)
+-- =========================================================================
+INSERT INTO sla_config (category, escalation_hours, escalation_level, escalate_to_authority_id, notify_template, region_code) VALUES
+('pothole', 48, 1, 4, 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to PWD Mumbai.', 'IN'),
+('pothole', 96, 2, 5, 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to NHAI RO Mumbai.', 'IN'),
+('waterlogging', 24, 1, 1, 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Ward K-West.', 'IN'),
+('waterlogging', 48, 2, 3, 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Ward H-East.', 'IN'),
+('pothole', 24, 1, 8, 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to FHWA Michigan.', 'US'),
+('waterlogging', 12, 1, 6, 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Detroit DPW.', 'US'),
+('pothole', 72, 1, 16, 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to KeNHA.', 'KE'),
+('paving_defect', 48, 1, 10, 'Complaint #{id}: {title} unactioned for {hours}h. Escalated to Camden Borough Highways.', 'GB');
+
+-- =========================================================================
+-- 11. CPI DATA (4 regions x 5 years = 20 rows)
+-- =========================================================================
+INSERT INTO cpi_data (region_code, year, cpi_value) VALUES
+('IN', 2020, 156.20), ('IN', 2021, 162.80), ('IN', 2022, 170.50), ('IN', 2023, 178.40), ('IN', 2024, 185.10),
+('US', 2020, 258.80), ('US', 2021, 270.97), ('US', 2022, 292.66), ('US', 2023, 304.70), ('US', 2024, 313.60),
+('GB', 2020, 108.90), ('GB', 2021, 112.60), ('GB', 2022, 120.60), ('GB', 2023, 128.90), ('GB', 2024, 133.40),
+('KE', 2020, 112.50), ('KE', 2021, 118.20), ('KE', 2022, 126.80), ('KE', 2023, 136.40), ('KE', 2024, 143.20);
+
+-- =========================================================================
+-- 12. ROAD ALIASES (14 rows)
+-- =========================================================================
+INSERT INTO road_aliases (road_id, alias_name, alias_region_code, alias_type, is_primary) VALUES
+(1, 'NH-48', 'IN', 'national', TRUE),
+(1, 'WEH', 'IN', 'local', FALSE),
+(2, 'NH-8 Spur', 'IN', 'national', FALSE),
+(3, 'Swami Vivekanand Road', 'IN', 'historical', FALSE),
+(5, 'LBS Marg', 'IN', 'local', TRUE),
+(9, 'Edsel Ford Freeway', 'US', 'local', FALSE),
+(10, 'Lodge Freeway', 'US', 'local', FALSE),
+(11, 'M-1', 'US', 'national', FALSE),
+(12, 'M-3', 'US', 'national', FALSE),
+(13, 'London Orbital Motorway', 'GB', 'national', FALSE),
+(14, 'North Circular Road', 'GB', 'local', TRUE),
+(17, 'A104', 'KE', 'national', FALSE),
+(18, 'A109', 'KE', 'national', TRUE),
+(19, 'A2', 'KE', 'national', TRUE);
+
+-- =========================================================================
+-- 13. TENDERS (7 tenders)
+-- =========================================================================
+INSERT INTO tenders (reference_no, title, description, authority_id, project_id, estimated_value, status, published_date, bid_deadline, award_date) VALUES
+('TND-IN-2025-001', 'WEH Resurfacing & Structural Grouting', 'Comprehensive resurfacing of WEH including flyover structural grouting', 5, 1, 250000000.00, 'awarded', '2025-04-01', '2025-05-15', '2025-05-30'),
+('TND-IN-2025-002', 'Link Road Concrete Pavement Upgrade', 'Concrete pavement upgrade for Link Road Phase 2', 1, 5, 150000000.00, 'awarded', '2025-08-01', '2025-09-15', '2025-10-01'),
+('TND-US-2025-001', 'I-94 Resurfacing & Bridge Repairs', 'Pavement rehabilitation and bridge joint replacement on I-94', 8, 11, 48000000.00, 'awarded', '2025-04-15', '2025-05-30', '2025-06-10'),
+('TND-GB-2025-001', 'M25 Smart Motorway J8-10 Upgrade', 'Design and build of smart motorway systems between Junction 8-10', 12, 15, 100000000.00, 'awarded', '2025-06-01', '2025-07-31', '2025-08-15'),
+('TND-KE-2025-001', 'Uhuru Highway Bridge Joint Replacement', 'Replacement of expansion joints on Uhuru Highway bridge', 16, 19, 90000000.00, 'awarded', '2025-06-15', '2025-07-31', '2025-08-10'),
+('TND-KE-2026-001', 'Jogoo Road Drainage & Resurfacing', 'Comprehensive drainage improvement and resurfacing of Jogoo Road', 14, 23, 20000000.00, 'published', '2025-12-01', '2026-01-31', NULL),
+('TND-IN-2026-001', 'WEH Safety Barrier & Lighting', 'Installation of crash barriers and LED lighting on WEH', 5, 10, 90000000.00, 'published', '2025-11-01', '2025-12-31', NULL);
+
+-- =========================================================================
+-- 14. TENDER BIDS (2-3 bids per tender, 18 rows)
+-- =========================================================================
+INSERT INTO tender_bids (tender_id, contractor_id, financial_quote, technical_score, financial_score, weighted_total, evaluator_notes, is_winner) VALUES
+-- TND-IN-2025-001 (WEH Resurfacing)
+(1, 1, 240000000.00, 88.50, 85.00, 86.75, 'Strong technical proposal, competitive pricing', TRUE),
+(1, 3, 255000000.00, 82.00, 80.00, 81.00, 'Higher cost but acceptable technical approach', FALSE),
+(1, 6, 235000000.00, 70.00, 88.00, 79.00, 'Lowest cost but weak technical submission', FALSE),
+-- TND-IN-2025-002 (Link Road Concrete)
+(2, 6, 145000000.00, 92.00, 82.00, 87.00, 'Best technical score, reasonable pricing', TRUE),
+(2, 8, 140000000.00, 78.00, 85.00, 81.50, 'Lower cost but weaker technical proposal', FALSE),
+-- TND-US-2025-001 (I-94)
+(3, 13, 45000000.00, 90.00, 80.00, 85.00, 'Excellent technical approach, good value', TRUE),
+(3, 14, 42000000.00, 75.00, 88.00, 81.50, 'Lower cost but weaker QA/QC plan', FALSE),
+(3, 15, 48000000.00, 65.00, 72.00, 68.50, 'Blacklisted concerns, lowest technical score', FALSE),
+-- TND-GB-2025-001 (M25 Smart Motorway)
+(4, 16, 95000000.00, 91.00, 83.00, 87.00, 'Best overall, strong smart motorway experience', TRUE),
+(4, 18, 92000000.00, 78.00, 86.00, 82.00, 'Lower cost but less motorway experience', FALSE),
+-- TND-KE-2025-001 (Uhuru Highway Bridge)
+(5, 19, 85000000.00, 85.00, 80.00, 82.50, 'Strong bridge experience, good value', TRUE),
+(5, 20, 82000000.00, 72.00, 84.00, 78.00, 'Lower cost but weaker technical', FALSE),
+(5, 21, 88000000.00, 68.00, 76.00, 72.00, 'Highest cost, lowest technical score', FALSE),
+-- TND-KE-2026-001 (Jogoo Road)
+(6, 19, 18000000.00, 78.00, 85.00, 81.50, 'Good technical approach, competitive pricing', FALSE),
+(6, 20, 17500000.00, 82.00, 88.00, 85.00, 'Best overall, awaiting award decision', FALSE),
+(6, 21, 19000000.00, 70.00, 78.00, 74.00, 'Higher cost, lower technical score', FALSE),
+-- TND-IN-2026-001 (WEH Safety)
+(7, 5, 85000000.00, 80.00, 82.00, 81.00, 'Good technical proposal, awaiting evaluation', FALSE),
+(7, 1, 82000000.00, 85.00, 86.00, 85.50, 'Strongest bidder, awaiting award decision', FALSE);
+
+-- =========================================================================
+-- 15. PROJECT BENEFICIARIES (8 rows)
+-- =========================================================================
+INSERT INTO project_beneficiaries (project_id, population_served, estimated_daily_traffic, household_count, beneficiary_type, data_source, census_year) VALUES
+(1, 2500000, 185000, 650000, 'mixed', 'MCGM Transport Census', 2023),
+(2, 1500000, 95000, 380000, 'mixed', 'PWD Traffic Survey', 2023),
+(5, 800000, 48000, 200000, 'residential', 'MCGM Ward Data', 2022),
+(7, 500000, 35000, 125000, 'commercial', 'BMC Town Planning', 2022),
+(11, 1200000, 155000, 480000, 'commuters', 'MDOT AADT Report', 2024),
+(15, 2000000, 180000, 800000, 'mixed', 'National Highways Traffic Data', 2024),
+(19, 800000, 68000, 200000, 'mixed', 'KeNHA Traffic Survey', 2023),
+(22, 350000, 8500, 85000, 'residential', 'Nairobi County Census', 2022);
+
+-- =========================================================================
+-- 16. ROAD MATERIALS (8 rows)
+-- =========================================================================
+INSERT INTO road_materials (project_id, material_type, specification_grade, mix_design_ref, source_quarry, test_report_url, test_date, approved_by) VALUES
+(1, 'asphalt', 'VG-40 Polymer Modified Bitumen', 'MDR-001-WEH-SMA', 'Plateau Minerals, Pune', 'https://qa.roadwatch.civic/tests/WEH-SMA-001.pdf', '2025-05-15', 'Quality Manager, NHAI'),
+(1, 'aggregate', '20mm Graded Aggregate', 'AGR-002-WEH', 'Aravalli Quarry, Palghar', 'https://qa.roadwatch.civic/tests/WEH-AGR-002.pdf', '2025-05-10', 'Materials Engineer, NHAI'),
+(5, 'concrete', 'M40 Grade PQC', 'PQC-001-LINK-M40', 'Concrete Mix Plant, Marol', 'https://qa.roadwatch.civic/tests/LINK-PQC-001.pdf', '2025-09-20', 'Quality Engineer, MCGM'),
+(5, 'base_course', 'GSB Grade III', 'GSB-001-LINK', 'Bhandup Quarry', 'https://qa.roadwatch.civic/tests/LINK-GSB-001.pdf', '2025-08-15', 'Site Engineer, MCGM'),
+(11, 'asphalt', 'PG 64-22 Binder', 'MIX-I94-ARZ', 'Detroit Asphalt Plant', 'https://qa.roadwatch.civic/tests/I94-ARZ-001.pdf', '2025-05-01', 'Materials Engineer, FHWA'),
+(15, 'asphalt', 'AC30 HRA Binder', 'MIX-M25-HRA', 'Heathrow Asphalt Plant', 'https://qa.roadwatch.civic/tests/M25-HRA-001.pdf', '2025-08-10', 'Quality Manager, National Highways'),
+(19, 'asphalt', 'A-1 Grade Bitumen', 'MIX-UHURU-SMA', 'Nairobi Asphalt Plant', 'https://qa.roadwatch.civic/tests/UHURU-SMA-001.pdf', '2025-07-15', 'Materials Engineer, KeNHA'),
+(22, 'subbase', 'CBR 30% Laterite', 'SUB-LANG-001', 'Karen Quarry, Nairobi', 'https://qa.roadwatch.civic/tests/LANG-SUB-001.pdf', '2025-09-10', 'Geotechnical Engineer, NCC');
+
+-- =========================================================================
+-- 17. PROJECT WARRANTIES (7 rows)
+-- =========================================================================
+INSERT INTO project_warranties (project_id, warranty_period_months, warranty_start_date, warranty_end_date, warranty_type, defect_amount, status) VALUES
+(2, 12, '2025-11-12', '2026-11-12', 'defect_liability', 1800000.00, 'active'),
+(7, 24, '2023-12-10', '2025-12-10', 'maintenance', 5000000.00, 'active'),
+(8, 12, '2024-12-25', '2025-12-25', 'defect_liability', 9000000.00, 'active'),
+(9, 12, '2025-06-25', '2026-06-25', 'defect_liability', 3000000.00, 'active'),
+(12, 12, '2025-09-15', '2026-09-15', 'defect_liability', 500000.00, 'active'),
+(17, 24, '2025-10-28', '2027-10-28', 'performance', 250000.00, 'active'),
+(20, 12, '2025-08-10', '2026-08-10', 'defect_liability', 1500000.00, 'active');
+
+-- =========================================================================
+-- 18. ROAD DEFECT HISTORY (12 rows)
+-- =========================================================================
+INSERT INTO road_defect_history (road_id, snapshot_date, status_at_time, complaint_count, project_count, source) VALUES
+(1, '2025-01-01', 'fair', 11, 0, 'inspection'),
+(1, '2025-03-15', 'under_construction', 14, 1, 'project'),
+(3, '2025-01-01', 'poor', 37, 1, 'complaint'),
+(3, '2026-03-01', 'poor', 52, 2, 'project'),
+(5, '2025-01-01', 'poor', 27, 1, 'inspection'),
+(5, '2025-11-01', 'poor', 32, 1, 'project'),
+(9, '2025-01-01', 'fair', 13, 0, 'inspection'),
+(9, '2025-06-01', 'under_construction', 16, 1, 'project'),
+(13, '2025-01-01', 'fair', 7, 0, 'inspection'),
+(13, '2025-09-01', 'under_construction', 10, 1, 'project'),
+(17, '2025-01-01', 'fair', 7, 0, 'inspection'),
+(17, '2025-08-01', 'under_construction', 9, 1, 'project');
+
+-- =========================================================================
+-- 19. REGION IMPORT LOG (4 rows)
+-- =========================================================================
+INSERT INTO region_import_log (region_code, source, roads_imported, roads_skipped, roads_errors, finished_at) VALUES
+('IN', 'osm', 842, 35, 3, '2025-01-15T10:30:00Z'),
+('US', 'osm', 1245, 52, 7, '2025-02-01T14:00:00Z'),
+('GB', 'osm', 678, 22, 2, '2025-01-20T11:45:00Z'),
+('KE', 'osm', 389, 18, 5, '2025-01-25T09:15:00Z');
+
+-- =========================================================================
+-- 20. ROUTING FEEDBACK (8 rows)
+-- =========================================================================
+INSERT INTO routing_feedback (complaint_id, authority_id, citizen_confirmed, feedback_text) VALUES
+(1, 5, TRUE, 'Correctly assigned to NHAI. They responded within 24 hours.'),
+(2, 5, TRUE, 'Signage was restored within 3 days.'),
+(3, 1, FALSE, 'This is a state highway issue, not municipal. Should be PWD.'),
+(5, 1, TRUE, 'Debris was cleared promptly.'),
+(8, 4, TRUE, 'The pothole was filled within the week.'),
+(11, 8, TRUE, 'FHWA team inspected the next day.'),
+(13, 11, TRUE, 'Camden Highways patched the manhole cover.'),
+(14, 14, FALSE, 'This should be KeNHA, not Nairobi County. Mombasa Road is a national highway.');
+
+-- =========================================================================
+-- 21. BACKFILL CONTRACTOR CODES (21 rows, sequential CON-XXXXX)
+-- =========================================================================
+DO $$
+DECLARE
+    c RECORD;
+    seq_num INTEGER := 1;
+BEGIN
+    FOR c IN SELECT id FROM contractors ORDER BY id LOOP
+        UPDATE contractors
+        SET contractor_code = 'CON-' || LPAD(seq_num::TEXT, 5, '0'),
+            performance_index = ROUND((COALESCE(projects_completed, 0)::NUMERIC / GREATEST(COALESCE(projects_completed, 0) + COALESCE(projects_delayed, 0), 1)) * COALESCE(rating, 0) * 20, 2)
+        WHERE id = c.id;
+        seq_num := seq_num + 1;
+    END LOOP;
+END $$;
+
+-- =========================================================================
+-- 22. AUDIT LOG (sample entries for testing)
+-- =========================================================================
+INSERT INTO audit_log (table_name, record_id, action, old_values, new_values, changed_by) VALUES
+('complaints', 1, 'INSERT', NULL, '{"title":"Severe Potholes near Andheri Flyover","category":"pothole","status":"pending"}', 'citizen_app'),
+('complaints', 1, 'UPDATE', '{"status":"pending"}', '{"title":"Severe Potholes near Andheri Flyover","category":"pothole","status":"in_progress"}', 'operator_nhai'),
+('projects', 1, 'INSERT', NULL, '{"title":"WEH Flyover Resurfacing & Structural Grouting","status":"in_progress"}', 'system'),
+('contractors', 10, 'UPDATE', '{"name":"Omega Infrastructure Corp","rating":2.50}', '{"name":"Omega Infrastructure Corp","rating":1.80,"blacklisted":true}', 'auditor'),
+('roads', 1, 'UPDATE', '{"name":"Western Express Highway","status":"fair"}', '{"name":"Western Express Highway","status":"under_construction"}', 'system');
+
+-- =========================================================================
+-- 23. CITIZEN NOTIFICATIONS (sample entries)
+-- =========================================================================
+INSERT INTO citizen_notifications (complaint_id, channel, recipient, event_type, template_used, status) VALUES
+(1, 'sms', '+91-9876543210', 'routed', 'complaint_routed', 'sent'),
+(2, 'sms', '+91-9876543211', 'resolved', 'complaint_resolved', 'sent'),
+(8, 'sms', '+91-9876543215', 'routed', 'complaint_routed', 'sent'),
+(11, 'email', 'citizen@example.com', 'routed', 'complaint_routed', 'sent'),
+(14, 'sms', '+254-20-5552001', 'routed', 'complaint_routed', 'sent');
+
+-- =========================================================================
+-- 24. REGION OVERLAP ROUTES (sample)
+-- =========================================================================
+INSERT INTO region_overlap_routes (complaint_id, primary_region, secondary_region, split_action, resolved) VALUES
+(1, 'IN', 'IN', 'forward', FALSE),
+(11, 'US', 'US', 'forward', FALSE);
+
+-- =========================================================================
+-- 25. APPROVAL TRAIL (sample entries)
+-- =========================================================================
+INSERT INTO approval_trail (entity_type, entity_id, action, requested_by, approved_by, approved_at, status, comments) VALUES
+('variance', 1, 'Budget Revision Approved', 'Project Manager, PWD', 'Chief Engineer, PWD', '2025-10-25T14:30:00Z', 'approved', 'Approved due to utility relocation necessity'),
+('contingency', 1, 'Contingency Release Requested', 'Site Engineer, NHAI', 'Project Director, NHAI', '2025-08-15T10:00:00Z', 'approved', 'Approved for rock excavation'),
+('variance', 3, 'Budget Reallocation', 'Chief Engineer, MCGM', 'Municipal Commissioner', '2025-06-20T16:00:00Z', 'approved', 'Funds reallocated to emergency repairs'),
+('project', 3, 'Project Halted', 'Project Manager, MCGM', 'Chief Engineer, MCGM', '2025-06-10T09:00:00Z', 'approved', 'Contractor blacklisted, project halted pending retender');
+
+-- =========================================================================
+-- 26. ROAD REGION CROSSINGS (sample)
+-- =========================================================================
+INSERT INTO road_region_crossings (road_id, region_code, geom_segment, authority_id) VALUES
+(1, 'IN', ST_GeomFromText('LINESTRING(72.8524 19.1012, 72.8610 19.2300)', 4326), 5),
+(9, 'US', ST_GeomFromText('LINESTRING(-83.1500 42.3500, -82.9400 42.3700)', 4326), 8);
+
+-- =========================================================================
+-- END OF MOCK DATA
+-- =========================================================================

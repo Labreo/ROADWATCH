@@ -76,20 +76,30 @@ const LOCALIZED_QUERIES = {
 };
 
 // Web Speech API interfaces
-const SpeechRecognition = typeof window !== 'undefined' && 
+const SpeechRecognition = typeof window !== 'undefined' &&
   ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition);
 
+// Focusable element selector for focus traps
+const FOCUSABLE_SELECTOR = [
+  'a[href]',
+  'button:not([disabled])',
+  'textarea:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(', ');
+
 // Animated SVG Waveform visualizer
-function WaveformVisualizer({ 
-  isListening, 
-  isSpeaking, 
-  isLoading, 
-  volume 
-}: { 
-  isListening: boolean; 
-  isSpeaking: boolean; 
-  isLoading: boolean; 
-  volume: number; 
+function WaveformVisualizer({
+  isListening,
+  isSpeaking,
+  isLoading,
+  volume
+}: {
+  isListening: boolean;
+  isSpeaking: boolean;
+  isLoading: boolean;
+  volume: number;
 }) {
   const [phase, setPhase] = useState(0);
 
@@ -108,15 +118,15 @@ function WaveformVisualizer({
     const width = 180;
     const height = 60;
     const center = height / 2;
-    
+
     // Wave amplitude based on assistant state
-    let amp = 3; 
+    let amp = 3;
     if (isListening) {
-      amp = 4 + volume * 28; 
+      amp = 4 + volume * 28;
     } else if (isSpeaking) {
-      amp = 14 + Math.sin(phase * 1.5) * 4; 
+      amp = 14 + Math.sin(phase * 1.5) * 4;
     } else if (isLoading) {
-      amp = 6 + Math.cos(phase * 2) * 2.5; 
+      amp = 6 + Math.cos(phase * 2) * 2.5;
     }
 
     for (let i = 0; i <= width; i += 4) {
@@ -138,8 +148,8 @@ function WaveformVisualizer({
   else if (isLoading) waveColor = 'stroke-amber-400';
 
   return (
-    <div className="w-48 h-20 flex items-center justify-center relative">
-      <svg width="100%" height="100%" viewBox="0 0 180 60" className="w-full h-full">
+    <div className="w-48 h-20 flex items-center justify-center relative" aria-hidden="true">
+      <svg width="100%" height="100%" viewBox="0 0 180 60" className="w-full h-full" role="presentation" focusable="false">
         <defs>
           <filter id="wave-glow" x="-20%" y="-20%" width="140%" height="140%">
             <feGaussianBlur stdDeviation="3" result="blur" />
@@ -164,6 +174,12 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
   // Voice Assistant States
   const [isVoiceMode, setIsVoiceMode] = useState(false);
 
+  // Refs for focus management
+  const voiceModeRef = useRef<HTMLDivElement>(null);
+  const voiceModeTriggerRef = useRef<HTMLButtonElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const mobileInputRef = useRef<HTMLInputElement>(null);
+
   useFocusTrap(sheetRef, isOpen && mounted && !isVoiceMode, () => setIsOpen(false));
 
   useEffect(() => {
@@ -174,6 +190,16 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // Prevent background scroll when chat is open on mobile
+  useEffect(() => {
+    if (isOpen && isMobile) {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = '';
+      };
+    }
+  }, [isOpen, isMobile]);
 
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([
@@ -190,7 +216,7 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isBackendOnline, setIsBackendOnline] = useState(false);
   const [expandedEvidenceKey, setExpandedEvidenceKey] = useState<string | null>(null);
-  
+
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [speechLanguage, setSpeechLanguage] = useState('en-IN');
@@ -204,8 +230,9 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
   });
   const [isSpeakingTTS, setIsSpeakingTTS] = useState(false);
 
-  // Screen reader announcement state
+  // Screen reader announcement state — use key-based live region to force re-announcement
   const [announcement, setAnnouncement] = useState('');
+  const [announcementKey, setAnnouncementKey] = useState(0);
 
   // Onboarding tour
   const { showTour, setShowTour, isFirstVisit } = useOnboarding();
@@ -220,16 +247,58 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
         .replace(/`/g, '')
         .replace(/#{1,6}\s/g, '')
         .trim();
-      setAnnouncement(clean);
+      if (clean !== announcement) {
+        setAnnouncement(clean);
+        setAnnouncementKey(prev => prev + 1);
+      }
     }
   }, [messages]);
 
-  // Clear announcement after 5 seconds
+  // Restore focus to voice mode trigger when voice mode closes
   useEffect(() => {
-    if (!announcement) return;
-    const timer = setTimeout(() => setAnnouncement(''), 5000);
-    return () => clearTimeout(timer);
-  }, [announcement]);
+    if (!isVoiceMode && voiceModeTriggerRef.current) {
+      // Small delay to let the DOM settle
+      const timer = setTimeout(() => {
+        voiceModeTriggerRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isVoiceMode]);
+
+  // Voice mode focus trap
+  useEffect(() => {
+    if (!isVoiceMode) return;
+    const container = voiceModeRef.current;
+    if (!container) return;
+
+    const focusables = container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+    if (focusables.length > 0) {
+      focusables[0].focus();
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setIsVoiceMode(false);
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const els = container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+      if (els.length === 0) return;
+      const first = els[0];
+      const last = els[els.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isVoiceMode]);
 
   // References to handle resources
   const isVoiceModeRef = useRef(false);
@@ -416,19 +485,19 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
     if (typeof window === 'undefined') return;
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      
+
       const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
       const audioContext = new AudioCtx();
       const analyser = audioContext.createAnalyser();
       analyser.fftSize = 64;
-      
+
       const source = audioContext.createMediaStreamSource(stream);
       source.connect(analyser);
-      
+
       audioContextRef.current = audioContext;
       analyserRef.current = analyser;
       streamSourceRef.current = source;
-      
+
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
       const update = () => {
         if (analyserRef.current) {
@@ -487,7 +556,7 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
         window.speechSynthesis.cancel();
       }
       setIsSpeaking(false);
-      
+
       try {
         recognitionRef.current.start();
         startAudioAnalyzer();
@@ -503,7 +572,7 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
       if (!isVoiceMode) return;
       const tag = document.activeElement?.tagName.toLowerCase();
       if (tag === 'input' || tag === 'textarea') return;
-      
+
       if (e.code === 'Space') {
         e.preventDefault();
         toggleListening();
@@ -562,7 +631,7 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
   // Simulate streaming response locally when backend is offline or fails
   const simulateStreamingResponse = async (textToSend: string) => {
     const lowerQuery = textToSend.toLowerCase();
-    
+
     let text = "";
     let routingDetails: RoutingDetail | undefined = undefined;
     let citations: Citation[] = [];
@@ -570,7 +639,7 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
     let evidence: { title: string; items: string[] }[] = [];
     let nextSuggestedPrompts: string[] = [];
 
-    // ── Region Detection: explicit switch ──
+    // Region Detection: explicit switch
     const regionSwitch = detectRegionSwitch(textToSend);
     if (regionSwitch && regionSwitch.confidence === 'explicit') {
       setRegionCode(regionSwitch.regionCode);
@@ -581,14 +650,14 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
       return void streamResponse(text, citations, suggestedActions, evidence, nextSuggestedPrompts, routingDetails);
     }
 
-    // ── Auto-detect region from road names / landmarks ──
+    // Auto-detect region from road names / landmarks
     const detectedRegion = detectRegionFromText(textToSend);
     if (detectedRegion.confidence === 'high' && detectedRegion.regionCode !== regionCode) {
       setRegionCode(detectedRegion.regionCode);
       setActiveRegion(detectedRegion.regionCode);
     }
 
-    // ── Cross-Region Comparison ──
+    // Cross-Region Comparison
     if (isComparisonQuery(textToSend)) {
       const comparison = getCrossRegionComparison();
       text = generateComparisonResponse(textToSend, comparison);
@@ -597,7 +666,7 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
       return void streamResponse(text, citations, suggestedActions, evidence, nextSuggestedPrompts, routingDetails);
     }
 
-    // ── B5: Escalation chain query ──
+    // B5: Escalation chain query
     const isEscalationQuery = lowerQuery.includes('what happened') || lowerQuery.includes('escalation') || lowerQuery.includes('complaint status') || lowerQuery.includes('track my') || lowerQuery.includes('where is my complaint') || lowerQuery.includes('my complaint');
     if (isEscalationQuery) {
       // Extract complaint ID if present
@@ -647,7 +716,7 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
       return void streamResponse(text, citations, suggestedActions, evidence, nextSuggestedPrompts, routingDetails, escalationChain);
     }
 
-    // ── Region-specific road query ──
+    // Region-specific road query
     const isM25Query = lowerQuery.includes('m25') || lowerQuery.includes('motorway');
     const isI94Query = lowerQuery.includes('i-94') || lowerQuery.includes('i94') || lowerQuery.includes('interstate');
     const isA104Query = lowerQuery.includes('a104') || lowerQuery.includes('nairobi-nakuru') || lowerQuery.includes('kenya highway');
@@ -891,7 +960,7 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
 
     setInput('');
     setIsLoading(true);
-    
+
     setMessages(prev => [...prev, { role: 'user', content: textToSend }]);
     setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
 
@@ -946,7 +1015,7 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
           if (line.trim()) {
             try {
               const data = JSON.parse(line);
-              
+
               if (data.type === 'content') {
                 fullResponse += data.content;
                 setMessages(prev => {
@@ -1000,7 +1069,7 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
     if (!content) return null;
     return content.split('\n').map((line, idx) => {
       const boldRegex = /\*\*(.*?)\*\*/g;
-      
+
       if (line.trim().startsWith('- ') || line.trim().startsWith('* ')) {
         const rawContent = line.trim().substring(2);
         const parts = [];
@@ -1017,7 +1086,7 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
           listElement = <>{parts}</>;
         }
         return (
-          <li key={idx} className="ml-4 list-disc text-slate-350 pl-1 text-[11px] leading-relaxed my-0.5">
+          <li key={idx} className="ml-4 list-disc text-slate-300 pl-1 text-[11px] leading-relaxed my-0.5">
             {listElement}
           </li>
         );
@@ -1038,7 +1107,7 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
       }
 
       return (
-        <p key={idx} className="text-[11px] leading-relaxed my-1 font-medium text-slate-350">
+        <p key={idx} className="text-[11px] leading-relaxed my-1 font-medium text-slate-300">
           {paragraphElement}
         </p>
       );
@@ -1047,8 +1116,8 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
 
   return (
     <>
-      {/* Screen-reader live region for assistant messages */}
-      <div aria-live="polite" aria-atomic="true" className="sr-only">
+      {/* Screen-reader live region for assistant messages — key forces re-announcement */}
+      <div aria-live="polite" aria-atomic="true" key={announcementKey} className="sr-only">
         {announcement}
       </div>
       {/* Floating Toggle Button */}
@@ -1057,12 +1126,12 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
           onClick={() => setIsOpen(!isOpen)}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="relative group p-4 rounded-full bg-gradient-to-tr from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-slate-950 font-black shadow-lg shadow-cyan-500/20 focus:outline-none flex items-center justify-center cursor-pointer border border-cyan-400/40"
+          className="relative group p-4 rounded-full bg-gradient-to-tr from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-slate-950 font-black shadow-lg shadow-cyan-500/20 focus-visible:outline-2 focus-visible:outline-cyan-400 focus-visible:outline-offset-2 flex items-center justify-center cursor-pointer border border-cyan-400/40"
           aria-label="Toggle AI Chat Assistant"
           aria-expanded={isOpen}
           aria-controls="chat-dialog"
         >
-          <span className="absolute inset-0 rounded-full bg-cyan-400/30 animate-ping opacity-75 scale-105" />
+          <span className="absolute inset-0 rounded-full bg-cyan-400/30 animate-ping opacity-75 scale-105" aria-hidden="true" />
           <AnimatePresence mode="wait">
             {isOpen ? (
               <motion.div
@@ -1072,7 +1141,7 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
                 exit={{ rotate: 90, opacity: 0 }}
                 transition={{ duration: 0.15 }}
               >
-                <X className="w-6 h-6 text-slate-950" />
+                <X className="w-6 h-6 text-slate-950" aria-hidden="true" />
               </motion.div>
             ) : (
               <motion.div
@@ -1083,7 +1152,7 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
                 transition={{ duration: 0.15 }}
                 className="flex items-center gap-1.5"
               >
-                <MessageSquare className="w-5 h-5 text-slate-950" />
+                <MessageSquare className="w-5 h-5 text-slate-950" aria-hidden="true" />
                 <span className="text-[10px] uppercase font-black tracking-widest max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 whitespace-nowrap pr-0 group-hover:pr-1">
                   Ask AI
                 </span>
@@ -1105,7 +1174,7 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
             aria-label="AI Chat Assistant"
             initial={isMobile ? { y: '100%' } : { opacity: 0, scale: 0.85, y: 50, x: 20 }}
             animate={
-              isMobile 
+              isMobile
                 ? { y: typeof window !== 'undefined' ? window.innerHeight - (window.innerHeight * 70) / 100 : 0 }
                 : { opacity: 1, scale: 1, y: 0, x: 0 }
             }
@@ -1121,13 +1190,13 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
               if (typeof window === 'undefined') return;
               const y = info.point.y;
               const height = window.innerHeight;
-              
+
               const snapPoints = [35, 70, 95];
               const currentPositions = snapPoints.map(pct => height - (height * pct) / 100);
-              const closest = currentPositions.reduce((prev, curr) => 
+              const closest = currentPositions.reduce((prev, curr) =>
                 Math.abs(curr - y) < Math.abs(prev - y) ? curr : prev
               );
-              
+
               const lowestPosition = currentPositions[0];
               if (y > lowestPosition + 100 || info.velocity.y > 600) {
                 setIsOpen(false);
@@ -1137,18 +1206,18 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
             } : undefined}
             className={`fixed z-50 bg-slate-950/90 backdrop-blur-xl border border-border/80 border-t-2 border-t-cyan-500/35 shadow-2xl flex flex-col select-none transition-all duration-200
               ${
-                isMobile 
-                  ? 'inset-x-0 top-0 h-screen rounded-t-3xl' 
+                isMobile
+                  ? 'inset-x-0 top-0 h-screen rounded-t-3xl'
                   : `bottom-24 right-6 rounded-2xl overflow-hidden ${
-                      isMaximized 
-                        ? 'w-[500px] h-[700px] max-w-[calc(100vw-32px)] max-h-[calc(100vh-120px)]' 
+                      isMaximized
+                        ? 'w-[500px] h-[700px] max-w-[calc(100vw-32px)] max-h-[calc(100vh-120px)]'
                         : 'w-96 h-[550px] max-w-[calc(100vw-32px)] max-h-[calc(100vh-120px)]'
                     }`
               }`}
           >
             {/* Grab Handle Header (Touch gesture indicator for mobile) */}
             {isMobile && (
-              <div 
+              <div
                 onPointerDown={(e) => dragControls.start(e)}
                 className="w-full h-8 flex items-center justify-center cursor-ns-resize active:scale-95 transition-all touch-none shrink-0 bg-slate-900/40"
               >
@@ -1161,21 +1230,21 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="p-1 rounded-lg bg-cyan-950/60 border border-cyan-800/40 text-cyan-400">
-                    <Sparkles className="w-4 h-4" />
+                    <Sparkles className="w-4 h-4" aria-hidden="true" />
                   </div>
                   <div>
                     <div className="flex items-center gap-1.5">
                       <h3 className="text-xs font-black uppercase text-slate-100 tracking-wider">
                         ROADWATCH AI
                       </h3>
-                      <span className={`w-1.5 h-1.5 rounded-full ${effectiveOnline ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+                      <span className={`w-1.5 h-1.5 rounded-full ${effectiveOnline ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} aria-hidden="true" />
                       {simulateOffline && (
                         <span className="text-[8px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 rounded-full tracking-wider">
                           DEMO MODE
                         </span>
                       )}
                     </div>
-                    <p className="text-[9px] text-muted-foreground font-semibold">
+                    <p className="text-[9px] text-slate-400 font-semibold">
                       {effectiveOnline ? 'Accredited Records Engine' : 'Offline Queue Active — Local Responses'}
                     </p>
                   </div>
@@ -1189,25 +1258,23 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
                   {/* Help / Onboarding Tour trigger */}
                   <button
                     onClick={() => setShowTour(true)}
-                    className="p-1.5 rounded-lg border border-border/60 hover:border-cyan-500/30 hover:bg-cyan-950/20 text-muted-foreground hover:text-cyan-400 transition-all shrink-0 cursor-pointer flex items-center justify-center"
-                    title="Show onboarding tour"
+                    className="p-1.5 rounded-lg border border-border/60 hover:border-cyan-500/30 hover:bg-cyan-950/20 text-slate-400 hover:text-cyan-400 transition-all shrink-0 cursor-pointer flex items-center justify-center focus-visible:outline-2 focus-visible:outline-cyan-400 focus-visible:outline-offset-2"
                     aria-label="Show onboarding tour"
                   >
-                    <HelpCircle className="w-3.5 h-3.5" />
+                    <HelpCircle className="w-3.5 h-3.5" aria-hidden="true" />
                   </button>
 
                   {/* Simulate Offline toggle button (demo) */}
                   <button
                     onClick={() => setSimulateOffline(!simulateOffline)}
-                    className={`p-1.5 rounded-lg border transition-all shrink-0 cursor-pointer flex items-center justify-center ${
+                    className={`p-1.5 rounded-lg border transition-all shrink-0 cursor-pointer flex items-center justify-center focus-visible:outline-2 focus-visible:outline-cyan-400 focus-visible:outline-offset-2 ${
                       simulateOffline
                         ? 'border-amber-500/50 bg-amber-500/10 text-amber-400'
-                        : 'border-border/60 hover:border-amber-500/30 hover:bg-amber-500/5 text-muted-foreground hover:text-amber-400'
+                        : 'border-border/60 hover:border-amber-500/30 hover:bg-amber-500/5 text-slate-400 hover:text-amber-400'
                     }`}
-                    title={simulateOffline ? 'Restore Online Connection' : 'Simulate Offline Mode (Demo)'}
                     aria-label={simulateOffline ? 'Restore online connection' : 'Simulate offline mode'}
                   >
-                    <Wrench className="w-3.5 h-3.5" />
+                    <Wrench className="w-3.5 h-3.5" aria-hidden="true" />
                   </button>
 
                   {/* TTS (Text-to-Speech) toggle */}
@@ -1221,47 +1288,47 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
                         setIsSpeakingTTS(false);
                       }
                     }}
-                    className={`p-1.5 rounded-lg border transition-all shrink-0 cursor-pointer flex items-center justify-center mr-1 ${
+                    className={`p-1.5 rounded-lg border transition-all shrink-0 cursor-pointer flex items-center justify-center mr-1 focus-visible:outline-2 focus-visible:outline-cyan-400 focus-visible:outline-offset-2 ${
                       ttsEnabled
                         ? 'border-cyan-500/50 bg-cyan-950/30 text-cyan-400'
-                        : 'border-border/60 hover:border-cyan-500/30 hover:bg-cyan-950/20 text-muted-foreground hover:text-cyan-400'
+                        : 'border-border/60 hover:border-cyan-500/30 hover:bg-cyan-950/20 text-slate-400 hover:text-cyan-400'
                     }`}
-                    title={ttsEnabled ? 'Disable text-to-speech' : 'Enable text-to-speech'}
                     aria-label={ttsEnabled ? 'Disable text-to-speech' : 'Enable text-to-speech'}
+                    aria-pressed={ttsEnabled}
                   >
                     {isSpeakingTTS ? (
-                      <span className="relative flex h-3.5 w-3.5 items-center justify-center">
+                      <span className="relative flex h-3.5 w-3.5 items-center justify-center" aria-hidden="true">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-60" />
                         <Volume2 className="w-3.5 h-3.5 relative" />
                       </span>
                     ) : (
-                      <Volume2 className={`w-3.5 h-3.5 ${ttsEnabled ? 'text-cyan-400' : ''}`} />
+                      <Volume2 className={`w-3.5 h-3.5 ${ttsEnabled ? 'text-cyan-400' : ''}`} aria-hidden="true" />
                     )}
                   </button>
 
                   {/* Voice mode trigger */}
                   <button
+                    ref={voiceModeTriggerRef}
                     onClick={() => setIsVoiceMode(true)}
-                    className="p-1.5 rounded-lg border border-border/60 hover:border-cyan-500/40 hover:bg-cyan-950/40 text-muted-foreground hover:text-cyan-455 transition-all shrink-0 cursor-pointer flex items-center justify-center mr-1"
-                    title="Launch Voice Mode"
+                    className="p-1.5 rounded-lg border border-border/60 hover:border-cyan-500/40 hover:bg-cyan-950/40 text-slate-400 hover:text-cyan-455 transition-all shrink-0 cursor-pointer flex items-center justify-center mr-1 focus-visible:outline-2 focus-visible:outline-cyan-400 focus-visible:outline-offset-2"
                     aria-label="Launch Voice Mode"
                   >
-                    <Mic className="w-3.5 h-3.5" />
+                    <Mic className="w-3.5 h-3.5" aria-hidden="true" />
                   </button>
 
                   <button
                     onClick={() => setIsMaximized(!isMaximized)}
-                    className="p-1.5 rounded-lg border border-border/60 hover:bg-slate-900 text-muted-foreground hover:text-foreground transition-all shrink-0 cursor-pointer hidden sm:block"
+                    className="p-1.5 rounded-lg border border-border/60 hover:bg-slate-900 text-slate-400 hover:text-foreground transition-all shrink-0 cursor-pointer hidden sm:block focus-visible:outline-2 focus-visible:outline-cyan-400 focus-visible:outline-offset-2"
                     aria-label={isMaximized ? 'Minimize chat' : 'Maximize chat'}
                   >
-                    {isMaximized ? <Minimize2 className="w-3 h-3" /> : <Maximize2 className="w-3 h-3" />}
+                    {isMaximized ? <Minimize2 className="w-3 h-3" aria-hidden="true" /> : <Maximize2 className="w-3 h-3" aria-hidden="true" />}
                   </button>
                   <button
                     onClick={() => setIsOpen(false)}
-                    className="p-1.5 rounded-lg border border-border/60 hover:bg-slate-900 text-muted-foreground hover:text-foreground transition-all shrink-0 cursor-pointer"
+                    className="p-1.5 rounded-lg border border-border/60 hover:bg-slate-900 text-slate-400 hover:text-foreground transition-all shrink-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-cyan-400 focus-visible:outline-offset-2"
                     aria-label="Close chat"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="w-3.5 h-3.5" aria-hidden="true" />
                   </button>
                 </div>
               </div>
@@ -1285,21 +1352,22 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
                     }`}>
                       {!effectiveOnline ? (
                         <>
-                          <WifiOff className="w-3 h-3 shrink-0 text-red-400" />
+                          <WifiOff className="w-3 h-3 shrink-0 text-red-400" aria-hidden="true" />
                           <span className="flex-1">Offline — responses are local. Reports queued.</span>
                         </>
                       ) : isSyncing ? (
                         <>
-                          <RefreshCw className="w-3 h-3 shrink-0 text-cyan-400 animate-spin" />
+                          <RefreshCw className="w-3 h-3 shrink-0 text-cyan-400 animate-spin" aria-hidden="true" />
                           <span className="flex-1">Syncing {syncQueueCount} queued reports...</span>
                         </>
                       ) : (
                         <>
-                          <CloudUpload className="w-3 h-3 shrink-0 text-amber-400" />
+                          <CloudUpload className="w-3 h-3 shrink-0 text-amber-400" aria-hidden="true" />
                           <span className="flex-1">{syncQueueCount} report{syncQueueCount > 1 ? 's' : ''} pending sync</span>
                           <button
                             onClick={processSyncQueue}
-                            className="text-[9px] font-black px-2 py-0.5 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-md transition-all cursor-pointer uppercase tracking-wider shrink-0"
+                            className="text-[9px] font-black px-2 py-0.5 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-md transition-all cursor-pointer uppercase tracking-wider shrink-0 focus-visible:outline-2 focus-visible:outline-amber-300 focus-visible:outline-offset-2"
+                            aria-label="Trigger manual sync of queued reports"
                           >
                             Sync Now
                           </button>
@@ -1336,32 +1404,33 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
               aria-live="polite"
               aria-label="Chat messages"
               aria-relevant="additions"
+              aria-busy={isLoading}
               ref={messagesScrollRef}
               className={`flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin ${isMobile ? 'pb-44' : ''}`}>
               {messages.map((msg, index) => {
                 const isAI = msg.role === 'assistant';
                 return (
-                  <div 
+                  <div
                     key={index}
                     className={`flex items-start gap-2.5 ${isAI ? 'justify-start' : 'justify-end'}`}
                   >
                     {isAI && (
                       <div className="p-1 rounded-lg bg-cyan-950/60 border border-cyan-850 text-cyan-400 shrink-0 mt-0.5">
-                        <Sparkles className="w-3 h-3" />
+                        <Sparkles className="w-3 h-3" aria-hidden="true" />
                       </div>
                     )}
                     <div className={`flex flex-col max-w-[82%] ${isAI ? 'items-start' : 'items-end'}`}>
                       <div className={`p-3 rounded-2xl text-[11px] font-medium leading-relaxed border ${
-                        isAI 
-                          ? 'bg-slate-900/60 border-border/50 text-slate-100 rounded-tl-sm' 
+                        isAI
+                          ? 'bg-slate-900/60 border-border/50 text-slate-100 rounded-tl-sm'
                           : 'bg-gradient-to-tr from-cyan-600/90 to-indigo-600/90 border-cyan-500/20 text-slate-950 font-semibold rounded-tr-sm'
                       }`}>
                         {isAI ? (
                           msg.content === '' ? (
-                            <div className="flex items-center gap-1 py-1.5">
-                              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce delay-75" />
-                              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce delay-150" />
-                              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce delay-225" />
+                            <div className="flex items-center gap-1 py-1.5" role="status" aria-label="Assistant is typing a response">
+                              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce delay-75" aria-hidden="true" />
+                              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce delay-150" aria-hidden="true" />
+                              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce delay-225" aria-hidden="true" />
                             </div>
                           ) : (
                             renderMessageContent(msg.content)
@@ -1373,13 +1442,13 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
 
                       {isAI && msg.evidence && msg.evidence.length > 0 && (
                         <div className="w-full mt-2.5 space-y-1.5">
-                          <span className="text-[9px] text-cyan-500/70 uppercase font-black tracking-widest block pl-1">
+                          <h4 className="text-[9px] text-cyan-500/70 uppercase font-black tracking-widest block pl-1">
                             Verification Evidence Logs
-                          </span>
+                          </h4>
                           {msg.evidence.map((ev, evIdx) => {
                             const isExpanded = expandedEvidenceKey === `${index}-${evIdx}`;
                             return (
-                              <div 
+                              <div
                                 key={evIdx}
                                 className="border border-cyan-500/10 bg-cyan-950/10 rounded-xl overflow-hidden"
                               >
@@ -1388,15 +1457,17 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
                                   onClick={() => setExpandedEvidenceKey(isExpanded ? null : `${index}-${evIdx}`)}
                                   aria-expanded={isExpanded}
                                   aria-controls={`evidence-${index}-${evIdx}`}
-                                  className="w-full px-3 py-2 flex items-center justify-between text-[10px] font-bold text-cyan-400/90 hover:bg-cyan-500/5 transition-all text-left cursor-pointer"
+                                  aria-label={`Toggle evidence section: ${ev.title}`}
+                                  className="w-full px-3 py-2 flex items-center justify-between text-[10px] font-bold text-cyan-400/90 hover:bg-cyan-500/5 transition-all text-left cursor-pointer focus-visible:outline-2 focus-visible:outline-cyan-400 focus-visible:outline-offset-2"
                                 >
                                   <div className="flex items-center gap-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" aria-hidden="true" />
                                     <span>{ev.title}</span>
                                   </div>
                                   <motion.span
                                     animate={{ rotate: isExpanded ? 180 : 0 }}
                                     transition={{ duration: 0.2 }}
+                                    aria-hidden="true"
                                   >
                                     <ChevronDown className="w-3.5 h-3.5 text-cyan-500/80" />
                                   </motion.span>
@@ -1415,11 +1486,11 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
                                     >
                                       <ul className="px-3 pb-2 pt-0.5 space-y-1 border-t border-cyan-500/5">
                                         {ev.items.map((item, itemIdx) => (
-                                          <li 
-                                            key={itemIdx} 
-                                            className="text-[9px] text-slate-350 font-mono leading-relaxed flex items-start gap-1.5"
+                                          <li
+                                            key={itemIdx}
+                                            className="text-[9px] text-slate-300 font-mono leading-relaxed flex items-start gap-1.5"
                                           >
-                                            <span className="text-cyan-600 select-none mt-0.5">❯</span>
+                                            <span className="text-cyan-600 select-none mt-0.5" aria-hidden="true">›</span>
                                             <span>{item}</span>
                                           </li>
                                         ))}
@@ -1466,13 +1537,14 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
                             <button
                               key={actIdx}
                               onClick={() => handleActionClick(act)}
-                              className="text-[9px] font-bold px-2.5 py-1.5 bg-cyan-950/50 border border-cyan-850 hover:border-cyan-500 text-cyan-400 rounded-xl transition-all cursor-pointer flex items-center gap-1 active:scale-95 shadow-sm"
+                              className="text-[9px] font-bold px-2.5 py-1.5 bg-cyan-950/50 border border-cyan-850 hover:border-cyan-500 text-cyan-400 rounded-xl transition-all cursor-pointer flex items-center gap-1 active:scale-95 shadow-sm focus-visible:outline-2 focus-visible:outline-cyan-400 focus-visible:outline-offset-2"
+                              aria-label={act.label}
                             >
-                              {act.type === 'report_complaint_on_road' && <Plus className="w-3 h-3" />}
-                              {act.type === 'navigate_to_road' && <Navigation className="w-3 h-3" />}
-                              {act.type === 'navigate_to_contractor' && <FileSpreadsheet className="w-3 h-3" />}
+                              {act.type === 'report_complaint_on_road' && <Plus className="w-3 h-3" aria-hidden="true" />}
+                              {act.type === 'navigate_to_road' && <Navigation className="w-3 h-3" aria-hidden="true" />}
+                              {act.type === 'navigate_to_contractor' && <FileSpreadsheet className="w-3 h-3" aria-hidden="true" />}
                               {act.label}
-                              <ArrowRight className="w-2.5 h-2.5" />
+                              <ArrowRight className="w-2.5 h-2.5" aria-hidden="true" />
                             </button>
                           ))}
                         </div>
@@ -1493,7 +1565,7 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
                     <button
                       key={idx}
                       onClick={() => handleSubmit(prompt)}
-                      className="shrink-0 text-[9.5px] font-black px-3 py-2 bg-slate-900/80 border border-border/80 hover:border-cyan-500/50 hover:bg-cyan-950/30 text-slate-350 hover:text-cyan-400 rounded-xl transition-all cursor-pointer whitespace-nowrap active:scale-95 shadow-sm"
+                      className="shrink-0 text-[9.5px] font-black px-3 py-2 bg-slate-900/80 border border-border/80 hover:border-cyan-500/50 hover:bg-cyan-950/30 text-slate-300 hover:text-cyan-400 rounded-xl transition-all cursor-pointer whitespace-nowrap active:scale-95 shadow-sm focus-visible:outline-2 focus-visible:outline-cyan-400 focus-visible:outline-offset-2"
                     >
                       {prompt}
                     </button>
@@ -1502,7 +1574,7 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
               )}
 
               <div className="px-4">
-                <form 
+                <form
                   onSubmit={(e) => {
                     e.preventDefault();
                     handleSubmit(input);
@@ -1510,44 +1582,44 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
                   className="flex gap-2 relative bg-slate-900 border border-border/80 focus-within:border-cyan-500 rounded-xl px-2 py-1.5 transition-all items-center"
                 >
                   <input
+                    ref={inputRef}
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Ask about repairs, budgets, audits..."
                     aria-label="Type your message"
-                    className="flex-1 bg-transparent border-0 focus:outline-none text-[11px] text-slate-200 placeholder-muted-foreground pl-1.5"
+                    className="flex-1 bg-transparent border-0 focus-visible:outline-none text-[11px] text-slate-200 placeholder-slate-500 pl-1.5"
                     disabled={isLoading}
                   />
                   <button
                     type="submit"
                     disabled={!input.trim() || isLoading}
                     aria-label="Send message"
-                    className={`p-1.5 rounded-lg bg-gradient-to-tr from-cyan-600 to-indigo-600 text-slate-950 font-bold hover:opacity-90 active:scale-95 transition-all shrink-0 cursor-pointer ${
-                      (!input.trim() || isLoading) ? 'opacity-40 cursor-not-allowed' : ''
+                    className={`p-1.5 rounded-lg bg-gradient-to-tr from-cyan-600 to-indigo-600 text-slate-950 font-bold hover:opacity-90 active:scale-95 transition-all shrink-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-cyan-400 focus-visible:outline-offset-2 ${
+                      (!input.trim() || isLoading) ? 'opacity-60 cursor-not-allowed' : ''
                     }`}
                   >
-                    <Send className="w-3.5 h-3.5 text-slate-950" />
+                    <Send className="w-3.5 h-3.5 text-slate-950" aria-hidden="true" />
                   </button>
                 </form>
               </div>
             </div>
             )}
 
-            {/* ══════════════════════════════════════════════════════════
-               CHATGPT VOICE ASSISTANT OVERLAY
-               ══════════════════════════════════════════════════════════ */}
+            {/* Voice Assistant Overlay */}
             {isVoiceMode && (
               <div
+                ref={voiceModeRef}
                 role="dialog"
                 aria-modal="true"
                 aria-label="Voice mode"
                 className="absolute inset-0 bg-[#050507]/98 backdrop-blur-2xl flex flex-col z-50 animate-in fade-in zoom-in-95 duration-200 justify-between p-6"
               >
-                
+
                 {/* Voice Header */}
                 <div className="flex items-center justify-between w-full border-b border-white/[0.04] pb-4">
                   {/* Language selection */}
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5" role="radiogroup" aria-label="Select speech recognition language">
                     {[
                       { code: 'en-IN', label: 'EN' },
                       { code: 'hi-IN', label: 'HI' },
@@ -1556,31 +1628,33 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
                       <button
                         key={lang.code}
                         onClick={() => setSpeechLanguage(lang.code)}
-                        className={`text-[8.5px] font-black px-2.5 py-1 rounded border transition-all ${
+                        className={`text-[8.5px] font-black px-2.5 py-1 rounded border transition-all focus-visible:outline-2 focus-visible:outline-cyan-400 focus-visible:outline-offset-2 ${
                           speechLanguage === lang.code
                             ? 'bg-cyan-500/10 border-cyan-500/50 text-cyan-400'
-                            : 'border-white/[0.06] text-[#55555f] hover:border-white/[0.12] hover:text-slate-400'
+                            : 'border-white/[0.06] text-slate-400 hover:border-white/[0.12] hover:text-slate-400'
                         }`}
+                        aria-label={`Switch to ${lang.label === 'EN' ? 'English' : lang.label === 'HI' ? 'Hindi' : 'Marathi'}`}
+                        aria-pressed={speechLanguage === lang.code}
                       >
                         {lang.label}
                       </button>
                     ))}
                   </div>
-                  
+
                   <button
                     onClick={() => setIsVoiceMode(false)}
-                    className="p-1.5 rounded-lg border border-white/[0.06] hover:bg-white/[0.02] text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-lg border border-white/[0.06] hover:bg-white/[0.02] text-slate-400 hover:text-slate-200 transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-cyan-400 focus-visible:outline-offset-2"
                     aria-label="Close voice mode"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="w-3.5 h-3.5" aria-hidden="true" />
                   </button>
                 </div>
 
                 {/* Pulse presence orb & Waveform visualizer */}
                 <div className="flex-1 flex flex-col items-center justify-center space-y-6 py-6">
-                  <button 
+                  <button
                     onClick={toggleListening}
-                    className={`w-32 h-32 rounded-full border flex flex-col items-center justify-center cursor-pointer transition-all duration-300 relative focus:outline-none ${
+                    className={`w-32 h-32 rounded-full border flex flex-col items-center justify-center cursor-pointer transition-all duration-300 relative focus-visible:outline-2 focus-visible:outline-cyan-400 focus-visible:outline-offset-4 ${
                       isListening
                         ? 'border-cyan-400/40 bg-cyan-400/[0.02] shadow-[0_0_40px_rgba(34,211,238,0.12)]'
                         : isSpeaking
@@ -1592,39 +1666,39 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
                     aria-label={isListening ? 'Stop listening' : 'Start listening'}
                   >
                     {(isListening || isSpeaking || isLoading) && (
-                      <div className="absolute inset-[-8px] rounded-full border border-current opacity-10 animate-ping pointer-events-none" />
+                      <div className="absolute inset-[-8px] rounded-full border border-current opacity-10 animate-ping pointer-events-none" aria-hidden="true" />
                     )}
 
-                    <WaveformVisualizer 
-                      isListening={isListening} 
-                      isSpeaking={isSpeaking} 
-                      isLoading={isLoading} 
-                      volume={audioVolume} 
+                    <WaveformVisualizer
+                      isListening={isListening}
+                      isSpeaking={isSpeaking}
+                      isLoading={isLoading}
+                      volume={audioVolume}
                     />
-                    
+
                     <div className="absolute bottom-3 text-center">
                       {isListening ? (
-                        <Mic className="w-4 h-4 text-cyan-400 mx-auto animate-pulse" />
+                        <Mic className="w-4 h-4 text-cyan-400 mx-auto animate-pulse" aria-hidden="true" />
                       ) : isSpeaking ? (
-                        <Volume2 className="w-4 h-4 text-indigo-400 mx-auto" />
+                        <Volume2 className="w-4 h-4 text-indigo-400 mx-auto" aria-hidden="true" />
                       ) : (
-                        <MicOff className="w-4 h-4 text-[#55555f] mx-auto" />
+                        <MicOff className="w-4 h-4 text-slate-500 mx-auto" aria-hidden="true" />
                       )}
                     </div>
                   </button>
 
                   {/* Telemetry translation subtitles */}
-                  <div className="text-center space-y-1.5 max-w-[260px] min-h-[44px]">
+                  <div className="text-center space-y-1.5 max-w-[260px] min-h-[44px]" aria-live="polite" aria-atomic="true">
                     <div className="mono-label text-[8px] tracking-[0.16em] text-cyan-500/60 uppercase">
-                      {isListening 
-                        ? 'Listening...' 
-                        : isSpeaking 
-                        ? 'Voice Playback active' 
-                        : isLoading 
-                        ? 'AI is compiling reply...' 
+                      {isListening
+                        ? 'Listening...'
+                        : isSpeaking
+                        ? 'Voice Playback active'
+                        : isLoading
+                        ? 'AI is compiling reply...'
                         : 'Scanner Standby'}
                     </div>
-                    <p className="text-[10px] font-mono text-slate-350 leading-relaxed line-clamp-2">
+                    <p className="text-[10px] font-mono text-slate-300 leading-relaxed line-clamp-2">
                       {currentTranscription}
                     </p>
                   </div>
@@ -1632,7 +1706,7 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
 
                 {/* Localized suggestions triggers */}
                 <div className="space-y-2 shrink-0">
-                  <div className="mono-label text-[7px] text-[#55555f] tracking-wider text-center select-none">
+                  <div className="mono-label text-[7px] text-slate-500 tracking-wider text-center select-none">
                     CLICK SUGGESTION // OR PRESS SPACEBAR TO SPEAK
                   </div>
                   <div className="grid grid-cols-2 gap-2 max-w-sm mx-auto">
@@ -1643,7 +1717,8 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
                           setCurrentTranscription(query);
                           handleSubmit(query);
                         }}
-                        className="p-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-cyan-950/20 hover:border-cyan-500/30 text-left text-[9.5px] font-semibold text-slate-350 hover:text-cyan-400 transition-all cursor-pointer leading-snug active:scale-95"
+                        className="p-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-cyan-950/20 hover:border-cyan-500/30 text-left text-[9.5px] font-semibold text-slate-300 hover:text-cyan-400 transition-all cursor-pointer leading-snug active:scale-95 focus-visible:outline-2 focus-visible:outline-cyan-400 focus-visible:outline-offset-2"
+                        aria-label={`Ask: ${query}`}
                       >
                         {query}
                       </button>
@@ -1674,7 +1749,7 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
                       if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(10);
                       handleSubmit(prompt);
                     }}
-                    className="shrink-0 text-[9.5px] font-black px-3 py-2 bg-slate-900/80 border border-border/80 hover:border-cyan-500/50 hover:bg-cyan-950/30 text-slate-350 hover:text-cyan-400 rounded-xl transition-all cursor-pointer whitespace-nowrap active:scale-95 shadow-sm"
+                    className="shrink-0 text-[9.5px] font-black px-3 py-2 bg-slate-900/80 border border-border/80 hover:border-cyan-500/50 hover:bg-cyan-950/30 text-slate-300 hover:text-cyan-400 rounded-xl transition-all cursor-pointer whitespace-nowrap active:scale-95 shadow-sm focus-visible:outline-2 focus-visible:outline-cyan-400 focus-visible:outline-offset-2"
                   >
                     {prompt}
                   </button>
@@ -1692,21 +1767,23 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
                 className="flex gap-2 relative bg-slate-900 border border-border/80 focus-within:border-cyan-500 rounded-xl px-2 py-1.5 transition-all items-center"
               >
                 <input
+                  ref={mobileInputRef}
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Ask about repairs, budgets, audits..."
-                  className="flex-1 bg-transparent border-0 focus:outline-none text-[11px] text-slate-200 placeholder-muted-foreground pl-1.5"
+                  className="flex-1 bg-transparent border-0 focus-visible:outline-none text-[11px] text-slate-200 placeholder-slate-500 pl-1.5"
                   disabled={isLoading}
                 />
                 <button
                   type="submit"
                   disabled={!input.trim() || isLoading}
-                  className={`p-1.5 rounded-lg bg-gradient-to-tr from-cyan-600 to-indigo-600 text-slate-950 font-bold hover:opacity-90 active:scale-95 transition-all shrink-0 cursor-pointer ${
-                    (!input.trim() || isLoading) ? 'opacity-40 cursor-not-allowed' : ''
+                  aria-label="Send message"
+                  className={`p-1.5 rounded-lg bg-gradient-to-tr from-cyan-600 to-indigo-600 text-slate-950 font-bold hover:opacity-90 active:scale-95 transition-all shrink-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-cyan-400 focus-visible:outline-offset-2 ${
+                    (!input.trim() || isLoading) ? 'opacity-60 cursor-not-allowed' : ''
                   }`}
                 >
-                  <Send className="w-3.5 h-3.5 text-slate-950" />
+                  <Send className="w-3.5 h-3.5 text-slate-950" aria-hidden="true" />
                 </button>
               </form>
             </div>
