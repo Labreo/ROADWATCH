@@ -56,6 +56,7 @@ import ChatOrchestrator from '@/components/chat/ChatOrchestrator';
 import OperationsDashboard from '@/components/operations/OperationsDashboard';
 import LandingHero from '@/components/demo/LandingHero';
 import DemoTourGuide from '@/components/demo/DemoTourGuide';
+import OnboardingTour from '@/components/demo/OnboardingTour';
 import DemoChatMode from '@/components/demo/DemoChatMode';
 import PlaybackDashboard from '@/components/playback/PlaybackDashboard';
 import SensorDashboard from '@/components/sensors/SensorDashboard';
