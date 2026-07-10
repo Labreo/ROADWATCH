@@ -5,6 +5,7 @@ frontend/out/
 frontend/build/
 frontend/*.tsbuildinfo
 frontend/next-env.d.ts
+.claude
 
 # Python & Backend dependencies
 backend/__pycache__/
