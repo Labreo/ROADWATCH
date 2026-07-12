@@ -112,7 +112,7 @@ export default function ChatOrchestrator() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: "Welcome to **ROADWATCH Conversational Shell**. I am your municipal auditor assistant. Ask questions to query budget compliance, inspect contractor rating scores, launch telemetry simulations, or view defect timelines.\n\n*Try tapping a query below, like: 'Why is S.V. Road damaged again?'*"
+      content: "Welcome to **ROADWATCH Conversational Shell**, integrated with the **IIT Madras CoERS 5E Framework (Engineering, Enforcement, Education, Emergency, Empathy)** and the **Sanjaya-RATH Safety Governance Core**. I can assist you with budget compliance audits, contractor scorecards, or launching 3D spatial simulations to support Data-Driven Hyperlocal Interventions (DDHI).\n\n*Try tapping a query below, like: 'Why is S.V. Road damaged again?'*"
     }
   ]);
   const [suggestedPrompts, setSuggestedPrompts] = useState<string[]>([
@@ -553,12 +553,12 @@ export default function ChatOrchestrator() {
               </div>
               <div>
                 <h2 className="text-[12px] font-black uppercase text-slate-100 tracking-wider">
-                  ROADWATCH AUDITOR AI
+                  ROADWATCH (CoERS Sanjaya-RATH Core)
                 </h2>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span className={`w-1.5 h-1.5 rounded-full ${isBackendOnline ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
                   <span className="text-[8.5px] text-muted-foreground font-bold tracking-wide uppercase">
-                    {isBackendOnline ? 'Accredited Records Engine' : 'Offline Mode (Local Fallback)'}
+                    {isBackendOnline ? 'IITM CoERS 5E Framework' : 'Offline Mode (CoERS Empathy Fallback)'}
                   </span>
                 </div>
               </div>

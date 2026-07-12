@@ -733,14 +733,24 @@ class RetrievalEngine:
         context_str = "\n".join(context_facts)
         
         system_prompt = (
-            "You are ROADWATCH AI, a civic accountability chatbot for public road infrastructure.\n"
-            "Your objective is to answer citizen questions about roads, budgets, contractors, and authorities.\n\n"
+            "You are ROADWATCH AI, a civic safety and road accountability engine designed in strict alignment with the Center of Excellence in Road Safety (CoERS) at IIT Madras, employing their multidisciplinary '5E' Framework (Engineering, Enforcement, Education, Emergency Care, Empathy) and executing Data-Driven Hyperlocal Interventions (DDHI) with our Sanjaya-RATH Safety Governance Core.\n"
+            "Your objective is to answer citizen questions about roads, budgets, contractors, and safety-routing authorities.\n\n"
             "CRITICAL RULES:\n"
             "1. You must NEVER hallucinate or assume facts. Every figure, contractor, road status, and date must match the provided structured records exactly.\n"
             "2. If the provided facts do not contain the answer, say 'I do not have that specific record in my database.'\n"
             "3. Maintain a professional, objective, civic transparency-oriented tone.\n"
             "4. Format currency in Indian Rupees (e.g. ₹1,25,00,000).\n"
             "5. Use markdown for tables or lists to make metrics easily readable.\n\n"
+            "VIEW SWITCHING & TELEMETRY NAVIGATION:\n"
+            "When the user requests to see a specific layout, map, or 3D digital twin, you MUST append a raw JSON view command at the absolute end of your response text (outside any markdown formatting). Use these exact schemas:\n"
+            "- To trigger the 3D Digital Twin view: include '{\"view\": \"twin\", \"roadId\": <id>}'\n"
+            "- To trigger the 3D Digital Twin focusing on an anomaly: include '{\"view\": \"twin\", \"roadId\": <id>, \"canvasAction\": {\"type\": \"FOCUS_ANOMALY\", \"coordinates\": [<x>, <y>, <z>]}}'. Available anomalies for SV Road (roadId 3) are: Node A-01: [-1.1, 0.25, 0.6], Node B-04: [0.1, 0.35, -0.8], Node C-02: [1.2, 0.15, 0.3], Pothole Wave Alpha: [0.3, 0.0, 0.5], Stress Zone Beta: [-0.5, 0.02, 0.1].\n"
+            "- To trigger a What-If Stress Simulation (deforming the road in 3D using vertex shaders): include '{\"view\": \"twin\", \"roadId\": <id>, \"uStructuralStressIntensity\": <float 0.0 to 1.5>}'. E.g. '{\"view\": \"twin\", \"roadId\": 3, \"uStructuralStressIntensity\": 1.2}'\n"
+            "- To show a road on the map: include '{\"view\": \"map\", \"roadId\": <id>}'\n"
+            "- To view transparency details / budgets: include '{\"view\": \"budgets\", \"roadId\": <id>}'\n"
+            "- To view contractor profile: include '{\"view\": \"contractors\", \"contractorId\": <id>}'\n"
+            "- To view complaints list: include '{\"view\": \"complaints\"}'\n"
+            "Do not put this JSON in code blocks. Append it as a single line at the very end of your response.\n\n"
             "BUDGET QUERY RESPONSE FORMAT (when the user asks about spending/funding/budget):\n"
             "- Always state: total sanctioned amount vs total actual spent, and the spend percentage.\n"
             "- When funding source data is available, include a bullet-point breakdown of sources (e.g. 'Central Road Fund: ₹30 Cr (25%)').\n"
@@ -818,6 +828,39 @@ class RetrievalEngine:
     def generate_deterministic_fallback(cls, system_prompt: str, user_message: str) -> str:
         road_id, contractor_id, authority_id, tender_id = cls.extract_entities(user_message)
         msg_lower = user_message.lower()
+
+        # Check for explicit view triggers first
+        if "digital twin" in msg_lower or "twin view" in msg_lower or "3d view" in msg_lower or "telemetry simulation" in msg_lower or "3d simulation" in msg_lower or "twin" in msg_lower:
+            r_id = road_id or 3 # default to SV Road (3)
+            # check for what-if simulation trigger
+            if "what if" in msg_lower or "stress" in msg_lower or "load" in msg_lower or "simulate" in msg_lower:
+                intensity = 1.25 if "high" in msg_lower or "heavy" in msg_lower or "extreme" in msg_lower else 0.85
+                return f"Simulating What-If vehicle load stress ({intensity}x normal load) on the 3D digital twin model. Note the mesh deformation and red stress pulses. {{\"view\": \"twin\", \"roadId\": {r_id}, \"uStructuralStressIntensity\": {intensity}}}"
+            
+            # check for specific anomaly focus
+            if "pothole" in msg_lower or "defect" in msg_lower:
+                return f"Launching 3D Digital Twin for SV Road and focusing WebGL camera coordinates on the pothole anomaly. {{\"view\": \"twin\", \"roadId\": 3, \"canvasAction\": {{\"type\": \"FOCUS_ANOMALY\", \"coordinates\": [0.3, 0.0, 0.5]}}}}"
+            if "stress zone" in msg_lower or "shear crack" in msg_lower:
+                return f"Launching 3D Digital Twin for SV Road and focusing WebGL camera coordinates on the structural stress zone. {{\"view\": \"twin\", \"roadId\": 3, \"canvasAction\": {{\"type\": \"FOCUS_ANOMALY\", \"coordinates\": [-0.5, 0.02, 0.1]}}}}"
+            if "node a" in msg_lower:
+                return f"Launching 3D Digital Twin for SV Road and focusing WebGL camera coordinates on Telemetry Node A-01. {{\"view\": \"twin\", \"roadId\": 3, \"canvasAction\": {{\"type\": \"FOCUS_ANOMALY\", \"coordinates\": [-1.1, 0.25, 0.6]}}}}"
+            
+            return f"Launching the interactive WebGL 3D Digital Twin. You can rotate and zoom to inspect subsurface utility layouts, sensor nodes, and surface potholes. {{\"view\": \"twin\", \"roadId\": {r_id}}}"
+
+        if "map" in msg_lower or "geospatial" in msg_lower:
+            r_id = road_id or 3
+            return f"Opening geospatial map interface. The Leaflet viewport has centered on the road corridor. {{\"view\": \"map\", \"roadId\": {r_id}}}"
+            
+        if "budget" in msg_lower or "spending" in msg_lower or "transparency" in msg_lower:
+            r_id = road_id or 3
+            return f"Displaying budget transparency dashboards. Sanitizing sanctioned allocations against actual spent outflows. {{\"view\": \"budgets\", \"roadId\": {r_id}}}"
+
+        if "contractor" in msg_lower or "blacklisted" in msg_lower or "builder" in msg_lower:
+            c_id = contractor_id or 10 # default to Omega Infrastructure
+            return f"Opening contractor registry profile and tender audit history. {{\"view\": \"contractors\", \"contractorId\": {c_id}}}"
+
+        if "complaint" in msg_lower or "report" in msg_lower or "grievance" in msg_lower:
+            return f"Opening citizen complaints dashboard. Listing active road defects and routing schedules. {{\"view\": \"complaints\"}}"
 
         if road_id:
             road = StructuredRoadRetriever.get_road_by_id(road_id)

@@ -225,7 +225,9 @@ export const useStore = create<AppState>((set, get) => {
           const roadIdVal = payload.roadId !== undefined ? payload.roadId : payload.selectedRoadId;
           if (roadIdVal !== undefined) {
             updates.selectedRoadId = roadIdVal;
-            if (roadIdVal !== null) {
+            if (payload.uStructuralStressIntensity !== undefined) {
+              updates.uStructuralStressIntensity = payload.uStructuralStressIntensity;
+            } else if (roadIdVal !== null) {
               const zones = generateStressZones(mockRoads as any);
               const zone = zones.find(z => z.roadId === roadIdVal);
               updates.uStructuralStressIntensity = zone ? zone.stressIndex / 100 : 0.0;
