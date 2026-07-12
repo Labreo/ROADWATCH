@@ -1,0 +1,14 @@
+[
+  {
+    "image_url": "/uploads/upload-1779537028538-fjpcg0eos.jpeg",
+    "location": "GPS Reported Area",
+    "lat": 26.165259,
+    "lng": 85.890975,
+    "type": "pothole",
+    "impact_level": 2,
+    "governing_body": "Municipal",
+    "id": "f7dcfb5c-0b27-470f-a85f-545addb1d45b",
+    "status": "pending",
+    "created_at": "2026-05-23T11:50:28.555Z"
+  }
+]

@@ -281,16 +281,18 @@ To ensure durability in environments with weak reception:
 * **GPS Accuracy**: It is assumed that the client device has a GPS module with accuracy within 10 meters. If GPS is unavailable, the user can place a pin manually on the interactive map.
 * **PostGIS Projections**: All geometry coordinates are stored in the WGS 84 (`SRID 4326`) coordinate reference system.
 
-### 10.2. Future Scope
-* **Predictive Infrastructure Analytics**: Utilizing historical defect clusters and contractor budget data to predict which road segments are most likely to fail during heavy rainfall.
-* **Real IoT Sensor Integration**: Replacing simulated telemetry with real physical stress sensors embedded in concrete pavements.
-* **Multilingual Voice Assistant**: Extending the voice assistant module to support voice-to-text inputs and audio playback in additional regional languages.
+### 10.2. CPPP Procurement Ledger Integration
+* **Real-world Tender Audits**: Integration of over 3.5MB of actual Central Public Procurement Portal (CPPP) data containing thousands of national highway and state highway contracts across all 28 Indian States.
+* **Award of Contract (AOC) Inspection**: Citizens can drill down into the exact administrative parameters (Tender Reference, Organization Name, Selected Bidder, bids received, contract date, and completion period).
+
+### 10.3. Smart Geospatial Routing via Overpass API
+* **Dynamic Jurisdiction Auditing**: Uses OpenStreetMap Overpass queries to map coordinates to road classifications (NHAI, State Highway, Municipal, PWD) and dynamically retrieve relevant Executive Engineer contacts.
 
 ---
 
 ## 11. Conclusion
 
-ROADWATCH elevates civic-tech from simple form reporting to an interactive platform for public accountability. By connecting financial budgets directly to physical road segments, blacklisted contractor scorecards, and spatial PostGIS routing, the platform provides a complete system of municipal oversight.
+ROADWATCH elevates civic-tech from simple form reporting to an interactive platform for public accountability. By connecting financial budgets directly to physical road segments, blacklisted contractor scorecards, and spatial PostGIS/Overpass routing, the platform provides a complete system of municipal oversight.
 
 Its mobile-first, offline-resilient architecture ensures that the system is accessible to field inspectors and citizens alike, regardless of network conditions. ROADWATCH is ready to be deployed as a scalable, transparent civic infrastructure platform.
 
@@ -301,6 +303,7 @@ Its mobile-first, offline-resilient architecture ensures that the system is acce
 To assist the design and production team in preparing slides or proposal materials, the following key interfaces should be included:
 
 * **Slide 1: Landing Page & Dashboard**: Showcases the 4 KPI summary cards (Road Registry, Sanctioned Spend, Pending Defects, and Resolution Rate) with compact currency format styling (`₹1.12 Cr`).
-* **Slide 2: Interactive GIS Map & Snappable Drawer**: Highlights the interactive map view on a mobile viewport with the `Road Registry Explorer` drawer snapped to its 25% peek height, revealing color-coded road segments.
+* **Slide 2: Public Spend Ledger**: Dedicated data grid featuring paginated, searchable CPPP contracts, complete with the CPPP-themed Award of Contract details modal.
 * **Slide 3: WebGL 3D Segment digital Twin**: Displays the rotating 3D road model with active sensor hotspots and underground utility pipelines.
-* **Slide 4: AI Chatbot Overlay**: Shows the snappable chatbot panel with structured verification citations pointing back to contractor profiles and historical project timelines.
+* **Slide 4: Floating Persistent Chatbot**: Shows the chatbot widget with its quick Highway Explorer dropdown, matching keywords to the local CPPP dataset and FAQ knowledge base.
+

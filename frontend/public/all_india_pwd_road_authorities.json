@@ -1,0 +1,258 @@
+[
+    {
+        "state_ut": "Andhra Pradesh",
+        "authority_type": "State Government",
+        "department_name": "Roads & Buildings Department",
+        "office_email": "eincrbap@gmail.com",
+        "administrative_head_email": "prlsecy-trb@ap.gov.in",
+        "official_website": "https://aprdc.ap.gov.in"   
+    },
+    {
+        "state_ut": "Arunachal Pradesh",
+        "authority_type": "State Government",
+        "department_name": "Public Works Department",
+        "office_email": "cehq-pwd-arn@nic.in",
+        "administrative_head_email": "cehq-pwd-arn@nic.in",
+        "official_website": "https://arunachalpwd.org"
+    },
+    {
+        "state_ut": "Assam",
+        "authority_type": "State Government",
+        "department_name": "Public Works Roads Department",
+        "office_email": "as-cepwd.roads@assam.gov.in",
+        "administrative_head_email": "as-guw1@nic.in",
+        "official_website": "https://pwdroads.assam.gov.in"
+    },
+    {
+        "state_ut": "Bihar",
+        "authority_type": "State Government",
+        "department_name": "Road Construction Department (RCD)",
+        "office_email": "rcdbihar@nic.in",
+        "administrative_head_email": "secy-rcd-bih@nic.in",
+        "official_website": "https://bsrdcl.bihar.gov.in/"   
+    },
+    {
+        "state_ut": "Chhattisgarh",
+        "authority_type": "State Government",
+        "department_name": "Public Works Department",
+        "office_email": "pwd.cg@nic.in",
+        "administrative_head_email": "secy-pwd.cg@nic.in",
+        "official_website": "https://pwd.cg.nic.in"
+    },
+    {
+        "state_ut": "Goa",
+        "authority_type": "State Government",
+        "department_name": "Public Works Department",
+        "office_email": "pce-pwd.goa@nic.in",
+        "administrative_head_email": "cencpwd.goa@nic.in",
+        "official_website": "https://pwd.goa.gov.in"
+    },
+    {
+        "state_ut": "Gujarat",
+        "authority_type": "State Government",
+        "department_name": "Roads & Buildings Department",
+        "office_email": "secrb@gujarat.gov.in",
+        "administrative_head_email": "min-rab@gujarat.gov.in",
+        "official_website": "https://rnb.gujarat.gov.in"
+    },
+    {
+        "state_ut": "Haryana",
+        "authority_type": "State Government",
+        "department_name": "Public Works (B&R) Department",
+        "office_email": "pwd-eic@hry.nic.in",
+        "administrative_head_email": "pwd-bandr@hry.nic.in",
+        "official_website": "https://haryanapwd.gov.in"
+    },
+    {
+        "state_ut": "Himachal Pradesh",
+        "authority_type": "State Government",
+        "department_name": "Public Works Department",
+        "office_email": "pwd-hp@nic.in",
+        "administrative_head_email": "pwd-hp@nic.in",
+        "official_website": "https://hppwd.hp.gov.in"
+    },
+    {
+        "state_ut": "Jharkhand",
+        "authority_type": "State Government",
+        "department_name": "Road Construction Department",
+        "office_email": "secyrcd-jhr@nic.in",
+        "administrative_head_email": "hqmoncell@rediffmail.com",
+        "official_website": "https://jharkhand.gov.in/rcd"
+    },
+    {
+        "state_ut": "Karnataka",
+        "authority_type": "State Government",
+        "department_name": "Public Works Department",
+        "office_email": "prs.pwd@karnataka.gov.in",
+        "administrative_head_email": "secytech-pwd@karnataka.gov.in",
+        "official_website": "https://kpwd.karnataka.gov.in"
+    },
+    {
+        "state_ut": "Kerala",
+        "authority_type": "State Government",
+        "department_name": "Public Works Department",
+        "office_email": "min.pwd@kerala.gov.in",
+        "administrative_head_email": "ceroads.pwd@kerala.gov.in",
+        "official_website": "https://www.pwd.kerala.gov.in"
+    },
+    {
+        "state_ut": "Madhya Pradesh",
+        "authority_type": "State Government",
+        "department_name": "Public Works Department",
+        "office_email": "eincpwd@mp.nic.in",
+        "administrative_head_email": "einc.registpwd@mp.gov.in",
+        "official_website": "https://mppwd.gov.in"
+    },
+    {
+        "state_ut": "Maharashtra",
+        "authority_type": "State Government",
+        "department_name": "Public Works Department",
+        "office_email": "min.pwd@maharashtra.gov.in",
+        "administrative_head_email": "acs.pwd@maharashtra.gov.in",
+        "official_website": "https://pwd.maharashtra.gov.in"
+    },
+    {
+        "state_ut": "Manipur",
+        "authority_type": "State Government",
+        "department_name": "Public Works Department",
+        "office_email": "secy-works-mn@gov.in",
+        "administrative_head_email": "ce.pwd.manipur@gmail.com",
+        "official_website": "https://manipurtransport.gov.in/"   
+    },
+    {
+        "state_ut": "Meghalaya",
+        "authority_type": "State Government",
+        "department_name": "Public Works Department (R&B)",
+        "office_email": "comm-sec.pwd-meg@gov.in",
+        "administrative_head_email": "secypwdmegh@yahoo.com",
+        "official_website": "https://megpwd.gov.in"
+    },
+    {
+        "state_ut": "Mizoram",
+        "authority_type": "State Government",
+        "department_name": "Public Works Department",
+        "office_email": "eincpwdmz@gmail.com",
+        "administrative_head_email": "ce.roads.pwdmz@gmail.com",
+        "official_website": "https://pwd.mizoram.gov.in"
+    },
+    {
+        "state_ut": "Nagaland",
+        "authority_type": "State Government",
+        "department_name": "Nagaland Public Works Department",
+        "office_email": "ce_npwd@yahoo.com",
+        "administrative_head_email": "chiefengineer.rnb@gmail.com",
+        "official_website": "https://npwd.nagaland.gov.in"
+    },
+    {
+        "state_ut": "Odisha",
+        "authority_type": "State Government",
+        "department_name": "Works Department",
+        "office_email": "workssec.or@nic.in",
+        "administrative_head_email": "eiccivil.owd@gov.in",
+        "official_website": "https://works.odisha.gov.in"
+    },
+    {
+        "state_ut": "Punjab",
+        "authority_type": "State Government",
+        "department_name": "Public Works Department (B&R)",
+        "office_email": "ce.hq.pwd@punjab.gov.in",
+        "administrative_head_email": "secy.pw@punjab.gov.in",
+        "official_website": "https://prbdb.punjab.gov.in/"  
+    },
+    {
+        "state_ut": "Rajasthan",
+        "authority_type": "State Government",
+        "department_name": "Public Works Department",
+        "office_email": "pwd-raj@nic.in",
+        "administrative_head_email": "ps.pwd-rj@nic.in",
+        "official_website": "https://pwd.rajasthan.gov.in"
+    },
+    {
+        "state_ut": "Sikkim",
+        "authority_type": "State Government",
+        "department_name": "Roads & Bridges Department",
+        "office_email": "roadsandbridgessikkim1@gmail.com",
+        "administrative_head_email": "roadsandbridgessikkim1@gmail.com",
+        "official_website": "https://sikkim.gov.in/departments/roads-bridges-department"
+    },
+    {
+        "state_ut": "Tamil Nadu",
+        "authority_type": "State Government",
+        "department_name": "Highways & Minor Ports Department",
+        "office_email": "itcellhd@gmail.com",
+        "administrative_head_email": "highwayssec@tn.gov.in",
+        "official_website": "https://www.tnhighways.tn.gov.in"
+    },
+    {
+        "state_ut": "Telangana",
+        "authority_type": "State Government",
+        "department_name": "Roads & Buildings Department",
+        "office_email": "secy_rb_ts@telangana.gov.in",
+        "administrative_head_email": "prlsecy_rb_ts@telangana.gov.in",
+        "official_website": "https://transport.telangana.gov.in"
+    },
+    {
+        "state_ut": "Tripura",
+        "authority_type": "State Government",
+        "department_name": "Public Works Department (R&B)",
+        "office_email": "pwdinside@gmail.com",
+        "administrative_head_email": "secy-pwd.tr@gov.in",
+        "official_website": "https://pwd.tripura.gov.in"
+    },
+    {
+        "state_ut": "Uttar Pradesh",
+        "authority_type": "State Government",
+        "department_name": "Public Works Department",
+        "office_email": "uppwd.hq1@gmail.com",      
+        "administrative_head_email": "secpwd-up@nic.in",
+        "official_website": "https://uppwd.gov.in/"    
+    },
+    {
+        "state_ut": "Uttarakhand",               
+        "authority_type": "State Government",
+        "department_name": "Public Works Department",
+        "office_email": "eicpwduk@nic.in",
+        "administrative_head_email": "cehqpwduk@gov.in",
+        "official_website": "https://pwd.uk.gov.in"
+    },
+    {
+        "state_ut": "West Bengal",
+        "authority_type": "State Government",
+        "department_name": "Public Works Department",
+        "office_email": "secpwd@wb.gov.in",
+        "administrative_head_email": "cepwd11@yahoo.com",
+        "official_website": "https://pwd.wb.gov.in/"   
+    },
+    {
+        "state_ut": "Delhi",
+        "authority_type": "Union Territory",
+        "department_name": "Public Works Department",
+        "office_email": "pwdhqdelhi@gmail.com",
+        "administrative_head_email": "einc-pwd@delhi.gov.in",
+        "official_website": "https://www.pwddelhi.gov.in"
+    },
+    {
+        "state_ut": "Jammu & Kashmir",
+        "authority_type": "Union Territory",
+        "department_name": "Public Works (R&B) Department",
+        "office_email": "compwd@rediffmail.com",
+        "administrative_head_email": "secy-pwdjk@nic.in",
+        "official_website": "https://jkpwd.nic.in"
+    },
+    {
+        "state_ut": "Ladakh",
+        "authority_type": "Union Territory",
+        "department_name": "Public Works Department",
+        "office_email": "pstocomsecutl@gmail.com",
+        "administrative_head_email": "deputysecretarypwd123@gmail.com",
+        "official_website": "https://ladakh.gov.in/public-works-department/"
+    },
+    {
+        "state_ut": "Puducherry",
+        "authority_type": "Union Territory",
+        "department_name": "Public Works Department",
+        "office_email": "cepwd@py.gov.in",
+        "administrative_head_email": "cepwd@py.gov.in",
+        "official_website": "https://pwd.py.gov.in"
+    }
+]

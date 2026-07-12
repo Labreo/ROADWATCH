@@ -1,0 +1,607 @@
+[
+  {
+    "id": "overall_stats",
+    "question": "What is the overall highway infrastructure investment overview?",
+    "keywords": [
+      "overall",
+      "overview",
+      "investment",
+      "infrastructure",
+      "total",
+      "how much",
+      "highway spending"
+    ],
+    "answer": "Here is the high-level overview of all highway contracts tracked in the database.",
+    "stats": {
+      "Total Contracts": "4144",
+      "Total Investment": "₹123901.29 Cr",
+      "Average Contract": "₹29.90 Cr"
+    }
+  },
+  {
+    "id": "top_states",
+    "question": "Show me the top 10 states by highway investment.",
+    "keywords": [
+      "top states",
+      "states by investment",
+      "state ranking",
+      "which states",
+      "state spending",
+      "state wise"
+    ],
+    "answer": "Here is the breakdown of the top 10 states receiving the highest highway infrastructure investments.",
+    "table": {
+      "columns": [
+        "State",
+        "Number of Contracts",
+        "Total Value Awarded"
+      ],
+      "rows": [
+        [
+          "Andhra Pradesh",
+          "90",
+          "₹21092.28 Cr"
+        ],
+        [
+          "Telangana",
+          "88",
+          "₹12103.67 Cr"
+        ],
+        [
+          "Punjab",
+          "392",
+          "₹11576.14 Cr"
+        ],
+        [
+          "Uttar Pradesh",
+          "440",
+          "₹9183.87 Cr"
+        ],
+        [
+          "Maharashtra",
+          "400",
+          "₹7994.14 Cr"
+        ],
+        [
+          "Bihar",
+          "33",
+          "₹6230.68 Cr"
+        ],
+        [
+          "Haryana",
+          "392",
+          "₹5941.15 Cr"
+        ],
+        [
+          "Himachal Pradesh",
+          "214",
+          "₹5524.02 Cr"
+        ],
+        [
+          "Madhya Pradesh",
+          "244",
+          "₹5033.66 Cr"
+        ],
+        [
+          "Odisha",
+          "163",
+          "₹4571.06 Cr"
+        ]
+      ]
+    }
+  },
+  {
+    "id": "top_contractors",
+    "question": "Who are the top 10 highway contractors nationwide?",
+    "keywords": [
+      "top contractors",
+      "biggest contractors",
+      "contractor ranking",
+      "who builds",
+      "largest contractors"
+    ],
+    "answer": "These are the top 10 contractors based on total awarded contract value.",
+    "table": {
+      "columns": [
+        "Contractor",
+        "Contracts Won",
+        "Total Value Awarded"
+      ],
+      "rows": [
+        [
+          "Y. Meenakshi (and others)",
+          "1",
+          "₹11976.67 Cr"
+        ],
+        [
+          "NKC PROJECTS PRIVATE LIMITED (and others)",
+          "1",
+          "₹2440.87 Cr"
+        ],
+        [
+          "Dilip Buildcon Limited (and others)",
+          "1",
+          "₹2360.00 Cr"
+        ],
+        [
+          "Dineshchandra R Agrawal Infracon Pvt. Ltd. (and others)",
+          "1",
+          "₹2160.00 Cr"
+        ],
+        [
+          "Dilip Buildcon Limited (and others)",
+          "1",
+          "₹2070.00 Cr"
+        ],
+        [
+          "NCC Limited (and others)",
+          "1",
+          "₹1844.77 Cr"
+        ],
+        [
+          "Dilip Buildcon Limited (and others)",
+          "1",
+          "₹1743.85 Cr"
+        ],
+        [
+          "NCC Limited (and others)",
+          "1",
+          "₹1577.00 Cr"
+        ],
+        [
+          "Dilip Buildcon Limited (and others)",
+          "1",
+          "₹1495.36 Cr"
+        ],
+        [
+          "NCC Limited (and others)",
+          "1",
+          "₹1437.72 Cr"
+        ]
+      ]
+    }
+  },
+  {
+    "id": "largest_contracts",
+    "question": "What are the top 10 largest individual highway contracts?",
+    "keywords": [
+      "largest contracts",
+      "biggest contract",
+      "most expensive",
+      "highest value",
+      "mega projects"
+    ],
+    "answer": "Here are the 10 most massive single highway infrastructure projects awarded.",
+    "table": {
+      "columns": [
+        "Tender Ref",
+        "Contractor",
+        "State",
+        "Contract Value"
+      ],
+      "rows": [
+        [
+          "NHAI/13013 /547/CO/22-23/...",
+          "Y. Meenakshi (and others)",
+          "Andhra Pradesh",
+          "₹11976.67 Cr"
+        ],
+        [
+          "PROJ/34/2025 Bihar Divisi...",
+          "NKC PROJECTS PRIVATE LIMITED (and others)",
+          "Bihar",
+          "₹2440.87 Cr"
+        ],
+        [
+          "MHDIV-20019/51/2024- NHAI...",
+          "Dilip Buildcon Limited (and others)",
+          "Maharashtra",
+          "₹2360.00 Cr"
+        ],
+        [
+          "BRDIV-20021/11/2025 Bihar...",
+          "Dineshchandra R Agrawal Infracon Pvt. Ltd. (and others)",
+          "Bihar",
+          "₹2160.00 Cr"
+        ],
+        [
+          "NHAI/HP/Shimla Bypass Pkg...",
+          "Dilip Buildcon Limited (and others)",
+          "Himachal Pradesh",
+          "₹2070.00 Cr"
+        ],
+        [
+          "NHAI/HP/Shimla Bypass Pkg...",
+          "NCC Limited (and others)",
+          "Himachal Pradesh",
+          "₹1844.77 Cr"
+        ],
+        [
+          "NHAI/CG/Urga-Pathalgaon/ ...",
+          "Dilip Buildcon Limited (and others)",
+          "Chhattisgarh",
+          "₹1743.85 Cr"
+        ],
+        [
+          "NHAI/Tech/AP/NH-71/ Madan...",
+          "NCC Limited (and others)",
+          "Andhra Pradesh",
+          "₹1577.00 Cr"
+        ],
+        [
+          "NHAI/Tech/ TS/NH-563/Kar-...",
+          "Dilip Buildcon Limited (and others)",
+          "Telangana",
+          "₹1495.36 Cr"
+        ],
+        [
+          "NHAI/KNT/Akkalkot-KN/TS B...",
+          "NCC Limited (and others)",
+          "Other",
+          "₹1437.72 Cr"
+        ]
+      ]
+    }
+  },
+  {
+    "id": "competitive_tenders",
+    "question": "Which tenders received the highest number of bids?",
+    "keywords": [
+      "most bids",
+      "competitive",
+      "bidding war",
+      "highest bids",
+      "most competitive"
+    ],
+    "answer": "These are the most highly competitive highway tenders, ranked by the number of bids received.",
+    "table": {
+      "columns": [
+        "Tender Ref",
+        "State",
+        "Bids Received",
+        "Contract Value"
+      ],
+      "rows": [
+        [
+          "RWD / KPD-17 of 2025-26...",
+          "Odisha",
+          "78",
+          "₹34.88 L"
+        ],
+        [
+          "EETIG-ONLINE-20-2025-26...",
+          "Odisha",
+          "71",
+          "₹20.99 L"
+        ],
+        [
+          "Bid Id No. SE- 83/2025-26...",
+          "Odisha",
+          "70",
+          "₹98.56 L"
+        ],
+        [
+          "EETIG-ONLINE-20-2025-26...",
+          "Odisha",
+          "66",
+          "₹23.31 L"
+        ],
+        [
+          "RWD / KPD-17 of 2025-26...",
+          "Odisha",
+          "56",
+          "₹16.92 L"
+        ],
+        [
+          "2569/EERWD/2024-25 dt 22-...",
+          "Uttarakhand",
+          "56",
+          "₹40.91 L"
+        ],
+        [
+          "Bid Id No. SE- 82/2025-26...",
+          "Odisha",
+          "55",
+          "₹71.51 L"
+        ],
+        [
+          "RWD / KPD-17 of 2025-26...",
+          "Odisha",
+          "47",
+          "₹12.71 L"
+        ],
+        [
+          "e-Procurement Notice No.R...",
+          "Odisha",
+          "38",
+          "₹14.51 L"
+        ],
+        [
+          "2351/Nivida Date 26-11-20...",
+          "Uttarakhand",
+          "37",
+          "₹64.81 L"
+        ]
+      ]
+    }
+  },
+  {
+    "id": "up_stats",
+    "question": "Detailed spending and top contractors in Uttar Pradesh.",
+    "keywords": [
+      "uttar pradesh",
+      "spending in uttar pradesh",
+      "contractors in uttar pradesh"
+    ],
+    "answer": "Uttar Pradesh has 440 contracts totaling ₹9183.87 Cr. Here are the top contractors in the state:",
+    "table": {
+      "columns": [
+        "Contractor",
+        "Total Awarded in UP"
+      ],
+      "rows": [
+        [
+          "Dilip Buildcon Limited (and others)",
+          "₹1181.00 Cr"
+        ],
+        [
+          "Dilip Buildcon Limited (and others)",
+          "₹819.00 Cr"
+        ],
+        [
+          "NKC PROJECTS PRIVATE LIMITED (and others)",
+          "₹660.34 Cr"
+        ],
+        [
+          "KCC Buildcon Private Limited (and others)",
+          "₹647.42 Cr"
+        ],
+        [
+          "KCC Buildcon Private Limited (and others)",
+          "₹621.00 Cr"
+        ]
+      ]
+    }
+  },
+  {
+    "id": "mh_stats",
+    "question": "Detailed spending and top contractors in Maharashtra.",
+    "keywords": [
+      "maharashtra",
+      "spending in maharashtra",
+      "contractors in maharashtra"
+    ],
+    "answer": "Maharashtra has 400 contracts totaling ₹7994.14 Cr. Here are the top contractors in the state:",
+    "table": {
+      "columns": [
+        "Contractor",
+        "Total Awarded in MH"
+      ],
+      "rows": [
+        [
+          "Dilip Buildcon Limited (and others)",
+          "₹2360.00 Cr"
+        ],
+        [
+          "M/s. ASHOKA BUILDCON LTD (and others)",
+          "₹812.45 Cr"
+        ],
+        [
+          "M.S.Khurana Engineering Limited (and others)",
+          "₹553.00 Cr"
+        ],
+        [
+          "Bansal Construction Works Private Limited (and others)",
+          "₹515.00 Cr"
+        ],
+        [
+          "AMR India Limited",
+          "₹363.44 Cr"
+        ]
+      ]
+    }
+  },
+  {
+    "id": "contractors_by_volume",
+    "question": "Which contractors have won the most individual contracts (volume)?",
+    "keywords": [
+      "most contracts won",
+      "contractor volume",
+      "number of contracts",
+      "most prolific"
+    ],
+    "answer": "These contractors have secured the highest volume of individual highway contracts.",
+    "table": {
+      "columns": [
+        "Contractor",
+        "Number of Contracts",
+        "Total Value"
+      ],
+      "rows": [
+        [
+          "Satish aggarwal and co (and others)",
+          "18",
+          "₹131.09 Cr"
+        ],
+        [
+          "The Y Enfra C0-Operative Labour &ampamp Construction Society Limited (and others)",
+          "11",
+          "₹21.61 L"
+        ],
+        [
+          "Prabakaran",
+          "10",
+          "₹1.27 Cr"
+        ],
+        [
+          "BHARATH HI TECCH BUILDERS PRIVATE LIMITED",
+          "8",
+          "₹5.58 Cr"
+        ],
+        [
+          "MSV INTERNATIONAL INC",
+          "7",
+          "₹32.73 Cr"
+        ],
+        [
+          "MANNAM VENKATA PRASADA RAO",
+          "7",
+          "₹1.52 Cr"
+        ],
+        [
+          "VAIBHAV LAXMAN BHOSALE (and others)",
+          "7",
+          "₹1.80 Cr"
+        ],
+        [
+          "Prabu Pandiyan",
+          "7",
+          "₹62.03 L"
+        ],
+        [
+          "BHARAT VANIJYA EASTERN PVT.LTD.",
+          "6",
+          "₹7.04 Cr"
+        ],
+        [
+          "BHARGAV CONSTRUCTIONS",
+          "6",
+          "₹1.41 Cr"
+        ]
+      ]
+    }
+  },
+  {
+    "id": "lowest_contracts",
+    "question": "Show me the smallest/lowest value highway contracts.",
+    "keywords": [
+      "smallest contracts",
+      "lowest value",
+      "cheapest",
+      "minimum value"
+    ],
+    "answer": "Here are the smallest recorded infrastructure contracts in the registry.",
+    "table": {
+      "columns": [
+        "Tender Ref",
+        "State",
+        "Contractor",
+        "Contract Value"
+      ],
+      "rows": [
+        [
+          "MCC/PWD/NIT21/2025-26...",
+          "Maharashtra",
+          "SHIOM ASHOKAPPA MIRKALE",
+          "₹1"
+        ],
+        [
+          "NHAI/RO-HYD/EOAA/2022...",
+          "Telangana",
+          "Square Communications Pvt. Ltd. (and others)",
+          "₹1"
+        ],
+        [
+          "NHAI/RO-VIJ/PIU-VIJ/NH-65...",
+          "Andhra Pradesh",
+          "Theme Engineering Services Pvt. Ltd. (and others)",
+          "₹1"
+        ],
+        [
+          "20262A3DFDEA B3B3 488F B5...",
+          "Haryana",
+          "M/S DURGA ELECTRICALS",
+          "₹2.69"
+        ],
+        [
+          "EO/MC/BANGA/2025-26/09...",
+          "Punjab",
+          "KS Enterprises",
+          "₹3.84"
+        ],
+        [
+          "NHAI/PIU/BPL/NH69/Blacksp...",
+          "Madhya Pradesh",
+          "EQRA INTERNATIONAL (and others)",
+          "₹4"
+        ],
+        [
+          "EO/MC/BANGA/2025-26/09...",
+          "Punjab",
+          "THE KANGNA BET CO OP L C SOCIETY LTD",
+          "₹4.2"
+        ],
+        [
+          "NHAI/17011/03/08/2023/RO ...",
+          "Tamil Nadu",
+          "Scientific Security Management Services Pvt. Ltd.",
+          "₹4.33"
+        ],
+        [
+          "EO/MC/BANGA/2025-26/09...",
+          "Punjab",
+          "KS Enterprises",
+          "₹5.93"
+        ],
+        [
+          "NHLML/Ropeways/UK/Kedarna...",
+          "Uttarakhand",
+          "Adani Enterprises Ltd",
+          "₹41.99"
+        ]
+      ]
+    }
+  },
+  {
+    "id": "by_year",
+    "question": "What is the breakdown of highway investments by year?",
+    "keywords": [
+      "by year",
+      "yearly",
+      "year wise",
+      "annual",
+      "year breakdown",
+      "spending per year"
+    ],
+    "answer": "This table shows the progression of highway infrastructure spending categorized by year.",
+    "table": {
+      "columns": [
+        "Year",
+        "Number of Contracts",
+        "Total Value"
+      ],
+      "rows": [
+        [
+          "2026",
+          "2851",
+          "₹15486.53 Cr"
+        ],
+        [
+          "2025",
+          "221",
+          "₹3995.35 Cr"
+        ],
+        [
+          "2024",
+          "222",
+          "₹9101.37 Cr"
+        ],
+        [
+          "2023",
+          "436",
+          "₹30589.94 Cr"
+        ],
+        [
+          "2022",
+          "299",
+          "₹44791.76 Cr"
+        ],
+        [
+          "2021",
+          "115",
+          "₹19936.34 Cr"
+        ]
+      ]
+    }
+  }
+]

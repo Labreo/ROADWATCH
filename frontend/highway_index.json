@@ -1,0 +1,3203 @@
+{
+  "generatedAt": "2026-05-31T15:12:58.796Z",
+  "totalContracts": 4144,
+  "highways": {
+    "nh": [
+      {
+        "code": "NH-44",
+        "contracts": 97,
+        "totalValue": "₹8258.92 Cr",
+        "totalValueRaw": 82589167496.42,
+        "states": [
+          "Andhra Pradesh",
+          "Haryana",
+          "Madhya Pradesh",
+          "Maharashtra",
+          "Other",
+          "Punjab",
+          "Tamil Nadu",
+          "Telangana",
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "NH-48",
+        "contracts": 83,
+        "totalValue": "₹5765.37 Cr",
+        "totalValueRaw": 57653712546.84039,
+        "states": [
+          "Gujarat",
+          "Haryana",
+          "Maharashtra",
+          "Other",
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-1",
+        "contracts": 66,
+        "totalValue": "₹2469.46 Cr",
+        "totalValueRaw": 24694561922,
+        "states": [
+          "Haryana",
+          "Other",
+          "Punjab"
+        ]
+      },
+      {
+        "code": "NH-64",
+        "contracts": 49,
+        "totalValue": "₹289.23 Cr",
+        "totalValueRaw": 2892286156,
+        "states": [
+          "Punjab"
+        ]
+      },
+      {
+        "code": "NH-05",
+        "contracts": 47,
+        "totalValue": "₹424.91 Cr",
+        "totalValueRaw": 4249115974,
+        "states": [
+          "Haryana",
+          "Himachal Pradesh",
+          "Punjab"
+        ]
+      },
+      {
+        "code": "NH-27",
+        "contracts": 44,
+        "totalValue": "₹1635.49 Cr",
+        "totalValueRaw": 16354897733.640001,
+        "states": [
+          "Assam",
+          "Gujarat",
+          "Madhya Pradesh",
+          "Other",
+          "Rajasthan",
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "NH-71",
+        "contracts": 42,
+        "totalValue": "₹10595.16 Cr",
+        "totalValueRaw": 105951641296,
+        "states": [
+          "Andhra Pradesh",
+          "Haryana",
+          "Other",
+          "Punjab"
+        ]
+      },
+      {
+        "code": "NH-07",
+        "contracts": 41,
+        "totalValue": "₹2175.97 Cr",
+        "totalValueRaw": 21759736959,
+        "states": [
+          "Haryana",
+          "Madhya Pradesh",
+          "Punjab",
+          "Uttarakhand"
+        ]
+      },
+      {
+        "code": "NH-10",
+        "contracts": 41,
+        "totalValue": "₹336.78 Cr",
+        "totalValueRaw": 3367788519.08,
+        "states": [
+          "Haryana",
+          "Punjab",
+          "Rajasthan"
+        ]
+      },
+      {
+        "code": "NH-52",
+        "contracts": 33,
+        "totalValue": "₹344.21 Cr",
+        "totalValueRaw": 3442083854,
+        "states": [
+          "Madhya Pradesh",
+          "Maharashtra",
+          "Punjab",
+          "Rajasthan"
+        ]
+      },
+      {
+        "code": "NH-30",
+        "contracts": 32,
+        "totalValue": "₹786.55 Cr",
+        "totalValueRaw": 7865489466.53,
+        "states": [
+          "Andhra Pradesh",
+          "Bihar",
+          "Chhattisgarh",
+          "Madhya Pradesh",
+          "Odisha",
+          "Telangana",
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "NH-16",
+        "contracts": 29,
+        "totalValue": "₹5461.59 Cr",
+        "totalValueRaw": 54615920476.9,
+        "states": [
+          "Andhra Pradesh",
+          "Odisha",
+          "Other",
+          "Tamil Nadu",
+          "Telangana"
+        ]
+      },
+      {
+        "code": "NH-95",
+        "contracts": 26,
+        "totalValue": "₹286.50 Cr",
+        "totalValueRaw": 2865013579.5,
+        "states": [
+          "Punjab"
+        ]
+      },
+      {
+        "code": "NH-65",
+        "contracts": 26,
+        "totalValue": "₹248.89 Cr",
+        "totalValueRaw": 2488887405,
+        "states": [
+          "Andhra Pradesh",
+          "Haryana",
+          "Maharashtra",
+          "Rajasthan",
+          "Telangana"
+        ]
+      },
+      {
+        "code": "NH-01",
+        "contracts": 25,
+        "totalValue": "₹354.44 Cr",
+        "totalValueRaw": 3544420372,
+        "states": [
+          "Haryana",
+          "Punjab"
+        ]
+      },
+      {
+        "code": "NH-03",
+        "contracts": 23,
+        "totalValue": "₹818.30 Cr",
+        "totalValueRaw": 8182977673,
+        "states": [
+          "Himachal Pradesh",
+          "Maharashtra",
+          "Other",
+          "Punjab",
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "NH-47",
+        "contracts": 22,
+        "totalValue": "₹484.76 Cr",
+        "totalValueRaw": 4847579647.1,
+        "states": [
+          "Gujarat",
+          "Maharashtra",
+          "Rajasthan",
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-31",
+        "contracts": 20,
+        "totalValue": "₹4765.53 Cr",
+        "totalValueRaw": 47655296191.82,
+        "states": [
+          "Assam",
+          "Bihar",
+          "Uttar Pradesh",
+          "West Bengal"
+        ]
+      },
+      {
+        "code": "NH-68",
+        "contracts": 19,
+        "totalValue": "₹324.74 Cr",
+        "totalValueRaw": 3247412990.6000004,
+        "states": [
+          "Gujarat",
+          "Rajasthan",
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-46",
+        "contracts": 18,
+        "totalValue": "₹154.41 Cr",
+        "totalValueRaw": 1544084460.1999998,
+        "states": [
+          "Madhya Pradesh",
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-53",
+        "contracts": 17,
+        "totalValue": "₹2580.17 Cr",
+        "totalValueRaw": 25801722979,
+        "states": [
+          "Chhattisgarh",
+          "Maharashtra",
+          "Odisha"
+        ]
+      },
+      {
+        "code": "NH-51",
+        "contracts": 17,
+        "totalValue": "₹49.01 Cr",
+        "totalValueRaw": 490088327.41999996,
+        "states": [
+          "Gujarat",
+          "Other"
+        ]
+      },
+      {
+        "code": "NH-09",
+        "contracts": 16,
+        "totalValue": "₹401.93 Cr",
+        "totalValueRaw": 4019304840.06,
+        "states": [
+          "Haryana",
+          "Other",
+          "Punjab",
+          "Uttarakhand"
+        ]
+      },
+      {
+        "code": "NH-503A",
+        "contracts": 15,
+        "totalValue": "₹313.76 Cr",
+        "totalValueRaw": 3137597825,
+        "states": [
+          "Punjab"
+        ]
+      },
+      {
+        "code": "NH-22",
+        "contracts": 15,
+        "totalValue": "₹2178.30 Cr",
+        "totalValueRaw": 21782980841,
+        "states": [
+          "Bihar",
+          "Haryana",
+          "Himachal Pradesh",
+          "Punjab"
+        ]
+      },
+      {
+        "code": "NH-148B",
+        "contracts": 14,
+        "totalValue": "₹1779.12 Cr",
+        "totalValueRaw": 17791197728,
+        "states": [
+          "Haryana",
+          "Punjab"
+        ]
+      },
+      {
+        "code": "NH-9",
+        "contracts": 14,
+        "totalValue": "₹418.80 Cr",
+        "totalValueRaw": 4187990052.4799995,
+        "states": [
+          "Haryana",
+          "Maharashtra",
+          "Other",
+          "Punjab"
+        ]
+      },
+      {
+        "code": "NH-56",
+        "contracts": 14,
+        "totalValue": "₹680.78 Cr",
+        "totalValueRaw": 6807773297.58,
+        "states": [
+          "Gujarat",
+          "Other",
+          "Rajasthan",
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "NH-5",
+        "contracts": 14,
+        "totalValue": "₹5464.12 Cr",
+        "totalValueRaw": 54641231866.43,
+        "states": [
+          "Andhra Pradesh",
+          "Chhattisgarh",
+          "Haryana",
+          "Himachal Pradesh",
+          "Odisha",
+          "Punjab",
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-8",
+        "contracts": 14,
+        "totalValue": "₹148.99 Cr",
+        "totalValueRaw": 1489921363.48,
+        "states": [
+          "Assam",
+          "Gujarat",
+          "Haryana",
+          "Maharashtra",
+          "Rajasthan",
+          "Tripura"
+        ]
+      },
+      {
+        "code": "NH-21",
+        "contracts": 13,
+        "totalValue": "₹1064.21 Cr",
+        "totalValueRaw": 10642071740,
+        "states": [
+          "Himachal Pradesh",
+          "Other",
+          "Punjab"
+        ]
+      },
+      {
+        "code": "NH-3",
+        "contracts": 13,
+        "totalValue": "₹208.50 Cr",
+        "totalValueRaw": 2085048348.5,
+        "states": [
+          "Madhya Pradesh",
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "NH-73",
+        "contracts": 13,
+        "totalValue": "₹95.87 Cr",
+        "totalValueRaw": 958744674,
+        "states": [
+          "Haryana"
+        ]
+      },
+      {
+        "code": "NH-45",
+        "contracts": 13,
+        "totalValue": "₹2216.61 Cr",
+        "totalValueRaw": 22166056053,
+        "states": [
+          "Madhya Pradesh",
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-344",
+        "contracts": 12,
+        "totalValue": "₹88.23 Cr",
+        "totalValueRaw": 882331018,
+        "states": [
+          "Haryana",
+          "Punjab"
+        ]
+      },
+      {
+        "code": "NH-66",
+        "contracts": 12,
+        "totalValue": "₹204.73 Cr",
+        "totalValueRaw": 2047290828.7,
+        "states": [
+          "Kerala",
+          "Maharashtra",
+          "Other",
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-72",
+        "contracts": 12,
+        "totalValue": "₹1564.43 Cr",
+        "totalValueRaw": 15644307444,
+        "states": [
+          "Haryana",
+          "Punjab",
+          "Uttarakhand"
+        ]
+      },
+      {
+        "code": "NH-15",
+        "contracts": 12,
+        "totalValue": "₹204.03 Cr",
+        "totalValueRaw": 2040340030,
+        "states": [
+          "Assam",
+          "Gujarat",
+          "Punjab",
+          "Rajasthan"
+        ]
+      },
+      {
+        "code": "NH-163",
+        "contracts": 12,
+        "totalValue": "₹3015.64 Cr",
+        "totalValueRaw": 30156361438,
+        "states": [
+          "Telangana"
+        ]
+      },
+      {
+        "code": "NH-354",
+        "contracts": 11,
+        "totalValue": "₹120.47 Cr",
+        "totalValueRaw": 1204719637,
+        "states": [
+          "Punjab"
+        ]
+      },
+      {
+        "code": "NH-703",
+        "contracts": 11,
+        "totalValue": "₹119.69 Cr",
+        "totalValueRaw": 1196879616,
+        "states": [
+          "Punjab"
+        ]
+      },
+      {
+        "code": "NH-7",
+        "contracts": 11,
+        "totalValue": "₹2360.53 Cr",
+        "totalValueRaw": 23605259729.339996,
+        "states": [
+          "Madhya Pradesh",
+          "Punjab",
+          "Tamil Nadu",
+          "Uttarakhand"
+        ]
+      },
+      {
+        "code": "NH-12",
+        "contracts": 11,
+        "totalValue": "₹112.73 Cr",
+        "totalValueRaw": 1127268078.5,
+        "states": [
+          "Jharkhand",
+          "Madhya Pradesh",
+          "Rajasthan",
+          "West Bengal"
+        ]
+      },
+      {
+        "code": "NH-32",
+        "contracts": 11,
+        "totalValue": "₹302.14 Cr",
+        "totalValueRaw": 3021392101,
+        "states": [
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-79",
+        "contracts": 11,
+        "totalValue": "₹544.93 Cr",
+        "totalValueRaw": 5449270866,
+        "states": [
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-205",
+        "contracts": 10,
+        "totalValue": "₹1746.45 Cr",
+        "totalValueRaw": 17464496264,
+        "states": [
+          "Andhra Pradesh",
+          "Himachal Pradesh",
+          "Other",
+          "Punjab",
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-49",
+        "contracts": 10,
+        "totalValue": "₹285.23 Cr",
+        "totalValueRaw": 2852312785,
+        "states": [
+          "Chhattisgarh",
+          "Jharkhand",
+          "Odisha",
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-54",
+        "contracts": 10,
+        "totalValue": "₹129.14 Cr",
+        "totalValueRaw": 1291435429,
+        "states": [
+          "Assam",
+          "Punjab"
+        ]
+      },
+      {
+        "code": "NH-152",
+        "contracts": 10,
+        "totalValue": "₹1340.22 Cr",
+        "totalValueRaw": 13402243541,
+        "states": [
+          "Haryana",
+          "Punjab",
+          "Rajasthan"
+        ]
+      },
+      {
+        "code": "NH-352",
+        "contracts": 9,
+        "totalValue": "₹84.33 Cr",
+        "totalValueRaw": 843307841,
+        "states": [
+          "Haryana",
+          "Other",
+          "Punjab"
+        ]
+      },
+      {
+        "code": "NH-67",
+        "contracts": 9,
+        "totalValue": "₹570.60 Cr",
+        "totalValueRaw": 5706022956,
+        "states": [
+          "Other",
+          "Punjab",
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-34",
+        "contracts": 9,
+        "totalValue": "₹1549.58 Cr",
+        "totalValueRaw": 15495839996.15,
+        "states": [
+          "Madhya Pradesh",
+          "Other",
+          "Uttar Pradesh",
+          "Uttarakhand"
+        ]
+      },
+      {
+        "code": "NH-130",
+        "contracts": 9,
+        "totalValue": "₹1358.37 Cr",
+        "totalValueRaw": 13583687522,
+        "states": [
+          "Chhattisgarh",
+          "Odisha"
+        ]
+      },
+      {
+        "code": "NH-563",
+        "contracts": 9,
+        "totalValue": "₹3026.98 Cr",
+        "totalValueRaw": 30269750357.03,
+        "states": [
+          "Telangana"
+        ]
+      },
+      {
+        "code": "NH-83",
+        "contracts": 8,
+        "totalValue": "₹45.22 Cr",
+        "totalValueRaw": 452157164,
+        "states": [
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-765",
+        "contracts": 8,
+        "totalValue": "₹29.52 Cr",
+        "totalValueRaw": 295172160.28,
+        "states": [
+          "Telangana"
+        ]
+      },
+      {
+        "code": "NH-163G",
+        "contracts": 8,
+        "totalValue": "₹4457.91 Cr",
+        "totalValueRaw": 44579070002,
+        "states": [
+          "Telangana"
+        ]
+      },
+      {
+        "code": "NH-344A",
+        "contracts": 8,
+        "totalValue": "₹1077.81 Cr",
+        "totalValueRaw": 10778095783,
+        "states": [
+          "Punjab"
+        ]
+      },
+      {
+        "code": "NH-5A",
+        "contracts": 7,
+        "totalValue": "₹2371.52 Cr",
+        "totalValueRaw": 23715247342,
+        "states": [
+          "Odisha"
+        ]
+      },
+      {
+        "code": "NH-60",
+        "contracts": 7,
+        "totalValue": "₹271.92 Cr",
+        "totalValueRaw": 2719228824,
+        "states": [
+          "Maharashtra",
+          "Odisha",
+          "West Bengal"
+        ]
+      },
+      {
+        "code": "NH-39",
+        "contracts": 7,
+        "totalValue": "₹466.80 Cr",
+        "totalValueRaw": 4667972119,
+        "states": [
+          "Madhya Pradesh"
+        ]
+      },
+      {
+        "code": "NH-4",
+        "contracts": 7,
+        "totalValue": "₹1149.04 Cr",
+        "totalValueRaw": 11490405226,
+        "states": [
+          "Goa",
+          "Karnataka",
+          "Maharashtra",
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-11",
+        "contracts": 7,
+        "totalValue": "₹1502.65 Cr",
+        "totalValueRaw": 15026509635,
+        "states": [
+          "Haryana",
+          "Rajasthan"
+        ]
+      },
+      {
+        "code": "NH-76",
+        "contracts": 7,
+        "totalValue": "₹165.21 Cr",
+        "totalValueRaw": 1652061012,
+        "states": [
+          "Rajasthan",
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "NH-150C",
+        "contracts": 7,
+        "totalValue": "₹3326.36 Cr",
+        "totalValueRaw": 33263563462,
+        "states": [
+          "Other",
+          "Telangana"
+        ]
+      },
+      {
+        "code": "NH-8A",
+        "contracts": 7,
+        "totalValue": "₹32.94 Cr",
+        "totalValueRaw": 329352494.4,
+        "states": [
+          "Gujarat"
+        ]
+      },
+      {
+        "code": "NH-334B",
+        "contracts": 7,
+        "totalValue": "₹56.68 Cr",
+        "totalValueRaw": 566773598,
+        "states": [
+          "Haryana"
+        ]
+      },
+      {
+        "code": "NH-77",
+        "contracts": 7,
+        "totalValue": "₹189.79 Cr",
+        "totalValueRaw": 1897907710,
+        "states": [
+          "Bihar",
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-2",
+        "contracts": 6,
+        "totalValue": "₹668.82 Cr",
+        "totalValueRaw": 6688235209.06,
+        "states": [
+          "Bihar",
+          "Haryana",
+          "Jharkhand",
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "NH-58",
+        "contracts": 6,
+        "totalValue": "₹196.97 Cr",
+        "totalValueRaw": 1969748555,
+        "states": [
+          "Other",
+          "Rajasthan",
+          "Uttar Pradesh",
+          "Uttarakhand"
+        ]
+      },
+      {
+        "code": "NH-215",
+        "contracts": 6,
+        "totalValue": "₹1.09 Cr",
+        "totalValueRaw": 10937269,
+        "states": [
+          "Odisha"
+        ]
+      },
+      {
+        "code": "NH-340C",
+        "contracts": 6,
+        "totalValue": "₹3563.84 Cr",
+        "totalValueRaw": 35638400000,
+        "states": [
+          "Andhra Pradesh",
+          "Other"
+        ]
+      },
+      {
+        "code": "NH-365BB",
+        "contracts": 6,
+        "totalValue": "₹151.66 Cr",
+        "totalValueRaw": 1516564722.3899999,
+        "states": [
+          "Telangana"
+        ]
+      },
+      {
+        "code": "NH-69",
+        "contracts": 6,
+        "totalValue": "₹324.63 Cr",
+        "totalValueRaw": 3246291545,
+        "states": [
+          "Madhya Pradesh"
+        ]
+      },
+      {
+        "code": "NH-716",
+        "contracts": 6,
+        "totalValue": "₹6286.69 Cr",
+        "totalValueRaw": 62866926656,
+        "states": [
+          "Andhra Pradesh",
+          "Other"
+        ]
+      },
+      {
+        "code": "NH-544D",
+        "contracts": 6,
+        "totalValue": "₹4286.12 Cr",
+        "totalValueRaw": 42861200000,
+        "states": [
+          "Andhra Pradesh"
+        ]
+      },
+      {
+        "code": "NH-544",
+        "contracts": 6,
+        "totalValue": "₹596.37 Cr",
+        "totalValueRaw": 5963679510,
+        "states": [
+          "Kerala",
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-38",
+        "contracts": 5,
+        "totalValue": "₹250.07 Cr",
+        "totalValueRaw": 2500659700,
+        "states": [
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-36",
+        "contracts": 5,
+        "totalValue": "₹58.44 Cr",
+        "totalValueRaw": 584356445,
+        "states": [
+          "Assam",
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-200",
+        "contracts": 5,
+        "totalValue": "₹159.78 Cr",
+        "totalValueRaw": 1597768834,
+        "states": [
+          "Chhattisgarh",
+          "Odisha"
+        ]
+      },
+      {
+        "code": "NH-6",
+        "contracts": 5,
+        "totalValue": "₹187.15 Cr",
+        "totalValueRaw": 1871529826,
+        "states": [
+          "Maharashtra",
+          "Odisha"
+        ]
+      },
+      {
+        "code": "NH-73A",
+        "contracts": 5,
+        "totalValue": "₹13.86 Cr",
+        "totalValueRaw": 138569683,
+        "states": [
+          "Haryana"
+        ]
+      },
+      {
+        "code": "NH-71A",
+        "contracts": 5,
+        "totalValue": "₹98.62 Cr",
+        "totalValueRaw": 986230076,
+        "states": [
+          "Haryana"
+        ]
+      },
+      {
+        "code": "NH-361",
+        "contracts": 5,
+        "totalValue": "₹108.04 Cr",
+        "totalValueRaw": 1080413360,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "NH-59",
+        "contracts": 5,
+        "totalValue": "₹23.18 Cr",
+        "totalValueRaw": 231781536,
+        "states": [
+          "Gujarat"
+        ]
+      },
+      {
+        "code": "NH-161",
+        "contracts": 5,
+        "totalValue": "₹27.57 Cr",
+        "totalValueRaw": 275734500,
+        "states": [
+          "Telangana"
+        ]
+      },
+      {
+        "code": "NH-751",
+        "contracts": 5,
+        "totalValue": "₹137.50 Cr",
+        "totalValueRaw": 1375021236.1399999,
+        "states": [
+          "Gujarat"
+        ]
+      },
+      {
+        "code": "NH-8E",
+        "contracts": 4,
+        "totalValue": "₹13.09 Cr",
+        "totalValueRaw": 130913405,
+        "states": [
+          "Gujarat"
+        ]
+      },
+      {
+        "code": "NH-709",
+        "contracts": 4,
+        "totalValue": "₹52.94 Cr",
+        "totalValueRaw": 529430077,
+        "states": [
+          "Haryana"
+        ]
+      },
+      {
+        "code": "NH-108B",
+        "contracts": 4,
+        "totalValue": "₹1.71 Cr",
+        "totalValueRaw": 17135550.520000003,
+        "states": [
+          "Tripura"
+        ]
+      },
+      {
+        "code": "NH-24",
+        "contracts": 4,
+        "totalValue": "₹206.50 Cr",
+        "totalValueRaw": 2065013330.05,
+        "states": [
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "NH-248A",
+        "contracts": 4,
+        "totalValue": "₹13.92 Cr",
+        "totalValueRaw": 139155720,
+        "states": [
+          "Haryana"
+        ]
+      },
+      {
+        "code": "NH-24B",
+        "contracts": 4,
+        "totalValue": "₹29.50 Cr",
+        "totalValueRaw": 295002784,
+        "states": [
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "NH-753B",
+        "contracts": 4,
+        "totalValue": "₹67.56 Cr",
+        "totalValueRaw": 675568681.56,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "NH-28",
+        "contracts": 4,
+        "totalValue": "₹392.39 Cr",
+        "totalValueRaw": 3923902999,
+        "states": [
+          "Other",
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "NH-166",
+        "contracts": 4,
+        "totalValue": "₹57.64 Cr",
+        "totalValueRaw": 576418758,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "NH-275",
+        "contracts": 4,
+        "totalValue": "₹2.20 Cr",
+        "totalValueRaw": 22022330,
+        "states": [
+          "Karnataka"
+        ]
+      },
+      {
+        "code": "NH-151",
+        "contracts": 4,
+        "totalValue": "₹188.69 Cr",
+        "totalValueRaw": 1886918505.4,
+        "states": [
+          "Gujarat"
+        ]
+      },
+      {
+        "code": "NH-45B",
+        "contracts": 3,
+        "totalValue": "₹86.87 Cr",
+        "totalValueRaw": 868728366,
+        "states": [
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-138",
+        "contracts": 3,
+        "totalValue": "₹377.42 Cr",
+        "totalValueRaw": 3774191251,
+        "states": [
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-334",
+        "contracts": 3,
+        "totalValue": "₹34.44 Cr",
+        "totalValueRaw": 344391695,
+        "states": [
+          "Uttar Pradesh",
+          "Uttarakhand"
+        ]
+      },
+      {
+        "code": "NH-516F",
+        "contracts": 3,
+        "totalValue": "₹2044.38 Cr",
+        "totalValueRaw": 20443808663.9,
+        "states": [
+          "Andhra Pradesh"
+        ]
+      },
+      {
+        "code": "NH-183",
+        "contracts": 3,
+        "totalValue": "₹21.91 Cr",
+        "totalValueRaw": 219094380,
+        "states": [
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-29",
+        "contracts": 3,
+        "totalValue": "₹60.32 Cr",
+        "totalValueRaw": 603150846,
+        "states": [
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "NH-74",
+        "contracts": 3,
+        "totalValue": "₹15.55 Cr",
+        "totalValueRaw": 155513485,
+        "states": [
+          "Uttar Pradesh",
+          "Uttarakhand"
+        ]
+      },
+      {
+        "code": "NH-752D",
+        "contracts": 3,
+        "totalValue": "₹15.37 L",
+        "totalValueRaw": 1537000,
+        "states": [
+          "Other"
+        ]
+      },
+      {
+        "code": "NH-907",
+        "contracts": 3,
+        "totalValue": "₹8.20 Cr",
+        "totalValueRaw": 82025107,
+        "states": [
+          "Haryana"
+        ]
+      },
+      {
+        "code": "NH-70",
+        "contracts": 3,
+        "totalValue": "₹1407.60 Cr",
+        "totalValueRaw": 14076000000,
+        "states": [
+          "Rajasthan"
+        ]
+      },
+      {
+        "code": "NH-208",
+        "contracts": 3,
+        "totalValue": "₹1265.16 Cr",
+        "totalValueRaw": 12651637985,
+        "states": [
+          "Tamil Nadu",
+          "Tripura"
+        ]
+      },
+      {
+        "code": "NH-63",
+        "contracts": 3,
+        "totalValue": "₹1680.90 Cr",
+        "totalValueRaw": 16809043456,
+        "states": [
+          "Karnataka",
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "NH-40",
+        "contracts": 3,
+        "totalValue": "₹1474.66 Cr",
+        "totalValueRaw": 14746563758,
+        "states": [
+          "Andhra Pradesh",
+          "Telangana"
+        ]
+      },
+      {
+        "code": "NH-209",
+        "contracts": 3,
+        "totalValue": "₹2.31 Cr",
+        "totalValueRaw": 23078447,
+        "states": [
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-709A",
+        "contracts": 3,
+        "totalValue": "₹30.49 Cr",
+        "totalValueRaw": 304900000,
+        "states": [
+          "Haryana"
+        ]
+      },
+      {
+        "code": "NH-753C",
+        "contracts": 3,
+        "totalValue": "₹14.79 Cr",
+        "totalValueRaw": 147875282,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "NH-753L",
+        "contracts": 3,
+        "totalValue": "₹1717.40 Cr",
+        "totalValueRaw": 17174000000,
+        "states": [
+          "Madhya Pradesh",
+          "Other"
+        ]
+      },
+      {
+        "code": "NH-766",
+        "contracts": 3,
+        "totalValue": "₹1.24 Cr",
+        "totalValueRaw": 12369235,
+        "states": [
+          "Kerala"
+        ]
+      },
+      {
+        "code": "NH-212",
+        "contracts": 3,
+        "totalValue": "₹1.24 Cr",
+        "totalValueRaw": 12369235,
+        "states": [
+          "Kerala"
+        ]
+      },
+      {
+        "code": "NH-319",
+        "contracts": 3,
+        "totalValue": "₹993.03 Cr",
+        "totalValueRaw": 9930316141,
+        "states": [
+          "Bihar"
+        ]
+      },
+      {
+        "code": "NH-61",
+        "contracts": 3,
+        "totalValue": "₹14.19 Cr",
+        "totalValueRaw": 141921316,
+        "states": [
+          "Maharashtra",
+          "Telangana"
+        ]
+      },
+      {
+        "code": "NH-54E",
+        "contracts": 3,
+        "totalValue": "₹154.15 Cr",
+        "totalValueRaw": 1541493294,
+        "states": [
+          "Assam"
+        ]
+      },
+      {
+        "code": "NH-113",
+        "contracts": 3,
+        "totalValue": "₹50.97 Cr",
+        "totalValueRaw": 509653586.29,
+        "states": [
+          "Gujarat",
+          "Rajasthan"
+        ]
+      },
+      {
+        "code": "NH-730",
+        "contracts": 3,
+        "totalValue": "₹20.11 Cr",
+        "totalValueRaw": 201122833,
+        "states": [
+          "Other"
+        ]
+      },
+      {
+        "code": "NH-28C",
+        "contracts": 3,
+        "totalValue": "₹49.84 Cr",
+        "totalValueRaw": 498406730,
+        "states": [
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "NH-233",
+        "contracts": 3,
+        "totalValue": "₹15.65 Cr",
+        "totalValueRaw": 156498000,
+        "states": [
+          "Other",
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "NH-709B",
+        "contracts": 3,
+        "totalValue": "₹61.69 Cr",
+        "totalValueRaw": 616891998,
+        "states": [
+          "Other",
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "NH-226",
+        "contracts": 2,
+        "totalValue": "₹3.56 Cr",
+        "totalValueRaw": 35572342,
+        "states": [
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-85",
+        "contracts": 2,
+        "totalValue": "₹8.65 Cr",
+        "totalValueRaw": 86542858,
+        "states": [
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-848",
+        "contracts": 2,
+        "totalValue": "₹214.18 Cr",
+        "totalValueRaw": 2141840276,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "NH-06",
+        "contracts": 2,
+        "totalValue": "₹72.39 Cr",
+        "totalValueRaw": 723948100,
+        "states": [
+          "Chhattisgarh"
+        ]
+      },
+      {
+        "code": "NH-17",
+        "contracts": 2,
+        "totalValue": "₹10.45 Cr",
+        "totalValueRaw": 104547441.35,
+        "states": [
+          "Maharashtra",
+          "West Bengal"
+        ]
+      },
+      {
+        "code": "NH-232",
+        "contracts": 2,
+        "totalValue": "₹7.06 Cr",
+        "totalValueRaw": 70605999,
+        "states": [
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "NH-125A",
+        "contracts": 2,
+        "totalValue": "₹1.22 Cr",
+        "totalValueRaw": 12231515,
+        "states": [
+          "Rajasthan"
+        ]
+      },
+      {
+        "code": "NH-75E",
+        "contracts": 2,
+        "totalValue": "₹15.46 Cr",
+        "totalValueRaw": 154582780,
+        "states": [
+          "Madhya Pradesh"
+        ]
+      },
+      {
+        "code": "NH-520",
+        "contracts": 2,
+        "totalValue": "₹79.77 L",
+        "totalValueRaw": 7976777,
+        "states": [
+          "Odisha",
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "NH-128",
+        "contracts": 2,
+        "totalValue": "₹14.91 Cr",
+        "totalValueRaw": 149110999,
+        "states": [
+          "Other",
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "NH-330",
+        "contracts": 2,
+        "totalValue": "₹27.79 Cr",
+        "totalValueRaw": 277881000,
+        "states": [
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "NH-131G",
+        "contracts": 2,
+        "totalValue": "₹1243.00 Cr",
+        "totalValueRaw": 12430000000,
+        "states": [
+          "Bihar"
+        ]
+      },
+      {
+        "code": "NH-363",
+        "contracts": 2,
+        "totalValue": "₹8.42 Cr",
+        "totalValueRaw": 84200000,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "NH-351F",
+        "contracts": 2,
+        "totalValue": "₹7.58 Cr",
+        "totalValueRaw": 75833614,
+        "states": [
+          "Gujarat"
+        ]
+      },
+      {
+        "code": "NH-160A",
+        "contracts": 2,
+        "totalValue": "₹130.79 Cr",
+        "totalValueRaw": 1307865909,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "NH-353B",
+        "contracts": 2,
+        "totalValue": "₹81.44 Cr",
+        "totalValueRaw": 814390509,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "NH-08",
+        "contracts": 2,
+        "totalValue": "₹1.34 Cr",
+        "totalValueRaw": 13399410.14,
+        "states": [
+          "Tripura"
+        ]
+      },
+      {
+        "code": "NH-202",
+        "contracts": 2,
+        "totalValue": "₹7.12 Cr",
+        "totalValueRaw": 71151438.56,
+        "states": [
+          "Manipur",
+          "Telangana"
+        ]
+      },
+      {
+        "code": "NH-88",
+        "contracts": 2,
+        "totalValue": "₹435.05 Cr",
+        "totalValueRaw": 4350452679,
+        "states": [
+          "Himachal Pradesh"
+        ]
+      },
+      {
+        "code": "NH-23",
+        "contracts": 2,
+        "totalValue": "₹43.91 L",
+        "totalValueRaw": 4391128,
+        "states": [
+          "Odisha"
+        ]
+      },
+      {
+        "code": "NH-744",
+        "contracts": 2,
+        "totalValue": "₹1264.94 Cr",
+        "totalValueRaw": 12649450000,
+        "states": [
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-516W",
+        "contracts": 2,
+        "totalValue": "₹1373.37 Cr",
+        "totalValueRaw": 13733660000,
+        "states": [
+          "Other"
+        ]
+      },
+      {
+        "code": "NH-130CD",
+        "contracts": 2,
+        "totalValue": "₹2480.74 Cr",
+        "totalValueRaw": 24807400000,
+        "states": [
+          "Chhattisgarh",
+          "Odisha"
+        ]
+      },
+      {
+        "code": "NH-62",
+        "contracts": 2,
+        "totalValue": "₹24.32 Cr",
+        "totalValueRaw": 243215308,
+        "states": [
+          "Punjab",
+          "Rajasthan"
+        ]
+      },
+      {
+        "code": "NH-365BG",
+        "contracts": 2,
+        "totalValue": "₹15.56 Cr",
+        "totalValueRaw": 155574500,
+        "states": [
+          "Other",
+          "Telangana"
+        ]
+      },
+      {
+        "code": "NH-0",
+        "contracts": 2,
+        "totalValue": "₹1521.89 Cr",
+        "totalValueRaw": 15218900000,
+        "states": [
+          "Telangana"
+        ]
+      },
+      {
+        "code": "NH-119",
+        "contracts": 2,
+        "totalValue": "₹1190.24 Cr",
+        "totalValueRaw": 11902361740,
+        "states": [
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "NH-151A",
+        "contracts": 2,
+        "totalValue": "₹92.85 L",
+        "totalValueRaw": 9284619,
+        "states": [
+          "Other"
+        ]
+      },
+      {
+        "code": "NH-50",
+        "contracts": 2,
+        "totalValue": "₹41.77 Cr",
+        "totalValueRaw": 417690557,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "NH-754A",
+        "contracts": 2,
+        "totalValue": "₹1.68 Cr",
+        "totalValueRaw": 16752469,
+        "states": [
+          "Punjab"
+        ]
+      },
+      {
+        "code": "NH-41",
+        "contracts": 2,
+        "totalValue": "₹2.66 Cr",
+        "totalValueRaw": 26643235,
+        "states": [
+          "Gujarat"
+        ]
+      },
+      {
+        "code": "NH-211",
+        "contracts": 2,
+        "totalValue": "₹15.99 Cr",
+        "totalValueRaw": 159940658,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "NH-565",
+        "contracts": 2,
+        "totalValue": "₹1035.71 Cr",
+        "totalValueRaw": 10357142854,
+        "states": [
+          "Andhra Pradesh",
+          "Other"
+        ]
+      },
+      {
+        "code": "NH-02",
+        "contracts": 2,
+        "totalValue": "₹564.76 Cr",
+        "totalValueRaw": 5647570000,
+        "states": [
+          "Jharkhand",
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "NH-344B",
+        "contracts": 2,
+        "totalValue": "₹2112.00 Cr",
+        "totalValueRaw": 21120000000,
+        "states": [
+          "Punjab"
+        ]
+      },
+      {
+        "code": "NH-205A",
+        "contracts": 2,
+        "totalValue": "₹39.72 Cr",
+        "totalValueRaw": 397186930,
+        "states": [
+          "Punjab"
+        ]
+      },
+      {
+        "code": "NH-1A",
+        "contracts": 2,
+        "totalValue": "₹117.70 Cr",
+        "totalValueRaw": 1177000009,
+        "states": [
+          "Other",
+          "Punjab"
+        ]
+      },
+      {
+        "code": "NH-365A",
+        "contracts": 2,
+        "totalValue": "₹3.14 Cr",
+        "totalValueRaw": 31421000,
+        "states": [
+          "Telangana"
+        ]
+      },
+      {
+        "code": "NH-125",
+        "contracts": 2,
+        "totalValue": "₹180.93 Cr",
+        "totalValueRaw": 1809322600,
+        "states": [
+          "Other",
+          "Uttarakhand"
+        ]
+      },
+      {
+        "code": "NH-503D",
+        "contracts": 2,
+        "totalValue": "₹1.55 Cr",
+        "totalValueRaw": 15505048,
+        "states": [
+          "Punjab"
+        ]
+      },
+      {
+        "code": "NH-154",
+        "contracts": 2,
+        "totalValue": "₹805.45 Cr",
+        "totalValueRaw": 8054540000,
+        "states": [
+          "Himachal Pradesh",
+          "Other"
+        ]
+      },
+      {
+        "code": "NH-130A",
+        "contracts": 2,
+        "totalValue": "₹3487.70 Cr",
+        "totalValueRaw": 34877000000,
+        "states": [
+          "Chhattisgarh"
+        ]
+      },
+      {
+        "code": "NH-96",
+        "contracts": 2,
+        "totalValue": "₹42.70 Cr",
+        "totalValueRaw": 427049635,
+        "states": [
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "NH-148",
+        "contracts": 2,
+        "totalValue": "₹20.62 Cr",
+        "totalValueRaw": 206200000,
+        "states": [
+          "Haryana",
+          "Rajasthan"
+        ]
+      },
+      {
+        "code": "NH-731",
+        "contracts": 2,
+        "totalValue": "₹62.43 Cr",
+        "totalValueRaw": 624264100,
+        "states": [
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "NH-911",
+        "contracts": 2,
+        "totalValue": "₹24.92 Cr",
+        "totalValueRaw": 249152350,
+        "states": [
+          "Rajasthan"
+        ]
+      },
+      {
+        "code": "NH-150A",
+        "contracts": 2,
+        "totalValue": "₹54.22 Cr",
+        "totalValueRaw": 542223002,
+        "states": [
+          "Karnataka"
+        ]
+      },
+      {
+        "code": "NH-722",
+        "contracts": 2,
+        "totalValue": "₹21.16 Cr",
+        "totalValueRaw": 211599990,
+        "states": [
+          "Bihar"
+        ]
+      },
+      {
+        "code": "NH-102",
+        "contracts": 2,
+        "totalValue": "₹21.16 Cr",
+        "totalValueRaw": 211599990,
+        "states": [
+          "Bihar"
+        ]
+      },
+      {
+        "code": "NH-922",
+        "contracts": 2,
+        "totalValue": "₹22.63 L",
+        "totalValueRaw": 2262544,
+        "states": [
+          "Bihar"
+        ]
+      },
+      {
+        "code": "NH-43",
+        "contracts": 2,
+        "totalValue": "₹25.88 Cr",
+        "totalValueRaw": 258788115,
+        "states": [
+          "Chhattisgarh",
+          "Madhya Pradesh"
+        ]
+      },
+      {
+        "code": "NH-326A",
+        "contracts": 2,
+        "totalValue": "₹94,937",
+        "totalValueRaw": 94937,
+        "states": [
+          "Andhra Pradesh"
+        ]
+      },
+      {
+        "code": "NH-547",
+        "contracts": 2,
+        "totalValue": "₹12.75 Cr",
+        "totalValueRaw": 127473630.95,
+        "states": [
+          "Madhya Pradesh"
+        ]
+      },
+      {
+        "code": "NH-4A",
+        "contracts": 2,
+        "totalValue": "₹897.56 Cr",
+        "totalValueRaw": 8975565000,
+        "states": [
+          "Goa",
+          "Karnataka"
+        ]
+      },
+      {
+        "code": "NH-148NA",
+        "contracts": 2,
+        "totalValue": "₹10.51 L",
+        "totalValueRaw": 1051040,
+        "states": [
+          "Other"
+        ]
+      },
+      {
+        "code": "NH-18",
+        "contracts": 2,
+        "totalValue": "₹21.38 Cr",
+        "totalValueRaw": 213811000,
+        "states": [
+          "Jharkhand",
+          "Odisha"
+        ]
+      },
+      {
+        "code": "NH-148AE",
+        "contracts": 2,
+        "totalValue": "₹70.25 L",
+        "totalValueRaw": 7025000,
+        "states": [
+          "Other"
+        ]
+      },
+      {
+        "code": "NH-160",
+        "contracts": 2,
+        "totalValue": "₹573.13 Cr",
+        "totalValueRaw": 5731339247,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "NH-146",
+        "contracts": 2,
+        "totalValue": "₹22.03 Cr",
+        "totalValueRaw": 220287110,
+        "states": [
+          "Madhya Pradesh"
+        ]
+      },
+      {
+        "code": "NH-119A",
+        "contracts": 2,
+        "totalValue": "₹998.25 Cr",
+        "totalValueRaw": 9982500000,
+        "states": [
+          "Bihar"
+        ]
+      },
+      {
+        "code": "NH-966A",
+        "contracts": 2,
+        "totalValue": "₹182.49 Cr",
+        "totalValueRaw": 1824912684,
+        "states": [
+          "Kerala"
+        ]
+      },
+      {
+        "code": "NH-352W",
+        "contracts": 1,
+        "totalValue": "₹2.88 Cr",
+        "totalValueRaw": 28777500,
+        "states": [
+          "Other"
+        ]
+      },
+      {
+        "code": "NH-944",
+        "contracts": 1,
+        "totalValue": "₹2.46 Cr",
+        "totalValueRaw": 24570596,
+        "states": [
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-47B",
+        "contracts": 1,
+        "totalValue": "₹2.46 Cr",
+        "totalValueRaw": 24570596,
+        "states": [
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-444A",
+        "contracts": 1,
+        "totalValue": "₹15.06 Cr",
+        "totalValueRaw": 150611300,
+        "states": [
+          "Haryana"
+        ]
+      },
+      {
+        "code": "NH-248S",
+        "contracts": 1,
+        "totalValue": "₹2360.00 Cr",
+        "totalValueRaw": 23600000000,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "NH-45E",
+        "contracts": 1,
+        "totalValue": "₹4.12 Cr",
+        "totalValueRaw": 41207922,
+        "states": [
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-33",
+        "contracts": 1,
+        "totalValue": "₹2440.87 Cr",
+        "totalValueRaw": 24408700000,
+        "states": [
+          "Bihar"
+        ]
+      },
+      {
+        "code": "NH-139W",
+        "contracts": 1,
+        "totalValue": "₹2160.00 Cr",
+        "totalValueRaw": 21600000000,
+        "states": [
+          "Bihar"
+        ]
+      },
+      {
+        "code": "NH-785",
+        "contracts": 1,
+        "totalValue": "₹4.59 Cr",
+        "totalValueRaw": 45936910,
+        "states": [
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-844",
+        "contracts": 1,
+        "totalValue": "₹1.16 Cr",
+        "totalValueRaw": 11600000,
+        "states": [
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-12BAHARAMPORE",
+        "contracts": 1,
+        "totalValue": "₹15.11 L",
+        "totalValueRaw": 1511000,
+        "states": [
+          "Jharkhand"
+        ]
+      },
+      {
+        "code": "NH-119D",
+        "contracts": 1,
+        "totalValue": "₹4.56 Cr",
+        "totalValueRaw": 45557000,
+        "states": [
+          "Bihar"
+        ]
+      },
+      {
+        "code": "NH-45C",
+        "contracts": 1,
+        "totalValue": "₹26.62 L",
+        "totalValueRaw": 2662048,
+        "states": [
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-248",
+        "contracts": 1,
+        "totalValue": "₹22.87 L",
+        "totalValueRaw": 2286805,
+        "states": [
+          "Haryana"
+        ]
+      },
+      {
+        "code": "NH-965",
+        "contracts": 1,
+        "totalValue": "₹87.50 Cr",
+        "totalValueRaw": 875000000,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "NH-965DD",
+        "contracts": 1,
+        "totalValue": "₹298.09 Cr",
+        "totalValueRaw": 2980900000,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "NH-965D",
+        "contracts": 1,
+        "totalValue": "₹298.09 Cr",
+        "totalValueRaw": 2980900000,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "NH-08VIA",
+        "contracts": 1,
+        "totalValue": "₹28.33 L",
+        "totalValueRaw": 2832783,
+        "states": [
+          "Tripura"
+        ]
+      },
+      {
+        "code": "NH-208A",
+        "contracts": 1,
+        "totalValue": "₹1.23 Cr",
+        "totalValueRaw": 12288304.39,
+        "states": [
+          "Tripura"
+        ]
+      },
+      {
+        "code": "NH-313",
+        "contracts": 1,
+        "totalValue": "₹90.32 Cr",
+        "totalValueRaw": 903152019.95,
+        "states": [
+          "Arunachal Pradesh"
+        ]
+      },
+      {
+        "code": "NH-102A",
+        "contracts": 1,
+        "totalValue": "₹2.62 Cr",
+        "totalValueRaw": 26151438.56,
+        "states": [
+          "Manipur"
+        ]
+      },
+      {
+        "code": "NH-127",
+        "contracts": 1,
+        "totalValue": "₹2.34 Cr",
+        "totalValueRaw": 23362332.57,
+        "states": [
+          "Assam"
+        ]
+      },
+      {
+        "code": "NH-105",
+        "contracts": 1,
+        "totalValue": "₹10.48 L",
+        "totalValueRaw": 1047643,
+        "states": [
+          "Himachal Pradesh"
+        ]
+      },
+      {
+        "code": "NH-548",
+        "contracts": 1,
+        "totalValue": "₹28.62 L",
+        "totalValueRaw": 2861581,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "NH-31H",
+        "contracts": 1,
+        "totalValue": "₹20.33 Cr",
+        "totalValueRaw": 203343456,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "NH-235",
+        "contracts": 1,
+        "totalValue": "₹7.92 Cr",
+        "totalValueRaw": 79188280,
+        "states": [
+          "Other"
+        ]
+      },
+      {
+        "code": "NH-352A",
+        "contracts": 1,
+        "totalValue": "₹99.53 L",
+        "totalValueRaw": 9953000,
+        "states": [
+          "Haryana"
+        ]
+      },
+      {
+        "code": "NH-205K",
+        "contracts": 1,
+        "totalValue": "₹86.06 L",
+        "totalValueRaw": 8606000,
+        "states": [
+          "Punjab"
+        ]
+      },
+      {
+        "code": "NH-7A",
+        "contracts": 1,
+        "totalValue": "₹130.20 Cr",
+        "totalValueRaw": 1302030000,
+        "states": [
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-365BBFROM",
+        "contracts": 1,
+        "totalValue": "₹93.25 L",
+        "totalValueRaw": 9324789,
+        "states": [
+          "Telangana"
+        ]
+      },
+      {
+        "code": "NH-11AS",
+        "contracts": 1,
+        "totalValue": "₹63.90 L",
+        "totalValueRaw": 6390000,
+        "states": [
+          "Other"
+        ]
+      },
+      {
+        "code": "NH-548D",
+        "contracts": 1,
+        "totalValue": "₹12.94 Cr",
+        "totalValueRaw": 129388046,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "NH-547E",
+        "contracts": 1,
+        "totalValue": "₹6.06 Cr",
+        "totalValueRaw": 60600000,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "NH-69PII",
+        "contracts": 1,
+        "totalValue": "₹2.11 Cr",
+        "totalValueRaw": 21104531,
+        "states": [
+          "Madhya Pradesh"
+        ]
+      },
+      {
+        "code": "NH-703RFP",
+        "contracts": 1,
+        "totalValue": "₹1.25 Cr",
+        "totalValueRaw": 12526718,
+        "states": [
+          "Punjab"
+        ]
+      },
+      {
+        "code": "NH-347B",
+        "contracts": 1,
+        "totalValue": "₹234.00 Cr",
+        "totalValueRaw": 2340000000,
+        "states": [
+          "Other"
+        ]
+      },
+      {
+        "code": "NH-530B",
+        "contracts": 1,
+        "totalValue": "₹44.76 Cr",
+        "totalValueRaw": 447570000,
+        "states": [
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "NH-934",
+        "contracts": 1,
+        "totalValue": "₹351.00 Cr",
+        "totalValueRaw": 3510000000,
+        "states": [
+          "Madhya Pradesh"
+        ]
+      },
+      {
+        "code": "NH-709AD",
+        "contracts": 1,
+        "totalValue": "₹169.55 Cr",
+        "totalValueRaw": 1695500000,
+        "states": [
+          "Other"
+        ]
+      },
+      {
+        "code": "NH-14",
+        "contracts": 1,
+        "totalValue": "₹150.58 Cr",
+        "totalValueRaw": 1505777777,
+        "states": [
+          "Gujarat"
+        ]
+      },
+      {
+        "code": "NH-87",
+        "contracts": 1,
+        "totalValue": "₹199.31 Cr",
+        "totalValueRaw": 1993100000,
+        "states": [
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "NH-103",
+        "contracts": 1,
+        "totalValue": "₹397.50 Cr",
+        "totalValueRaw": 3975000000,
+        "states": [
+          "Himachal Pradesh"
+        ]
+      },
+      {
+        "code": "NH-365",
+        "contracts": 1,
+        "totalValue": "₹51.60 L",
+        "totalValueRaw": 5159503.39,
+        "states": [
+          "Telangana"
+        ]
+      },
+      {
+        "code": "NH-109D",
+        "contracts": 1,
+        "totalValue": "₹177.24 Cr",
+        "totalValueRaw": 1772400000,
+        "states": [
+          "Other"
+        ]
+      },
+      {
+        "code": "NH-752I",
+        "contracts": 1,
+        "totalValue": "₹2.50 Cr",
+        "totalValueRaw": 25000885,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "NH-20",
+        "contracts": 1,
+        "totalValue": "₹260.45 Cr",
+        "totalValueRaw": 2604540000,
+        "states": [
+          "Himachal Pradesh"
+        ]
+      },
+      {
+        "code": "NH-221",
+        "contracts": 1,
+        "totalValue": "₹11.62 Cr",
+        "totalValueRaw": 116210109,
+        "states": [
+          "Andhra Pradesh"
+        ]
+      },
+      {
+        "code": "NH-158",
+        "contracts": 1,
+        "totalValue": "₹1.94 L",
+        "totalValueRaw": 193501,
+        "states": [
+          "Rajasthan"
+        ]
+      },
+      {
+        "code": "NH-353",
+        "contracts": 1,
+        "totalValue": "₹1.95 L",
+        "totalValueRaw": 194786,
+        "states": [
+          "Telangana"
+        ]
+      },
+      {
+        "code": "NH-111FROM",
+        "contracts": 1,
+        "totalValue": "₹20.24 Cr",
+        "totalValueRaw": 202374444,
+        "states": [
+          "Chhattisgarh"
+        ]
+      },
+      {
+        "code": "NH-11A",
+        "contracts": 1,
+        "totalValue": "₹17.02 Cr",
+        "totalValueRaw": 170200000,
+        "states": [
+          "Rajasthan"
+        ]
+      },
+      {
+        "code": "NH-111",
+        "contracts": 1,
+        "totalValue": "₹76.00 Cr",
+        "totalValueRaw": 760000011,
+        "states": [
+          "Chhattisgarh"
+        ]
+      },
+      {
+        "code": "NH-327E",
+        "contracts": 1,
+        "totalValue": "₹6.12 L",
+        "totalValueRaw": 611611,
+        "states": [
+          "Bihar"
+        ]
+      },
+      {
+        "code": "NH-89",
+        "contracts": 1,
+        "totalValue": "₹21.17 Cr",
+        "totalValueRaw": 211699635,
+        "states": [
+          "Rajasthan"
+        ]
+      },
+      {
+        "code": "NH-112",
+        "contracts": 1,
+        "totalValue": "₹7.84 L",
+        "totalValueRaw": 783999,
+        "states": [
+          "Rajasthan"
+        ]
+      },
+      {
+        "code": "NH-148N",
+        "contracts": 1,
+        "totalValue": "₹77.22 L",
+        "totalValueRaw": 7722000,
+        "states": [
+          "Other"
+        ]
+      },
+      {
+        "code": "NH-458",
+        "contracts": 1,
+        "totalValue": "₹3.84 Cr",
+        "totalValueRaw": 38361065,
+        "states": [
+          "Rajasthan"
+        ]
+      },
+      {
+        "code": "NH-57",
+        "contracts": 1,
+        "totalValue": "₹3.87 Cr",
+        "totalValueRaw": 38690000,
+        "states": [
+          "Odisha"
+        ]
+      },
+      {
+        "code": "NH-754K",
+        "contracts": 1,
+        "totalValue": "₹46.01 L",
+        "totalValueRaw": 4600800,
+        "states": [
+          "Gujarat"
+        ]
+      },
+      {
+        "code": "NH-220",
+        "contracts": 1,
+        "totalValue": "₹9.50 Cr",
+        "totalValueRaw": 94974509,
+        "states": [
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-57A",
+        "contracts": 1,
+        "totalValue": "₹57,001",
+        "totalValueRaw": 57001,
+        "states": [
+          "Bihar"
+        ]
+      },
+      {
+        "code": "NH-527",
+        "contracts": 1,
+        "totalValue": "₹57,001",
+        "totalValueRaw": 57001,
+        "states": [
+          "Bihar"
+        ]
+      },
+      {
+        "code": "NH-44A",
+        "contracts": 1,
+        "totalValue": "₹1.28 Cr",
+        "totalValueRaw": 12847304,
+        "states": [
+          "Haryana"
+        ]
+      },
+      {
+        "code": "NH-38ONITEMRATEBASISINTHESTATEOFTAMILNADU",
+        "contracts": 1,
+        "totalValue": "₹7.42 Cr",
+        "totalValueRaw": 74222386,
+        "states": [
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-244",
+        "contracts": 1,
+        "totalValue": "₹3.06 Cr",
+        "totalValueRaw": 30638994.84,
+        "states": [
+          "Other"
+        ]
+      },
+      {
+        "code": "NH-12A",
+        "contracts": 1,
+        "totalValue": "₹5.08 Cr",
+        "totalValueRaw": 50839647,
+        "states": [
+          "Madhya Pradesh"
+        ]
+      },
+      {
+        "code": "NH-730A",
+        "contracts": 1,
+        "totalValue": "₹62,786",
+        "totalValueRaw": 62786,
+        "states": [
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "NH-86",
+        "contracts": 1,
+        "totalValue": "₹11.12 Cr",
+        "totalValueRaw": 111161115,
+        "states": [
+          "Madhya Pradesh"
+        ]
+      },
+      {
+        "code": "NH-341",
+        "contracts": 1,
+        "totalValue": "₹65.48 L",
+        "totalValueRaw": 6547735,
+        "states": [
+          "Gujarat"
+        ]
+      },
+      {
+        "code": "NH-150E",
+        "contracts": 1,
+        "totalValue": "₹9.00 Cr",
+        "totalValueRaw": 90000000,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "NH-91",
+        "contracts": 1,
+        "totalValue": "₹45.82 Cr",
+        "totalValueRaw": 458231634,
+        "states": [
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "NH-552",
+        "contracts": 1,
+        "totalValue": "₹43,300",
+        "totalValueRaw": 43300,
+        "states": [
+          "Madhya Pradesh"
+        ]
+      },
+      {
+        "code": "NH-365B",
+        "contracts": 1,
+        "totalValue": "₹5.48 Cr",
+        "totalValueRaw": 54805151,
+        "states": [
+          "Telangana"
+        ]
+      },
+      {
+        "code": "NH-93",
+        "contracts": 1,
+        "totalValue": "₹13.06 Cr",
+        "totalValueRaw": 130609999,
+        "states": [
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "NH-509",
+        "contracts": 1,
+        "totalValue": "₹13.06 Cr",
+        "totalValueRaw": 130609999,
+        "states": [
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "NH-703B",
+        "contracts": 1,
+        "totalValue": "₹2.96 Cr",
+        "totalValueRaw": 29599999,
+        "states": [
+          "Punjab"
+        ]
+      },
+      {
+        "code": "NH-42",
+        "contracts": 1,
+        "totalValue": "₹11976.67 Cr",
+        "totalValueRaw": 119766666000,
+        "states": [
+          "Andhra Pradesh"
+        ]
+      },
+      {
+        "code": "NH-254",
+        "contracts": 1,
+        "totalValue": "₹84,999",
+        "totalValueRaw": 84999,
+        "states": [
+          "Punjab"
+        ]
+      },
+      {
+        "code": "NH-218",
+        "contracts": 1,
+        "totalValue": "₹37.63 Cr",
+        "totalValueRaw": 376320000,
+        "states": [
+          "Karnataka"
+        ]
+      },
+      {
+        "code": "NH-216",
+        "contracts": 1,
+        "totalValue": "₹2.86 L",
+        "totalValueRaw": 285785,
+        "states": [
+          "Andhra Pradesh"
+        ]
+      },
+      {
+        "code": "NH-117",
+        "contracts": 1,
+        "totalValue": "₹720.67 Cr",
+        "totalValueRaw": 7206700000,
+        "states": [
+          "West Bengal"
+        ]
+      },
+      {
+        "code": "NH-105B",
+        "contracts": 1,
+        "totalValue": "₹1.21 Cr",
+        "totalValueRaw": 12100777,
+        "states": [
+          "Punjab"
+        ]
+      },
+      {
+        "code": "NH-344GM",
+        "contracts": 1,
+        "totalValue": "₹691.00 Cr",
+        "totalValueRaw": 6910000000,
+        "states": [
+          "Haryana"
+        ]
+      },
+      {
+        "code": "NH-248BB",
+        "contracts": 1,
+        "totalValue": "₹35.13 L",
+        "totalValueRaw": 3512500,
+        "states": [
+          "Other"
+        ]
+      },
+      {
+        "code": "NH-17B",
+        "contracts": 1,
+        "totalValue": "₹2.35 Cr",
+        "totalValueRaw": 23523079,
+        "states": [
+          "Goa"
+        ]
+      },
+      {
+        "code": "NH-210",
+        "contracts": 1,
+        "totalValue": "₹29.58 Cr",
+        "totalValueRaw": 295791117,
+        "states": [
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-19",
+        "contracts": 1,
+        "totalValue": "₹21.44 Cr",
+        "totalValueRaw": 214400000,
+        "states": [
+          "Haryana"
+        ]
+      },
+      {
+        "code": "NH-561",
+        "contracts": 1,
+        "totalValue": "₹812.45 Cr",
+        "totalValueRaw": 8124500000,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "NH-4B",
+        "contracts": 1,
+        "totalValue": "₹29.16 Cr",
+        "totalValueRaw": 291557812.08,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "NH-146B",
+        "contracts": 1,
+        "totalValue": "₹5.53 Cr",
+        "totalValueRaw": 55290131,
+        "states": [
+          "Madhya Pradesh"
+        ]
+      },
+      {
+        "code": "NH-347",
+        "contracts": 1,
+        "totalValue": "₹4.23 Cr",
+        "totalValueRaw": 42334394.95,
+        "states": [
+          "Madhya Pradesh"
+        ]
+      },
+      {
+        "code": "NH-336",
+        "contracts": 1,
+        "totalValue": "₹13.02 Cr",
+        "totalValueRaw": 130247660,
+        "states": [
+          "Tamil Nadu"
+        ]
+      },
+      {
+        "code": "NH-8AD",
+        "contracts": 1,
+        "totalValue": "₹4.79 Cr",
+        "totalValueRaw": 47903130.4,
+        "states": [
+          "Gujarat"
+        ]
+      },
+      {
+        "code": "NH-86EXTN",
+        "contracts": 1,
+        "totalValue": "₹9.78 Cr",
+        "totalValueRaw": 97800000,
+        "states": [
+          "Madhya Pradesh"
+        ]
+      },
+      {
+        "code": "NH-148D",
+        "contracts": 1,
+        "totalValue": "₹3.29 Cr",
+        "totalValueRaw": 32888888,
+        "states": [
+          "Rajasthan"
+        ]
+      },
+      {
+        "code": "NH-122",
+        "contracts": 1,
+        "totalValue": "₹236.25 Cr",
+        "totalValueRaw": 2362500000,
+        "states": [
+          "Other"
+        ]
+      },
+      {
+        "code": "NH-148BB",
+        "contracts": 1,
+        "totalValue": "₹14.94 Cr",
+        "totalValueRaw": 149425381,
+        "states": [
+          "Punjab"
+        ]
+      },
+      {
+        "code": "NH-152A",
+        "contracts": 1,
+        "totalValue": "₹12.76 Cr",
+        "totalValueRaw": 127576627,
+        "states": [
+          "Punjab"
+        ]
+      }
+    ],
+    "sh": [
+      {
+        "code": "SH-42",
+        "contracts": 3,
+        "totalValue": "₹14.37 Cr",
+        "totalValueRaw": 143705374,
+        "states": [
+          "Assam",
+          "Telangana"
+        ]
+      },
+      {
+        "code": "SH-39",
+        "contracts": 2,
+        "totalValue": "₹4.48 Cr",
+        "totalValueRaw": 44802778.86,
+        "states": [
+          "Assam",
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "SH-12",
+        "contracts": 2,
+        "totalValue": "₹8.12 Cr",
+        "totalValueRaw": 81152077,
+        "states": [
+          "Bihar",
+          "Haryana"
+        ]
+      },
+      {
+        "code": "SH-1",
+        "contracts": 2,
+        "totalValue": "₹1500.47 Cr",
+        "totalValueRaw": 15004727500,
+        "states": [
+          "Telangana"
+        ]
+      },
+      {
+        "code": "SH-20",
+        "contracts": 2,
+        "totalValue": "₹1939.68 Cr",
+        "totalValueRaw": 19396780000,
+        "states": [
+          "Karnataka",
+          "Punjab"
+        ]
+      },
+      {
+        "code": "SH-25",
+        "contracts": 2,
+        "totalValue": "₹43.60 Cr",
+        "totalValueRaw": 435985216,
+        "states": [
+          "Punjab"
+        ]
+      },
+      {
+        "code": "SH-054",
+        "contracts": 1,
+        "totalValue": "₹25.47 L",
+        "totalValueRaw": 2547342.2,
+        "states": [
+          "Andhra Pradesh"
+        ]
+      },
+      {
+        "code": "SH-069",
+        "contracts": 1,
+        "totalValue": "₹25.95 L",
+        "totalValueRaw": 2595033.83,
+        "states": [
+          "Andhra Pradesh"
+        ]
+      },
+      {
+        "code": "SH-07",
+        "contracts": 1,
+        "totalValue": "₹15.00 L",
+        "totalValueRaw": 1500000,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "SH-253",
+        "contracts": 1,
+        "totalValue": "₹28.62 L",
+        "totalValueRaw": 2861581,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "SH-432",
+        "contracts": 1,
+        "totalValue": "₹28.62 L",
+        "totalValueRaw": 2861581,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "SH-17",
+        "contracts": 1,
+        "totalValue": "₹1.41 Cr",
+        "totalValueRaw": 14063271.98,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "SH-208",
+        "contracts": 1,
+        "totalValue": "₹25.75 L",
+        "totalValueRaw": 2575417.85,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "SH-182",
+        "contracts": 1,
+        "totalValue": "₹70.05 L",
+        "totalValueRaw": 7004877.47,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "SH-43",
+        "contracts": 1,
+        "totalValue": "₹88.21 L",
+        "totalValueRaw": 8821333,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "SH-435",
+        "contracts": 1,
+        "totalValue": "₹19.49 L",
+        "totalValueRaw": 1949092.048,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "SH-334",
+        "contracts": 1,
+        "totalValue": "₹29.50 L",
+        "totalValueRaw": 2950399.12,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "SH-263",
+        "contracts": 1,
+        "totalValue": "₹1.24 Cr",
+        "totalValueRaw": 12446254.8,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "SH-14",
+        "contracts": 1,
+        "totalValue": "₹14.50 L",
+        "totalValueRaw": 1450000,
+        "states": [
+          "Maharashtra"
+        ]
+      },
+      {
+        "code": "SH-47",
+        "contracts": 1,
+        "totalValue": "₹4.25 L",
+        "totalValueRaw": 424674.5,
+        "states": [
+          "Odisha"
+        ]
+      },
+      {
+        "code": "SH-19",
+        "contracts": 1,
+        "totalValue": "₹11.88 L",
+        "totalValueRaw": 1188405,
+        "states": [
+          "Odisha"
+        ]
+      },
+      {
+        "code": "SH-04",
+        "contracts": 1,
+        "totalValue": "₹26.67 L",
+        "totalValueRaw": 2666961,
+        "states": [
+          "West Bengal"
+        ]
+      },
+      {
+        "code": "SH-5",
+        "contracts": 1,
+        "totalValue": "₹4.97 L",
+        "totalValueRaw": 496872,
+        "states": [
+          "West Bengal"
+        ]
+      },
+      {
+        "code": "SH-63",
+        "contracts": 1,
+        "totalValue": "₹46.31 L",
+        "totalValueRaw": 4631166.59,
+        "states": [
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "SH-134",
+        "contracts": 1,
+        "totalValue": "₹25.37 L",
+        "totalValueRaw": 2536532.23,
+        "states": [
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "SH-130",
+        "contracts": 1,
+        "totalValue": "₹6.37 Cr",
+        "totalValueRaw": 63733153,
+        "states": [
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "SH-77",
+        "contracts": 1,
+        "totalValue": "₹50.83 L",
+        "totalValueRaw": 5083309.87,
+        "states": [
+          "Uttar Pradesh"
+        ]
+      },
+      {
+        "code": "SH-13",
+        "contracts": 1,
+        "totalValue": "₹3.19 Cr",
+        "totalValueRaw": 31893146,
+        "states": [
+          "Haryana"
+        ]
+      },
+      {
+        "code": "SH-71",
+        "contracts": 1,
+        "totalValue": "₹234.00 Cr",
+        "totalValueRaw": 2340000000,
+        "states": [
+          "Other"
+        ]
+      },
+      {
+        "code": "SH-22A",
+        "contracts": 1,
+        "totalValue": "₹55.88 Cr",
+        "totalValueRaw": 558800000,
+        "states": [
+          "Other"
+        ]
+      },
+      {
+        "code": "SH-9",
+        "contracts": 1,
+        "totalValue": "₹225.66 Cr",
+        "totalValueRaw": 2256588400,
+        "states": [
+          "Madhya Pradesh"
+        ]
+      },
+      {
+        "code": "SH-06",
+        "contracts": 1,
+        "totalValue": "₹1.70 Cr",
+        "totalValueRaw": 17034306.07,
+        "states": [
+          "Gujarat"
+        ]
+      },
+      {
+        "code": "SH-49",
+        "contracts": 1,
+        "totalValue": "₹69.90 Cr",
+        "totalValueRaw": 699000000,
+        "states": [
+          "Bihar"
+        ]
+      }
+    ]
+  },
+  "states": [
+    {
+      "state": "Andhra Pradesh",
+      "contracts": 90,
+      "totalValue": "₹21092.28 Cr",
+      "totalValueRaw": 210922799284.12
+    },
+    {
+      "state": "Telangana",
+      "contracts": 88,
+      "totalValue": "₹12103.67 Cr",
+      "totalValueRaw": 121036732950.57999
+    },
+    {
+      "state": "Punjab",
+      "contracts": 392,
+      "totalValue": "₹11576.14 Cr",
+      "totalValueRaw": 115761443858.4
+    },
+    {
+      "state": "Uttar Pradesh",
+      "contracts": 440,
+      "totalValue": "₹9183.87 Cr",
+      "totalValueRaw": 91838686464.01599
+    },
+    {
+      "state": "Maharashtra",
+      "contracts": 400,
+      "totalValue": "₹7994.14 Cr",
+      "totalValueRaw": 79941398435.232
+    },
+    {
+      "state": "Bihar",
+      "contracts": 33,
+      "totalValue": "₹6230.68 Cr",
+      "totalValueRaw": 62306842604
+    },
+    {
+      "state": "Haryana",
+      "contracts": 392,
+      "totalValue": "₹5941.15 Cr",
+      "totalValueRaw": 59411462379.193
+    },
+    {
+      "state": "Himachal Pradesh",
+      "contracts": 214,
+      "totalValue": "₹5524.02 Cr",
+      "totalValueRaw": 55240237539.08
+    },
+    {
+      "state": "Madhya Pradesh",
+      "contracts": 244,
+      "totalValue": "₹5033.66 Cr",
+      "totalValueRaw": 50336589468.47599
+    },
+    {
+      "state": "Odisha",
+      "contracts": 163,
+      "totalValue": "₹4571.06 Cr",
+      "totalValueRaw": 45710591003.285995
+    },
+    {
+      "state": "Chhattisgarh",
+      "contracts": 27,
+      "totalValue": "₹4398.01 Cr",
+      "totalValueRaw": 43980104325
+    },
+    {
+      "state": "Tamil Nadu",
+      "contracts": 393,
+      "totalValue": "₹4393.81 Cr",
+      "totalValueRaw": 43938069114.78
+    },
+    {
+      "state": "Karnataka",
+      "contracts": 16,
+      "totalValue": "₹2709.75 Cr",
+      "totalValueRaw": 27097535992
+    },
+    {
+      "state": "Gujarat",
+      "contracts": 95,
+      "totalValue": "₹2268.69 Cr",
+      "totalValueRaw": 22686858727.085197
+    },
+    {
+      "state": "Uttarakhand",
+      "contracts": 75,
+      "totalValue": "₹1989.23 Cr",
+      "totalValueRaw": 19892346756.320004
+    },
+    {
+      "state": "Rajasthan",
+      "contracts": 92,
+      "totalValue": "₹1263.84 Cr",
+      "totalValueRaw": 12638399722.05
+    },
+    {
+      "state": "West Bengal",
+      "contracts": 258,
+      "totalValue": "₹1048.28 Cr",
+      "totalValueRaw": 10482812284.965
+    },
+    {
+      "state": "Goa",
+      "contracts": 20,
+      "totalValue": "₹927.37 Cr",
+      "totalValueRaw": 9273664221.79
+    },
+    {
+      "state": "Kerala",
+      "contracts": 239,
+      "totalValue": "₹661.56 Cr",
+      "totalValueRaw": 6615602383.36
+    },
+    {
+      "state": "Jharkhand",
+      "contracts": 90,
+      "totalValue": "₹660.30 Cr",
+      "totalValueRaw": 6602965855.74
+    },
+    {
+      "state": "Assam",
+      "contracts": 117,
+      "totalValue": "₹393.90 Cr",
+      "totalValueRaw": 3938981901.299999
+    },
+    {
+      "state": "Arunachal Pradesh",
+      "contracts": 12,
+      "totalValue": "₹194.33 Cr",
+      "totalValueRaw": 1943254450.76
+    },
+    {
+      "state": "Meghalaya",
+      "contracts": 3,
+      "totalValue": "₹151.91 Cr",
+      "totalValueRaw": 1519125135.892
+    },
+    {
+      "state": "Tripura",
+      "contracts": 125,
+      "totalValue": "₹67.51 Cr",
+      "totalValueRaw": 675097801.0400001
+    },
+    {
+      "state": "Nagaland",
+      "contracts": 1,
+      "totalValue": "₹40.52 Cr",
+      "totalValueRaw": 405211000
+    },
+    {
+      "state": "Mizoram",
+      "contracts": 1,
+      "totalValue": "₹31.24 Cr",
+      "totalValueRaw": 312438584
+    },
+    {
+      "state": "Manipur",
+      "contracts": 5,
+      "totalValue": "₹14.68 Cr",
+      "totalValueRaw": 146761309.26
+    }
+  ]
+}

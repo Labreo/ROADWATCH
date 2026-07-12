@@ -5,6 +5,7 @@ import "@/styles/a11y.css";
 import ResponsiveShell from "@/components/shared/ResponsiveShell";
 import A11yRootProvider from "@/components/shared/A11yRootProvider";
 import SkipLink from "@/components/shared/SkipLink";
+import FloatingChatWidget from "@/components/chat/FloatingChatWidget";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,6 +42,7 @@ export default function RootLayout({
         <A11yRootProvider>
           <ResponsiveShell>{children}</ResponsiveShell>
         </A11yRootProvider>
+        <FloatingChatWidget />
       </body>
     </html>
   );
