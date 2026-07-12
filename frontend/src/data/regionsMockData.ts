@@ -7,10 +7,10 @@ import { Road, Authority, Contractor, Project, Complaint } from '@/types';
 
 // --- INDIA (existing data consolidated) ---
 export const indiaRoads: Road[] = [
-  { id: 1, name: 'Western Express Highway', roadCode: 'WEH-NH8', status: 'under_construction', lengthKm: 25.50, authorityId: 101, lastRelayingDate: '2025-06-01', geometry: { type: 'LineString', coordinates: [[72.8524, 19.1012], [72.8530, 19.1340], [72.8590, 19.1860], [72.8610, 19.2300]] } },
-  { id: 2, name: 'S.V. Road', roadCode: 'SV-RD-01', status: 'poor', lengthKm: 16.80, authorityId: 102, lastRelayingDate: '2023-10-05', geometry: { type: 'LineString', coordinates: [[72.8354, 19.0601], [72.8360, 19.1020], [72.8398, 19.1620], [72.8450, 19.2080]] } },
-  { id: 3, name: 'Eastern Express Highway', roadCode: 'EEH-SH3', status: 'fair', lengthKm: 22.10, authorityId: 103, lastRelayingDate: '2025-11-12', geometry: { type: 'LineString', coordinates: [[72.9210, 19.0410], [72.9340, 19.1020], [72.9460, 19.1680], [72.9610, 19.2150]] } },
-  { id: 4, name: 'Ghodbunder Road', roadCode: 'GB-SH42', status: 'good', lengthKm: 20.00, authorityId: 103, lastRelayingDate: '2024-12-25', geometry: { type: 'LineString', coordinates: [[72.9550, 19.2220], [72.9310, 19.2520], [72.8990, 19.2680], [72.8680, 19.2810]] } },
+  { id: 1, name: 'Western Express Highway', roadCode: 'WEH-NH8', roadType: 'NH', status: 'under_construction', lengthKm: 25.50, authorityId: 101, lastRelayingDate: '2025-06-01', geometry: { type: 'LineString', coordinates: [[72.8524, 19.1012], [72.8530, 19.1340], [72.8590, 19.1860], [72.8610, 19.2300]] } },
+  { id: 2, name: 'S.V. Road', roadCode: 'SV-RD-01', roadType: 'MDR', status: 'poor', lengthKm: 16.80, authorityId: 102, lastRelayingDate: '2023-10-05', geometry: { type: 'LineString', coordinates: [[72.8354, 19.0601], [72.8360, 19.1020], [72.8398, 19.1620], [72.8450, 19.2080]] } },
+  { id: 3, name: 'Eastern Express Highway', roadCode: 'EEH-SH3', roadType: 'SH', status: 'fair', lengthKm: 22.10, authorityId: 103, lastRelayingDate: '2025-11-12', geometry: { type: 'LineString', coordinates: [[72.9210, 19.0410], [72.9340, 19.1020], [72.9460, 19.1680], [72.9610, 19.2150]] } },
+  { id: 4, name: 'Ghodbunder Road', roadCode: 'GB-SH42', roadType: 'SH', status: 'good', lengthKm: 20.00, authorityId: 103, lastRelayingDate: '2024-12-25', geometry: { type: 'LineString', coordinates: [[72.9550, 19.2220], [72.9310, 19.2520], [72.8990, 19.2680], [72.8680, 19.2810]] } },
 ];
 
 export const indiaAuthorities: Authority[] = [
@@ -33,10 +33,10 @@ export const indiaProjects: Project[] = [
 
 // --- UNITED KINGDOM ---
 export const ukRoads: Road[] = [
-  { id: 201, name: 'M25 Orbital Motorway', roadCode: 'M25', status: 'fair', lengthKm: 188.50, authorityId: 201, lastRelayingDate: '2024-08-15', geometry: { type: 'LineString', coordinates: [[-0.3500, 51.6500], [-0.3100, 51.6200], [-0.2500, 51.5800], [-0.1800, 51.5400]] } },
-  { id: 202, name: 'A406 North Circular Road', roadCode: 'A406', status: 'poor', lengthKm: 25.70, authorityId: 202, lastRelayingDate: '2022-11-03', geometry: { type: 'LineString', coordinates: [[-0.2800, 51.5550], [-0.2400, 51.5700], [-0.1900, 51.5850], [-0.1400, 51.6000]] } },
-  { id: 203, name: 'A1 Great North Road', roadCode: 'A1', status: 'good', lengthKm: 410.00, authorityId: 201, lastRelayingDate: '2025-03-20', geometry: { type: 'LineString', coordinates: [[-0.1200, 51.5200], [-0.1000, 51.5800], [-0.0800, 51.6500], [-0.0500, 51.7200]] } },
-  { id: 204, name: 'M1 Motorway', roadCode: 'M1', status: 'fair', lengthKm: 310.00, authorityId: 201, lastRelayingDate: '2024-12-01', geometry: { type: 'LineString', coordinates: [[-0.2800, 51.6100], [-0.3500, 51.7000], [-0.4200, 51.8000], [-0.5000, 51.9000]] } },
+  { id: 201, name: 'M25 Orbital Motorway', roadCode: 'M25', roadType: 'Motorway', status: 'fair', lengthKm: 188.50, authorityId: 201, lastRelayingDate: '2024-08-15', geometry: { type: 'LineString', coordinates: [[-0.3500, 51.6500], [-0.3100, 51.6200], [-0.2500, 51.5800], [-0.1800, 51.5400]] } },
+  { id: 202, name: 'A406 North Circular Road', roadCode: 'A406', roadType: 'A-Road', status: 'poor', lengthKm: 25.70, authorityId: 202, lastRelayingDate: '2022-11-03', geometry: { type: 'LineString', coordinates: [[-0.2800, 51.5550], [-0.2400, 51.5700], [-0.1900, 51.5850], [-0.1400, 51.6000]] } },
+  { id: 203, name: 'A1 Great North Road', roadCode: 'A1', roadType: 'A-Road', status: 'good', lengthKm: 410.00, authorityId: 201, lastRelayingDate: '2025-03-20', geometry: { type: 'LineString', coordinates: [[-0.1200, 51.5200], [-0.1000, 51.5800], [-0.0800, 51.6500], [-0.0500, 51.7200]] } },
+  { id: 204, name: 'M1 Motorway', roadCode: 'M1', roadType: 'Motorway', status: 'fair', lengthKm: 310.00, authorityId: 201, lastRelayingDate: '2024-12-01', geometry: { type: 'LineString', coordinates: [[-0.2800, 51.6100], [-0.3500, 51.7000], [-0.4200, 51.8000], [-0.5000, 51.9000]] } },
 ];
 
 export const ukAuthorities: Authority[] = [
@@ -59,10 +59,10 @@ export const ukProjects: Project[] = [
 
 // --- UNITED STATES ---
 export const usRoads: Road[] = [
-  { id: 301, name: 'I-94 Edsel Ford Freeway', roadCode: 'I-94', status: 'fair', lengthKm: 45.20, authorityId: 301, lastRelayingDate: '2024-06-10', geometry: { type: 'LineString', coordinates: [[-83.1000, 42.3200], [-83.0400, 42.3500], [-82.9600, 42.3800], [-82.8800, 42.4100]] } },
-  { id: 302, name: 'M-1 Woodward Avenue', roadCode: 'M-1', status: 'poor', lengthKm: 21.30, authorityId: 302, lastRelayingDate: '2022-04-22', geometry: { type: 'LineString', coordinates: [[-83.0600, 42.3400], [-83.0680, 42.3800], [-83.0800, 42.4200], [-83.0900, 42.4600]] } },
-  { id: 303, name: 'I-75 Fisher Freeway', roadCode: 'I-75', status: 'good', lengthKm: 62.80, authorityId: 301, lastRelayingDate: '2025-09-05', geometry: { type: 'LineString', coordinates: [[-83.0500, 42.2500], [-83.0700, 42.3100], [-83.1000, 42.3700], [-83.1300, 42.4300]] } },
-  { id: 304, name: 'US-12 Michigan Avenue', roadCode: 'US-12', status: 'fair', lengthKm: 28.60, authorityId: 302, lastRelayingDate: '2024-11-15', geometry: { type: 'LineString', coordinates: [[-83.1500, 42.3000], [-83.1000, 42.3150], [-83.0400, 42.3300], [-82.9800, 42.3450]] } },
+  { id: 301, name: 'I-94 Edsel Ford Freeway', roadCode: 'I-94', roadType: 'Interstate', status: 'fair', lengthKm: 45.20, authorityId: 301, lastRelayingDate: '2024-06-10', geometry: { type: 'LineString', coordinates: [[-83.1000, 42.3200], [-83.0400, 42.3500], [-82.9600, 42.3800], [-82.8800, 42.4100]] } },
+  { id: 302, name: 'M-1 Woodward Avenue', roadCode: 'M-1', roadType: 'State-Highway', status: 'poor', lengthKm: 21.30, authorityId: 302, lastRelayingDate: '2022-04-22', geometry: { type: 'LineString', coordinates: [[-83.0600, 42.3400], [-83.0680, 42.3800], [-83.0800, 42.4200], [-83.0900, 42.4600]] } },
+  { id: 303, name: 'I-75 Fisher Freeway', roadCode: 'I-75', roadType: 'Interstate', status: 'good', lengthKm: 62.80, authorityId: 301, lastRelayingDate: '2025-09-05', geometry: { type: 'LineString', coordinates: [[-83.0500, 42.2500], [-83.0700, 42.3100], [-83.1000, 42.3700], [-83.1300, 42.4300]] } },
+  { id: 304, name: 'US-12 Michigan Avenue', roadCode: 'US-12', roadType: 'US-Highway', status: 'fair', lengthKm: 28.60, authorityId: 302, lastRelayingDate: '2024-11-15', geometry: { type: 'LineString', coordinates: [[-83.1500, 42.3000], [-83.1000, 42.3150], [-83.0400, 42.3300], [-82.9800, 42.3450]] } },
 ];
 
 export const usAuthorities: Authority[] = [
@@ -85,10 +85,10 @@ export const usProjects: Project[] = [
 
 // --- KENYA ---
 export const keRoads: Road[] = [
-  { id: 401, name: 'A104 Nairobi-Nakuru Highway', roadCode: 'A104', status: 'poor', lengthKm: 160.00, authorityId: 401, lastRelayingDate: '2021-08-20', geometry: { type: 'LineString', coordinates: [[36.8200, -1.2800], [36.7500, -1.1000], [36.6500, -0.8500], [36.5500, -0.6000]] } },
-  { id: 402, name: 'A109 Mombasa Road', roadCode: 'A109', status: 'fair', lengthKm: 480.00, authorityId: 401, lastRelayingDate: '2024-02-10', geometry: { type: 'LineString', coordinates: [[36.8300, -1.3200], [36.9000, -1.3500], [37.0000, -1.4000], [37.1500, -1.4500]] } },
-  { id: 403, name: 'B3 Thika Road', roadCode: 'B3', status: 'good', lengthKm: 45.00, authorityId: 402, lastRelayingDate: '2025-07-01', geometry: { type: 'LineString', coordinates: [[36.8600, -1.2300], [36.9100, -1.1800], [36.9700, -1.1200], [37.0200, -1.0600]] } },
-  { id: 404, name: 'C62 Kiambu Road', roadCode: 'C62', status: 'fair', lengthKm: 22.50, authorityId: 403, lastRelayingDate: '2024-10-05', geometry: { type: 'LineString', coordinates: [[36.8000, -1.2200], [36.7900, -1.1700], [36.7800, -1.1200], [36.7700, -1.0700]] } },
+  { id: 401, name: 'A104 Nairobi-Nakuru Highway', roadCode: 'A104', roadType: 'A-Road', status: 'poor', lengthKm: 160.00, authorityId: 401, lastRelayingDate: '2021-08-20', geometry: { type: 'LineString', coordinates: [[36.8200, -1.2800], [36.7500, -1.1000], [36.6500, -0.8500], [36.5500, -0.6000]] } },
+  { id: 402, name: 'A109 Mombasa Road', roadCode: 'A109', roadType: 'A-Road', status: 'fair', lengthKm: 480.00, authorityId: 401, lastRelayingDate: '2024-02-10', geometry: { type: 'LineString', coordinates: [[36.8300, -1.3200], [36.9000, -1.3500], [37.0000, -1.4000], [37.1500, -1.4500]] } },
+  { id: 403, name: 'B3 Thika Road', roadCode: 'B3', roadType: 'B-Road', status: 'good', lengthKm: 45.00, authorityId: 402, lastRelayingDate: '2025-07-01', geometry: { type: 'LineString', coordinates: [[36.8600, -1.2300], [36.9100, -1.1800], [36.9700, -1.1200], [37.0200, -1.0600]] } },
+  { id: 404, name: 'C62 Kiambu Road', roadCode: 'C62', roadType: 'C-Road', status: 'fair', lengthKm: 22.50, authorityId: 403, lastRelayingDate: '2024-10-05', geometry: { type: 'LineString', coordinates: [[36.8000, -1.2200], [36.7900, -1.1700], [36.7800, -1.1200], [36.7700, -1.0700]] } },
 ];
 
 export const keAuthorities: Authority[] = [

@@ -97,11 +97,24 @@ function UtilityCrossSection({ road }: { road: Road }) {
   );
 }
 
-// Decodes road category types based on code structures
-const getRoadType = (roadCode: string) => {
-  if (roadCode.includes('NH')) return 'National Highway';
-  if (roadCode.includes('SH')) return 'State Highway';
-  return 'Arterial Local Road';
+// Road type label map
+const ROAD_TYPE_LABELS: Record<string, string> = {
+  'NH': 'National Highway (NH)',
+  'SH': 'State Highway (SH)',
+  'MDR': 'Major District Road (MDR)',
+  'MCR': 'Minor Collector Road (MCR)',
+  'ODR': 'Other District Road (ODR)',
+  'VR': 'Village Road (VR)',
+  'City': 'City Road',
+  'Interstate': 'Interstate Highway (US)',
+  'US-Highway': 'US Highway',
+  'State-Highway': 'State Highway',
+  'Local': 'Local Road',
+  'Motorway': 'Motorway (UK)',
+  'A-Road': 'A-Road (UK)',
+  'B-Road': 'B-Road (UK)',
+  'C-Road': 'C-Road (UK)',
+  'Urban': 'Urban Road',
 };
 
 // Renders visual star rating blocks for contractor reliability
@@ -177,7 +190,7 @@ export default function RoadDetailsPanel() {
           </div>
           <div className="flex flex-col gap-1">
             <p className="mono-label text-[9px] tracking-wider text-cyan-550/70">
-              CLASSIFICATION: <span className="text-slate-250 font-bold tracking-normal uppercase text-[9px]">{getRoadType(road.roadCode)}</span>
+              CLASSIFICATION: <span className="text-slate-250 font-bold tracking-normal uppercase text-[9px]">{ROAD_TYPE_LABELS[road.roadType] || road.roadType}</span>
             </p>
             <p className="mono-label text-[9px] tracking-wider text-cyan-500/60">
               LENGTH: <span className="mono-readout text-[10px] text-slate-200">{road.lengthKm} KM</span>

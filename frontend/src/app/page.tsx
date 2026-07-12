@@ -582,6 +582,9 @@ export default function Page() {
                         <span className="text-[8.5px] font-mono font-bold text-cyan-400 bg-cyan-950/30 border border-cyan-900/40 px-1.5 py-0.5 rounded tracking-wider uppercase">
                           {road.roadCode}
                         </span>
+                        <span className="text-[7px] font-mono font-bold text-slate-500 bg-slate-900 border border-border/60 px-1 py-0.5 rounded tracking-wider uppercase">
+                          {road.roadType}
+                        </span>
                         <span className={`text-[8px] font-extrabold uppercase border px-1.5 py-0.2 rounded tracking-wide ${getStatusTextClass(road.status)}`}>
                           {road.status.replace('_', ' ')}
                         </span>
@@ -705,6 +708,7 @@ export default function Page() {
                     >
                       <div className="flex justify-between items-center mb-1.5 gap-2">
                         <span className="text-[8.5px] font-mono font-bold text-cyan-400 bg-cyan-950/30 border border-cyan-900/40 px-1.5 py-0.5 rounded tracking-wider uppercase">{road.roadCode}</span>
+                        <span className="text-[7px] font-mono font-bold text-slate-500 bg-slate-900 border border-border/60 px-1 py-0.5 rounded tracking-wider uppercase">{road.roadType}</span>
                         <span className={`text-[8px] font-extrabold uppercase border px-1.5 py-0.2 rounded tracking-wide ${getStatusTextClass(road.status)}`}>
                           {road.status.replace('_', ' ')}
                         </span>
@@ -962,6 +966,7 @@ export default function Page() {
                     <div className="space-y-1.5 max-w-[220px]">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-[8px] bg-slate-800 text-slate-400 font-bold px-1.5 py-0.2 rounded border border-border/50 uppercase">{road.roadCode}</span>
+                        <span className="text-[6.5px] bg-slate-900 text-slate-600 font-bold px-1 py-0.2 rounded border border-border/40 uppercase">{road.roadType}</span>
                         {hasAnomalies && (
                           <span className={`w-1.5 h-1.5 rounded-full ${hasHighAnomaly ? 'bg-red-550 animate-pulse' : 'bg-orange-500'}`}></span>
                         )}

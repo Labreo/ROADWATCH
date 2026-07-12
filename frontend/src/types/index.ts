@@ -40,6 +40,7 @@ export interface Road {
   id: number;
   name: string;
   roadCode: string;
+  roadType: 'NH' | 'SH' | 'MDR' | 'MCR' | 'ODR' | 'VR' | 'City' | 'Interstate' | 'US-Highway' | 'State-Highway' | 'Local' | 'Motorway' | 'A-Road' | 'B-Road' | 'C-Road' | 'Urban';
   status: RoadStatus;
   lengthKm: number;
   authorityId: number;
