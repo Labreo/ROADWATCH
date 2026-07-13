@@ -55,32 +55,32 @@ INSERT INTO authorities (name, department_code, contact_email, contact_phone, re
 -- =========================================================================
 -- 2. CONTRACTORS (21 rows: 12 IN + 3 US + 3 GB + 3 KE)
 -- =========================================================================
-INSERT INTO contractors (name, license_number, registration_date, contact_email, contact_phone, rating, projects_completed, projects_delayed, blacklisted, blacklisted_reason) VALUES
+INSERT INTO contractors (name, license_number, registration_date, contact_email, contact_phone, rating, projects_completed, projects_delayed, blacklisted, blacklisted_reason, contractor_code) VALUES
 -- IN (12)
-('Apex Infrastructure Ltd', 'LIC-IN-001', '2015-04-12', 'contact@apexinfra.in', '+91-22-61234567', 4.25, 24, 2, FALSE, NULL),
-('BuildWell Roadways Ltd', 'LIC-IN-002', '2018-09-20', 'projects@buildwell.in', '+91-22-68919988', 3.80, 18, 4, FALSE, NULL),
-('Zenith Construction Co', 'LIC-IN-003', '2012-01-15', 'tenders@zenithcon.in', '+91-22-55558888', 4.50, 42, 1, FALSE, NULL),
-('Shiva Earthmovers Pvt Ltd', 'LIC-IN-004', '2020-06-30', 'ops@shivaearth.in', '+91-9820011223', 2.10, 8, 5, FALSE, NULL),
-('Landmark Infra Projects', 'LIC-IN-005', '2019-11-05', 'info@landmarkinfra.in', '+91-22-25911020', 3.90, 15, 2, FALSE, NULL),
-('Metro Highway Consultants', 'LIC-IN-006', '2014-03-22', 'contact@metrohighway.in', '+91-22-40900909', 4.60, 31, 0, FALSE, NULL),
-('Coastal Paving Solutions', 'LIC-IN-007', '2021-02-18', 'ops@coastalpaving.in', '+91-22-88123456', 4.10, 6, 2, FALSE, NULL),
-('Bharat Roads & Infra', 'LIC-IN-008', '2010-05-05', 'contact@bharatroads.in', '+91-22-26511234', 4.75, 85, 3, FALSE, NULL),
-('Skyline Developers Ltd', 'LIC-IN-009', '2022-08-14', 'bids@skylinedev.in', '+91-9930088899', 3.40, 4, 1, FALSE, NULL),
-('Omega Infrastructure Corp', 'LIC-IN-010', '2016-10-10', 'legal@omegacorp.in', '+91-22-67129900', 1.80, 12, 8, TRUE, 'Failure to complete SV Road drainage project inside contract timelines; substandard materials causing surface peeling within 3 months.'),
-('Precision Asphalt Works', 'LIC-IN-011', '2023-01-20', 'contact@precisionasphalt.in', '+91-9004055112', 4.00, 3, 0, FALSE, NULL),
-('Pioneer Engineering Corp', 'LIC-IN-012', '2017-07-07', 'pioneer@pioneereng.in', '+91-22-28776655', 3.20, 14, 4, FALSE, NULL),
+('Apex Infrastructure Ltd', 'LIC-IN-001', '2015-04-12', 'contact@apexinfra.in', '+91-22-61234567', 4.25, 24, 2, FALSE, NULL, 'CON-00001'),
+('BuildWell Roadways Ltd', 'LIC-IN-002', '2018-09-20', 'projects@buildwell.in', '+91-22-68919988', 3.80, 18, 4, FALSE, NULL, 'CON-00002'),
+('Zenith Construction Co', 'LIC-IN-003', '2012-01-15', 'tenders@zenithcon.in', '+91-22-55558888', 4.50, 42, 1, FALSE, NULL, 'CON-00003'),
+('Shiva Earthmovers Pvt Ltd', 'LIC-IN-004', '2020-06-30', 'ops@shivaearth.in', '+91-9820011223', 2.10, 8, 5, FALSE, NULL, 'CON-00004'),
+('Landmark Infra Projects', 'LIC-IN-005', '2019-11-05', 'info@landmarkinfra.in', '+91-22-25911020', 3.90, 15, 2, FALSE, NULL, 'CON-00005'),
+('Metro Highway Consultants', 'LIC-IN-006', '2014-03-22', 'contact@metrohighway.in', '+91-22-40900909', 4.60, 31, 0, FALSE, NULL, 'CON-00006'),
+('Coastal Paving Solutions', 'LIC-IN-007', '2021-02-18', 'ops@coastalpaving.in', '+91-22-88123456', 4.10, 6, 2, FALSE, NULL, 'CON-00007'),
+('Bharat Roads & Infra', 'LIC-IN-008', '2010-05-05', 'contact@bharatroads.in', '+91-22-26511234', 4.75, 85, 3, FALSE, NULL, 'CON-00008'),
+('Skyline Developers Ltd', 'LIC-IN-009', '2022-08-14', 'bids@skylinedev.in', '+91-9930088899', 3.40, 4, 1, FALSE, NULL, 'CON-00009'),
+('Omega Infrastructure Corp', 'LIC-IN-010', '2016-10-10', 'legal@omegacorp.in', '+91-22-67129900', 1.80, 12, 8, TRUE, 'Failure to complete SV Road drainage project inside contract timelines; substandard materials causing surface peeling within 3 months.', 'CON-00010'),
+('Precision Asphalt Works', 'LIC-IN-011', '2023-01-20', 'contact@precisionasphalt.in', '+91-9004055112', 4.00, 3, 0, FALSE, NULL, 'CON-00011'),
+('Pioneer Engineering Corp', 'LIC-IN-012', '2017-07-07', 'pioneer@pioneereng.in', '+91-22-28776655', 3.20, 14, 4, FALSE, NULL, 'CON-00012'),
 -- US (3)
-('Great Lakes Infrastructure LLC', 'LIC-US-001', '2018-03-15', 'bids@greatlakesinfra.com', '+1-313-555-0101', 4.30, 35, 2, FALSE, NULL),
-('Michigan Paving Company', 'LIC-US-002', '2019-07-22', 'ops@michiganpaving.com', '+1-313-555-0102', 3.90, 22, 3, FALSE, NULL),
-('Detroit Roads Alliance', 'LIC-US-003', '2020-01-10', 'contracts@detroitroads.org', '+1-313-555-0103', 2.50, 10, 5, TRUE, 'Failure to complete I-94 resurfacing within contract timeline; substandard asphalt quality.'),
+('Great Lakes Infrastructure LLC', 'LIC-US-001', '2018-03-15', 'bids@greatlakesinfra.com', '+1-313-555-0101', 4.30, 35, 2, FALSE, NULL, 'CON-00013'),
+('Michigan Paving Company', 'LIC-US-002', '2019-07-22', 'ops@michiganpaving.com', '+1-313-555-0102', 3.90, 22, 3, FALSE, NULL, 'CON-00014'),
+('Detroit Roads Alliance', 'LIC-US-003', '2020-01-10', 'contracts@detroitroads.org', '+1-313-555-0103', 2.50, 10, 5, TRUE, 'Failure to complete I-94 resurfacing within contract timeline; substandard asphalt quality.', 'CON-00015'),
 -- GB (3)
-('Thames Highway Services', 'LIC-GB-001', '2016-11-01', 'tenders@thameshighways.co.uk', '+44-20-79460101', 4.50, 48, 1, FALSE, NULL),
-('Camden Civils Ltd', 'LIC-GB-002', '2021-02-14', 'projects@camdencivils.co.uk', '+44-20-79460102', 4.10, 12, 1, FALSE, NULL),
-('London Asphalt Works', 'LIC-GB-003', '2017-09-05', 'info@londonasphalt.co.uk', '+44-20-79460103', 3.60, 28, 6, FALSE, NULL),
+('Thames Highway Services', 'LIC-GB-001', '2016-11-01', 'tenders@thameshighways.co.uk', '+44-20-79460101', 4.50, 48, 1, FALSE, NULL, 'CON-00016'),
+('Camden Civils Ltd', 'LIC-GB-002', '2021-02-14', 'projects@camdencivils.co.uk', '+44-20-79460102', 4.10, 12, 1, FALSE, NULL, 'CON-00017'),
+('London Asphalt Works', 'LIC-GB-003', '2017-09-05', 'info@londonasphalt.co.uk', '+44-20-79460103', 3.60, 28, 6, FALSE, NULL, 'CON-00018'),
 -- KE (3)
-('Nairobi Road Builders Ltd', 'LIC-KE-001', '2015-05-20', 'info@nairobiroadbuilders.co.ke', '+254-20-5550101', 4.20, 30, 3, FALSE, NULL),
-('Kenya Infrastructure Co Ltd', 'LIC-KE-002', '2018-08-12', 'tenders@kenyainfra.co.ke', '+254-20-5550102', 3.80, 18, 4, FALSE, NULL),
-('Mombasa Roadworks Ltd', 'LIC-KE-003', '2020-03-30', 'projects@mombasaroadworks.co.ke', '+254-20-5550103', 2.80, 8, 5, FALSE, NULL);
+('Nairobi Road Builders Ltd', 'LIC-KE-001', '2015-05-20', 'info@nairobiroadbuilders.co.ke', '+254-20-5550101', 4.20, 30, 3, FALSE, NULL, 'CON-00019'),
+('Kenya Infrastructure Co Ltd', 'LIC-KE-002', '2018-08-12', 'tenders@kenyainfra.co.ke', '+254-20-5550102', 3.80, 18, 4, FALSE, NULL, 'CON-00020'),
+('Mombasa Roadworks Ltd', 'LIC-KE-003', '2020-03-30', 'projects@mombasaroadworks.co.ke', '+254-20-5550103', 2.80, 8, 5, FALSE, NULL, 'CON-00021');
 
 -- =========================================================================
 -- 3. ROADS (22 rows: 8 IN + 4 US + 4 GB + 6 KE)

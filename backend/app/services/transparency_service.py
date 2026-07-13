@@ -127,7 +127,7 @@ def calculate_vfm_index(road_id: int) -> dict | None:
     projects = StructuredRoadRetriever.get_road_projects(road_id) or []
     complaints = StructuredRoadRetriever.get_road_complaints(road_id) or []
 
-    total_spent = sum(p['budget_spent'] or 0 for p in projects)
+    total_spent = float(sum(p['budget_spent'] or 0 for p in projects))
     length_km = float(road['length_km'])
 
     if length_km == 0 or total_spent == 0:

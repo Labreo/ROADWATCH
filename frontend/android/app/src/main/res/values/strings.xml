@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ROADWATCH</string>
+    <string name="title_activity_main">ROADWATCH</string>
+    <string name="package_name">com.roadwatch.civic</string>
+    <string name="custom_url_scheme">com.roadwatch.civic</string>
+</resources>

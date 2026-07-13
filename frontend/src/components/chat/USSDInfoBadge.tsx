@@ -13,13 +13,14 @@ export default function USSDInfoBadge() {
       <button
         onClick={() => setExpanded(!expanded)}
         className="flex items-center gap-1.5 px-2 py-1 rounded-lg border border-cyan-700/30 bg-cyan-950/30 hover:bg-cyan-900/40 text-cyan-300 hover:text-cyan-200 transition-all shrink-0 cursor-pointer text-[10px] font-semibold tracking-wide"
-        title="USSD access for feature phones"
-        aria-label={`USSD shortcode: ${USSD_SHORTCODE}. Click for details.`}
+        title="Simulated USSD gateway for feature phones (demo)"
+        aria-label={`Simulated USSD shortcode: ${USSD_SHORTCODE}. Click for details.`}
         aria-expanded={expanded}
       >
         <Phone className="w-3 h-3" />
         <span className="hidden sm:inline">{USSD_SHORTCODE}</span>
         <span className="sm:hidden">USSD</span>
+        <span className="text-[7px] font-black text-amber-400 bg-amber-500/10 border border-amber-500/30 px-1 rounded-full tracking-wider ml-0.5">SIM</span>
         <ChevronDown className={`w-2.5 h-2.5 transition-transform ${expanded ? 'rotate-180' : ''}`} />
       </button>
 
@@ -40,7 +41,7 @@ export default function USSDInfoBadge() {
                     <Phone className="w-3.5 h-3.5" />
                   </div>
                   <span className="text-xs font-bold text-cyan-300 tracking-wider uppercase">
-                    No Internet?
+                    No Internet? <span className="text-[8px] text-amber-400 font-black ml-1">SIMULATED</span>
                   </span>
                 </div>
                 <button
@@ -53,8 +54,8 @@ export default function USSDInfoBadge() {
               </div>
 
               <p className="text-[11px] text-slate-300 leading-relaxed">
-                Dial <code className="px-1.5 py-0.5 rounded bg-slate-800 text-cyan-300 font-mono text-[10px] font-bold">{USSD_SHORTCODE}</code>{' '}
-                from any phone to access ROADWATCH:
+                <strong className="text-amber-400">Demo simulation:</strong> Dial <code className="px-1.5 py-0.5 rounded bg-slate-800 text-cyan-300 font-mono text-[10px] font-bold">{USSD_SHORTCODE}</code>{' '}
+                from any phone to access ROADWATCH (in production, a telecom gateway would handle this):
               </p>
 
               <div className="space-y-1.5 text-[11px]">

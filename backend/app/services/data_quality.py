@@ -197,3 +197,193 @@ class DataQualityService:
             'details': checks,
             'label': f'{consistency_score}% consistent',
         }
+
+
+def score_road(road_id: int) -> dict | None:
+    """Compute data quality score for a single road."""
+    sql = """
+    SELECT r.id, r.name, r.road_code, r.length_km, r.road_type, ST_AsText(r.geom) as geom_wkt, r.contractor_id, r.last_relaying_date, r.updated_at, a.region_code
+    FROM roads r
+    LEFT JOIN authorities a ON r.authority_id = a.id
+    WHERE r.id = %s
+    """
+    rows = db.query(sql, (road_id,))
+    if not rows:
+        return None
+    road = rows[0]
+
+    # 1. Completeness (max 25)
+    missing_fields = []
+    fields_to_check = {
+        'name': 'Name',
+        'road_code': 'Road Code',
+        'length_km': 'Length',
+        'road_type': 'Road Type',
+        'geom_wkt': 'Geometry',
+        'contractor_id': 'Contractor'
+    }
+    present_count = 0
+    for field, label in fields_to_check.items():
+        val = road.get(field)
+        if val is not None and str(val).strip() != "":
+            present_count += 1
+        else:
+            missing_fields.append(label)
+
+    completeness_score = round((present_count / len(fields_to_check)) * 25.0, 1)
+
+    # 2. Freshness (max 25)
+    now = datetime.now(timezone.utc)
+    ts = road.get('updated_at') or road.get('last_relaying_date')
+    if ts:
+        if ts.tzinfo is None:
+            ts = ts.replace(tzinfo=timezone.utc)
+        age_days = (now - ts).total_seconds() / 86400.0
+        if age_days <= 30:
+            freshness_score = 25.0
+        elif age_days <= 180:
+            freshness_score = round(25.0 - (age_days - 30) * (15.0 / 150.0), 1)
+        else:
+            freshness_score = 10.0
+        last_date = ts.isoformat()
+        age_days_val = round(age_days, 1)
+    else:
+        freshness_score = 5.0
+        last_date = None
+        age_days_val = None
+
+    # 3. Consistency (max 25)
+    consistency_issues = []
+    project_rows = db.query("""
+        SELECT COUNT(*) as total, COALESCE(SUM(CASE WHEN budget_spent > budget_allocated THEN 1 ELSE 0 END), 0) as over_budget
+        FROM projects
+        WHERE road_id = %s
+    """, (road_id,))
+    
+    if project_rows and project_rows[0]['over_budget'] > 0:
+        consistency_issues.append("Mismatched budget (spent exceeds allocated)")
+        consistency_score = 15.0
+    else:
+        consistency_score = 25.0
+
+    # 4. Spatial validity (max 25)
+    spatial_issues = []
+    geom_check = db.query("""
+        SELECT ST_IsValid(geom) as is_valid, ST_GeometryType(geom) as geom_type
+        FROM roads
+        WHERE id = %s
+    """, (road_id,))
+    
+    if geom_check and geom_check[0]['is_valid']:
+        spatial_score = 25.0
+    else:
+        spatial_score = 12.5
+        spatial_issues.append("Invalid spatial geometry or empty geometry")
+
+    overall_score = round(completeness_score + freshness_score + consistency_score + spatial_score, 1)
+    
+    if overall_score >= 90.0:
+        grade = 'A'
+    elif overall_score >= 80.0:
+        grade = 'B'
+    elif overall_score >= 70.0:
+        grade = 'C'
+    elif overall_score >= 50.0:
+        grade = 'D'
+    else:
+        grade = 'F'
+
+    return {
+        "road_id": road_id,
+        "road_name": road.get('name') or "Unnamed Road",
+        "road_code": road.get('road_code') or "N/A",
+        "overall_score": overall_score,
+        "grade": grade,
+        "evaluated_at": now.isoformat(),
+        "dimensions": {
+            "completeness": {
+                "score": completeness_score,
+                "missing": missing_fields,
+                "issues": []
+            },
+            "freshness": {
+                "score": freshness_score,
+                "missing": [],
+                "issues": [],
+                "lastDate": last_date,
+                "ageDays": age_days_val
+            },
+            "consistency": {
+                "score": consistency_score,
+                "missing": [],
+                "issues": consistency_issues
+            },
+            "spatial_validity": {
+                "score": spatial_score,
+                "missing": [],
+                "issues": spatial_issues
+            }
+        }
+    }
+
+
+def score_all_roads() -> list[dict]:
+    """Compute data quality score for all roads."""
+    rows = db.query("SELECT id FROM roads")
+    results = []
+    for r in rows:
+        res = score_road(r['id'])
+        if res:
+            results.append(res)
+    return results
+
+
+def get_summary_stats() -> dict:
+    """Get aggregate data quality stats across all roads."""
+    all_scores = score_all_roads()
+    if not all_scores:
+        return {
+            "average_score": 0,
+            "grade_distribution": {"A": 0, "B": 0, "C": 0, "D": 0, "F": 0},
+            "weakest_dimension": "None",
+            "best_ranked": [],
+            "worst_ranked": []
+        }
+
+    total_score = sum(r['overall_score'] for r in all_scores)
+    avg_score = round(total_score / len(all_scores), 1)
+
+    grades = {"A": 0, "B": 0, "C": 0, "D": 0, "F": 0}
+    dim_totals = {
+        "completeness": 0.0,
+        "freshness": 0.0,
+        "consistency": 0.0,
+        "spatial_validity": 0.0
+    }
+
+    for r in all_scores:
+        grades[r['grade']] = grades.get(r['grade'], 0) + 1
+        for dim in dim_totals:
+            dim_totals[dim] += r['dimensions'][dim]['score']
+
+    # find weakest dimension
+    dim_averages = {dim: (tot / len(all_scores)) for dim, tot in dim_totals.items()}
+    weakest_dim = min(dim_averages, key=dim_averages.get)
+
+    sorted_roads = sorted(all_scores, key=lambda x: x['overall_score'], reverse=True)
+    best_ranked = [
+        {"id": r['road_id'], "name": r['road_name'], "score": r['overall_score'], "grade": r['grade']}
+        for r in sorted_roads[:5]
+    ]
+    worst_ranked = [
+        {"id": r['road_id'], "name": r['road_name'], "score": r['overall_score'], "grade": r['grade']}
+        for r in reversed(sorted_roads[-5:])
+    ]
+
+    return {
+        "average_score": avg_score,
+        "grade_distribution": grades,
+        "weakest_dimension": weakest_dim,
+        "best_ranked": best_ranked,
+        "worst_ranked": worst_ranked
+    }
