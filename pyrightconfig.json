@@ -1,0 +1,8 @@
+{
+  "venvPath": "/Users/sanjaywaradkar/ROADWATCH/backend",
+  "venv": "venv",
+  "extraPaths": [
+    "/Users/sanjaywaradkar/ROADWATCH/backend",
+    "/Users/sanjaywaradkar/ROADWATCH/backend/venv/lib/python3.14/site-packages"
+  ]
+}

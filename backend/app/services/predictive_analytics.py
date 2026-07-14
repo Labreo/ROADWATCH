@@ -16,16 +16,21 @@ class CostPredictor:
 
     @classmethod
     def train(cls):
-        projects = db.query(
-            "SELECT p.id, p.budget_spent, p.budget_allocated, "
-            "r.length_km, r.road_type, rgn.code AS region_code "
-            "FROM projects p "
-            "JOIN roads r ON p.road_id = r.id "
-            "JOIN authorities a ON r.authority_id = a.id "
-            "JOIN regions rgn ON a.region_code = rgn.code "
-            "WHERE p.status IN ('completed', 'in_progress') "
-            "AND r.length_km > 0 AND p.budget_spent > 0"
-        )
+        try:
+            projects = db.query(
+                "SELECT p.id, p.budget_spent, p.budget_allocated, "
+                "r.length_km, r.road_type, rgn.code AS region_code "
+                "FROM projects p "
+                "JOIN roads r ON p.road_id = r.id "
+                "JOIN authorities a ON r.authority_id = a.id "
+                "JOIN regions rgn ON a.region_code = rgn.code "
+                "WHERE p.status IN ('completed', 'in_progress') "
+                "AND r.length_km > 0 AND p.budget_spent > 0"
+            )
+        except Exception as e:
+            print(f"Database query failed in CostPredictor.train ({e}) — training skipped")
+            cls._is_trained = False
+            return
         if not projects or len(projects) < 3:
             cls._is_trained = False
             return

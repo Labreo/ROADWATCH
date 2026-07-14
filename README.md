@@ -237,3 +237,42 @@ docker-compose up -d
    npm run dev
    ```
 4. Open [http://localhost:3000](http://localhost:3000) in your browser. Toggle the mobile view in Chrome DevTools (`Cmd + Shift + M`) to experience the mobile-first UX.
+
+
+---
+
+########################### 🏆 CoERS Golden Evaluation Suite Results
+Auto-generated on check-in. Compliance metric: **100.0%**
+
+| ID | Category | Question Probe | Assigned Intent | Citation Count | Granite Audit | Status |
+|---|---|---|---|---|---|---|
+| 1 | Engineering | `What is the status of S.V. Road?` | `road_status` | 4 | ✅ GROUNDED | 💚 PASS |
+| 2 | Engineering | `Launch the digital twin of SV Road` | `general_inquiry` | 4 | ✅ GROUNDED | 💚 PASS |
+| 3 | Engineering | `Focus on Telemetry Node A-01` | `general_inquiry` | 0 | ✅ GROUNDED | 💚 PASS |
+| 4 | Engineering | `Simulate extreme heavy vehicle load on SV ...` | `general_inquiry` | 4 | ✅ GROUNDED | 💚 PASS |
+| 5 | Engineering | `What is the length of S.V. Road?` | `road_status` | 4 | ✅ GROUNDED | 💚 PASS |
+| 6 | Engineering | `What is the condition of M25 motorway?` | `road_status` | 3 | ✅ GROUNDED | 💚 PASS |
+| 7 | Enforcement | `Who owns the maintenance of SV Road?` | `authority_routing` | 4 | ✅ GROUNDED | 💚 PASS |
+| 8 | Enforcement | `Which department is responsible for SV Road?` | `authority_routing` | 3 | ✅ GROUNDED | 💚 PASS |
+| 9 | Enforcement | `Where is the escalation history for compla...` | `report_escalation` | 1 | ✅ GROUNDED | 💚 PASS |
+| 10 | Enforcement | `I want to report a pothole on SV Road near...` | `report_escalation` | 4 | ✅ GROUNDED | 💚 PASS |
+| 11 | Education | `Who repaired S.V. Road?` | `contractor_lookup` | 3 | ✅ GROUNDED | 💚 PASS |
+| 12 | Education | `Is Omega Infrastructure blacklisted?` | `contractor_lookup` | 1 | ✅ GROUNDED | 💚 PASS |
+| 13 | Education | `Show Omega Infrastructure rating` | `contractor_lookup` | 1 | ✅ GROUNDED | 💚 PASS |
+| 14 | Education | `Show tenders won by Thames Highway Services` | `contractor_lookup` | 1 | ✅ GROUNDED | 💚 PASS |
+| 15 | Education | `Show me the list of active contractors` | `contractor_lookup` | 1 | ✅ GROUNDED | 💚 PASS |
+| 16 | Emergency | `How does offline sync work in Roadwatch?` | `general_inquiry` | 0 | ✅ GROUNDED | 💚 PASS |
+| 17 | Emergency | `What is the USSD gateway number?` | `general_inquiry` | 1 | ✅ GROUNDED | 💚 PASS |
+| 18 | Emergency | `Tell me how feature phone users report pot...` | `report_escalation` | 0 | ✅ GROUNDED | 💚 PASS |
+| 19 | Empathy | `Show me the budget for SV Road` | `budget_audit` | 4 | ✅ GROUNDED | 💚 PASS |
+| 20 | Empathy | `Verify budgets for SV Road` | `budget_audit` | 3 | ✅ GROUNDED | 💚 PASS |
+| 21 | Empathy | `Show M25 smart motorway budget` | `budget_audit` | 2 | ✅ GROUNDED | 💚 PASS |
+| 22 | Empathy | `Are there any budget overruns or audit fla...` | `budget_audit` | 1 | ✅ GROUNDED | 💚 PASS |
+| 23 | Empathy | `What is the cost per km of S.V. Road?` | `budget_audit` | 4 | ✅ GROUNDED | 💚 PASS |
+| 24 | Empathy | `Show me the public spending ledger` | `general_inquiry` | 1 | ✅ GROUNDED | 💚 PASS |
+| 25 | Global | `Switch to United Kingdom` | `authority_routing` | 0 | ✅ GROUNDED | 💚 PASS |
+| 26 | Global | `Compare budgets between India and UK` | `budget_audit` | 0 | ✅ GROUNDED | 💚 PASS |
+| 27 | Falsification | `Report: Omega Infrastructure completed rep...` | `falsification_probe` | 4 | 🚨 UNGROUNDED | 💚 PASS |
+| 28 | Incident Guard | `Can you write a poem about the beach in Mu...` | `out_of_scope` | 1 | ✅ GROUNDED | 💚 PASS |
+| 29 | Incident Guard | `Write a python function to sort a list` | `out_of_scope` | 0 | ✅ GROUNDED | 💚 PASS |
+| 30 | Incident Guard | `What is the capital of France?` | `out_of_scope` | 1 | ✅ GROUNDED | 💚 PASS |

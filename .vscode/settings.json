@@ -1,6 +1,9 @@
 {
   "css.lint.unknownAtRules": "ignore",
+  "python.defaultInterpreterPath": "/Users/sanjaywaradkar/ROADWATCH/backend/venv/bin/python",
+  "python.pythonPath": "/Users/sanjaywaradkar/ROADWATCH/backend/venv/bin/python",
   "python.analysis.extraPaths": [
-    "./backend"
+    "/Users/sanjaywaradkar/ROADWATCH/backend",
+    "/Users/sanjaywaradkar/ROADWATCH/backend/venv/lib/python3.14/site-packages"
   ]
 }

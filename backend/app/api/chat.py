@@ -22,7 +22,7 @@ class ChatRequest(BaseModel):
 @router.post("/chat")
 async def chat_endpoint(request: ChatRequest):
     # Retrieve system prompt, citations, and metadata
-    system_prompt, citations, suggested_actions, suggested_prompts, intent, routing_details = \
+    system_prompt, citations, suggested_actions, suggested_prompts, intent, routing_details, audit_report = \
         await RetrievalEngine.process_query(
             message=request.message,
             session_id=request.session_id,
@@ -51,7 +51,8 @@ async def chat_endpoint(request: ChatRequest):
             "suggested_actions": suggested_actions,
             "suggested_prompts": suggested_prompts,
             "intent": intent,
-            "routing_details": routing_details
+            "routing_details": routing_details,
+            "audit_report": audit_report
         }) + "\n"
         
     return StreamingResponse(event_generator(), media_type="application/x-ndjson")

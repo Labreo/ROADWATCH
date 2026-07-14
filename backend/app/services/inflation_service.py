@@ -7,19 +7,23 @@ _CPI_TABLE: dict[str, dict[int, float]] = {}
 
 
 def _load_cpi_data():
-    rows = db.query("SELECT region_code, year, cpi_value FROM cpi_data ORDER BY region_code, year")
-    if not rows:
-        logger.warning("No CPI data found in database — using hardcoded defaults")
-        _load_hardcoded_defaults()
-        return
+    try:
+        rows = db.query("SELECT region_code, year, cpi_value FROM cpi_data ORDER BY region_code, year")
+        if not rows:
+            logger.warning("No CPI data found in database — using hardcoded defaults")
+            _load_hardcoded_defaults()
+            return
 
-    for row in rows:
-        region = row['region_code']
-        year = row['year']
-        val = float(row['cpi_value'])
-        if region not in _CPI_TABLE:
-            _CPI_TABLE[region] = {}
-        _CPI_TABLE[region][year] = val
+        for row in rows:
+            region = row['region_code']
+            year = row['year']
+            val = float(row['cpi_value'])
+            if region not in _CPI_TABLE:
+                _CPI_TABLE[region] = {}
+            _CPI_TABLE[region][year] = val
+    except Exception as e:
+        logger.warning(f"Database query failed in _load_cpi_data ({e}) — using hardcoded defaults")
+        _load_hardcoded_defaults()
 
 
 def _load_hardcoded_defaults():
