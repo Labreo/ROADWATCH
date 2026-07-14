@@ -1,3 +1,5 @@
+import { projects as defaultProjects, roads as defaultRoads } from '@/data/mockData';
+
 const API_BASE = 'http://localhost:8000/api/v1';
 
 interface ExchangeRate {
@@ -49,18 +51,51 @@ interface GlobalSpendResult {
 const rateCache: Map<string, { rate: number; ts: number }> = new Map();
 const CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
+const MOCK_EXCHANGE_RATES: Record<string, number> = {
+  'USD_INR': 83.5, 'INR_USD': 1 / 83.5,
+  'GBP_INR': 106.0, 'INR_GBP': 1 / 106.0,
+  'KES_INR': 0.65, 'INR_KES': 1 / 0.65,
+  'USD_GBP': 0.79, 'GBP_USD': 1.27,
+  'USD_KES': 129.5, 'KES_USD': 1 / 129.5,
+  'GBP_KES': 164.5, 'KES_GBP': 1 / 164.5,
+  'INR_INR': 1.0, 'USD_USD': 1.0, 'GBP_GBP': 1.0, 'KES_KES': 1.0,
+};
+
+function getOfflineRate(from: string, to: string): number {
+  const key = `${from.toUpperCase()}_${to.toUpperCase()}`;
+  if (MOCK_EXCHANGE_RATES[key] !== undefined) {
+    return MOCK_EXCHANGE_RATES[key];
+  }
+  // Try cross rate through INR
+  const toInrKey = `${from.toUpperCase()}_INR`;
+  const fromInrKey = `INR_${to.toUpperCase()}`;
+  if (MOCK_EXCHANGE_RATES[toInrKey] !== undefined && MOCK_EXCHANGE_RATES[fromInrKey] !== undefined) {
+    return MOCK_EXCHANGE_RATES[toInrKey] * MOCK_EXCHANGE_RATES[fromInrKey];
+  }
+  return 1.0;
+}
+
 async function fetchWithCache<T>(url: string, cacheKey: string): Promise<T> {
   const cached = rateCache.get(cacheKey);
   if (cached && Date.now() - cached.ts < CACHE_TTL) {
     return { ...cached, rate: cached.rate } as unknown as T;
   }
-  const resp = await fetch(url);
-  if (!resp.ok) throw new Error(`API error: ${resp.status}`);
-  const data = await resp.json();
-  if (data.rate) {
-    rateCache.set(cacheKey, { rate: data.rate, ts: Date.now() });
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`API error: ${resp.status}`);
+    const data = await resp.json();
+    if (data.rate) {
+      rateCache.set(cacheKey, { rate: data.rate, ts: Date.now() });
+    }
+    return data;
+  } catch (error) {
+    console.warn(`Exchange rate API down, returning offline rate for ${cacheKey}:`, error);
+    const parts = cacheKey.split('_');
+    const from = parts[0] || 'USD';
+    const to = parts[1] || 'INR';
+    const rate = getOfflineRate(from, to);
+    return { from, to, rate } as unknown as T;
   }
-  return data;
 }
 
 export async function getExchangeRate(
@@ -68,7 +103,7 @@ export async function getExchangeRate(
   toCurrency: string
 ): Promise<ExchangeRate> {
   const url = `${API_BASE}/exchange/rate?from=${fromCurrency}&to=${toCurrency}`;
-  return fetchWithCache<ExchangeRate>(url, `${fromCurrency}_${toCurrency}`);
+  return fetchWithCache<ExchangeRate>(url, `${fromCurrency.toUpperCase()}_${toCurrency.toUpperCase()}`);
 }
 
 export async function convertCurrency(
@@ -76,29 +111,103 @@ export async function convertCurrency(
   fromCurrency: string,
   toCurrency: string
 ): Promise<ConversionResult> {
-  const url = `${API_BASE}/exchange/convert?amount=${amount}&from=${fromCurrency}&to=${toCurrency}`;
-  const resp = await fetch(url);
-  if (!resp.ok) throw new Error(`Conversion failed: ${resp.status}`);
-  return resp.json();
+  try {
+    const url = `${API_BASE}/exchange/convert?amount=${amount}&from=${fromCurrency}&to=${toCurrency}`;
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`Conversion failed: ${resp.status}`);
+    return await resp.json();
+  } catch (error) {
+    console.warn(`Conversion API down, returning offline conversion:`, error);
+    const rate = getOfflineRate(fromCurrency, toCurrency);
+    return {
+      amountFrom: amount,
+      currencyFrom: fromCurrency.toUpperCase(),
+      amountTo: Math.round(amount * rate * 100) / 100,
+      currencyTo: toCurrency.toUpperCase(),
+      rate,
+      timestamp: new Date().toISOString(),
+    };
+  }
 }
 
 export async function compareProjectCost(
   projectId: number,
   toCurrency: string = 'USD'
 ): Promise<ProjectCostComparison> {
-  const url = `${API_BASE}/exchange/compare/${projectId}?to_currency=${toCurrency}`;
-  const resp = await fetch(url);
-  if (!resp.ok) throw new Error(`Comparison failed: ${resp.status}`);
-  return resp.json();
+  try {
+    const url = `${API_BASE}/exchange/compare/${projectId}?to_currency=${toCurrency}`;
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`Comparison failed: ${resp.status}`);
+    return await resp.json();
+  } catch (error) {
+    console.warn("Project cost comparison API down, using offline fallback:", error);
+    const project = defaultProjects.find(p => p.id === projectId);
+    const budgetAllocatedLocal = project?.budgetAllocated || 0;
+    const budgetSpentLocal = project?.budgetSpent || 0;
+    
+    // Default project currency is INR
+    const sourceCurrency = 'INR';
+    const rate = getOfflineRate(sourceCurrency, toCurrency);
+    
+    return {
+      projectId,
+      projectTitle: project?.title || "Unknown Project",
+      sourceCurrency,
+      targetCurrency: toCurrency.toUpperCase(),
+      budgetAllocatedLocal,
+      budgetAllocatedConverted: Math.round(budgetAllocatedLocal * rate * 100) / 100,
+      budgetSpentLocal,
+      budgetSpentConverted: Math.round(budgetSpentLocal * rate * 100) / 100,
+      rateUsed: rate,
+      rateTimestamp: new Date().toISOString()
+    };
+  }
 }
 
 export async function getGlobalSpend(
   currency: string = 'USD'
 ): Promise<GlobalSpendResult> {
-  const url = `${API_BASE}/exchange/global-spend?currency=${currency}`;
-  const resp = await fetch(url);
-  if (!resp.ok) throw new Error(`Global spend fetch failed: ${resp.status}`);
-  return resp.json();
+  try {
+    const url = `${API_BASE}/exchange/global-spend?currency=${currency}`;
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`Global spend fetch failed: ${resp.status}`);
+    return await resp.json();
+  } catch (error) {
+    console.warn("Global spend API down, using offline fallback:", error);
+    
+    const target = currency.toUpperCase();
+    
+    const mappedProjects = defaultProjects.map(p => {
+      // Find source currency from region of project's road
+      const road = defaultRoads.find(r => r.id === p.roadId);
+      const region = road?.regionCode || 'IN';
+      const regionToCurr: Record<string, string> = { US: 'USD', GB: 'GBP', KE: 'KES', IN: 'INR' };
+      const source = regionToCurr[region] || 'INR';
+      const rate = getOfflineRate(source, target);
+      
+      return {
+        projectId: p.id,
+        title: p.title,
+        regionCode: region,
+        currency: source,
+        budgetAllocatedLocal: p.budgetAllocated,
+        budgetAllocatedConverted: Math.round(p.budgetAllocated * rate * 100) / 100,
+        budgetSpentLocal: p.budgetSpent,
+        budgetSpentConverted: Math.round(p.budgetSpent * rate * 100) / 100
+      };
+    });
+    
+    const totalAllocated = mappedProjects.reduce((sum, p) => sum + (p.budgetAllocatedConverted || 0), 0);
+    const totalSpent = mappedProjects.reduce((sum, p) => sum + (p.budgetSpentConverted || 0), 0);
+    
+    return {
+      totalAllocated,
+      totalSpent,
+      targetCurrency: target,
+      projectCount: defaultProjects.length,
+      projects: mappedProjects
+    };
+  }
 }
 
 // CPI data for frontend inflation calculations (mirrors backend)

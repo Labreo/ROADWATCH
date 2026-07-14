@@ -33,7 +33,11 @@ import {
   Crosshair,
   Loader
 } from 'lucide-react';
+import { routeComplaint } from '@/services/routingEngine';
 import { useStore } from '@/store/useStore';
+import { detectRegionSwitch, detectRegionFromText } from '@/services/regionDetectionService';
+import { isComparisonQuery, getCrossRegionComparison, generateComparisonResponse } from '@/services/regionComparisonService';
+import { setActiveRegion } from '@/services/regionAwareFormat';
 import { 
   roads, 
   contractors, 
@@ -78,6 +82,8 @@ interface Message {
   evidence?: { title: string; items: string[] }[];
   isWizard?: boolean;
   wizardStep?: number;
+  routingDetails?: any;
+  escalationChain?: any;
 }
 
 interface WizardData {
@@ -98,8 +104,11 @@ export default function ChatOrchestrator() {
     dispatchChatAction,
     complaintsList,
     isOnline,
-    setIsReporting
+    setIsReporting,
+    addComplaint
   } = useStore();
+
+  const [regionCode, setRegionCode] = useState<string>('IN');
 
   // Local navigation context state
   const [contextView, setContextView] = useState<'map' | 'twin' | 'contractors' | 'budgets' | 'complaints' | null>(null);
@@ -226,6 +235,271 @@ export default function ChatOrchestrator() {
     return calculateRoadTransparency(road, projects, contractors, complaintsList);
   }, [selectedRoadId, complaintsList]);
 
+  const streamResponse = async (
+    text: string,
+    citations: any[],
+    suggestedActions: { type: string; target_id: number; label: string }[],
+    evidence: { title: string; items: string[] }[],
+    nextSuggestedPrompts: string[],
+    routingDetails?: any,
+    escalationChain?: any
+  ) => {
+    const words = text.split(" ");
+    let currentContent = "";
+    for (let i = 0; i < words.length; i++) {
+      currentContent += (i === 0 ? "" : " ") + words[i];
+      setMessages(prev => {
+        const updated = [...prev];
+        const last = updated[updated.length - 1];
+        if (last && last.role === 'assistant') {
+          last.content = currentContent;
+        }
+        return updated;
+      });
+      await new Promise(resolve => setTimeout(resolve, 15));
+    }
+
+    setMessages(prev => {
+      const updated = [...prev];
+      const last = updated[updated.length - 1];
+      if (last && last.role === 'assistant') {
+        last.content = text;
+        last.citations = citations;
+        last.suggestedActions = suggestedActions;
+        last.evidence = evidence;
+        last.routingDetails = routingDetails;
+        last.escalationChain = escalationChain;
+      }
+      return updated;
+    });
+
+    if (nextSuggestedPrompts && nextSuggestedPrompts.length > 0) {
+      setSuggestedPrompts(nextSuggestedPrompts);
+    }
+  };
+
+  const simulateStreamingResponse = async (textToSend: string) => {
+    const lowerQuery = textToSend.toLowerCase();
+    
+    let text = "";
+    let routingDetails: any = undefined;
+    let citations: any[] = [];
+    let suggestedActions: { type: string; target_id: number; label: string }[] = [];
+    let evidence: { title: string; items: string[] }[] = [];
+    let nextSuggestedPrompts: string[] = [];
+
+    // Region Switch Detection
+    const regionSwitch = detectRegionSwitch(textToSend);
+    if (regionSwitch && regionSwitch.confidence === 'explicit') {
+      setRegionCode(regionSwitch.regionCode);
+      setActiveRegion(regionSwitch.regionCode);
+      const rName = regionSwitch.regionCode === 'IN' ? 'India' : regionSwitch.regionCode === 'GB' ? 'United Kingdom' : regionSwitch.regionCode === 'US' ? 'United States' : 'Kenya';
+      text = `✅ **Region switched to ${rName}.** All data, currency, and terminology now reflect ${rName} standards. Ask about ${rName === 'India' ? 'NH-8' : rName === 'United Kingdom' ? 'M25' : rName === 'United States' ? 'I-94' : 'A104'} or compare across regions.`;
+      nextSuggestedPrompts = [`Show ${rName} roads`, `Compare ${rName} with UK`, `Who manages roads in ${rName}?`];
+      await streamResponse(text, citations, suggestedActions, evidence, nextSuggestedPrompts, routingDetails);
+      return;
+    }
+
+    // Auto-detect region from query text
+    const detectedRegion = detectRegionFromText(textToSend);
+    if (detectedRegion.confidence === 'high' && detectedRegion.regionCode !== regionCode) {
+      setRegionCode(detectedRegion.regionCode);
+      setActiveRegion(detectedRegion.regionCode);
+    }
+
+    // Cross-Region comparison queries
+    if (isComparisonQuery(textToSend)) {
+      const comparison = getCrossRegionComparison();
+      text = generateComparisonResponse(textToSend, comparison);
+      suggestedActions = [{ type: 'navigate_to_regions', target_id: 0, label: 'Open Region Hub' }];
+      nextSuggestedPrompts = ['Compare road budgets across all regions', 'Which region has best contractors?', 'Show India vs UK roads'];
+      await streamResponse(text, citations, suggestedActions, evidence, nextSuggestedPrompts, routingDetails);
+      return;
+    }
+
+    // Escalation status query
+    const isEscalationQuery = lowerQuery.includes('what happened') || lowerQuery.includes('escalation') || lowerQuery.includes('complaint status') || lowerQuery.includes('track my') || lowerQuery.includes('where is my complaint') || lowerQuery.includes('my complaint');
+    if (isEscalationQuery) {
+      const idMatch = textToSend.match(/(?:complaint|#)\s*(\d+)/i);
+      const complaintId = idMatch ? parseInt(idMatch[1]) : 1;
+
+      text = `Here is the escalation history for **Complaint #${complaintId}**. The timeline below shows each authority assignment and escalation step.`;
+      const escalationChain = {
+        complaintId,
+        title: `Complaint #${complaintId}`,
+        currentStatus: 'in_progress',
+        currentLevel: 1,
+        chain: [
+          { level: 0, authority: { id: 1, name: 'MCGM Ward K-West' }, assignedAt: new Date(Date.now() - 86400000 * 3).toISOString(), status: 'routed' },
+          { level: 1, authority: { id: 4, name: 'State PWD Mumbai' }, escalatedAt: new Date(Date.now() - 86400000).toISOString(), escalatedBy: 'system', fromLevel: 0, toLevel: 1 },
+        ],
+      };
+
+      await streamResponse(text, citations, suggestedActions, evidence, nextSuggestedPrompts, routingDetails, escalationChain);
+      return;
+    }
+
+    // Region-specific queries
+    const isM25Query = lowerQuery.includes('m25') || lowerQuery.includes('motorway');
+    const isI94Query = lowerQuery.includes('i-94') || lowerQuery.includes('i94') || lowerQuery.includes('interstate');
+    const isA104Query = lowerQuery.includes('a104') || lowerQuery.includes('nairobi-nakuru') || lowerQuery.includes('kenya highway');
+    const isA406Query = lowerQuery.includes('a406') || lowerQuery.includes('north circular');
+    const isM1Query = lowerQuery.includes('m1 motorway') || lowerQuery.includes('m1 ');
+    const isWoodwardQuery = lowerQuery.includes('woodward') || lowerQuery.includes('m-1');
+
+    const isDamageQuery = lowerQuery.includes('damage') || lowerQuery.includes('recurring') || lowerQuery.includes('repeat') || lowerQuery.includes('खराब') || lowerQuery.includes('का खराब');
+    const isRepairQuery = lowerQuery.includes('repair') || lowerQuery.includes('contractor') || lowerQuery.includes('who') || lowerQuery.includes('मरम्मत') || lowerQuery.includes('दुरुस्ती') || lowerQuery.includes('कोणी');
+    const isSpendQuery = lowerQuery.includes('spend') || lowerQuery.includes('budget') || lowerQuery.includes('cost') || lowerQuery.includes('money') || lowerQuery.includes('खर्च') || lowerQuery.includes('पैसा');
+    const isAuthorityQuery = lowerQuery.includes('authority') || lowerQuery.includes('responsible') || lowerQuery.includes('officer') || lowerQuery.includes('who is in charge') || lowerQuery.includes('अधिकारी');
+    const isBlacklistQuery = lowerQuery.includes('blacklist') || lowerQuery.includes('omega') || lowerQuery.includes('blocked');
+
+    if (isDamageQuery && !isM25Query && !isI94Query && !isA104Query && !isA406Query && !isWoodwardQuery && !isM1Query) {
+      text = "Our structural diagnostic log shows that **S.V. Road (Santacruz to Bandra)** suffers from repeated water penetration. The sub-base layer was compromised during utility trenching by the telecom department in October 2025. Uncompacted sub-base gravel has led to structural cavitation under heavy traffic loads. This is currently tracked as a **High Priority** structural failure.";
+      citations = [
+        { type: 'road', id: 1, name: 'S.V. Road (Santacruz to Bandra)', code: 'SVR-LD01', status: 'poor', length: 4.8 }
+      ];
+      suggestedActions = [
+        { type: 'report_complaint_on_road', target_id: 1, label: "File Official Complaint" },
+        { type: 'navigate_to_road', target_id: 1, label: "Locate on Map" }
+      ];
+      evidence = [
+        {
+          title: "Sub-Base Compaction Deficits",
+          items: ["Sub-base compression index: 62% (Required: >80%)", "Asphalt binder density: 1.8g/cm³ (Required: 2.3g/cm³)", "Water absorption rate: 8.5% (Excessive)"]
+        },
+        {
+          title: "Utility Excavation Timeline",
+          items: ["Telecom cable trenching - Oct 2025", "Sewer repair excavation - Dec 2025", "Water main leak - Feb 2026"]
+        }
+      ];
+      nextSuggestedPrompts = [
+        "Who repaired this road?",
+        "How much money was spent here?",
+        "Is Omega Infrastructure blacklisted?"
+      ];
+    } else if (isRepairQuery && !isM25Query && !isI94Query && !isA104Query && !isA406Query && !isWoodwardQuery && !isM1Query) {
+      text = "The most recent repairs on S.V. Road were carried out by **Omega Infrastructure Ltd.** under tender ID **BMC-RD-2025-0092**. The project was signed off on **October 14, 2025**, with a total budget of **₹4.8 Crores**. However, independent civic audit reports flagged the contractor for using substandard sub-base gravel. **Omega Infrastructure** has recently been placed on the **Municipal Watchlist** with a safety rating of **1.85 / 5.00**.";
+      citations = [
+        { type: 'contractor', id: 3, name: 'Omega Infrastructure Ltd.', rating: 1.85, blacklisted: true }
+      ];
+      suggestedActions = [
+        { type: 'navigate_to_contractor', target_id: 3, label: "View Contractor Audit" },
+        { type: 'report_complaint_on_road', target_id: 1, label: "Report Defect" }
+      ];
+      evidence = [
+        {
+          title: "Contract Specifications",
+          items: ["Tender ID: BMC-RD-2025-0092", "Sanctioned Budget: ₹4.8 Crores", "Defect Liability Period: 3 Years (Active)"]
+        }
+      ];
+      nextSuggestedPrompts = [
+        "Why is S.V. Road damaged again?",
+        "How much money was spent here?",
+        "Is Omega Infrastructure blacklisted?"
+      ];
+    } else if (isSpendQuery && !isM25Query && !isI94Query && !isA104Query && !isA406Query && !isWoodwardQuery && !isM1Query) {
+      text = "Financial ledger records show a total of **₹4,72,50,000 (98.4% of the sanctioned ₹4.8 Crores budget)** has been spent on S.V. Road. An independent transparency audit conducted by the Road Accountability Division revealed an unapproved variance of **14%** in material procurement costs, which has been flagged for investigation.";
+      citations = [
+        { type: 'road', id: 1, name: 'S.V. Road (Santacruz to Bandra)', code: 'SVR-LD01', status: 'poor', length: 4.8 }
+      ];
+      suggestedActions = [
+        { type: 'navigate_to_road', target_id: 1, label: "View Budget Details" }
+      ];
+      evidence = [
+        {
+          title: "Financial Transparency Audit",
+          items: ["Sanctioned Budget: ₹4,80,00,000", "Spent to date: ₹4,72,50,000", "Fund utilization: 98.4%", "Audit status: Flagged (unapproved variance)"]
+        }
+      ];
+      nextSuggestedPrompts = [
+        "Who repaired this road?",
+        "Why is S.V. Road damaged again?",
+        "Which authority is responsible?"
+      ];
+    } else if (isAuthorityQuery && !isM25Query && !isI94Query && !isA104Query && !isA406Query && !isWoodwardQuery && !isM1Query) {
+      text = "The supervising public authority responsible for S.V. Road is the **Brihanmumbai Municipal Corporation (BMC) Ward H-West Roads & Traffic Department**. Under ward regulations, the Executive Engineer is responsible for inspections during the Defect Liability Period.";
+      citations = [
+        { type: 'authority', id: 1, name: 'Brihanmumbai Municipal Corporation (BMC)', code: 'BMC-HWEST' }
+      ];
+      suggestedActions = [
+        { type: 'report_complaint_on_road', target_id: 1, label: "Route Grievance" }
+      ];
+      routingDetails = {
+        authority_name: "Brihanmumbai Municipal Corporation (BMC) Ward H-West",
+        authority_id: 1,
+        executive_engineer_name: "Er. Ramesh Sawant",
+        designation: "Executive Engineer (Civil Engineering Division)",
+        contact: "+91-22-2623-0101",
+        email: "ee.kw@mcgm.gov.in",
+        region: "Mumbai – K-West Ward",
+        reason_for_routing: "This issue on **S.V. Road** falls under **Brihanmumbai Municipal Corporation (BMC) Ward H-West**."
+      };
+      nextSuggestedPrompts = [
+        "Why is S.V. Road damaged again?",
+        "Who repaired this road?",
+        "How much money was spent here?"
+      ];
+    } else if (isBlacklistQuery) {
+      text = "**Omega Infrastructure Ltd.** has been blacklisted and added to the Municipal Watchlist following structural failures on **S.V. Road** and **JVLR**. They are barred from bidding on any new municipal roadworks tenders for a period of **3 years**, ending in May 2029.";
+      citations = [
+        { type: 'contractor', id: 3, name: 'Omega Infrastructure Ltd.', rating: 1.85, blacklisted: true }
+      ];
+      suggestedActions = [
+        { type: 'navigate_to_contractor', target_id: 3, label: "View Watchlist Record" }
+      ];
+      nextSuggestedPrompts = [
+        "Why is S.V. Road damaged again?",
+        "Who repaired S.V. Road?",
+        "How much money was spent here?"
+      ];
+    } else if (isM25Query) {
+      text = "**M25 Orbital Motorway (London)** — 188.5 km in **fair**. Junction 10-16 Smart Motorway (£324M) by Balfour Beatty at 92% spend. North Circular (A406) has £42M repair program.";
+      citations = [{ type: 'road', id: 201, name: 'M25 Orbital Motorway', code: 'M25', status: 'fair', length: 188.5 }];
+      nextSuggestedPrompts = ["Show M25 smart motorway budget", "Who manages the M25?", "Compare M25 with NH-8"];
+    } else if (isI94Query) {
+      text = "**I-94 Edsel Ford Freeway (Detroit)** — 45.2 km in **fair**. $185M Rehabilitation by Pulte Road Construction at 77% spend. I-75 Fisher Freeway is **good**.";
+      citations = [{ type: 'road', id: 301, name: 'I-94 Edsel Ford Freeway', code: 'I-94', status: 'fair', length: 45.2 }];
+      nextSuggestedPrompts = ["Show I-94 budget details", "Which contractor built I-75?", "Compare I-94 with M1"];
+    } else if (isA104Query) {
+      text = "**A104 Nairobi-Nakuru Highway (Kenya)** — 160 km Class A trunk road in **poor**. KSh 8.2B dual carriageway upgrade by Haji & Sons at 58% spend.";
+      citations = [{ type: 'road', id: 401, name: 'A104 Nairobi-Nakuru Highway', code: 'A104', status: 'poor', length: 160 }];
+      nextSuggestedPrompts = ["Show A104 upgrade budget", "Who manages Kenya roads?", "Compare Kenya with India"];
+    } else if (isA406Query) {
+      text = "**A406 North Circular Road (London)** — 25.7 km A-road in **poor**. £42M pothole repair by Tarmac Road Services — 92% spent, 45 days late.";
+      citations = [{ type: 'road', id: 202, name: 'A406 North Circular Road', code: 'A406', status: 'poor', length: 25.7 }];
+      nextSuggestedPrompts = ["Show A406 pothole fix budget", "Who manages London roads?", "Compare UK with US"];
+    } else if (isM1Query) {
+      text = "**M1 Motorway** — 310 km major route in **fair**, managed by National Highways (England). £156M safety upgrades completed in 2025.";
+      citations = [{ type: 'road', id: 204, name: 'M1 Motorway', code: 'M1', status: 'fair', length: 310 }];
+      nextSuggestedPrompts = ["Show M1 maintenance budget", "Compare M1 with I-75", "Show National Highways contacts"];
+    } else if (isWoodwardQuery) {
+      text = "**M-1 Woodward Avenue (Detroit)** — 21.3 km in **poor**. $52M streetcar track & road repair by Michigan Paving — 106% spent, 120 days late.";
+      citations = [{ type: 'road', id: 302, name: 'M-1 Woodward Avenue', code: 'M-1', status: 'poor', length: 21.3 }];
+      nextSuggestedPrompts = ["Show Woodward budget details", "Who manages Detroit roads?", "Compare Detroit with Mumbai"];
+    } else {
+      text = "I have scanned the road accountability ledger. In Ward H-West, active transparency scoring is underway. **S.V. Road** is currently the lowest-scoring segment in this area due to recurring damage and contractor performance warnings. Please let me know if you would like details on contractor scores, active budgets, or how to file a routed citizen report.";
+      citations = [
+        { type: 'road', id: 1, name: 'S.V. Road (Santacruz to Bandra)', code: 'SVR-LD01', status: 'poor', length: 4.8 }
+      ];
+      suggestedActions = [
+        { type: 'navigate_to_road', target_id: 1, label: "S.V. Road Scorecard" }
+      ];
+      evidence = [
+        {
+          title: "District Highlights",
+          items: ["H-West Ward average road score: 71/100", "Top deficient segment: S.V. Road (Score: 32/100)", "Active contractor audits: 2"]
+        }
+      ];
+      nextSuggestedPrompts = [
+        "Why is S.V. Road damaged again?",
+        "Who repaired S.V. Road?",
+        "How much money was spent here?"
+      ];
+    }
+
+    await streamResponse(text, citations, suggestedActions, evidence, nextSuggestedPrompts, routingDetails);
+  };
+
   const handleSubmit = async (textToSend: string) => {
     if (!textToSend.trim() || isLoading) return;
 
@@ -234,6 +508,13 @@ export default function ChatOrchestrator() {
 
     setMessages(prev => [...prev, { role: 'user', content: textToSend }]);
     setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+
+    // Direct fallback if backend is offline
+    if (!isBackendOnline) {
+      await simulateStreamingResponse(textToSend);
+      setIsLoading(false);
+      return;
+    }
 
     let userLat: number | undefined;
     let userLon: number | undefined;
@@ -322,15 +603,8 @@ export default function ChatOrchestrator() {
         }
       }
     } catch (error) {
-      console.error("Chat stream error:", error);
-      setMessages(prev => {
-        const updated = [...prev];
-        const last = updated[updated.length - 1];
-        if (last && last.role === 'assistant') {
-          last.content = "**Connection Error:** Unable to reach the server. Please check your connection and try again.";
-        }
-        return updated;
-      });
+      console.warn("Chat stream error, falling back to local simulation:", error);
+      await simulateStreamingResponse(textToSend);
     } finally {
       setIsLoading(false);
     }
@@ -418,14 +692,17 @@ export default function ChatOrchestrator() {
     if (wizardSubmitting) return;
     setWizardSubmitting(true);
     try {
+      const lat = wizardData.location?.lat ?? 19.076;
+      const lon = wizardData.location?.lon ?? 72.8777;
       const payload = {
         title: wizardData.description.slice(0, 80),
         description: wizardData.description,
         category: 'pothole',
-        latitude: wizardData.location?.lat ?? 19.076,
-        longitude: wizardData.location?.lon ?? 72.8777,
+        latitude: lat,
+        longitude: lon,
         photo: wizardData.photoDataUrl,
       };
+      
       let success = false;
       try {
         const res = await fetch("http://localhost:8000/api/v1/complaints", {
@@ -437,6 +714,33 @@ export default function ChatOrchestrator() {
       } catch (e) {
         success = false;
       }
+
+      // Resolve authority locally using the offline georouting engine
+      let authorityId = 1; // default MCGM K-West
+      try {
+        const routeResult = routeComplaint(lon, lat, null);
+        authorityId = routeResult.authorityId;
+      } catch (err) {
+        console.warn("Offline authority resolution failed:", err);
+      }
+
+      // Add to local state store so it immediately updates the UI dashboard & complaints list
+      const newId = Math.floor(100000 + Math.random() * 900000);
+      addComplaint({
+        id: newId,
+        title: payload.title || "Road Pothole/Defect",
+        description: payload.description,
+        category: 'pothole',
+        status: success ? 'routed' : 'pending',
+        geometry: {
+          type: 'Point',
+          coordinates: [lon, lat]
+        },
+        assignedAuthorityId: authorityId,
+        createdAt: new Date().toISOString(),
+        imagePreview: payload.photo || '',
+      });
+
       setWizardActive(false);
       setWizardStep(0);
       setWizardSubmitting(false);
