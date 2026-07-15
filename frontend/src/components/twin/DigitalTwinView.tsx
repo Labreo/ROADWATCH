@@ -509,10 +509,29 @@ export function useCameraInterpolation(controlsRef: React.RefObject<any>) {
 // ── Main View ────────────────────────────────────────────────
 
 export default function DigitalTwinView() {
-  const { setSelectedRoadId, canvasAction, setCanvasAction } = useStore();
-  const [selectedRoad, setSelectedRoad] = useState<Road>(roads[0]);
+  const { selectedRoadId, setSelectedRoadId, canvasAction, setCanvasAction } = useStore();
+  
+  const initialRoad = useMemo(() => {
+    if (selectedRoadId) {
+      const found = roads.find(r => r.id === selectedRoadId);
+      if (found) return found;
+    }
+    return roads[0];
+  }, [selectedRoadId]);
+
+  const [selectedRoad, setSelectedRoad] = useState<Road>(initialRoad);
   const clock = useClock();
   const sceneRef = useRef<THREE.Scene | null>(null);
+
+  // Sync local state with store changes
+  useEffect(() => {
+    if (selectedRoadId) {
+      const found = roads.find(r => r.id === selectedRoadId);
+      if (found) {
+        setSelectedRoad(found);
+      }
+    }
+  }, [selectedRoadId]);
 
   // Sync local selection to global store for map
   const handleSelectRoad = (road: Road) => {
@@ -520,9 +539,11 @@ export default function DigitalTwinView() {
     setSelectedRoadId(road.id);
   };
 
-  // Initialize map to first road and clean up canvas actions & release WebGL memory on unmount
+  // Initialize map road selection if not already set, and clean up canvas actions & release WebGL memory on unmount
   useEffect(() => {
-    setSelectedRoadId(roads[0].id);
+    if (!selectedRoadId) {
+      setSelectedRoadId(roads[0].id);
+    }
     return () => {
       setCanvasAction(null);
       

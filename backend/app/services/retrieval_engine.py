@@ -170,6 +170,16 @@ class RetrievalEngine:
         # 2. Extract Entities & Intents
         road_id, contractor_id, authority_id, tender_id = cls.extract_entities(message)
         
+        # Check history for last road_id if not found in current message
+        if not road_id:
+            history = sessions_memory.get(session_id, [])
+            for h in reversed(history[:-1] if len(history) > 1 else history):
+                if h.get("role") == "user":
+                    h_road_id, _, _, _ = cls.extract_entities(h.get("content", ""))
+                    if h_road_id:
+                        road_id = h_road_id
+                        break
+        
         # 2.1 Detect Probes (Falsification & Safety Refusals)
         msg_lower = message.lower()
         is_lie_probe = False
@@ -716,12 +726,16 @@ class RetrievalEngine:
             "VIEW SWITCHING & TELEMETRY NAVIGATION:\n"
             "When the user requests to see a specific layout, map, or 3D digital twin, you MUST append a raw JSON view command at the absolute end of your response text (outside any markdown formatting). Use these exact schemas:\n"
             "- To trigger the 3D Digital Twin view: include '{\"view\": \"twin\", \"roadId\": <id>}'\n"
+            "- To trigger the 3D Digital Twin as a popup/modal (specifically when the user asks for the 'live condition' or 'live condition of the model'): include '{\"view\": \"twin\", \"roadId\": <id>, \"asPopup\": true}'\n"
             "- To trigger the 3D Digital Twin focusing on an anomaly: include '{\"view\": \"twin\", \"roadId\": <id>, \"canvasAction\": {\"type\": \"FOCUS_ANOMALY\", \"coordinates\": [<x>, <y>, <z>]}}'. Available anomalies for SV Road (roadId 3) are: Node A-01: [-1.1, 0.25, 0.6], Node B-04: [0.1, 0.35, -0.8], Node C-02: [1.2, 0.15, 0.3], Pothole Wave Alpha: [0.3, 0.0, 0.5], Stress Zone Beta: [-0.5, 0.02, 0.1].\n"
             "- To trigger a What-If Stress Simulation (deforming the road in 3D using vertex shaders): include '{\"view\": \"twin\", \"roadId\": <id>, \"uStructuralStressIntensity\": <float 0.0 to 1.5>}'. E.g. '{\"view\": \"twin\", \"roadId\": 3, \"uStructuralStressIntensity\": 1.2}'\n"
             "- To show a road on the map: include '{\"view\": \"map\", \"roadId\": <id>}'\n"
             "- To view transparency details / budgets: include '{\"view\": \"budgets\", \"roadId\": <id>}'\n"
             "- To view contractor profile: include '{\"view\": \"contractors\", \"contractorId\": <id>}'\n"
             "- To view complaints list: include '{\"view\": \"complaints\"}'\n"
+            "- To view historical playback dashboard: include '{\"view\": \"playback\"}'\n"
+            "- To view smart infrastructure sensors monitor dashboard: include '{\"view\": \"sensors\"}'\n"
+            "- To view global regions hub: include '{\"view\": \"regions\"}'\n"
             "Do not put this JSON in code blocks. Append it as a single line at the very end of your response.\n\n"
             "BUDGET QUERY RESPONSE FORMAT (when the user asks about spending/funding/budget):\n"
             "- Always state: total sanctioned amount vs total actual spent, and the spend percentage.\n"
@@ -815,7 +829,7 @@ class RetrievalEngine:
     async def stream_response(cls, system_prompt: str, user_message: str, history: list = []):
         api_key = os.environ.get("CONCENTRATE_API_KEY", "")
         if not api_key:
-            fallback_text = cls.generate_deterministic_fallback(system_prompt, user_message)
+            fallback_text = cls.generate_deterministic_fallback(system_prompt, user_message, history)
             chunk_size = 8
             for i in range(0, len(fallback_text), chunk_size):
                 yield fallback_text[i:i+chunk_size]
@@ -844,7 +858,7 @@ class RetrievalEngine:
                 if response.status_code != 200:
                     error_text = await response.aread()
                     print(f"Concentrate API error {response.status_code}: {error_text.decode(errors='replace')}")
-                    fallback_text = cls.generate_deterministic_fallback(system_prompt, user_message)
+                    fallback_text = cls.generate_deterministic_fallback(system_prompt, user_message, history)
                     chunk_size = 8
                     for i in range(0, len(fallback_text), chunk_size):
                         yield fallback_text[i:i+chunk_size]
@@ -866,7 +880,7 @@ class RetrievalEngine:
                             pass
 
     @classmethod
-    def generate_deterministic_fallback(cls, system_prompt: str, user_message: str) -> str:
+    def generate_deterministic_fallback(cls, system_prompt: str, user_message: str, history: list = []) -> str:
         msg_lower = user_message.lower()
         
         # Check for Lie Probe in generate_deterministic_fallback
@@ -906,10 +920,20 @@ class RetrievalEngine:
                 )
 
         road_id, contractor_id, authority_id, tender_id = cls.extract_entities(user_message)
+        
+        # Check history for last road_id if not found in current message
+        if not road_id:
+            for h in reversed(history):
+                if h.get("role") == "user":
+                    h_road_id, _, _, _ = cls.extract_entities(h.get("content", ""))
+                    if h_road_id:
+                        road_id = h_road_id
+                        break
+
         msg_lower = user_message.lower()
 
         # Check for explicit view triggers first
-        if "digital twin" in msg_lower or "twin view" in msg_lower or "3d view" in msg_lower or "telemetry simulation" in msg_lower or "3d simulation" in msg_lower or "twin" in msg_lower or "telemetry node" in msg_lower or "simulate" in msg_lower:
+        if "digital twin" in msg_lower or "twin view" in msg_lower or "3d view" in msg_lower or "telemetry simulation" in msg_lower or "3d simulation" in msg_lower or "twin" in msg_lower or "telemetry node" in msg_lower or "simulate" in msg_lower or "live condition" in msg_lower or "condition of the model" in msg_lower:
             r_id = road_id or 3 # default to SV Road (3)
             # check for what-if simulation trigger
             if "what if" in msg_lower or "stress" in msg_lower or "load" in msg_lower or "simulate" in msg_lower:
@@ -924,11 +948,29 @@ class RetrievalEngine:
             if "node a" in msg_lower:
                 return f"Launching 3D Digital Twin for SV Road and focusing WebGL camera coordinates on Telemetry Node A-01. {{\"view\": \"twin\", \"roadId\": 3, \"canvasAction\": {{\"type\": \"FOCUS_ANOMALY\", \"coordinates\": [-1.1, 0.25, 0.6]}}}}"
             
+            # If the user explicitly asked for "live condition of the model" or "live condition", open it as popup
+            if "live condition" in msg_lower or "condition of the model" in msg_lower:
+                road_name = "S.V. Road" if r_id == 3 else f"Road {r_id}"
+                for name, rid in ROAD_ALIASES.items():
+                    if rid == r_id:
+                        road_name = name.upper()
+                        break
+                return f"Launching the interactive WebGL 3D Digital Twin for {road_name} as a pop up. You can rotate and zoom to inspect subsurface utility layouts, sensor nodes, and surface potholes live. {{\"view\": \"twin\", \"roadId\": {r_id}, \"asPopup\": true}}"
+
             return f"Launching the interactive WebGL 3D Digital Twin. You can rotate and zoom to inspect subsurface utility layouts, sensor nodes, and surface potholes. {{\"view\": \"twin\", \"roadId\": {r_id}}}"
 
         if "map" in msg_lower or "geospatial" in msg_lower:
             r_id = road_id or 3
             return f"Opening geospatial map interface. The Leaflet viewport has centered on the road corridor. {{\"view\": \"map\", \"roadId\": {r_id}}}"
+
+        if "playback" in msg_lower or "historical" in msg_lower or "replay" in msg_lower:
+            return "Opening the historical playback system to inspect past road defects, repair timelines, and contractor activities. {\"view\": \"playback\"}"
+            
+        if "sensor" in msg_lower or "vibration" in msg_lower or "monitoring" in msg_lower or "diagnostic" in msg_lower:
+            return "Launching the Smart Infrastructure Sensor Monitor dashboard to view real-time vibration telemetry, stress heatmaps, and drainage sensor status. {\"view\": \"sensors\"}"
+            
+        if "regions overview" in msg_lower or "regions hub" in msg_lower or "global regions" in msg_lower:
+            return "Opening the global regions hub to review preloaded countries, currencies, and municipal authorities. {\"view\": \"regions\"}"
             
         # Informational handlers for offline/ussd/ledger/switch queries
         if "offline sync" in msg_lower or "sync work" in msg_lower:
@@ -968,9 +1010,9 @@ class RetrievalEngine:
                     f"- **{uk_authorities['name']}** ({uk_authorities['department_code']})\n"
                     "- M25 (Junction 8-12), A406 (North Circular Road), A1 (Holloway Road), Whitehall\n"
                     "- Contact National Highways: info@nationalhighways.co.uk | +44-300-123-5000\n\n"
-                    "Try asking: 'Show M25 smart motorway budget' or 'What is the condition of M25 motorway?'"
+                    "Try asking: 'Show M25 smart motorway budget' or 'What is the condition of M25 motorway?' {\"view\": \"regions\"}"
                 )
-            return "Switching to United Kingdom region. Try asking about M25 motorway or UK authorities."
+            return "Switching to United Kingdom region. Try asking about M25 motorway or UK authorities. {\"view\": \"regions\"}"
             
         if "budget" in msg_lower or "spending" in msg_lower or "transparency" in msg_lower:
             r_id = road_id or 3

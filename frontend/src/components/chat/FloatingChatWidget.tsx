@@ -157,13 +157,13 @@ export default function FloatingChatWidget() {
 
     // Guided reporting trigger
     if (/report|pothole|streetlight|drainage/i.test(text) && text.length < 30) {
-      setReporting({ step: 'type' });
+      setReporting({ step: 'image', type: 'pothole' });
       setMessages((prev) => [
         ...prev,
         {
           id: `assist-${Date.now()}`,
           role: 'assistant',
-          content: `🚧 **Starting Guided Reporting Flow**\n\nI will guide you step-by-step to report this issue. Let's begin!\n\n**Step 1: Select the issue type below:**`,
+          content: `🚧 **File a Complaint**\n\nPlease select and upload a photo of the road defect below to file a complaint. The system will automatically tag coordinates and route the work order.`,
           timestamp: new Date(),
         },
       ]);
@@ -262,23 +262,18 @@ export default function FloatingChatWidget() {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setReporting((prev) => ({ ...prev, step: 'landmark', image: file }));
+      setReporting((prev) => ({ ...prev, image: file }));
+      // Automatically geolocate and submit
+      handleDetectLocation(file);
     }
   };
 
-  const handleSkipImage = () => {
-    setReporting((prev) => ({ ...prev, step: 'landmark' }));
-  };
-
-  const handleLandmarkSubmit = (landmarkStr: string) => {
-    setReporting((prev) => ({ ...prev, step: 'gps', landmark: landmarkStr }));
-  };
-
-  const handleDetectLocation = () => {
+  const handleDetectLocation = (file: File) => {
     if (!navigator.geolocation) {
       setReporting((prev) => ({
         ...prev,
         step: 'submitting',
+        image: file,
         lat: 13.0827,
         lng: 80.2707,
         accuracy: 10,
@@ -309,6 +304,7 @@ export default function FloatingChatWidget() {
         setReporting((prev) => ({
           ...prev,
           step: 'submitting',
+          image: file,
           lat: latitude,
           lng: longitude,
           accuracy: acc,
@@ -319,6 +315,7 @@ export default function FloatingChatWidget() {
         setReporting((prev) => ({
           ...prev,
           step: 'submitting',
+          image: file,
           lat: 13.0827,
           lng: 80.2707,
           accuracy: 15,
@@ -693,42 +690,18 @@ export default function FloatingChatWidget() {
             {/* Guided Reporting Interactive UI */}
             {reporting.step !== 'idle' && reporting.step !== 'success' && (
               <div className="mr-auto w-full max-w-[85%] border border-cyan-500/40 rounded-2xl bg-cyan-950/20 p-4 space-y-4">
-                <span className="text-[9px] font-bold text-cyan-400 block tracking-wider uppercase">Guided Issue Filing</span>
-
-                {/* STEP 1: SELECT ISSUE TYPE */}
-                {reporting.step === 'type' && (
-                  <div className="space-y-2">
-                    <p className="text-[11px] text-slate-300">Select issue type:</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {(['pothole', 'streetlight', 'traffic_signal', 'open_drainage'] as const).map((t) => (
-                        <button
-                          key={t}
-                          onClick={() => handleSelectType(t)}
-                          className="bg-slate-900 border border-slate-700 rounded p-2 text-left text-xs hover:border-cyan-400 transition hover:bg-slate-800 cursor-pointer capitalize text-slate-200"
-                        >
-                          {t === 'pothole' ? '🕳️' : t === 'streetlight' ? '💡' : t === 'traffic_signal' ? '🚦' : '🌊'} {t.replace('_', ' ')}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <span className="text-[9px] font-bold text-cyan-400 block tracking-wider uppercase">Issue Filing</span>
 
                 {/* STEP 2: UPLOAD IMAGE */}
                 {reporting.step === 'image' && (
                   <div className="space-y-3">
-                    <p className="text-[11px] text-slate-300">Upload a photo of the <b>{reporting.type?.replace('_', ' ')}</b> (optional):</p>
+                    <p className="text-[11px] text-slate-300">Upload a photo of the defect to submit a report:</p>
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      className="w-full py-3 bg-slate-900 border-2 border-dashed border-slate-700 rounded-lg text-xs hover:border-cyan-500 transition text-slate-300 flex flex-col items-center justify-center space-y-1 cursor-pointer"
+                      className="w-full py-4 bg-slate-900 border-2 border-dashed border-slate-700 rounded-xl text-xs hover:border-cyan-500 transition text-slate-300 flex flex-col items-center justify-center space-y-1.5 cursor-pointer animate-pulse"
                     >
-                      <span>📸 Capture / Choose Photo</span>
-                      <span className="text-[9px] text-slate-500">jpeg/png formats</span>
-                    </button>
-                    <button
-                      onClick={handleSkipImage}
-                      className="w-full py-2 text-[10px] text-slate-400 hover:text-slate-200 transition"
-                    >
-                      Skip — proceed without photo
+                      <span>📸 Choose / Capture Photo</span>
+                      <span className="text-[9px] text-slate-500">jpeg, png, WebP formats</span>
                     </button>
                     <input
                       ref={fileInputRef}
@@ -738,49 +711,6 @@ export default function FloatingChatWidget() {
                       onChange={handleImageUpload}
                       className="hidden"
                     />
-                  </div>
-                )}
-
-                {/* STEP 3: NEAREST LANDMARK */}
-                {reporting.step === 'landmark' && (
-                  <div className="space-y-2">
-                    <p className="text-[11px] text-slate-300">Nearest landmark (optional):</p>
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        const val = (e.currentTarget.elements.namedItem('landmark') as HTMLInputElement).value;
-                        handleLandmarkSubmit(val);
-                      }}
-                      className="flex space-x-2"
-                    >
-                      <input
-                        name="landmark"
-                        type="text"
-                        placeholder="e.g. Opp. Central School, Near bus stop..."
-                        className="flex-1 text-xs rounded bg-slate-900 border border-slate-700 p-2 text-white focus:outline-none focus:border-cyan-500"
-                        autoFocus
-                      />
-                      <button
-                        type="submit"
-                        className="bg-cyan-500 text-black px-3 rounded text-xs font-bold hover:bg-cyan-400 cursor-pointer"
-                      >
-                        Next
-                      </button>
-                    </form>
-                  </div>
-                )}
-
-                {/* STEP 4: GPS LOCATION */}
-                {reporting.step === 'gps' && (
-                  <div className="space-y-3">
-                    <p className="text-[11px] text-slate-300">Tag precise location via device GPS:</p>
-                    <button
-                      onClick={handleDetectLocation}
-                      className="w-full py-2 bg-cyan-500 text-black text-xs font-bold rounded flex items-center justify-center space-x-1 hover:bg-cyan-400 cursor-pointer"
-                    >
-                      <span>📍 Detect Coordinates</span>
-                    </button>
-                    <p className="text-[9px] text-slate-500 text-center">Your coordinates will be used to auto-route the issue to the correct authority</p>
                   </div>
                 )}
 
