@@ -129,9 +129,9 @@ gantt
 2.  ***Last Repaired:** June 10, 2018.*
 3.  ***Contractor:** Omega Infrastructure Ltd. — rated 1.85 out of 5 and currently blacklisted.'*
 
-The underlying problem: sub-base compaction is only **62%** — the minimum required is 80%. Water absorption is at **8.5%**, which means the road will break down during monsoon rains.
+*Point to the Sub-Base Compaction evidence panel:* "This is not a maintenance failure — it is a **procurement fraud**. The compaction never reached spec. The asphalt binder was swapped for a cheaper grade. Our system caught it because we cross-referenced sensor readings against the signed tender document — something no manual audit had done.
 
-The contractor who did the work, Omega Infrastructure, was paid ₹4.8 Crores through tender BMC-RD-2025-0092. They have been blacklisted by municipal order for replacing the specified material with cheaper alternatives.
+*Point to the Omega Infrastructure citation card:* "And the consequence is live on screen right now. Omega is **blacklisted**. Their final milestone payment of ₹7.5 Lakhs is frozen. The 3-year defect liability clause means this repair bill goes back to them — **at zero cost to the taxpayer**. ROADWATCH did not just find the problem. It triggered the accountability chain."
 
 > **⚡ EVAL CRITERIA CALLOUT (EC-1 — Data Accuracy):** Say:
 

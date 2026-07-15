@@ -115,6 +115,12 @@ export default function Page() {
   const [isTourActive, setIsTourActive] = useState(false);
   const [tourStep, setTourStep] = useState(1);
 
+  useEffect(() => {
+    if (hasSeenOnboarding) {
+      setShowLanding(false);
+    }
+  }, [hasSeenOnboarding]);
+
   // Bottom Drawer state for Conversational Cockpit
   const [drawerHeight, setDrawerHeight] = useState<number>(0);
 

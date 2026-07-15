@@ -315,4 +315,43 @@ export const demoSnippets: DemoSnippet[] = [
       },
     ],
   },
+  {
+    id: 'scenario-d',
+    title: 'Launch Digital Twin',
+    subtitle: '3D Spatial Telemetry & Live Sensor Overlay',
+    description: 'Launches the 3D Digital Twin view of S.V. Road with real-time sensor nodes and subsurface utility lines. Covers judging criteria 5.',
+    criteria: [5],
+    duration: '~60s',
+    messages: [
+      {
+        role: 'user',
+        content: 'Show the live condition of the model',
+      },
+      {
+        role: 'assistant',
+        content:
+          '**Launching 3D Digital Twin** — S.V. Road (Santacruz to Bandra)\n\nThe spatial simulation is now rendering. Here is what you are seeing:\n\n- **Sensor Node Grid**: 12 IoT nodes are embedded at 400m intervals. 3 nodes show **Critical** readings (vibration amplitude > 8mm/s), 5 are **Elevated** (4–8mm/s), and 4 are **Nominal**.\n- **Subsurface Utility Overlay**: Water main (0.9m depth, active pressure 3.2 bar), electrical conduit (1.1m depth), and fiber optic trunk (1.4m depth) are all rendered.\n- **Structural Deformation Layer**: The model shows a 23mm surface depression at the Bandra end consistent with the sub-base compaction deficit in the engineering logs.\n\nYou can rotate, zoom, and tap any sensor node for a live telemetry readout. This view is synchronized with the PostGIS database in real time.',
+        suggestedPrompts: [
+          'Who is financially liable for the repairs?',
+          'Show me the budget breakdown',
+          'File a complaint on this road',
+        ],
+      },
+    ],
+    scenes: [
+      {
+        id: 'scene-d-1',
+        title: 'Launch digital twin',
+        description: 'AI opens the 3D spatial model with live sensor overlay',
+        narration:
+          'The user asks to see the live road model. The 3D Digital Twin renders the road geometry, utility pipes, and IoT sensor nodes pulled from the PostGIS telemetry database.',
+        dispatchActions: [
+          {
+            type: 'SET_CONTEXT_VIEW',
+            payload: { view: 'twin' },
+          },
+        ],
+      },
+    ],
+  },
 ];

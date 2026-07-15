@@ -189,7 +189,7 @@ export default function LandingHero({ onStartTour, onEnterDirect, onStartDemo }:
             <div className="grid grid-cols-2 gap-2.5 w-full sm:flex sm:w-auto sm:gap-3">
               <button
                 onClick={onEnterDirect}
-                className="flex items-center justify-center gap-2.5 px-6 py-3 sm:py-3.5 rounded-lg bg-cyan-500/20 border border-cyan-500/40 hover:bg-cyan-500 hover:text-slate-950 text-cyan-400 text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-cyan-500/10 active:scale-95"
+                className="group flex items-center justify-center gap-2.5 px-6 py-3 sm:py-3.5 rounded-lg bg-cyan-500/20 border border-cyan-500/40 hover:bg-cyan-500 hover:text-slate-950 text-cyan-400 text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-cyan-500/10 active:scale-95"
               >
                 Launch Platform
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />

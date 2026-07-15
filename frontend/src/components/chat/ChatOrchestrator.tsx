@@ -49,6 +49,57 @@ import {
 import { Road, Contractor, Project, Complaint } from '@/types';
 import { calculateRoadTransparency, getScoreGrade, getCitywideTransparencyData } from '@/services/transparencyEngine';
 import { formatCurrency } from '@/services/regionAwareFormat';
+import { demoSnippets, DemoMessage } from '@/data/demoScripts';
+
+// ---------------------------------------------------------------------------
+// Demo-mode local fallback: fuzzy keyword matcher against demoSnippets
+// ---------------------------------------------------------------------------
+function findBestDemoReply(query: string): DemoMessage | null {
+  const q = query.toLowerCase();
+
+  // ── Direct intent overrides ──────────────────────────────────────────
+  // Bypass fuzzy scoring for high-confidence intent patterns so that
+  // phrasing variations ("launch the digital twin", "show the twin",
+  // "show the live condition") all reliably map to the right snippet.
+  if (/twin|digital.twin|live.condition|3d.model|spatial.model|launch.*model|show.*twin/i.test(q)) {
+    const twinSnippet = demoSnippets.find(s => s.id === 'scenario-d');
+    const reply = twinSnippet?.messages.find(m => m.role === 'assistant') ?? null;
+    if (reply) return reply;
+  }
+  if (/budget|spending|where.*money|money.*go|breakdown|tender.*cost/i.test(q)) {
+    const budgetSnippet = demoSnippets.find(s => s.id === 'scenario-b');
+    const reply = budgetSnippet?.messages.find(m => m.role === 'assistant') ?? null;
+    if (reply) return reply;
+  }
+  if (/pothole|report|hazard|complaint|standing.water|caving/i.test(q)) {
+    const complaintSnippet = demoSnippets.find(s => s.id === 'scenario-c');
+    const reply = complaintSnippet?.messages.find(m => m.role === 'assistant') ?? null;
+    if (reply) return reply;
+  }
+
+  // ── Fuzzy keyword overlap ────────────────────────────────────────────
+  let bestScore = 0;
+  let bestReply: DemoMessage | null = null;
+
+  for (const snippet of demoSnippets) {
+    for (let i = 0; i < snippet.messages.length - 1; i++) {
+      const userMsg = snippet.messages[i];
+      const assistantMsg = snippet.messages[i + 1];
+      if (userMsg.role !== 'user' || assistantMsg.role !== 'assistant') continue;
+
+      // Score by shared keyword overlap
+      const keywords = userMsg.content.toLowerCase().split(/\W+/).filter(w => w.length > 3);
+      const score = keywords.reduce((acc, kw) => acc + (q.includes(kw) ? 1 : 0), 0);
+      if (score > bestScore) {
+        bestScore = score;
+        bestReply = assistantMsg;
+      }
+    }
+  }
+
+  // Require at least 1 keyword match to avoid nonsense fallbacks
+  return bestScore >= 1 ? bestReply : null;
+}
 
 // Subcomponents
 import MapWrapper from '@/components/map/MapWrapper';
@@ -125,6 +176,14 @@ export default function ChatOrchestrator() {
   const [selectedContractorId, setSelectedContractorId] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [mounted, setMounted] = useState(false);
+  // Sub-view within 'map' context: 'details' shows RoadDetailsPanel full-pane,
+  // 'map' shows MapWrapper full-pane. Toggle with the map/back button.
+  const [mapSubView, setMapSubView] = useState<'details' | 'map'>('details');
+
+  // Reset to details panel whenever a new road is selected
+  useEffect(() => {
+    if (selectedRoadId) setMapSubView('details');
+  }, [selectedRoadId]);
 
   // Chat window state
   const [input, setInput] = useState('');
@@ -331,9 +390,41 @@ export default function ChatOrchestrator() {
     setMessages(prev => [...prev, { role: 'user', content: textToSend }]);
     setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
 
-    // Direct error if backend is offline
+    // ------------------------------------------------------------------
+    // Navigation dispatcher — fires after any response to open the right panel
+    // Works regardless of backend status (demo mode, timeout, or live stream).
+    // ------------------------------------------------------------------
+    const dispatchNavigationFromQuery = (q: string) => {
+      if (/twin|digital twin|live condition|3d model|spatial model|telemetry|sensor/i.test(q)) {
+        setContextView('twin');
+      } else if (/show.*map|view.*map|map.*road|geospatial|on the map/i.test(q) && selectedRoadId) {
+        setContextView('map');
+      } else if (/budget|spending|money|crore|₹|tender|sanction/i.test(q)) {
+        setContextView('budgets');
+      } else if (/contractor|omega|zenith|blacklist|scorecard/i.test(q)) {
+        setContextView('contractors');
+      }
+    };
+
+    // ------------------------------------------------------------------
+    // DEMO FALLBACK: If backend is offline, stream the best matching
+    // canned response from demoScripts.ts (full evidence + citations).
+    // ------------------------------------------------------------------
     if (!isBackendOnline) {
-      await submitBackendError();
+      const demoReply = findBestDemoReply(textToSend);
+      if (demoReply) {
+        await streamResponse(
+          demoReply.content,
+          (demoReply.citations as any) ?? [],
+          demoReply.suggestedActions ?? [],
+          demoReply.evidence ?? [],
+          demoReply.suggestedPrompts ?? []
+        );
+      } else {
+        await submitBackendError();
+      }
+      // Always fire navigation — even if we showed an error, open the right panel
+      dispatchNavigationFromQuery(textToSend);
       setIsLoading(false);
       return;
     }
@@ -349,10 +440,15 @@ export default function ChatOrchestrator() {
       userLon = position.coords.longitude;
     } catch (e) {}
 
+    // Abort the stream if the backend hangs for more than 10 seconds
+    const abortController = new AbortController();
+    const streamTimeout = setTimeout(() => abortController.abort(), 10000);
+
     try {
       const response = await fetch("http://localhost:8000/api/v1/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: abortController.signal,
         body: JSON.stringify({
           message: textToSend,
           session_id: sessionIdRef.current,
@@ -425,10 +521,44 @@ export default function ChatOrchestrator() {
           }
         }
       }
-    } catch (error) {
-      console.warn("Chat stream error:", error);
-      await submitBackendError();
+
+      // If backend streamed but returned nothing useful, fall back to demo data
+      if (!fullResponse.trim()) {
+        const demoReply = findBestDemoReply(textToSend);
+        if (demoReply) {
+          await streamResponse(
+            demoReply.content,
+            (demoReply.citations as any) ?? [],
+            demoReply.suggestedActions ?? [],
+            demoReply.evidence ?? [],
+            demoReply.suggestedPrompts ?? []
+          );
+          dispatchNavigationFromQuery(textToSend);
+        }
+      } else {
+        // Backend returned content — still check for twin/map triggers if
+        // the backend didn't embed a {"view":...} navigation token
+        dispatchNavigationFromQuery(textToSend);
+      }
+    } catch (error: any) {
+      // On timeout/abort or network failure, try the demo data first
+      const demoReply = findBestDemoReply(textToSend);
+      if (demoReply) {
+        await streamResponse(
+          demoReply.content,
+          (demoReply.citations as any) ?? [],
+          demoReply.suggestedActions ?? [],
+          demoReply.evidence ?? [],
+          demoReply.suggestedPrompts ?? []
+        );
+      } else {
+        console.warn("Chat stream error:", error);
+        await submitBackendError();
+      }
+      // Always fire navigation regardless of whether demo reply was found
+      dispatchNavigationFromQuery(textToSend);
     } finally {
+      clearTimeout(streamTimeout);
       setIsLoading(false);
     }
   };
@@ -1038,11 +1168,54 @@ export default function ChatOrchestrator() {
               {/* Dynamic Sub-View Dispatcher */}
               <div className="flex-1 h-full min-h-0 w-full overflow-hidden">
                 {contextView === 'map' && (
-                  <div className="w-full h-full relative">
-                    <MapWrapper />
-                    {selectedRoadId && (
-                      <div className="absolute left-4 top-4 bottom-4 w-76 bg-slate-950/95 border border-white/[0.08] rounded-2xl overflow-hidden shadow-2xl z-10 flex flex-col animate-in slide-in-from-left duration-300">
-                        <RoadDetailsPanel />
+                  <div className="w-full h-full flex flex-col min-h-0">
+                    {selectedRoadId && mapSubView === 'details' ? (
+                      /* ── DETAILS VIEW: full-pane road details panel ── */
+                      <div className="w-full h-full flex flex-col min-h-0 relative">
+                        {/* Swap-to-map button in top-right corner */}
+                        <button
+                          onClick={() => setMapSubView('map')}
+                          title="View on map"
+                          aria-label="Switch to map view"
+                          className="absolute top-3 right-12 z-20 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-900/80 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-950/60 hover:border-cyan-500 text-[9px] font-black uppercase tracking-wide transition-all cursor-pointer shadow-lg"
+                        >
+                          <MapPin className="w-3 h-3" />
+                          View Map
+                        </button>
+                        {/* Road Details Panel scrolls within the full pane */}
+                        <div className="flex-1 overflow-y-auto min-h-0 scrollbar-thin scrollbar-thumb-white/[0.06]">
+                          <RoadDetailsPanel />
+                        </div>
+                      </div>
+                    ) : selectedRoadId && mapSubView === 'map' ? (
+                      /* ── MAP VIEW: full-pane Leaflet map ── */
+                      <div className="w-full h-full relative">
+                        {/* Back-to-details + close strip — floats above Leaflet (z-[9999]) */}
+                        <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-[9999] pointer-events-none">
+                          <button
+                            onClick={() => setMapSubView('details')}
+                            title="Back to road details"
+                            aria-label="Back to road details"
+                            className="pointer-events-auto flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-950 border border-cyan-500/40 text-cyan-400 hover:bg-cyan-950/60 hover:border-cyan-500 text-[9.5px] font-black uppercase tracking-wide transition-all cursor-pointer shadow-2xl"
+                          >
+                            <ArrowRight className="w-3 h-3 rotate-180" />
+                            ← Road Details
+                          </button>
+                          <button
+                            onClick={() => setContextView(null)}
+                            title="Close map"
+                            aria-label="Close map"
+                            className="pointer-events-auto flex items-center justify-center w-8 h-8 rounded-xl bg-slate-950 border border-white/[0.15] text-slate-400 hover:text-slate-100 hover:border-white/30 transition-all cursor-pointer shadow-2xl"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                        <MapWrapper />
+                      </div>
+                    ) : (
+                      /* ── NO ROAD SELECTED: plain map ── */
+                      <div className="w-full h-full relative">
+                        <MapWrapper />
                       </div>
                     )}
                   </div>
