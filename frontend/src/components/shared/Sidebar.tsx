@@ -246,7 +246,7 @@ export default function Sidebar() {
                   ? 'text-cyan-400 border-cyan-800/30 bg-cyan-950/30'
                   : 'text-indigo-400 border-indigo-800/30 bg-indigo-950/30'
               }`}>
-                {userRole}
+                {isAdmin ? 'admin' : 'citizen'}
               </span>
             </button>
             {/* Status row */}
