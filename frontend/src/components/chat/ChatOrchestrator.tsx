@@ -397,6 +397,8 @@ export default function ChatOrchestrator() {
     const dispatchNavigationFromQuery = (q: string) => {
       if (/twin|digital twin|live condition|3d model|spatial model|telemetry|sensor/i.test(q)) {
         setContextView('twin');
+        // Auto-select S.V. Road (id: 3) for the demo flow
+        if (!selectedRoadId) setSelectedRoadId(3);
       } else if (/show.*map|view.*map|map.*road|geospatial|on the map/i.test(q) && selectedRoadId) {
         setContextView('map');
       } else if (/budget|spending|money|crore|₹|tender|sanction/i.test(q)) {
@@ -1222,7 +1224,7 @@ export default function ChatOrchestrator() {
                 )}
 
                 {contextView === 'twin' && (
-                  <div className="w-full h-full bg-slate-950/90 relative">
+                  <div className="w-full h-full flex flex-col bg-slate-950/90">
                     <ErrorBoundary>
                       <DigitalTwinView />
                     </ErrorBoundary>
@@ -1515,7 +1517,7 @@ export default function ChatOrchestrator() {
             )}
 
             {contextView === 'twin' && (
-              <div className="w-full h-full bg-slate-950/90 relative min-h-[300px]">
+              <div className="w-full h-full flex flex-col bg-slate-950/90 min-h-[300px]">
                 <ErrorBoundary>
                   <DigitalTwinView />
                 </ErrorBoundary>

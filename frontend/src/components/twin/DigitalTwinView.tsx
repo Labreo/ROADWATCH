@@ -506,31 +506,33 @@ export function useCameraInterpolation(controlsRef: React.RefObject<any>) {
   });
 }
 
-// ── Main View ────────────────────────────────────────────────
-
 export default function DigitalTwinView() {
   const { selectedRoadId, setSelectedRoadId, canvasAction, setCanvasAction } = useStore();
-  
+
+  // Auto-select S.V. Road (id 3) on first mount if nothing is selected
+  useEffect(() => {
+    if (!selectedRoadId) setSelectedRoadId(3);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const initialRoad = useMemo(() => {
-    if (selectedRoadId) {
-      const found = roads.find(r => r.id === selectedRoadId);
-      if (found) return found;
-    }
-    return roads[0];
+    const target = selectedRoadId ?? 3;
+    return roads.find(r => r.id === target) ?? roads[0];
   }, [selectedRoadId]);
 
   const [selectedRoad, setSelectedRoad] = useState<Road>(initialRoad);
   const clock = useClock();
   const sceneRef = useRef<THREE.Scene | null>(null);
 
+  // Panel visibility state — start collapsed so the 3D model is fully visible
+  const [leftOpen,  setLeftOpen]  = useState(false);
+  const [rightOpen, setRightOpen] = useState(false);
+
   // Sync local state with store changes
   useEffect(() => {
-    if (selectedRoadId) {
-      const found = roads.find(r => r.id === selectedRoadId);
-      if (found) {
-        setSelectedRoad(found);
-      }
-    }
+    const target = selectedRoadId ?? 3;
+    const found = roads.find(r => r.id === target);
+    if (found) setSelectedRoad(found);
   }, [selectedRoadId]);
 
   // Sync local selection to global store for map
@@ -539,46 +541,25 @@ export default function DigitalTwinView() {
     setSelectedRoadId(road.id);
   };
 
-  // Initialize map road selection if not already set, and clean up canvas actions & release WebGL memory on unmount
+  // Clean up canvas actions & release WebGL memory on unmount
   useEffect(() => {
-    if (!selectedRoadId) {
-      setSelectedRoadId(roads[0].id);
-    }
     return () => {
       setCanvasAction(null);
-      
       const scene = sceneRef.current;
       if (scene) {
-        console.log("DigitalTwinView unmount: executing absolute explicit memory disposal cycle...");
         scene.traverse((object) => {
           if (object instanceof THREE.Mesh) {
-            // Dispose Geometry
-            if (object.geometry) {
-              console.log(`DigitalTwinView dispose: releasing geometry for ${object.name || 'mesh'}`);
-              object.geometry.dispose();
-            }
-
-            // Dispose Materials & custom shaders
+            if (object.geometry) object.geometry.dispose();
             if (object.material) {
               const disposeMaterial = (mat: THREE.Material) => {
-                console.log(`DigitalTwinView dispose: releasing material ${mat.name || mat.type}`);
                 mat.dispose();
-
-                // Dispose associated textures
                 for (const key in mat) {
                   const prop = (mat as any)[key];
-                  if (prop && typeof prop === 'object' && prop.isTexture) {
-                    console.log(`DigitalTwinView dispose: releasing texture ${key}`);
-                    prop.dispose();
-                  }
+                  if (prop && typeof prop === 'object' && prop.isTexture) prop.dispose();
                 }
               };
-
-              if (Array.isArray(object.material)) {
-                object.material.forEach(disposeMaterial);
-              } else {
-                disposeMaterial(object.material);
-              }
+              if (Array.isArray(object.material)) object.material.forEach(disposeMaterial);
+              else disposeMaterial(object.material);
             }
           }
         });
@@ -589,38 +570,85 @@ export default function DigitalTwinView() {
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden animate-in fade-in duration-300 relative">
 
-      {/* ── HUD Top Strip (absolute over map) ── */}
+      {/* ── HUD Top Strip ── */}
       <HUDStrip clock={clock} />
 
-      {/* ── Main content area: map + panels ── */}
-      <div className="flex-1 relative lg:pointer-events-none min-h-0">
+      {/* ── Panel toggle pill row (below HUD) ── */}
+      <div className="absolute top-[44px] left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5 px-3 py-1.5 bg-black/70 backdrop-blur-md border border-white/[0.06] rounded-full pointer-events-auto">
+        <button
+          onClick={() => setLeftOpen(v => !v)}
+          className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[8.5px] font-black uppercase tracking-wider transition-all ${leftOpen ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40' : 'text-slate-500 hover:text-slate-300 border border-transparent'}`}
+        >
+          <Layers className="w-2.5 h-2.5" />
+          Segments
+        </button>
+        <span className="w-px h-3 bg-white/[0.08]" />
+        <button
+          onClick={() => setRightOpen(v => !v)}
+          className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[8.5px] font-black uppercase tracking-wider transition-all ${rightOpen ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40' : 'text-slate-500 hover:text-slate-300 border border-transparent'}`}
+        >
+          <Activity className="w-2.5 h-2.5" />
+          Intel
+        </button>
+      </div>
 
-        {/* ── Center: 3D Road Inspection Scene ── */}
-        <div className="absolute inset-0 pointer-events-auto z-0">
+      {/* ── Main content area ── */}
+      <div className="flex-1 relative min-h-0">
+
+        {/* 3D Canvas — always fills the full pane */}
+        <div className="absolute inset-0 z-0">
           <ErrorBoundary>
             <RoadInspectionScene sceneRef={sceneRef} />
           </ErrorBoundary>
         </div>
 
-        {/* ── Corner scan decorators ── */}
+        {/* Corner scan decorators */}
         <div className="absolute top-[44px] left-0 w-4 h-4 border-t border-l border-cyan-500/20 pointer-events-none z-10" />
         <div className="absolute top-[44px] right-0 w-4 h-4 border-t border-r border-cyan-500/20 pointer-events-none z-10" />
         <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-cyan-500/20 pointer-events-none z-10" />
         <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-cyan-500/20 pointer-events-none z-10" />
 
-        {/* ── Left panel: Road list ── */}
-        <section className="absolute left-4 top-[52px] bottom-4 w-[260px] z-10 flex flex-col pointer-events-auto hidden lg:flex">
-          <RoadListPanel selected={selectedRoad} onSelect={handleSelectRoad} />
-        </section>
+        {/* ── Left panel: Road list (collapsible) ── */}
+        <div
+          className={`absolute left-2 top-[72px] bottom-2 z-20 flex flex-col pointer-events-auto transition-all duration-300 ease-in-out ${leftOpen ? 'w-[230px]' : 'w-0 overflow-hidden'}`}
+        >
+          {leftOpen && (
+            <div className="relative h-full animate-in slide-in-from-left duration-200">
+              {/* Collapse button */}
+              <button
+                onClick={() => setLeftOpen(false)}
+                title="Collapse segment list"
+                className="absolute -right-3 top-3 z-30 w-6 h-6 flex items-center justify-center rounded-full bg-slate-900 border border-white/[0.10] text-slate-400 hover:text-cyan-400 hover:border-cyan-500/40 transition-all shadow-lg"
+              >
+                <ChevronRight className="w-3 h-3 rotate-180" />
+              </button>
+              <RoadListPanel selected={selectedRoad} onSelect={handleSelectRoad} />
+            </div>
+          )}
+        </div>
 
-        {/* ── Right panel: Intelligence ── */}
-        <section className="absolute right-4 top-[52px] bottom-4 w-[300px] z-10 flex flex-col pointer-events-auto hidden lg:flex">
-          <IntelligencePanel 
-            road={selectedRoad}
-            canvasAction={canvasAction}
-            setCanvasAction={setCanvasAction}
-          />
-        </section>
+        {/* ── Right panel: Intelligence (collapsible) ── */}
+        <div
+          className={`absolute right-2 top-[72px] bottom-2 z-20 flex flex-col pointer-events-auto transition-all duration-300 ease-in-out ${rightOpen ? 'w-[260px]' : 'w-0 overflow-hidden'}`}
+        >
+          {rightOpen && (
+            <div className="relative h-full animate-in slide-in-from-right duration-200">
+              {/* Collapse button */}
+              <button
+                onClick={() => setRightOpen(false)}
+                title="Collapse intelligence panel"
+                className="absolute -left-3 top-3 z-30 w-6 h-6 flex items-center justify-center rounded-full bg-slate-900 border border-white/[0.10] text-slate-400 hover:text-cyan-400 hover:border-cyan-500/40 transition-all shadow-lg"
+              >
+                <ChevronRight className="w-3 h-3" />
+              </button>
+              <IntelligencePanel
+                road={selectedRoad}
+                canvasAction={canvasAction}
+                setCanvasAction={setCanvasAction}
+              />
+            </div>
+          )}
+        </div>
 
         {/* ── Mobile: stacked panels below map ── */}
         <div className="lg:hidden absolute bottom-0 left-0 right-0 z-10 max-h-[45vh] overflow-y-auto glass-command border-t border-white/[0.05] pointer-events-auto">
@@ -641,47 +669,17 @@ export default function DigitalTwinView() {
               ))}
             </div>
             <div className="text-xs font-bold text-slate-200">{selectedRoad.name}</div>
-            
-            {/* Mobile focus controls */}
-            <div className="space-y-1.5">
-              <div className="mono-label text-[8px] text-cyan-400">CAMERA TELEMETRY FOCUS RELAYS</div>
-              <div className="flex flex-wrap gap-1.5">
-                {[
-                  { label: "Node A-01", coords: [-1.1, 0.25, 0.6] as [number,number,number] },
-                  { label: "Node B-04", coords: [0.1, 0.35, -0.8] as [number,number,number] },
-                  { label: "Node C-02", coords: [1.2, 0.15, 0.3] as [number,number,number] },
-                  { label: "Pothole", coords: [0.3, 0.0, 0.5] as [number,number,number] }
-                ].map((anomaly, idx) => {
-                  const active = canvasAction && canvasAction.coordinates && 
-                                 Math.abs(canvasAction.coordinates[0] - anomaly.coords[0]) < 0.01 &&
-                                 Math.abs(canvasAction.coordinates[1] - anomaly.coords[1]) < 0.01 &&
-                                 Math.abs(canvasAction.coordinates[2] - anomaly.coords[2]) < 0.01;
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => {
-                        if (active) {
-                          setCanvasAction(null);
-                        } else {
-                          setCanvasAction({ type: 'FOCUS_ANOMALY', coordinates: anomaly.coords });
-                        }
-                      }}
-                      className={`px-2.5 py-1 rounded text-[8px] font-black uppercase transition-all ${
-                        active
-                          ? 'border-cyan-500/50 bg-cyan-500/10 text-cyan-400'
-                          : 'border-white/[0.06] text-[#55555f] hover:border-white/[0.12]'
-                      }`}
-                    >
-                      {anomaly.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
             <TerrainProfile road={selectedRoad} />
           </div>
         </div>
+      </div>
+
+      {/* Live HUD badge */}
+      <div className="absolute bottom-3 right-3 bg-slate-950/80 backdrop-blur-md border border-white/5 py-1.5 px-3 rounded-lg pointer-events-none select-none z-10">
+        <span className="text-[8px] font-black uppercase tracking-widest text-slate-350 flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-ping" />
+          Interactive HUD Active
+        </span>
       </div>
     </div>
   );
