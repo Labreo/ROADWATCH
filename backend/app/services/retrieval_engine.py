@@ -158,7 +158,7 @@ class RetrievalEngine:
         return "general_inquiry"
 
     @classmethod
-    async def process_query(cls, message: str, session_id: str, lat: float = None, lon: float = None):
+    async def process_query(cls, message: str, session_id: str, lat: float | None = None, lon: float | None = None):
         # 1. Update session history
         if session_id not in sessions_memory:
             sessions_memory[session_id] = []
@@ -605,7 +605,7 @@ class RetrievalEngine:
                 suggested_prompts.append(f"How was {resolved_contractor['name']} selected? What bids did they win?")
 
         if authority_id:
-            resolved_authority = AuthorityResolver.get_authority_by_id(authority_id)
+            resolved_authority = AuthorityResolver.get_authority_by_id(int(authority_id))
             if resolved_authority:
                 citations.append({
                     "type": "authority",
@@ -851,7 +851,7 @@ class RetrievalEngine:
                         await asyncio.sleep(0.02)
                     return
 
-                async for line in response.iter_lines():
+                async for line in response.aiter_lines():
                     if line.startswith("data: "):
                         data_str = line[6:].strip()
                         if data_str == "[DONE]":

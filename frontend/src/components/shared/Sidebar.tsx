@@ -30,6 +30,13 @@ function useClock() {
   return t;
 }
 
+// Ensure server & client first render match: default to citizen until hydrated
+function useMounted() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  return mounted;
+}
+
 // Nav section separator
 function NavSeparator({ label }: { label: string }) {
   return (
@@ -67,7 +74,8 @@ export default function Sidebar() {
     return () => window.removeEventListener('resize', handleResize);
   }, [setSidebarOpen]);
 
-  const isAdmin = userRole === 'admin';
+  const mounted = useMounted();
+  const isAdmin = mounted && userRole === 'admin';
 
   const citizenItems: { id: AppView; label: string; icon: any; badge?: string | number }[] = [
     { id: 'chat'        as AppView, label: 'Chat Assistant',    icon: MessageSquare, badge: syncQueueCount > 0 ? syncQueueCount : undefined },
@@ -92,7 +100,7 @@ export default function Sidebar() {
 
   const navSections = [
     {
-      label: isAdmin ? 'Navigation' : 'Citizen Hub',
+      label: 'Navigation',
       items: isAdmin ? adminItems : citizenItems,
     }
   ];

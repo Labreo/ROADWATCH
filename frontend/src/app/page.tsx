@@ -1515,7 +1515,9 @@ export default function Page() {
 
       {/* VIEW 9: DIGITAL TWIN COMMAND CONSOLE */}
       {!isChatDriven && activeView === 'twin' && userRole === 'admin' && (
-        <DigitalTwinView />
+        <ErrorBoundary>
+          <DigitalTwinView />
+        </ErrorBoundary>
       )}
       {!isChatDriven && activeView === 'twin' && userRole !== 'admin' && (
         <AdminRestrictedView />
@@ -1635,7 +1637,11 @@ export default function Page() {
 
               {/* Drawer Content */}
               <div className="flex-1 overflow-y-auto p-6 scrollbar-thin select-text">
-                {activeView === 'twin' && <DigitalTwinView />}
+                {activeView === 'twin' && (
+                  <ErrorBoundary>
+                    <DigitalTwinView />
+                  </ErrorBoundary>
+                )}
                 
                 {activeView === 'roads' && (
                   <div className="w-full h-full relative min-h-[300px]">
@@ -1796,6 +1802,8 @@ export default function Page() {
           onEnterDirect={() => {
             setShowLanding(false);
             setIsTourActive(false);
+            setHasSeenOnboarding(true);
+            setActiveView('dashboard');
           }}
           onStartDemo={() => {
             setShowLanding(false);

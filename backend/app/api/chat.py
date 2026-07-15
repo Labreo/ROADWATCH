@@ -3,7 +3,8 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional
 import json
-from datetime import datetime
+import io
+from datetime import datetime, timezone
 from app.services.retrieval_engine import RetrievalEngine, sessions_memory
 from app.services.vision_pipeline import RoadDamageEvaluator
 from app.services.authority_resolver import AuthorityResolver
@@ -69,7 +70,7 @@ def extract_exif_gps(image_bytes: bytes):
         return None
     try:
         img = Image.open(io.BytesIO(image_bytes))
-        exif = img._getexif()
+        exif = img.getexif()
         if not exif:
             return None
         
@@ -102,8 +103,6 @@ def extract_exif_gps(image_bytes: bytes):
     except Exception as e:
         print(f"Error extracting backend GPS EXIF: {e}")
     return None
-
-import io
 
 @router.post("/chat/analyze-photo")
 async def analyze_photo_endpoint(
@@ -145,15 +144,9 @@ async def analyze_photo_endpoint(
                     pass
 
             if resolved_lat is None and latitude is not None:
-                try:
-                    resolved_lat = float(latitude)
-                except Exception:
-                    pass
+                resolved_lat = latitude
             if resolved_lon is None and longitude is not None:
-                try:
-                    resolved_lon = float(longitude)
-                except Exception:
-                    pass
+                resolved_lon = longitude
 
             # Try parsing EXIF from raw image binary on the backend
             if (resolved_lat is None or resolved_lon is None) and image_bytes:
@@ -210,8 +203,11 @@ async def analyze_photo_endpoint(
                 }
 
             # 4. Resolve geographic routing (authority and closest road segment)
-            authority = AuthorityResolver.resolve_authority_for_coordinates(resolved_lon, resolved_lat)
-            road = StructuredRoadRetriever.get_closest_road(resolved_lon, resolved_lat)
+            authority = None
+            road = None
+            if resolved_lon is not None and resolved_lat is not None:
+                authority = AuthorityResolver.resolve_authority_for_coordinates(resolved_lon, resolved_lat)
+                road = StructuredRoadRetriever.get_closest_road(resolved_lon, resolved_lat)
 
             # Build routing details
             routing_details = None
@@ -225,14 +221,14 @@ async def analyze_photo_endpoint(
             road_id = road["id"] if road else None
             road_name = road["name"] if road else "Unmapped Segment"
             
-            category = analysis.get("defectType", "pothole")
+            category = str(analysis.get("defectType", "pothole"))
             category_title = category.replace("_", " ").title()
             title = f"Citizen Report: {category_title} on {road_name}"
             
             depth = analysis.get("estimatedDepthCm", 0.0)
             width = analysis.get("estimatedWidthM", 0.0)
-            vision_severity = analysis.get("severity", "medium")
-            has_traffic = analysis.get("hasTraffic", False)
+            vision_severity = str(analysis.get("severity", "medium"))
+            has_traffic = bool(analysis.get("hasTraffic", False))
             
             description = (
                 f"Defect type: {category_title}. "
@@ -243,7 +239,7 @@ async def analyze_photo_endpoint(
             
             # Write to Spatial Database to ensure persistence
             geom_wkt = f"POINT({resolved_lon} {resolved_lat})"
-            created_at_iso = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+            created_at_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
             
             sql = """
             INSERT INTO complaints (title, description, category, geom, status, escalation_level, priority, target_resolution_hours, image_url, assigned_authority_id, road_id, created_at, updated_at)
@@ -323,7 +319,7 @@ async def analyze_photo_endpoint(
                 "content": str(outer_err)
             }) + "\n"
             
-            created_at_iso = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+            created_at_iso = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
             fallback_complaint = {
                 "id": 9999,
                 "clientTempId": "RW-AUTO-9999",

@@ -464,7 +464,7 @@ class Database:
             # If name-based lookup was used, filter
             if len(params) > 0 and isinstance(params[0], str):
                 name_query = params[0].lower().strip('%')
-                matches = [c for c in all_contractors if name_query in c["name"].lower()]
+                matches = [c for c in all_contractors if name_query in str(c["name"]).lower()]
                 if matches:
                     return [matches[0]]
             # If ID-based lookup, filter by the param if numeric
@@ -594,13 +594,13 @@ class Database:
             conn.close()
         except Exception as e:
             print(f"pg_trgm init error (non-fatal): {e}")
-
     def init_database(self, schema_path: str = "docs/schema.sql", seed_path: str = "docs/mock_data.sql"):
         """
         Initializes the database schema and seeds it if tables are empty.
         Reads schema.sql and mock_data.sql from the project docs directory.
         Safe to call multiple times — only runs if tables are empty or missing.
         """
+        conn = None
         try:
             conn = self.engine.raw_connection()
             with conn.cursor() as cursor:
@@ -635,13 +635,15 @@ class Database:
                     cursor.execute(seed_sql)
                     conn.commit()
                     print("Seed data inserted successfully.")
-            conn.close()
+            if conn is not None:
+                conn.close()
         except Exception as e:
             print(f"Database initialization error (non-fatal): {e}")
-            try:
-                conn.rollback()
-            except Exception:
-                pass
+            if conn is not None:
+                try:
+                    conn.rollback()
+                except Exception:
+                    pass
 
 
 # Singleton instance of database

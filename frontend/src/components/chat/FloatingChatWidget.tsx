@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { handleLocalChat, initializeLocalChatEngine, updateReportsCache } from '@/lib/localChatEngine';
+import { updateReportsCache } from '@/lib/localChatEngine';
 
 type Message = {
   id: string;
@@ -84,10 +84,7 @@ export default function FloatingChatWidget() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Initialize client-side data stores on mount
-  useEffect(() => {
-    initializeLocalChatEngine();
-  }, []);
+  // No-op: backend handles all query processing
 
   // Fetch highway index on first dropdown open
   const fetchHighwayIndex = useCallback(async () => {
@@ -142,6 +139,8 @@ export default function FloatingChatWidget() {
     setEngine('Local Chat Engine (CPPP Data)');
   };
 
+  const sessionIdRef = useRef(`fw-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+
   const handleSendMessage = async (text: string) => {
     if (!text.trim()) return;
 
@@ -156,37 +155,103 @@ export default function FloatingChatWidget() {
     setInputValue('');
     setLoading(true);
 
-    // Simulate small latency for premium AI interface feel
-    setTimeout(async () => {
-      setLoading(false);
-      const content = handleLocalChat(text);
-
-      if (content === '__TRIGGER_REPORT_FLOW__') {
-        setReporting({ step: 'type' });
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: `assist-${Date.now()}`,
-            role: 'assistant',
-            content: `🚧 **Starting Guided Reporting Flow**\n\nI will guide you step-by-step to report this issue. Let's begin!\n\n**Step 1: Select the issue type below:**`,
-            timestamp: new Date(),
-          },
-        ]);
-        return;
-      }
-
-      setEngine('Local Chat Engine (CPPP Data)');
+    // Guided reporting trigger
+    if (/report|pothole|streetlight|drainage/i.test(text) && text.length < 30) {
+      setReporting({ step: 'type' });
       setMessages((prev) => [
         ...prev,
         {
           id: `assist-${Date.now()}`,
           role: 'assistant',
-          content,
+          content: `🚧 **Starting Guided Reporting Flow**\n\nI will guide you step-by-step to report this issue. Let's begin!\n\n**Step 1: Select the issue type below:**`,
           timestamp: new Date(),
-          engine: 'Local Chat Engine (CPPP Data)',
         },
       ]);
-    }, 450);
+      setLoading(false);
+      return;
+    }
+
+    setEngine('ROADWATCH Backend API');
+
+    const assistantMsg: Message = {
+      id: `assist-${Date.now()}`,
+      role: 'assistant',
+      content: '',
+      timestamp: new Date(),
+      engine: 'ROADWATCH Backend API',
+    };
+    setMessages((prev) => [...prev, assistantMsg]);
+
+    try {
+      const response = await fetch("http://localhost:8000/api/v1/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: text,
+          session_id: sessionIdRef.current,
+        })
+      });
+
+      if (!response.body) {
+        throw new Error("No response body received");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.trim()) {
+            try {
+              const data = JSON.parse(line);
+              if (data.type === 'content') {
+                setMessages(prev => {
+                  const updated = [...prev];
+                  const last = updated[updated.length - 1];
+                  if (last && last.role === 'assistant') {
+                    last.content += data.content;
+                  }
+                  return updated;
+                });
+              } else if (data.type === 'metadata') {
+                setMessages(prev => {
+                  const updated = [...prev];
+                  const last = updated[updated.length - 1];
+                  if (last && last.role === 'assistant') {
+                    last.citations = data.citations;
+                    last.suggestedActions = data.suggested_actions;
+                    last.routingDetails = data.routing_details;
+                  }
+                  return updated;
+                });
+              }
+            } catch (err) {
+              console.error("Parse stream error:", err);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.warn("Chat stream failed:", error);
+      setMessages(prev => {
+        const updated = [...prev];
+        const last = updated[updated.length - 1];
+        if (last && last.role === 'assistant') {
+          last.content = "⚠️ **Backend server unavailable.**\n\nYour query could not be processed because the backend server is not responding. Please ensure the backend is running.";
+        }
+        return updated;
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   /* Guided Reporting Handlers */

@@ -14,10 +14,10 @@ class ConcentrateAPIConfig:
         self.api_endpoint = "https://api.concentrate.ai/v1/chat/completions"
 
 class RoadDamageEvaluator:
-    def __init__(self, config: ConcentrateAPIConfig = None):
+    def __init__(self, config: ConcentrateAPIConfig | None = None):
         self.config = config or ConcentrateAPIConfig()
 
-    async def evaluate_damage_stream(self, image_bytes: bytes, latitude: float, longitude: float):
+    async def evaluate_damage_stream(self, image_bytes: bytes, latitude: float | None, longitude: float | None):
         import json
         import httpx
 
@@ -77,7 +77,7 @@ class RoadDamageEvaluator:
                     yield json.dumps({"type": "error", "content": f"Concentrate API error {response.status_code}: {error_text.decode(errors='replace')}"})
                     return
 
-                async for line in response.iter_lines():
+                async for line in response.aiter_lines():
                     if line.startswith("data: "):
                         data_str = line[6:].strip()
                         if data_str == "[DONE]":

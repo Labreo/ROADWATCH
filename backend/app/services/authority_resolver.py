@@ -292,7 +292,7 @@ class AuthorityResolver:
         return {'area_match_percentage': None, 'boundary_distance_meters': None}
 
     @staticmethod
-    def resolve_with_routing_details(lon: float, lat: float, road_name: str = None, region_code: str = None) -> dict:
+    def resolve_with_routing_details(lon: float, lat: float, road_name: str | None = None, region_code: str | None = None) -> dict:
         """One-call: resolve authority for coordinates + build routing details."""
         authority = AuthorityResolver.resolve_authority_for_coordinates(lon, lat, region_code=region_code)
         if region_code:
@@ -303,7 +303,7 @@ class AuthorityResolver:
         return AuthorityResolver.build_routing_details(authority, road_name, region_name, lon, lat)
 
     @staticmethod
-    def build_routing_details(authority: dict, road_name: str = None, region_name: str = None, lon: float = None, lat: float = None) -> dict:
+    def build_routing_details(authority: dict | None, road_name: str | None = None, region_name: str | None = None, lon: float | None = None, lat: float | None = None) -> dict:
         """
         Build a human-readable routing_details payload from resolved authority.
         Includes executive engineer info, fallback for unknown authorities.
