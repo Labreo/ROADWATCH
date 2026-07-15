@@ -166,10 +166,6 @@ const getStoredComplaints = (): Complaint[] => {
 };
 
 export const useStore = create<AppState>((set, get) => {
-  // Initial lists (localStorage fallback for custom synced complaints)
-  const initialCustomComplaints = getStoredComplaints();
-  const initialComplaintsList = [...initialCustomComplaints, ...mockComplaints];
-
   return {
     // Sidebar State
     sidebarOpen: true,
@@ -344,10 +340,7 @@ export const useStore = create<AppState>((set, get) => {
     setUStructuralStressIntensity: (val) => set({ uStructuralStressIntensity: val }),
 
     // Region State
-    regionCode: (() => {
-      if (typeof window === 'undefined') return 'IN';
-      return localStorage.getItem('rw_region') || 'IN';
-    })(),
+    regionCode: 'IN',
     setRegionCode: (code) => {
       set({ regionCode: code });
       if (typeof window !== 'undefined') {
@@ -360,10 +353,7 @@ export const useStore = create<AppState>((set, get) => {
     setExchangeTargetCurrency: (currency) => set({ exchangeTargetCurrency: currency }),
 
     // Accessibility State
-    contrastMode: (() => {
-      if (typeof window === 'undefined') return 'normal';
-      return (localStorage.getItem('rw_contrast') as ContrastMode) || 'normal';
-    })(),
+    contrastMode: 'normal',
     setContrastMode: (mode) => {
       set({ contrastMode: mode });
       if (typeof window !== 'undefined') {
@@ -371,10 +361,7 @@ export const useStore = create<AppState>((set, get) => {
         document.documentElement.classList.toggle('high-contrast', mode === 'high');
       }
     },
-    fontSize: (() => {
-      if (typeof window === 'undefined') return 'default';
-      return (localStorage.getItem('rw_fontsize') as FontSizeLevel) || 'default';
-    })(),
+    fontSize: 'default',
     setFontSize: (size) => {
       set({ fontSize: size });
       if (typeof window !== 'undefined') {
@@ -385,20 +372,14 @@ export const useStore = create<AppState>((set, get) => {
         }
       }
     },
-    locale: (() => {
-      if (typeof window === 'undefined') return 'en-IN';
-      return (localStorage.getItem('rw_locale') as Locale) || 'en-IN';
-    })(),
+    locale: 'en-IN',
     setLocale: (locale) => {
       set({ locale });
       if (typeof window !== 'undefined') {
         localStorage.setItem('rw_locale', locale);
       }
     },
-    reducedMotion: (() => {
-      if (typeof window === 'undefined') return false;
-      return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    })(),
+    reducedMotion: false,
     setReducedMotion: (val) => {
       set({ reducedMotion: val });
       if (typeof window !== 'undefined') {
@@ -406,10 +387,7 @@ export const useStore = create<AppState>((set, get) => {
       }
     },
 
-    userRole: (() => {
-      if (typeof window === 'undefined') return 'citizen';
-      return (localStorage.getItem('rw_role') as UserRole) || 'citizen';
-    })(),
+    userRole: 'citizen',
     setUserRole: (role) => {
       set({ userRole: role });
       if (typeof window !== 'undefined') {
@@ -417,10 +395,7 @@ export const useStore = create<AppState>((set, get) => {
       }
     },
 
-    hasSeenOnboarding: (() => {
-      if (typeof window === 'undefined') return false;
-      return localStorage.getItem('rw_onboarding') === 'true';
-    })(),
+    hasSeenOnboarding: false,
     setHasSeenOnboarding: (val) => {
       set({ hasSeenOnboarding: val });
       if (typeof window !== 'undefined') {
@@ -441,7 +416,7 @@ export const useStore = create<AppState>((set, get) => {
     setDemoNarration: (narration) => set({ demoNarration: narration }),
 
     // Network / Offline Queue
-    isOnline: typeof window !== 'undefined' ? window.navigator.onLine : true,
+    isOnline: true,
     setIsOnline: (online) => {
       const wasOffline = !get().isOnline;
       set({ isOnline: online });
@@ -458,6 +433,57 @@ export const useStore = create<AppState>((set, get) => {
     conflicts: [],
 
     loadCachedData: async () => {
+      // 1. Hydrate client-side settings/localStorage in the browser synchronously on mount
+      if (typeof window !== 'undefined') {
+        try {
+          const savedRegion = localStorage.getItem('rw_region') || 'IN';
+          const savedContrast = (localStorage.getItem('rw_contrast') as ContrastMode) || 'normal';
+          const savedFontSize = (localStorage.getItem('rw_fontsize') as FontSizeLevel) || 'default';
+          const savedLocale = (localStorage.getItem('rw_locale') as Locale) || 'en-IN';
+          const savedRole = (localStorage.getItem('rw_role') as UserRole) || 'citizen';
+          const savedOnboarding = localStorage.getItem('rw_onboarding') === 'true';
+          const isOnline = window.navigator.onLine;
+          const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+          // Apply DOM classes corresponding to hydrated values
+          const root = document.documentElement;
+          root.classList.toggle('high-contrast', savedContrast === 'high');
+          
+          root.classList.remove('font-size-small', 'font-size-large');
+          if (savedFontSize !== 'default') {
+            root.classList.add(`font-size-${savedFontSize}`);
+          }
+          
+          root.lang = savedLocale.startsWith('en') ? 'en' : savedLocale.split('-')[0];
+          root.classList.toggle('reduced-motion', prefersReducedMotion);
+
+          // Get custom complaints
+          let customComplaints: Complaint[] = [];
+          try {
+            const stored = localStorage.getItem('roadwatch_custom_complaints');
+            customComplaints = stored ? JSON.parse(stored) : [];
+          } catch (e) {
+            console.error('Error loading custom complaints:', e);
+          }
+          const complaintsList = [...customComplaints, ...mockComplaints];
+
+          set({
+            regionCode: savedRegion,
+            contrastMode: savedContrast,
+            fontSize: savedFontSize,
+            locale: savedLocale,
+            reducedMotion: prefersReducedMotion,
+            userRole: savedRole,
+            hasSeenOnboarding: savedOnboarding,
+            isOnline: isOnline,
+            complaintsList,
+          });
+        } catch (err) {
+          console.error('Error hydrating store settings:', err);
+        }
+      }
+
+      // 2. Load IndexedDB cached data
       try {
         const queue = await CachedRoadRepository.getQueue();
         const logs = await CachedRoadRepository.getSyncLogs();
@@ -497,7 +523,7 @@ export const useStore = create<AppState>((set, get) => {
     setIsReporting: (reporting) => set({ isReporting: reporting }),
 
     // Complaints database state
-    complaintsList: initialComplaintsList,
+    complaintsList: mockComplaints,
     addComplaint: (complaint) => {
       const updatedList = [complaint, ...get().complaintsList];
       set({ complaintsList: updatedList });

@@ -9,6 +9,9 @@ type Message = {
   content: string;
   timestamp: Date;
   engine?: string;
+  citations?: any[];
+  suggestedActions?: any[];
+  routingDetails?: any;
 };
 
 type ReportingState = {
