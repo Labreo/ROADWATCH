@@ -23,9 +23,9 @@ const TOUR_STEPS = [
   },
   {
     title: 'Report Issues + Stay Updated',
-    description: 'File a complaint via chat or the wizard. Use USSD code *762392824# from any phone — no internet needed.',
+    description: 'File a complaint via chat or the wizard. Reports queue locally when offline and sync automatically once you reconnect — no data lost on a weak connection.',
     icon: <Smartphone className="w-5 h-5" />,
-    highlight: 'ussd-area',
+    highlight: 'offline-area',
   },
 ];
 
@@ -169,16 +169,16 @@ export default function OnboardingTour({ onClose }: { onClose: () => void }) {
 
               {step === 3 && (
                 <div className="bg-slate-800/50 rounded-lg p-2.5">
-                  <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Multi-Channel Access:</p>
+                  <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Low-Bandwidth Ready:</p>
                   <div className="mt-1.5 space-y-1.5 text-[10px] text-slate-300">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-cyan-400">🌐</span> Web Chat (this interface)
+                      <span className="text-cyan-400">🌐</span> Works in any modern mobile browser — no install
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-cyan-400">📱</span> SMS: Send ROAD {'<name>'} to this number
+                      <span className="text-cyan-400">📴</span> Full offline capture — reports queue locally
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-cyan-400">📞</span> USSD: Dial <code className="px-1 rounded bg-slate-700 text-cyan-300 font-mono">*762392824#</code>
+                      <span className="text-cyan-400">🔄</span> Auto-sync the moment the connection returns
                     </div>
                   </div>
                 </div>

@@ -12,7 +12,8 @@ export interface SensorReading {
   roadId: number;
   type: SensorType;
   label: string;
-  value: number;       // 0–100 index
+  value: number;       // 0–100 normalized severity index (drives bars/levels)
+  reading: number;     // real-world physical measurement (drives the displayed number)
   unit: string;
   level: SensorLevel;
   trend: 'stable' | 'rising' | 'falling';
@@ -21,6 +22,29 @@ export interface SensorReading {
   lng: number;
   depth?: string;      // for underground overlay context
   description: string;
+}
+
+// Physical measurement ranges per sensor type — the 0–100 severity index is
+// mapped into these bands so readouts look like instrument telemetry
+// (e.g. 7.3 mm/s²) instead of a suspiciously round 0–100 score.
+const READING_RANGE: Record<SensorType, { lo: number; hi: number; decimals: number }> = {
+  vibration:        { lo: 0.4,  hi: 16.5, decimals: 1 },  // mm/s²
+  stress:           { lo: 1.1,  hi: 11.8, decimals: 1 },  // MPa
+  drainage:         { lo: 8,    hi: 96,   decimals: 0 },  // % saturation
+  traffic:          { lo: 0.3,  hi: 4.6,  decimals: 2 },  // million ESALs
+  repair_integrity: { lo: 38,   hi: 98,   decimals: 0 },  // RCI 0–100
+};
+
+// Map a severity index (0–100) to a physical reading, with a small
+// deterministic sub-unit jitter so successive sensors don't share a value.
+function toReading(type: SensorType, index: number, jitterSeed: number): number {
+  const { lo, hi, decimals } = READING_RANGE[type];
+  const frac = index / 100;
+  const jitter = ((jitterSeed % 19) / 19 - 0.5) * ((hi - lo) / 22); // ±~2% of band
+  const raw = lo + (hi - lo) * frac + jitter;
+  const clamped = Math.min(hi, Math.max(lo, raw));
+  const p = Math.pow(10, decimals);
+  return Math.round(clamped * p) / p;
 }
 
 export interface SensorZone {
@@ -95,11 +119,21 @@ export function generateSensorsForRoads(roads: RoadMeta[]): SensorReading[] {
       ];
 
       sensorTypes.forEach((def, typeIdx) => {
-        const raw = clamp(Math.round(seededValue(road.id, typeIdx + posIdx * 10, 42) * mult));
+        // Center the seed around a mid band, then bias by road-status multiplier
+        // without hard-clamping everything to 100 — keeps a realistic spread
+        // (mostly nominal/elevated with a few genuine criticals) per segment.
+        const base = seededValue(road.id, typeIdx + posIdx * 10, 42); // 0–99
+        const biased = 30 + (base - 50) * 0.55 + (mult - 1) * 34;
+        const raw = clamp(Math.round(biased));
         // Repair integrity is inverse — lower raw = worse integrity when status is poor
         const value = def.type === 'repair_integrity'
           ? clamp(100 - raw)
           : raw;
+        const reading = toReading(
+          def.type,
+          value,
+          road.id * 7 + typeIdx * 11 + posIdx * 5,
+        );
 
         readings.push({
           id: `${road.id}-${def.type}-${posIdx}`,
@@ -107,6 +141,7 @@ export function generateSensorsForRoads(roads: RoadMeta[]): SensorReading[] {
           type: def.type,
           label: def.label,
           value,
+          reading,
           unit: def.unit,
           level: getLevel(value),
           trend: getTrend(road.id + posIdx, def.type),

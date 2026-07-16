@@ -36,7 +36,6 @@ import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { detectRegionSwitch, detectRegionFromText, detectRegionFromGps } from '@/services/regionDetectionService';
 import { isComparisonQuery, getCrossRegionComparison, generateComparisonResponse } from '@/services/regionComparisonService';
 import { setActiveRegion } from '@/services/regionAwareFormat';
-import USSDInfoBadge from './USSDInfoBadge';
 import OnboardingTour, { useOnboarding } from './OnboardingTour';
 
 interface Message {
@@ -1004,9 +1003,6 @@ export default function ChatPanel({ onSelectContractor }: ChatPanelProps) {
 
                 {/* Action Buttons */}
                 <div className="flex items-center gap-1">
-                  {/* USSD Badge */}
-                  <USSDInfoBadge />
-
                   {/* Help / Onboarding Tour trigger */}
                   <button
                     onClick={() => setShowTour(true)}

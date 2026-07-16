@@ -184,7 +184,7 @@ function SensorCard({
       <div className="space-y-1">
         <div className="flex justify-between items-center text-[9px]">
           <span className="text-muted-foreground">Reading</span>
-          <span className="font-black text-slate-200">{sensor.value} {sensor.unit}</span>
+          <span className="font-black text-slate-200">{sensor.reading} {sensor.unit}</span>
         </div>
         <ValueBar value={sensor.value} />
       </div>
@@ -275,7 +275,7 @@ function DetailPanel({ sensor, onClose }: { sensor: SensorReading; onClose: () =
           <div className="flex justify-between items-baseline">
             <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Current Reading</span>
             <span className="text-2xl font-black text-slate-100">
-              {sensor.value}
+              {sensor.reading}
               <span className="text-xs font-semibold text-muted-foreground ml-1">{sensor.unit}</span>
             </span>
           </div>
@@ -355,7 +355,7 @@ function DetailPanel({ sensor, onClose }: { sensor: SensorReading; onClose: () =
                 <div key={s.id} className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border/40 bg-slate-950/40">
                   <SIcon className="w-3.5 h-3.5 shrink-0" style={{ color: SENSOR_COLORS[s.type] }} />
                   <span className="flex-1 text-[10px] text-slate-300 font-semibold truncate">{TYPE_LABELS[s.type]}</span>
-                  <span className="text-xs font-black" style={{ color: sc }}>{s.value}</span>
+                  <span className="text-xs font-black" style={{ color: sc }}>{s.reading}</span>
                   <span
                     className="text-[8px] font-black uppercase px-1.5 py-0.5 rounded"
                     style={{ color: sc, backgroundColor: `${sc}15`, border: `1px solid ${sc}30` }}
@@ -414,7 +414,7 @@ function CenterViewToggle({
 const ALL_TYPES: SensorType[]  = ['vibration', 'stress', 'drainage', 'traffic', 'repair_integrity'];
 const ALL_LEVELS: SensorLevel[] = ['critical', 'elevated', 'nominal'];
 
-export default function SensorDashboard() {
+export default function SensorDashboard({ embedded = false }: { embedded?: boolean } = {}) {
   const allSensors  = useMemo(() => generateSensorsForRoads(roads as any), []);
   const stressZones = useMemo(() => generateStressZones(roads as any), []);
 
@@ -459,10 +459,16 @@ export default function SensorDashboard() {
   };
 
   return (
-    <div className="flex-1 flex flex-col lg:flex-row gap-0 min-h-0 overflow-hidden animate-in fade-in duration-300 relative lg:pointer-events-none">
+    <div className={embedded
+      ? 'w-full flex flex-col gap-4 p-4 animate-in fade-in duration-300'
+      : 'flex-1 flex flex-col lg:flex-row gap-0 min-h-0 overflow-hidden animate-in fade-in duration-300 relative lg:pointer-events-none'
+    }>
 
       {/* ── LEFT: Filters + Sensor List ── */}
-      <section className="w-full lg:w-[340px] lg:absolute lg:left-4 lg:top-4 lg:bottom-4 lg:z-10 flex flex-col glass-panel rounded-xl pointer-events-auto overflow-hidden">
+      <section className={embedded
+        ? 'w-full flex flex-col glass-panel rounded-xl pointer-events-auto overflow-hidden'
+        : 'w-full lg:w-[340px] lg:absolute lg:left-4 lg:top-4 lg:bottom-4 lg:z-10 flex flex-col glass-panel rounded-xl pointer-events-auto overflow-hidden'
+      }>
 
         {/* Header with live badge */}
         <div className="p-4 border-b border-border/60 shrink-0">
@@ -566,7 +572,7 @@ export default function SensorDashboard() {
         </div>
 
         {/* Sensor list */}
-        <div className="flex-1 overflow-y-auto p-3 space-y-2">
+        <div className={embedded ? 'max-h-[420px] overflow-y-auto p-3 space-y-2' : 'flex-1 overflow-y-auto p-3 space-y-2'}>
           <div className="flex justify-between items-center text-[9px] text-muted-foreground uppercase tracking-wider font-bold px-0.5 pb-1">
             <span>Live Feeds</span>
             <span>{filteredSensors.length} showing</span>
@@ -591,7 +597,10 @@ export default function SensorDashboard() {
       </section>
 
       {/* ── CENTER: Visualization Panel ── */}
-      <section className="w-full h-[500px] lg:h-auto lg:absolute lg:inset-0 lg:z-0 pointer-events-auto flex flex-col">
+      <section className={embedded
+        ? 'w-full h-[440px] pointer-events-auto flex flex-col glass-panel rounded-xl relative overflow-hidden'
+        : 'w-full h-[500px] lg:h-auto lg:absolute lg:inset-0 lg:z-0 pointer-events-auto flex flex-col'
+      }>
 
         {/* View toggle bar */}
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 pointer-events-auto">
@@ -646,12 +655,21 @@ export default function SensorDashboard() {
 
       {/* ── RIGHT: Sensor Detail or Legend ── */}
       {selectedSensor ? (
-        <section className="w-full lg:w-[380px] lg:absolute lg:right-4 lg:top-4 lg:bottom-4 lg:z-10 flex flex-col glass-panel rounded-xl overflow-hidden shadow-2xl pointer-events-auto animate-in slide-in-from-bottom lg:slide-in-from-right duration-250">
+        <section className={embedded
+          ? 'w-full flex flex-col glass-panel rounded-xl overflow-hidden shadow-2xl pointer-events-auto max-h-[520px]'
+          : 'w-full lg:w-[380px] lg:absolute lg:right-4 lg:top-4 lg:bottom-4 lg:z-10 flex flex-col glass-panel rounded-xl overflow-hidden shadow-2xl pointer-events-auto animate-in slide-in-from-bottom lg:slide-in-from-right duration-250'
+        }>
           <DetailPanel sensor={selectedSensor} onClose={() => setSelectedId(null)} />
         </section>
       ) : (
-        <div className="hidden lg:flex lg:absolute lg:right-4 lg:top-4 lg:z-10 pointer-events-auto">
-          <div className="glass-panel rounded-xl border border-border/60 p-4 w-64 space-y-3">
+        <div className={embedded
+          ? 'flex pointer-events-auto'
+          : 'hidden lg:flex lg:absolute lg:right-4 lg:top-4 lg:z-10 pointer-events-auto'
+        }>
+          <div className={embedded
+            ? 'glass-panel rounded-xl border border-border/60 p-4 w-full space-y-3'
+            : 'glass-panel rounded-xl border border-border/60 p-4 w-64 space-y-3'
+          }>
             <h4 className="text-[10px] uppercase font-black text-slate-300 tracking-widest">Sensor Legend</h4>
 
             <div className="space-y-1.5">

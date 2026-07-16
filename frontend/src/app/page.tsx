@@ -54,9 +54,7 @@ import SyncCenter from '@/components/transparency/SyncCenter';
 import ChatPanel from '@/components/chat/ChatPanel';
 import ChatOrchestrator from '@/components/chat/ChatOrchestrator';
 import OperationsDashboard from '@/components/operations/OperationsDashboard';
-import LandingHero from '@/components/demo/LandingHero';
-import DemoTourGuide from '@/components/demo/DemoTourGuide';
-import OnboardingTour from '@/components/demo/OnboardingTour';
+
 import DemoChatMode from '@/components/demo/DemoChatMode';
 import PlaybackDashboard from '@/components/playback/PlaybackDashboard';
 import SensorDashboard from '@/components/sensors/SensorDashboard';
@@ -103,23 +101,9 @@ export default function Page() {
     setDemoMode,
     userRole,
     setUserRole,
-    hasSeenOnboarding,
-    setHasSeenOnboarding
   } = useStore();
-
   const [isSyncingUI, setIsSyncingUI] = useState(false);
   const [complaintsTab, setComplaintsTab] = useState<'reports' | 'sync'>('reports');
-
-  // Onboarding & Demo walkthrough states
-  const [showLanding, setShowLanding] = useState(true);
-  const [isTourActive, setIsTourActive] = useState(false);
-  const [tourStep, setTourStep] = useState(1);
-
-  useEffect(() => {
-    if (hasSeenOnboarding) {
-      setShowLanding(false);
-    }
-  }, [hasSeenOnboarding]);
 
   // Bottom Drawer state for Conversational Cockpit
   const [drawerHeight, setDrawerHeight] = useState<number>(0);
@@ -1781,49 +1765,7 @@ export default function Page() {
       {/* Complaint wizard overlay */}
       <ComplaintWizard />
 
-      {/* Interactive Tour Guide Dock */}
-      {isTourActive && (
-        <DemoTourGuide
-          currentStep={tourStep}
-          setStep={setTourStep}
-          onExit={() => {
-            setIsTourActive(false);
-          }}
-          onLaunchDemo={() => {
-            setIsTourActive(false);
-            setDemoMode('scripted');
-            setActiveView('chat');
-          }}
-        />
-      )}
 
-      {/* Landing Page Cinematic Overlay */}
-      {showLanding && (
-        <LandingHero
-          onStartTour={() => {
-            setShowLanding(false);
-            setIsTourActive(true);
-            setTourStep(1);
-          }}
-          onEnterDirect={() => {
-            setShowLanding(false);
-            setIsTourActive(false);
-            setHasSeenOnboarding(true);
-            setActiveView('dashboard');
-          }}
-          onStartDemo={() => {
-            setShowLanding(false);
-            setIsTourActive(false);
-            setDemoMode('scripted');
-            setActiveView('chat');
-          }}
-        />
-      )}
-
-      {/* Onboarding tour for first-time visitors */}
-      {!showLanding && !hasSeenOnboarding && !isTourActive && !isChatDriven && (
-        <OnboardingTour />
-      )}
     </div>
   );
 }

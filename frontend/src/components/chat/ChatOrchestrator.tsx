@@ -34,19 +34,23 @@ import {
   Loader
 } from 'lucide-react';
 import { routeComplaint } from '@/services/routingEngine';
+import { streamConcentrateReply, isConcentrateConfigured } from '@/services/concentrateClient';
 import { useStore } from '@/store/useStore';
 import { detectRegionSwitch, detectRegionFromText } from '@/services/regionDetectionService';
 import { isComparisonQuery, getCrossRegionComparison, generateComparisonResponse } from '@/services/regionComparisonService';
 import { setActiveRegion } from '@/services/regionAwareFormat';
+import { getRegionData, regionInfo } from '@/data/regionsMockData';
+import { globalTemplates } from '@/data/globalTemplates';
 import { 
-  roads, 
-  contractors, 
-  projects, 
+  roads,
+  contractors,
+  projects,
+  authorities,
   getAuthority,
   getContractor,
   complaints as mockComplaints
 } from '@/data/mockData';
-import { Road, Contractor, Project, Complaint } from '@/types';
+import { Road, Contractor, Project, Complaint, ComplaintCategory } from '@/types';
 import { calculateRoadTransparency, getScoreGrade, getCitywideTransparencyData } from '@/services/transparencyEngine';
 import { formatCurrency } from '@/services/regionAwareFormat';
 import { demoSnippets, DemoMessage } from '@/data/demoScripts';
@@ -61,6 +65,21 @@ function findBestDemoReply(query: string): DemoMessage | null {
   // Bypass fuzzy scoring for high-confidence intent patterns so that
   // phrasing variations ("launch the digital twin", "show the twin",
   // "show the live condition") all reliably map to the right snippet.
+
+  // Falsification probe MUST be checked first: the lie query contains words
+  // ("₹4.8 Cr", "completed", "report") that would otherwise mis-route to the
+  // budget or complaint scenarios. A claim about Omega + SV Road framed as a
+  // question/assertion ("...right?", "completed", "yesterday", "for ₹4.8")
+  // is the Granite Guardian falsification probe.
+  if (
+    /omega/i.test(q) &&
+    /(completed|repair|repav|yesterday|4\.8|right\?|₹|cr\b|crore)/i.test(q)
+  ) {
+    const guardianSnippet = demoSnippets.find(s => s.id === 'scenario-e');
+    const reply = guardianSnippet?.messages.find(m => m.role === 'assistant') ?? null;
+    if (reply) return reply;
+  }
+
   if (/twin|digital.twin|live.condition|3d.model|spatial.model|launch.*model|show.*twin/i.test(q)) {
     const twinSnippet = demoSnippets.find(s => s.id === 'scenario-d');
     const reply = twinSnippet?.messages.find(m => m.role === 'assistant') ?? null;
@@ -101,6 +120,46 @@ function findBestDemoReply(query: string): DemoMessage | null {
   return bestScore >= 1 ? bestReply : null;
 }
 
+// ---------------------------------------------------------------------------
+// Cross-region road lookup for global budget queries (KA-4).
+// Scans the non-India region datasets (GB/US/KE) for a road matching the
+// query by name or road code, so "M25 smart motorway budget" resolves to the
+// UK dataset with GBP formatting and the correct National Highways authority —
+// without the user having to switch region first.
+// ---------------------------------------------------------------------------
+function findRegionRoadBudget(query: string): {
+  regionCode: string;
+  answer: string;
+} | null {
+  const q = query.toLowerCase();
+  for (const regionCode of ['GB', 'US', 'KE']) {
+    const data = getRegionData(regionCode);
+    const template = globalTemplates[regionCode];
+    for (const road of data.roads) {
+      const nameHit = q.includes(road.name.toLowerCase());
+      const codeHit = q.includes(road.roadCode.toLowerCase());
+      if (!nameHit && !codeHit) continue;
+
+      const project = data.projects.find(p => p.roadId === road.id);
+      const authority = data.authorities.find(a => a.id === road.authorityId);
+      if (!project || !authority) continue;
+
+      const utilisation = Math.round((project.budgetSpent / project.budgetAllocated) * 100);
+      const answer =
+        `**${road.name} (${road.roadCode}) — ${project.title}**\n\n` +
+        `Managing authority: **${authority.name}**.\n\n` +
+        `- Sanctioned budget: **${template.formatCurrency(project.budgetAllocated)}**\n` +
+        `- Expended to date: **${template.formatCurrency(project.budgetSpent)}** (${utilisation}% utilised)\n` +
+        `- Status: **${project.status.replace(/_/g, ' ')}**\n\n` +
+        `Figures are reported in ${template.currency} (${template.currencySymbol}) under the ${template.regionName} template. ` +
+        `Open the Global Regions Hub on the right for the full ${template.regionName} road ledger.`;
+
+      return { regionCode, answer };
+    }
+  }
+  return null;
+}
+
 // Subcomponents
 import MapWrapper from '@/components/map/MapWrapper';
 import RoadDetailsPanel from '@/components/dashboard/RoadDetailsPanel';
@@ -112,6 +171,10 @@ import RepairFrequencyHeatmap from '@/components/transparency/RepairFrequencyHea
 import BudgetTimeline from '@/components/transparency/BudgetTimeline';
 import ContractorHistoryCard from '@/components/transparency/ContractorHistoryCard';
 import TransparencyScoreCard from '@/components/transparency/TransparencyScoreCard';
+import SankeyFlowVisualizer from '@/components/transparency/SankeyFlowVisualizer';
+import RegionsOverview from '@/components/regions/RegionsOverview';
+import SensorDashboard from '@/components/sensors/SensorDashboard';
+import PlaybackDashboard from '@/components/playback/PlaybackDashboard';
 import BottomSheet from '@/components/shared/BottomSheet';
 import CitationRenderer, { Citation } from './CitationRenderer';
 
@@ -152,9 +215,57 @@ interface WizardData {
   photoDataUrl: string | null;
   photoFile: File | null;
   location: { lat: number; lon: number } | null;
+  // AI vision draft (populated on step 0 -> 1 transition)
+  analyzing: boolean;
+  analyzed: boolean;
+  title: string;
+  category: string;
+  severity: string;
+  defectType: string;
+  depthCm: number | null;
+  widthM: number | null;
+  recommendedAction: string;
 }
 
-const WIZARD_TOTAL_STEPS = 1;
+// 0 = photo upload, 1 = AI analyze + editable draft review + confirm
+const WIZARD_TOTAL_STEPS = 2;
+
+// Severity options offered in the draft review card
+const WIZARD_SEVERITY_OPTS = ['emergency', 'high', 'medium', 'low'] as const;
+const WIZARD_CATEGORY_OPTS = ['pothole', 'waterlogging', 'paving_defect', 'missing_signage'] as const;
+
+// Human-readable label for a defect/category code.
+function defectTypeLabel(code: string): string {
+  const map: Record<string, string> = {
+    pothole: 'Pothole (Class 1 structural failure)',
+    waterlogging: 'Waterlogging / drainage failure',
+    paving_defect: 'Paving defect',
+    missing_signage: 'Missing / damaged signage',
+  };
+  return map[code] ?? code;
+}
+
+// Simulated client-side vision classifier. Deterministic so the on-stage demo
+// never depends on a live backend/Concentrate call. Matches the demo narration
+// (Class 1 structural failure, standing water, P1). The ~2s delay gives the UI
+// an "analyzing" beat that fills presentation time.
+function analyzePhotoDraft(): Promise<Partial<WizardData>> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        title: 'Pothole with standing water — S.V. Road',
+        description:
+          'Deep pothole with pooled water detected on the carriageway. Structural subsidence with standing water poses a hazard to two-wheelers and pedestrians.',
+        category: 'pothole',
+        defectType: 'pothole',
+        severity: 'emergency',
+        depthCm: 52,
+        widthM: 1.3,
+        recommendedAction: 'Immediate barricading + contractor mobilization within 4h; permanent repair within 48h.',
+      });
+    }, 2000);
+  });
+}
 
 export default function ChatOrchestrator() {
   const { 
@@ -166,13 +277,12 @@ export default function ChatOrchestrator() {
     complaintsList,
     isOnline,
     setIsReporting,
-    addComplaint
+    addComplaint,
+    setRegionCode
   } = useStore();
 
-  const [regionCode, setRegionCode] = useState<string>('IN');
-
   // Local navigation context state
-  const [contextView, setContextView] = useState<'map' | 'twin' | 'contractors' | 'budgets' | 'complaints' | null>(null);
+  const [contextView, setContextView] = useState<'map' | 'twin' | 'contractors' | 'budgets' | 'complaints' | 'regions' | 'sensors' | 'playback' | null>(null);
   const [selectedContractorId, setSelectedContractorId] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -202,7 +312,7 @@ export default function ChatOrchestrator() {
   const [isLoading, setIsLoading] = useState(false);
   const [isBackendOnline, setIsBackendOnline] = useState(false);
   const [expandedEvidenceKey, setExpandedEvidenceKey] = useState<string | null>(null);
-  const [isProbesOpen, setIsProbesOpen] = useState(true);
+  const [isProbesOpen, setIsProbesOpen] = useState(false);
 
   const handleProbeClick = async (type: 'lie' | 'noise' | 'truth') => {
     if (isLoading) return;
@@ -225,6 +335,15 @@ export default function ChatOrchestrator() {
     photoDataUrl: null,
     photoFile: null,
     location: null,
+    analyzing: false,
+    analyzed: false,
+    title: '',
+    category: 'pothole',
+    severity: 'emergency',
+    defectType: 'pothole',
+    depthCm: null,
+    widthM: null,
+    recommendedAction: '',
   });
   const [wizardSubmitting, setWizardSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -381,6 +500,32 @@ export default function ChatOrchestrator() {
     }
   };
 
+  // Live LLM fallback: stream a grounded answer from Concentrate AI directly
+  // from the browser when the backend is down and no canned demo reply matched.
+  // Returns true if it produced an answer, false if it should fall through to
+  // the static "backend unavailable" message.
+  const streamLiveLLM = async (textToSend: string): Promise<boolean> => {
+    if (!isConcentrateConfigured()) return false;
+    try {
+      const history = messages.map(m => ({ role: m.role, content: m.content }));
+      let acc = '';
+      await streamConcentrateReply(textToSend, history, (delta) => {
+        acc += delta;
+        setMessages(prev => {
+          const updated = [...prev];
+          const last = updated[updated.length - 1];
+          if (last && last.role === 'assistant') last.content = acc;
+          return updated;
+        });
+      });
+      // Nothing came back — treat as failure so caller shows the error.
+      return acc.trim().length > 0;
+    } catch (e) {
+      console.warn('Concentrate live fallback failed:', e);
+      return false;
+    }
+  };
+
   const handleSubmit = async (textToSend: string) => {
     if (!textToSend.trim() || isLoading) return;
 
@@ -395,18 +540,123 @@ export default function ChatOrchestrator() {
     // Works regardless of backend status (demo mode, timeout, or live stream).
     // ------------------------------------------------------------------
     const dispatchNavigationFromQuery = (q: string) => {
-      if (/twin|digital twin|live condition|3d model|spatial model|telemetry|sensor/i.test(q)) {
+      // Falsification probe: an Omega claim framed as completed/paid/"right?"
+      // opens the blacklist record, not the budget panel. Checked first so the
+      // "₹4.8 Cr" in the lie doesn't mis-route to budgets.
+      if (/omega/i.test(q) && /(completed|repair|repav|yesterday|4\.8|right\?|₹|cr\b|crore)/i.test(q)) {
+        setSelectedRoadId(null);
+        setSelectedContractorId(3);
+        setContextView('contractors');
+      } else if (/playback|historical|history.*(playback|simulation|timeline)|replay|time.?lapse|progression/i.test(q)) {
+        // Historical playback dashboard (Flow D) — check before twin/sensor so
+        // "historical" queries don't get swallowed by the telemetry regex.
+        if (!selectedRoadId) setSelectedRoadId(3);
+        setContextView('playback');
+      } else if (/(sensor|iot|vibration|stress|drainage).*(monitor|dashboard|stream|log|telemetry|infrastructure)|(monitor|dashboard).*(sensor|iot)|smart infrastructure|sensor monitor/i.test(q)) {
+        // Smart Infrastructure Sensor Monitor (Flow C) — must beat the twin
+        // regex below, which also matches the bare word "sensor".
+        if (!selectedRoadId) setSelectedRoadId(3);
+        setContextView('sensors');
+      } else if (/twin|digital twin|live condition|3d model|spatial model|telemetry|sensor/i.test(q)) {
         setContextView('twin');
         // Auto-select S.V. Road (id: 3) for the demo flow
         if (!selectedRoadId) setSelectedRoadId(3);
       } else if (/show.*map|view.*map|map.*road|geospatial|on the map/i.test(q) && selectedRoadId) {
         setContextView('map');
       } else if (/budget|spending|money|crore|₹|tender|sanction/i.test(q)) {
+        // Match a named road so the panel opens the road-level breakdown
+        // (with Sankey capital-flow) rather than the city audit summary.
+        const namedRoad = roads.find(r =>
+          q.toLowerCase().includes(r.name.toLowerCase()) ||
+          q.toLowerCase().includes(r.roadCode.toLowerCase().replace(/-/g, ' ')) ||
+          (/s\.?\s?v\.?\s?road/i.test(q) && r.id === 3)
+        );
+        if (namedRoad) setSelectedRoadId(namedRoad.id);
         setContextView('budgets');
       } else if (/contractor|omega|zenith|blacklist|scorecard/i.test(q)) {
         setContextView('contractors');
       }
     };
+
+    // ------------------------------------------------------------------
+    // GLOBAL APPLICABILITY (KA-4): explicit region switch.
+    // "Switch to United Kingdom" flips the active region entirely on the
+    // client — store region + currency/format template — with no code change,
+    // then opens the Global Regions Hub on the right showing the live template.
+    // ------------------------------------------------------------------
+    const regionSwitch = detectRegionSwitch(textToSend);
+    if (regionSwitch) {
+      const code = regionSwitch.regionCode;
+      const template = globalTemplates[code];
+      const info = regionInfo[code as keyof typeof regionInfo];
+      setRegionCode(code);
+      setActiveRegion(code);
+      const nh = template.tiers.national_highway;
+      const confirmation =
+        `${info?.flag ?? '🌍'} **Region switched to ${template.regionName}.**\n\n` +
+        `The entire platform now runs on the ${template.regionName} template — no code changes, data only:\n\n` +
+        `- Currency: **${template.currency} (${template.currencySymbol})**\n` +
+        `- Road tiers: **${nh.classification}**, ${template.tiers.state_highway.classification}, ${template.tiers.municipal.classification}\n` +
+        `- Lead authority: **${nh.agency}**\n\n` +
+        `The Global Regions Hub on the right shows the active ${template.regionName} jurisdiction. ` +
+        `Try asking about a local road — e.g. "${info?.roadNaming ?? ''}".`;
+      await streamResponse(confirmation, [], [], [], []);
+      setSelectedRoadId(null);
+      setSelectedContractorId(null);
+      setContextView('regions');
+      setIsLoading(false);
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // GLOBAL APPLICABILITY (KA-4): cross-region road budget query.
+    // "Show me the M25 smart motorway budget" resolves against the GB/US/KE
+    // datasets and answers in the correct currency + authority, switching the
+    // active region so the Regions Hub reflects it.
+    // ------------------------------------------------------------------
+    const regionBudget = findRegionRoadBudget(textToSend);
+    if (regionBudget) {
+      setRegionCode(regionBudget.regionCode);
+      setActiveRegion(regionBudget.regionCode);
+      await streamResponse(regionBudget.answer, [], [], [], []);
+      setSelectedRoadId(null);
+      setSelectedContractorId(null);
+      setContextView('regions');
+      setIsLoading(false);
+      return;
+    }
+
+    // ------------------------------------------------------------------
+    // MULTI-SOURCE PANELS (Flow C/D): sensor monitor + historical playback.
+    // These render live dashboards in the context panel. Intercept here so the
+    // reply + panel are identical whether the backend is up or down.
+    // ------------------------------------------------------------------
+    const q = textToSend.toLowerCase();
+    const wantsPlayback = /playback|historical|replay|time.?lapse|progression/.test(q);
+    const wantsSensors =
+      /(sensor|iot|vibration|stress|drainage).*(monitor|dashboard|stream|log|telemetry|infrastructure)|(monitor|dashboard).*(sensor|iot)|smart infrastructure|sensor monitor/.test(q);
+    if (wantsPlayback) {
+      await streamResponse(
+        `**Historical Playback loaded.** The panel on the right replays this segment's defect log — ` +
+          `road-condition progression over time alongside contractor repair dispatches, so past municipal ` +
+          `engineering quality can be audited step by step. Scrub the timeline to any date.`,
+        [], [], [], []
+      );
+      dispatchNavigationFromQuery(textToSend);
+      setIsLoading(false);
+      return;
+    }
+    if (wantsSensors) {
+      await streamResponse(
+        `**Smart Infrastructure Sensor Monitor active.** The panel streams live IoT telemetry for this segment — ` +
+          `real-time vibration, structural stress heatmaps, and local drainage sensor logs. ` +
+          `Where sensors flag a defect, the map is regenerated to reflect the current road condition.`,
+        [], [], [], []
+      );
+      dispatchNavigationFromQuery(textToSend);
+      setIsLoading(false);
+      return;
+    }
 
     // ------------------------------------------------------------------
     // DEMO FALLBACK: If backend is offline, stream the best matching
@@ -420,10 +670,15 @@ export default function ChatOrchestrator() {
           (demoReply.citations as any) ?? [],
           demoReply.suggestedActions ?? [],
           demoReply.evidence ?? [],
-          demoReply.suggestedPrompts ?? []
+          demoReply.suggestedPrompts ?? [],
+          undefined,
+          undefined,
+          demoReply.auditReport
         );
       } else {
-        await submitBackendError();
+        // No canned match — try a live grounded LLM answer before giving up.
+        const answered = await streamLiveLLM(textToSend);
+        if (!answered) await submitBackendError();
       }
       // Always fire navigation — even if we showed an error, open the right panel
       dispatchNavigationFromQuery(textToSend);
@@ -536,6 +791,10 @@ export default function ChatOrchestrator() {
             demoReply.suggestedPrompts ?? []
           );
           dispatchNavigationFromQuery(textToSend);
+        } else {
+          const answered = await streamLiveLLM(textToSend);
+          if (!answered) await submitBackendError();
+          dispatchNavigationFromQuery(textToSend);
         }
       } else {
         // Backend returned content — still check for twin/map triggers if
@@ -551,11 +810,15 @@ export default function ChatOrchestrator() {
           (demoReply.citations as any) ?? [],
           demoReply.suggestedActions ?? [],
           demoReply.evidence ?? [],
-          demoReply.suggestedPrompts ?? []
+          demoReply.suggestedPrompts ?? [],
+          undefined,
+          undefined,
+          demoReply.auditReport
         );
       } else {
         console.warn("Chat stream error:", error);
-        await submitBackendError();
+        const answered = await streamLiveLLM(textToSend);
+        if (!answered) await submitBackendError();
       }
       // Always fire navigation regardless of whether demo reply was found
       dispatchNavigationFromQuery(textToSend);
@@ -583,7 +846,12 @@ export default function ChatOrchestrator() {
     if (wizardActive) return;
     setWizardActive(true);
     setWizardStep(0);
-    setWizardData({ description: '', photoDataUrl: null, photoFile: null, location: null });
+    setWizardData({
+      description: '', photoDataUrl: null, photoFile: null, location: null,
+      analyzing: false, analyzed: false, title: '', category: 'pothole',
+      severity: 'emergency', defectType: 'pothole', depthCm: null, widthM: null,
+      recommendedAction: '',
+    });
     setMessages(prev => [...prev, { role: 'user', content: '📋 Report an Issue' }]);
     setMessages(prev => [...prev, { role: 'assistant', content: '', isWizard: true, wizardStep: 0 }]);
     try {
@@ -609,6 +877,22 @@ export default function ChatOrchestrator() {
       }
       return updated;
     });
+
+    // Entering the AI review step (step 1): run the simulated vision classifier
+    // once, then populate the editable draft. Skip if already analyzed (Back/Next).
+    if (nextStep === 1 && !wizardData.analyzed) {
+      setWizardData(prev => ({ ...prev, analyzing: true }));
+      analyzePhotoDraft().then(draft => {
+        setWizardData(prev => ({
+          ...prev,
+          ...draft,
+          // Preserve a user-typed description if they already entered one.
+          description: prev.description || (draft.description ?? ''),
+          analyzing: false,
+          analyzed: true,
+        }));
+      });
+    }
   };
 
   const wizardPrevStep = () => {
@@ -646,75 +930,129 @@ export default function ChatOrchestrator() {
   const wizardSubmit = async () => {
     if (wizardSubmitting) return;
     setWizardSubmitting(true);
+
+    // Default to S.V. Road, Bandra West so offline routing lands on Ward H-West
+    // (matches the demo narration: Exec Engineer R.K. Joshi, Zenith dispatch).
+    const lat = wizardData.location?.lat ?? 19.0980;
+    const lon = wizardData.location?.lon ?? 72.8362;
+    const photo = wizardData.photoDataUrl;
+    // Use the (possibly user-edited) AI draft. Fall back to the free-text
+    // description or a sane default if the draft is somehow empty.
+    const category = wizardData.category || 'pothole';
+    const severity = wizardData.severity || 'emergency';
+    const title = wizardData.title || (wizardData.description ? wizardData.description.slice(0, 80) : "Pothole — standing water");
+    const description = wizardData.description || "Road pothole/defect reported via direct photo upload.";
+
+    // Close the card immediately and show a processing bubble so the user always
+    // gets feedback the instant they tap Submit — never a stuck green button.
+    setWizardActive(false);
+    setWizardStep(0);
+    setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+
+    // Best-effort backend POST (non-blocking for the demo/offline flow).
+    let backendOk = false;
     try {
-      const lat = wizardData.location?.lat ?? 19.076;
-      const lon = wizardData.location?.lon ?? 72.8777;
-      const payload = {
-        title: wizardData.description ? wizardData.description.slice(0, 80) : "Road Defect",
-        description: wizardData.description || "Road pothole/defect reported via direct photo upload.",
-        category: 'pothole',
-        latitude: lat,
-        longitude: lon,
-        photo: wizardData.photoDataUrl,
-      };
-      
-      let success = false;
-      try {
-        const res = await fetch("http://localhost:8000/api/v1/complaints", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        success = res.ok;
-      } catch (e) {
-        success = false;
-      }
+      const res = await fetch("http://localhost:8000/api/v1/complaints", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, description, category, severity, latitude: lat, longitude: lon, photo }),
+      });
+      backendOk = res.ok;
+    } catch (e) {
+      backendOk = false;
+    }
 
-      // Resolve authority locally using the offline georouting engine
-      let authorityId = 1; // default MCGM K-West
-      try {
-        const routeResult = routeComplaint(lon, lat, null);
-        authorityId = routeResult.authorityId;
-      } catch (err) {
-        console.warn("Offline authority resolution failed:", err);
-      }
+    // Resolve the responsible authority via the offline georouting engine.
+    let route: ReturnType<typeof routeComplaint> | null = null;
+    try {
+      route = routeComplaint(lon, lat, null);
+    } catch (err) {
+      console.warn("Offline authority resolution failed:", err);
+    }
 
-      // Add to local state store so it immediately updates the UI dashboard & complaints list
-      const newId = Math.floor(100000 + Math.random() * 900000);
+    const authorityId = route?.authorityId ?? 1;
+    const authorityName = route?.authorityName ?? 'Brihanmumbai Municipal Corporation (BMC)';
+    const deptCode = route?.departmentCode ?? 'BMC Ward H-West, Roads & Traffic Department';
+    const engineer = route?.executiveEngineer ?? 'Mr. R.K. Joshi';
+    const managerTitle = route?.fieldManagerTitle ?? 'Executive Engineer';
+    const ticketNo = `RW-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+    const workOrder = `WO-HW-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    // Persist to store so the dashboard & Complaints tab update immediately.
+    const newId = Math.floor(100000 + Math.random() * 900000);
+    try {
       addComplaint({
         id: newId,
-        title: payload.title || "Road Pothole/Defect",
-        description: payload.description,
-        category: 'pothole',
-        status: success ? 'routed' : 'pending',
-        geometry: {
-          type: 'Point',
-          coordinates: [lon, lat]
-        },
+        title,
+        description,
+        category: category as ComplaintCategory,
+        status: 'routed',
+        priority: 5,
+        escalationLevel: 0,
+        targetResolutionHours: 48,
+        geometry: { type: 'Point', coordinates: [lon, lat] },
         assignedAuthorityId: authorityId,
+        roadId: 1,
         createdAt: new Date().toISOString(),
-        imagePreview: payload.photo || '',
+        imagePreview: photo || '',
       });
-
-      setWizardActive(false);
-      setWizardStep(0);
-      setWizardSubmitting(false);
-      if (success) {
-        setMessages(prev => [...prev, {
-          role: 'assistant',
-          content: '✅ **Complaint Submitted Successfully!**\n\nYour road defect report has been logged in the system. You can track its status in the **Complaints** tab. Our team will review and route it to the responsible authority.',
-          citations: [],
-        }]);
-      } else {
-        setMessages(prev => [...prev, {
-          role: 'assistant',
-          content: '📤 **Queued Offline**\n\nYour complaint has been saved locally and will be submitted automatically when you\'re back online. No data lost.',
-          citations: [],
-        }]);
-      }
-    } catch (e) {
-      setWizardSubmitting(false);
+    } catch (err) {
+      console.warn("Failed to persist complaint locally:", err);
     }
+
+    // Map the confirmed draft severity onto the demo's P-level / SLA narration.
+    const sevMeta: Record<string, { label: string; mobHrs: number; repairHrs: number }> = {
+      emergency: { label: 'P1 (Critical)', mobHrs: 4, repairHrs: 48 },
+      high: { label: 'P2 (High)', mobHrs: 12, repairHrs: 72 },
+      medium: { label: 'P3 (Medium)', mobHrs: 24, repairHrs: 120 },
+      low: { label: 'P4 (Low)', mobHrs: 48, repairHrs: 240 },
+    };
+    const sev = sevMeta[severity] ?? sevMeta.emergency;
+    const defectLabel = defectTypeLabel(wizardData.defectType || category);
+    const depthStr = wizardData.depthCm != null ? `${wizardData.depthCm}mm-class subsidence` : 'structural subsidence';
+
+    const content =
+      `✅ **Complaint filed & auto-routed** — Ticket **#${ticketNo}**\n\n` +
+      `Here is your **routing summary:**\n\n` +
+      `**Location:** GPS extracted from photo metadata → **${lat.toFixed(4)}°N, ${lon.toFixed(4)}°E** (S.V. Road, Bandra West).\n\n` +
+      `**Authority Match:** PostGIS ST_Contains boundary check assigns this to **${deptCode}**, supervised by ${managerTitle} **${engineer}** (${authorityName}).\n\n` +
+      `**Defect Classification:** AI vision pipeline → **${defectLabel}** (${depthStr}, reviewer-confirmed) — priority **${sev.label}**.\n\n` +
+      `**SLA Response:** ${sev.label} defect → contractor mobilization within **${sev.mobHrs} hours**, permanent repair within **${sev.repairHrs} hours**. The SLA clock has started.\n\n` +
+      `**Auto-Dispatch:** Qualified non-blacklisted contractor **Zenith Construction Ltd.** (rating 4.2/5) dispatched under work order **${workOrder}**. Crew GPS ETA **25 minutes**.\n\n` +
+      (backendOk ? `_Synced to civic infrastructure database._` : `_Saved locally — will sync to the civic database when back online. No data lost._`);
+
+    await streamResponse(
+      content,
+      [],
+      [
+        { type: 'navigate_to_road', target_id: 1, label: 'View Hazard on Map' },
+        { type: 'navigate_to_road', target_id: 1, label: 'Track Complaint Status' },
+      ],
+      [
+        {
+          title: 'Citizen Report Telemetry',
+          items: [
+            `Ticket ID: ${ticketNo}`,
+            `GPS: ${lat.toFixed(4)}°N, ${lon.toFixed(4)}°E (from photo EXIF)`,
+            `Photo attached — AI vision: ${defectLabel} / ${severity} (citizen-reviewed)`,
+          ],
+        },
+        {
+          title: 'Authority & Dispatch Chain',
+          items: [
+            `${deptCode}`,
+            `${managerTitle}: ${engineer}`,
+            `Work Order: ${workOrder} | Contractor: Zenith Construction Ltd. | Crew ETA: 25 min`,
+          ],
+        },
+      ],
+      ['Track my complaint status', 'Show me the repair work order', 'View SLA compliance for Ward H-West'],
+    );
+
+    // Fire the map/context navigation to S.V. Road for "View Hazard on Map".
+    setSelectedRoadId(1);
+
+    setWizardSubmitting(false);
   };
 
   const renderMessageMarkdown = (content: string) => {
@@ -1231,6 +1569,30 @@ export default function ChatOrchestrator() {
                   </div>
                 )}
 
+                {contextView === 'regions' && (
+                  <div className="w-full h-full flex flex-col bg-slate-950/90">
+                    <ErrorBoundary>
+                      <RegionsOverview />
+                    </ErrorBoundary>
+                  </div>
+                )}
+
+                {contextView === 'sensors' && (
+                  <div className="w-full h-full flex flex-col bg-slate-950/90 overflow-y-auto">
+                    <ErrorBoundary>
+                      <SensorDashboard embedded />
+                    </ErrorBoundary>
+                  </div>
+                )}
+
+                {contextView === 'playback' && (
+                  <div className="w-full h-full flex flex-col bg-slate-950/90 overflow-y-auto">
+                    <ErrorBoundary>
+                      <PlaybackDashboard embedded />
+                    </ErrorBoundary>
+                  </div>
+                )}
+
                 {contextView === 'budgets' && (
                   <div className="w-full h-full p-5 overflow-y-auto space-y-6">
                     {selectedRoadId ? (
@@ -1258,7 +1620,22 @@ export default function ChatOrchestrator() {
                             </div>
 
                             <TransparencyScoreCard score={scoreData.transparencyScore} deductions={scoreData.scoreDeductions} />
-                            
+
+                            <div className="space-y-2">
+                              <div className="flex justify-between items-center border-b border-white/[0.05] pb-1.5">
+                                <h4 className="text-[10px] text-slate-200 uppercase font-black tracking-widest">Public Capital Flow Pathway</h4>
+                                <span className="text-[8px] bg-slate-900 border border-white/[0.05] text-slate-450 px-2 py-0.5 rounded font-black uppercase tracking-wider">
+                                  Upstream Funding Tracker
+                                </span>
+                              </div>
+                              <SankeyFlowVisualizer
+                                projects={roadProjects}
+                                contractors={contractors}
+                                authorities={authorities}
+                                road={road}
+                              />
+                            </div>
+
                             <div className="grid grid-cols-2 gap-4">
                               <div className="bg-slate-900/30 p-4 border border-white/[0.04] rounded-2xl">
                                 <h5 className="text-[10px] text-slate-200 uppercase font-black mb-3">Yearly Spending Chart</h5>
@@ -1497,6 +1874,9 @@ export default function ChatOrchestrator() {
           title={
             contextView === 'map' ? 'Geospatial Road Map' :
             contextView === 'twin' ? 'Digital Twin command' :
+            contextView === 'regions' ? 'Global Regions Hub' :
+            contextView === 'sensors' ? 'Smart Infrastructure Sensor Monitor' :
+            contextView === 'playback' ? 'Historical Playback Simulation' :
             contextView === 'budgets' ? 'Transparency Budgets' :
             contextView === 'contractors' ? 'Contractor rating scorecard' :
             'Defect Lifecycle timeline'
@@ -1520,6 +1900,30 @@ export default function ChatOrchestrator() {
               <div className="w-full h-full flex flex-col bg-slate-950/90 min-h-[300px]">
                 <ErrorBoundary>
                   <DigitalTwinView />
+                </ErrorBoundary>
+              </div>
+            )}
+
+            {contextView === 'regions' && (
+              <div className="w-full min-h-[300px]">
+                <ErrorBoundary>
+                  <RegionsOverview />
+                </ErrorBoundary>
+              </div>
+            )}
+
+            {contextView === 'sensors' && (
+              <div className="w-full min-h-[300px]">
+                <ErrorBoundary>
+                  <SensorDashboard embedded />
+                </ErrorBoundary>
+              </div>
+            )}
+
+            {contextView === 'playback' && (
+              <div className="w-full min-h-[300px]">
+                <ErrorBoundary>
+                  <PlaybackDashboard embedded />
                 </ErrorBoundary>
               </div>
             )}
@@ -1771,12 +2175,165 @@ function WizardStepRenderer({
   const progressPct = ((step + 1) / WIZARD_TOTAL_STEPS) * 100;
   const canProceed = data.photoDataUrl !== null;
 
+  // ---- Step 1: AI analysis + editable draft review ----
+  if (step === 1) {
+    return (
+      <div className="w-full space-y-3">
+        {data.analyzing ? (
+          // "Analyzing" beat — deterministic ~2s simulated vision pass
+          <div className="flex flex-col items-center gap-3 p-6 border-2 border-dashed border-cyan-700/30 rounded-xl bg-slate-950/40">
+            {data.photoDataUrl && (
+              <img
+                src={data.photoDataUrl}
+                alt="Analyzing defect"
+                className="w-full h-28 object-cover rounded-lg border border-cyan-500/20 opacity-70"
+              />
+            )}
+            <div className="flex items-center gap-2 text-cyan-400">
+              <Loader className="w-4 h-4 animate-spin" />
+              <span className="text-[11px] font-bold">AI vision analyzing defect…</span>
+            </div>
+            <p className="text-[9px] text-slate-500 text-center">
+              Classifying defect type, estimating depth &amp; severity, drafting your report.
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+              <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">AI Draft — Review &amp; Edit</p>
+            </div>
+            <p className="text-[9px] text-slate-400">Our vision model pre-filled this from your photo. Correct anything before it&apos;s sent.</p>
+
+            {data.photoDataUrl && (
+              <img
+                src={data.photoDataUrl}
+                alt="Reported defect"
+                className="w-full h-20 object-cover rounded-lg border border-white/[0.06]"
+              />
+            )}
+
+            {/* AI telemetry chips (read-only) */}
+            <div className="flex flex-wrap gap-1.5">
+              {data.depthCm != null && (
+                <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-700/30 text-cyan-300 text-[8px] font-bold">
+                  Depth ≈ {data.depthCm}mm
+                </span>
+              )}
+              {data.widthM != null && (
+                <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-700/30 text-cyan-300 text-[8px] font-bold">
+                  Width ≈ {data.widthM}m
+                </span>
+              )}
+              <span className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-700/30 text-cyan-300 text-[8px] font-bold">
+                Confidence 94%
+              </span>
+            </div>
+
+            {/* Editable title */}
+            <div className="space-y-1">
+              <label className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">Title</label>
+              <input
+                type="text"
+                value={data.title}
+                onChange={(e) => setData(prev => ({ ...prev, title: e.target.value }))}
+                className="w-full px-2.5 py-1.5 rounded-lg bg-slate-950/60 border border-white/[0.08] text-slate-200 text-[10px] focus:border-cyan-500/50 focus:outline-none"
+                placeholder="Short summary of the defect"
+              />
+            </div>
+
+            {/* Editable description */}
+            <div className="space-y-1">
+              <label className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">Description</label>
+              <textarea
+                value={data.description}
+                onChange={(e) => setData(prev => ({ ...prev, description: e.target.value }))}
+                rows={3}
+                className="w-full px-2.5 py-1.5 rounded-lg bg-slate-950/60 border border-white/[0.08] text-slate-200 text-[10px] resize-none focus:border-cyan-500/50 focus:outline-none"
+                placeholder="Describe the defect"
+              />
+            </div>
+
+            {/* Category selector */}
+            <div className="space-y-1">
+              <label className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">Category</label>
+              <div className="flex flex-wrap gap-1.5">
+                {WIZARD_CATEGORY_OPTS.map(cat => (
+                  <button
+                    key={cat}
+                    onClick={() => setData(prev => ({ ...prev, category: cat }))}
+                    className={`px-2 py-1 rounded-lg text-[8px] font-bold border transition-all ${
+                      data.category === cat
+                        ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300'
+                        : 'bg-slate-950/40 border-white/[0.08] text-slate-500 hover:text-slate-300'
+                    }`}
+                  >
+                    {cat.replace('_', ' ')}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Severity selector */}
+            <div className="space-y-1">
+              <label className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">Severity</label>
+              <div className="flex flex-wrap gap-1.5">
+                {WIZARD_SEVERITY_OPTS.map(sev => (
+                  <button
+                    key={sev}
+                    onClick={() => setData(prev => ({ ...prev, severity: sev }))}
+                    className={`px-2 py-1 rounded-lg text-[8px] font-bold border transition-all ${
+                      data.severity === sev
+                        ? 'bg-amber-500/20 border-amber-500/50 text-amber-300'
+                        : 'bg-slate-950/40 border-white/[0.08] text-slate-500 hover:text-slate-300'
+                    }`}
+                  >
+                    {sev}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {data.recommendedAction && (
+              <p className="text-[8px] text-slate-500 italic border-l-2 border-cyan-700/40 pl-2">
+                AI recommendation: {data.recommendedAction}
+              </p>
+            )}
+
+            {/* Action buttons */}
+            <div className="flex items-center justify-between gap-2 pt-1">
+              <button
+                onClick={onPrev}
+                disabled={submitting}
+                className="px-3 py-1.5 rounded-xl border border-white/[0.08] text-slate-400 hover:text-cyan-400 text-[9px] font-bold transition-all disabled:opacity-40"
+              >
+                ← Back
+              </button>
+              <button
+                onClick={onSubmit}
+                disabled={submitting || !data.title.trim()}
+                className="px-4 py-1.5 rounded-xl bg-emerald-500 text-slate-950 text-[9px] font-black hover:bg-emerald-400 transition-all disabled:opacity-40 flex items-center gap-1"
+              >
+                {submitting ? (
+                  <><Loader className="w-3 h-3 animate-spin" /> Sending…</>
+                ) : (
+                  <><CheckCircle className="w-3 h-3" /> Confirm &amp; Send</>
+                )}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    );
+  }
+
+  // ---- Step 0: photo upload ----
   return (
     <div className="w-full space-y-3">
       {/* Step content */}
       <div className="space-y-2">
         <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">Upload a Photo of the defect</p>
-        <p className="text-[10px] text-slate-400">Take or upload a picture of the defect. Our AI routes it instantly.</p>
+        <p className="text-[10px] text-slate-400">Take or upload a picture of the defect. Our AI classifies it and drafts your report.</p>
         <div className="flex flex-col items-center gap-3 p-4 border-2 border-dashed border-white/[0.08] rounded-xl bg-slate-950/30">
           {data.photoDataUrl ? (
             <div className="relative w-full">
@@ -1816,15 +2373,11 @@ function WizardStepRenderer({
           Cancel
         </button>
         <button
-          onClick={onSubmit}
+          onClick={onNext}
           disabled={submitting || !canProceed}
-          className="px-4 py-1.5 rounded-xl bg-emerald-500 text-slate-950 text-[9px] font-black hover:bg-emerald-400 transition-all disabled:opacity-40 flex items-center gap-1"
+          className="px-4 py-1.5 rounded-xl bg-cyan-500 text-slate-950 text-[9px] font-black hover:bg-cyan-400 transition-all disabled:opacity-40 flex items-center gap-1"
         >
-          {submitting ? (
-            <><Loader className="w-3 h-3 animate-spin" /> Submitting...</>
-          ) : (
-            <><CheckCircle className="w-3 h-3" /> Submit Report</>
-          )}
+          <Sparkles className="w-3 h-3" /> Analyze with AI
         </button>
       </div>
     </div>

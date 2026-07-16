@@ -16,6 +16,7 @@ import {
   Moon,
   ChevronRight,
   Accessibility,
+  Wrench,
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { NotificationItem } from '@/types';
@@ -157,14 +158,17 @@ export default function TopNav() {
       {/* Right: action tray */}
       <div className="flex items-center gap-2 shrink-0">
 
-        {/* Network status */}
-        <div
-          className={`hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[9px] font-bold tracking-wide transition-all ${
+        {/* Network status — click to simulate offline/online for the demo.
+            Toggling back to online auto-flushes the offline queue (Flow E). */}
+        <button
+          onClick={() => setIsOnline(!isOnline)}
+          className={`hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[9px] font-bold tracking-wide transition-all cursor-pointer group ${
             isOnline
-              ? 'bg-emerald-950/30 border-emerald-900/40 text-emerald-400'
-              : 'bg-rose-950/50 border-rose-900/50 text-rose-400 animate-pulse'
+              ? 'bg-emerald-950/30 border-emerald-900/40 text-emerald-400 hover:border-emerald-500/60'
+              : 'bg-rose-950/50 border-rose-900/50 text-rose-400 animate-pulse hover:animate-none hover:border-rose-500/70'
           }`}
-          aria-label={isOnline ? t('banner.online') : t('banner.offline')}
+          aria-label={isOnline ? 'Simulate offline mode' : 'Restore online connection'}
+          title={isOnline ? 'Click to simulate OFFLINE mode (demo)' : 'Click to restore ONLINE connection'}
         >
           <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}`} />
           {isOnline ? (
@@ -172,7 +176,8 @@ export default function TopNav() {
           ) : (
             <><WifiOff className="w-3 h-3" /><span>Offline</span></>
           )}
-        </div>
+          <Wrench className="w-2.5 h-2.5 opacity-0 group-hover:opacity-70 transition-opacity" />
+        </button>
 
         {/* Region selector */}
         <RegionSelector />

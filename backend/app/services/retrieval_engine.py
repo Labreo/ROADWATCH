@@ -981,12 +981,6 @@ class RetrievalEngine:
                 "and the complaint is batch-synced to the backend via POST /api/v1/complaints/sync. "
                 "The client then reconciles the server response to update the local record."
             )
-        if "ussd" in msg_lower:
-            return (
-                "Roadwatch provides a USSD gateway for feature phone users. "
-                "Dial *123# from any mobile phone to report a pothole or road defect without needing a smartphone or internet connection. "
-                "The USSD gateway submits the report to the nearest municipal authority based on your mobile tower location."
-            )
         if "ledger" in msg_lower or "public spending" in msg_lower:
             snapshot = StructuredRoadRetriever.get_citywide_budget_snapshot()
             if snapshot and snapshot['total_projects'] > 0:
@@ -1045,8 +1039,8 @@ class RetrievalEngine:
             return f"Opening contractor registry profile and tender audit history. {{\"view\": \"contractors\", \"contractorId\": {c_id}}}"
 
         if "complaint" in msg_lower or "report" in msg_lower or "grievance" in msg_lower:
-            feature_note = " Feature phone users can also dial *123# USSD gateway to report without a smartphone." if "feature phone" in msg_lower else ""
-            return f"Opening citizen complaints dashboard with guided reporting flow. You can report a pothole, waterlogging, or other road defect.{feature_note} {{\"view\": \"complaints\"}}"
+            offline_note = " Reports captured offline are queued locally and sync automatically once connectivity returns — nothing is lost on a weak connection." if "offline" in msg_lower or "feature phone" in msg_lower else ""
+            return f"Opening citizen complaints dashboard with guided reporting flow. You can report a pothole, waterlogging, or other road defect.{offline_note} {{\"view\": \"complaints\"}}"
 
         if road_id:
             road = StructuredRoadRetriever.get_road_by_id(road_id)

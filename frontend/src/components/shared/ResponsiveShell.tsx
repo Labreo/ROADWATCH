@@ -6,6 +6,7 @@ import { useStore } from '@/store/useStore';
 import { ReactNode, useEffect } from 'react';
 import { NetworkStatusProvider } from '@/providers/NetworkStatusProvider';
 import OfflineBanner from './OfflineBanner';
+import SyncToast from './SyncToast';
 import {
   MessageSquare,
   Map,
@@ -111,6 +112,9 @@ export default function ResponsiveShell({ children }: ResponsiveShellProps) {
             })}
           </div>
         </nav>
+
+        {/* Offline → online sync confirmation toast (Flow E / KA-5) */}
+        <SyncToast />
       </div>
     </NetworkStatusProvider>
   );

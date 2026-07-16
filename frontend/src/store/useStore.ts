@@ -46,6 +46,9 @@ interface AppState {
   syncLogs: SyncLog[];
   cachedRoads: Road[];
   conflicts: { id: string; localItem: SyncQueueItem; serverItem: Complaint }[];
+  /** Transient confirmation toast shown after a background sync completes. */
+  syncToast: { id: string; message: string; tone: 'success' | 'error' } | null;
+  dismissSyncToast: () => void;
 
   loadCachedData: () => Promise<void>;
   cacheAllRoadsOffline: () => Promise<void>;
@@ -431,6 +434,8 @@ export const useStore = create<AppState>((set, get) => {
     syncLogs: [],
     cachedRoads: [],
     conflicts: [],
+    syncToast: null,
+    dismissSyncToast: () => set({ syncToast: null }),
 
     loadCachedData: async () => {
       // 1. Hydrate client-side settings/localStorage in the browser synchronously on mount
@@ -527,13 +532,20 @@ export const useStore = create<AppState>((set, get) => {
     addComplaint: (complaint) => {
       const updatedList = [complaint, ...get().complaintsList];
       set({ complaintsList: updatedList });
-      
-      // Save custom complaints to local storage
+
+      // Save custom complaints to local storage. Strip heavy base64 image data
+      // before persisting — a single photo can exceed the ~5 MB localStorage
+      // quota and throw QuotaExceededError, which previously killed the submit
+      // flow silently. The in-memory list keeps the full preview for display.
       if (typeof window !== 'undefined') {
-        const custom = updatedList.filter(
-          c => !mockComplaints.some(mc => mc.id === c.id)
-        );
-        window.localStorage.setItem('roadwatch_custom_complaints', JSON.stringify(custom));
+        try {
+          const custom = updatedList
+            .filter(c => !mockComplaints.some(mc => mc.id === c.id))
+            .map(({ imagePreview, imageUrl, ...rest }) => rest);
+          window.localStorage.setItem('roadwatch_custom_complaints', JSON.stringify(custom));
+        } catch (e) {
+          console.warn('Failed to persist custom complaints (quota or serialization):', e);
+        }
       }
     },
     updateComplaint: (id, updates) => {
@@ -873,6 +885,26 @@ export const useStore = create<AppState>((set, get) => {
         const updatedLogs = [syncLog, ...get().syncLogs];
         set({ syncLogs: updatedLogs });
         await CachedRoadRepository.addSyncLog(syncLog);
+      }
+
+      // Surface a transient confirmation toast so the reconnect → auto-push is
+      // visible in the demo (KA-5). Success only when nothing failed.
+      if (successCount > 0 && failedCount === 0) {
+        set({
+          syncToast: {
+            id: `synctoast-${Date.now()}`,
+            message: `${successCount} queued report${successCount > 1 ? 's' : ''} synced to the civic database.`,
+            tone: 'success'
+          }
+        });
+      } else if (failedCount > 0) {
+        set({
+          syncToast: {
+            id: `synctoast-${Date.now()}`,
+            message: `${successCount} synced, ${failedCount} failed — will retry automatically.`,
+            tone: 'error'
+          }
+        });
       }
 
       set({ isSyncing: false });

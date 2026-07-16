@@ -10,11 +10,11 @@ import PlaybackEventPanel from './PlaybackEventPanel';
 import { Search, SlidersHorizontal, History, MapPin, Activity } from 'lucide-react';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 
-export default function PlaybackDashboard() {
-  const { 
-    selectedRoadId, 
-    setSelectedRoadId, 
-    currentPlaybackStepId 
+export default function PlaybackDashboard({ embedded = false }: { embedded?: boolean } = {}) {
+  const {
+    selectedRoadId,
+    setSelectedRoadId,
+    currentPlaybackStepId
   } = useStore();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -51,9 +51,15 @@ export default function PlaybackDashboard() {
   };
 
   return (
-    <div className="flex-1 flex flex-col lg:flex-row gap-6 min-h-0 overflow-hidden animate-in fade-in duration-300 relative lg:pointer-events-none">
+    <div className={embedded
+      ? 'w-full flex flex-col gap-4 p-4 animate-in fade-in duration-300'
+      : 'flex-1 flex flex-col lg:flex-row gap-6 min-h-0 overflow-hidden animate-in fade-in duration-300 relative lg:pointer-events-none'
+    }>
       {/* Left Column: Historical Registry list */}
-      <section className="w-full lg:w-[320px] lg:absolute lg:left-4 lg:top-4 lg:bottom-4 lg:z-10 lg:h-auto flex flex-col glass-panel rounded-xl pointer-events-auto p-4 space-y-4 relative z-10">
+      <section className={embedded
+        ? 'w-full flex flex-col glass-panel rounded-xl pointer-events-auto p-4 space-y-4'
+        : 'w-full lg:w-[320px] lg:absolute lg:left-4 lg:top-4 lg:bottom-4 lg:z-10 lg:h-auto flex flex-col glass-panel rounded-xl pointer-events-auto p-4 space-y-4 relative z-10'
+      }>
         <div>
           <label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-1 block">Timeline filter</label>
           <div className="relative">
@@ -75,7 +81,7 @@ export default function PlaybackDashboard() {
         </div>
 
         {/* Scrollable list */}
-        <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+        <div className={embedded ? 'max-h-[300px] overflow-y-auto space-y-2 pr-1' : 'flex-1 overflow-y-auto space-y-2 pr-1'}>
           {filteredRoads.map((road) => {
             const isSelected = selectedRoadId === road.id;
             const histState = getHistoricalRoadState(road.id, currentPlaybackStepId);
@@ -115,17 +121,23 @@ export default function PlaybackDashboard() {
       </section>
 
       {/* Center Column: Leaflet Map view with timeline scrubber */}
-      <section className="w-full h-[350px] lg:h-auto lg:absolute lg:inset-0 lg:z-0 pointer-events-auto">
+      <section className={embedded
+        ? 'w-full h-[340px] pointer-events-auto relative rounded-xl overflow-hidden'
+        : 'w-full h-[350px] lg:h-auto lg:absolute lg:inset-0 lg:z-0 pointer-events-auto'
+      }>
         <ErrorBoundary>
           <MapWrapper />
         </ErrorBoundary>
-        
+
         {/* Cinematic Timeline Slider Floating Panel */}
         <TimelineSlider />
       </section>
 
       {/* Right Column: Historical Playback Event Panel */}
-      <section className="w-full lg:w-[350px] lg:absolute lg:right-4 lg:top-4 lg:bottom-4 lg:z-10 lg:h-auto flex flex-col glass-panel rounded-xl overflow-hidden shadow-2xl pointer-events-auto relative z-10 transition-all duration-300 animate-in slide-in-from-bottom lg:slide-in-from-right">
+      <section className={embedded
+        ? 'w-full flex flex-col glass-panel rounded-xl overflow-hidden shadow-2xl pointer-events-auto'
+        : 'w-full lg:w-[350px] lg:absolute lg:right-4 lg:top-4 lg:bottom-4 lg:z-10 lg:h-auto flex flex-col glass-panel rounded-xl overflow-hidden shadow-2xl pointer-events-auto relative z-10 transition-all duration-300 animate-in slide-in-from-bottom lg:slide-in-from-right'
+      }>
         <PlaybackEventPanel />
       </section>
     </div>

@@ -1,9 +1,10 @@
-const CACHE_NAME = 'roadwatch-cache-v1';
+const CACHE_NAME = 'roadwatch-cache-v2';
 const MAP_CACHE_NAME = 'roadwatch-map-tiles';
 const CHAT_CACHE_NAME = 'roadwatch-chat-v1';
 const DYNAMIC_CACHE_NAME = 'roadwatch-dynamic-v1';
+// NOTE: do NOT precache '/' — the HTML document must stay network-first so
+// code changes take effect. Precaching it pins stale markup (e.g. old landing).
 const STATIC_ASSETS = [
-  '/',
   '/next.svg',
   '/vercel.svg',
   '/globe.svg',
@@ -73,6 +74,27 @@ self.addEventListener('fetch', (event) => {
             return res;
           })
           .catch(() => cache.match(event.request).then((cached) => cached || new Response('', { status: 503 })));
+      })
+    );
+    return;
+  }
+
+  // 1c. Navigation requests (HTML documents) — network-first.
+  // Always fetch fresh markup so code changes take effect; fall back to the
+  // cached document only when offline. Prevents pinning stale HTML.
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      caches.open(CACHE_NAME).then((cache) => {
+        return fetch(event.request)
+          .then((networkResponse) => {
+            if (networkResponse && networkResponse.status === 200) {
+              cache.put(event.request, networkResponse.clone());
+            }
+            return networkResponse;
+          })
+          .catch(() =>
+            cache.match(event.request).then((cached) => cached || cache.match('/'))
+          );
       })
     );
     return;

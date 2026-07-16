@@ -285,7 +285,7 @@ function TelemetryTicker({ sensors }: { sensors: SensorReading[] }) {
                 {s.type.split('_')[0].slice(0, 3).toUpperCase()}
               </span>
               <span className="text-slate-500">·</span>
-              <span className="text-slate-400">{s.value}</span>
+              <span className="text-slate-400">{s.reading}</span>
               <span className="text-slate-600 text-[7px]">{s.unit}</span>
             </span>
           );
@@ -314,7 +314,7 @@ function WaveformStrip({ sensor }: { sensor: SensorReading }) {
         showLabel={false}
         animated={true}
       />
-      <span className="mono-readout text-[8px] flex-shrink-0">{sensor.value}</span>
+      <span className="mono-readout text-[8px] flex-shrink-0">{sensor.reading}</span>
     </div>
   );
 }

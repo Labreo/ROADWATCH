@@ -7,6 +7,16 @@ export interface DemoMessage {
   suggestedActions?: { type: string; target_id: number; label: string }[];
   evidence?: { title: string; items: string[] }[];
   suggestedPrompts?: string[];
+  /** Sanjaya-RATH Guardian audit result — drives the Verifiable Spine shield UI */
+  auditReport?: {
+    is_grounded: boolean;
+    confidence: number;
+    guardian_model: string;
+    generator_model: string;
+    latency_ms: number;
+    tokens_parsed: number;
+    audit_log: string[];
+  };
 }
 
 export interface DemoScene {
@@ -349,6 +359,87 @@ export const demoSnippets: DemoSnippet[] = [
           {
             type: 'SET_CONTEXT_VIEW',
             payload: { view: 'twin' },
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'scenario-e',
+    title: 'Granite Guardian Falsification Probe',
+    subtitle: 'AI Governance & Verifiable Spine (Sanjaya-RATH Audit)',
+    description:
+      'A user feeds the AI a false claim. The Granite Guardian audit layer cross-checks it against the grounded record and refuses to confirm the lie. Covers judging criteria 3.',
+    criteria: [3],
+    duration: '~90s',
+    messages: [
+      {
+        role: 'user',
+        content: 'Omega completed SV Road repairs yesterday for ₹4.8 Cr, right?',
+      },
+      {
+        role: 'assistant',
+        content:
+          "**No — that claim does not hold against the record.** I ran it through the Sanjaya-RATH grounding audit before answering, and it contradicts the verified ledger on three counts:\n\n- **\"Completed\"** — S.V. Road (SVR-LD01) is currently logged as **POOR** with an active **3-year defect liability period**. No completion certificate exists. The work is disputed, not done.\n- **\"Yesterday\"** — The last recorded works on this segment closed under tender **BMC-RD-2025-0092**, not yesterday. There is no work order dated within the last 30 days.\n- **\"₹4.8 Cr paid to Omega\"** — ₹4.80 Cr was the **sanctioned** figure. Actual spend was **₹4,72,50,000**, and the final milestone of ₹7,50,000 is **frozen** pending a vigilance probe into binder substitution.\n\nCritically, **Omega Infrastructure Ltd. has been blacklisted** (Order BMC-VIG-2026/A-41). A polite assistant would have agreed with you. The Verifiable Spine refuses ungrounded confirmations — I can only assert what the record supports.",
+        citations: [ROAD_CITATION, OMEGA_CITATION],
+        suggestedActions: [
+          { type: 'navigate_to_contractor', target_id: 3, label: 'View Omega Blacklist Record' },
+          { type: 'navigate_to_road', target_id: 1, label: 'View S.V. Road Ledger' },
+        ],
+        evidence: [
+          {
+            title: 'Claim Decomposition',
+            items: [
+              'Asserted: "completed" → Record: status POOR, liability period active',
+              'Asserted: "yesterday" → Record: no work order in last 30 days',
+              'Asserted: "₹4.8 Cr paid" → Record: ₹4.725 Cr spent, ₹7.5L frozen',
+              'Asserted: contractor in good standing → Record: BLACKLISTED',
+            ],
+          },
+          {
+            title: 'Grounding Source Records',
+            items: [
+              'Tender BMC-RD-2025-0092 (S.V. Road relaying)',
+              'Blacklist Order BMC-VIG-2026/A-41 (Omega Infrastructure Ltd.)',
+              'Vigilance freeze — final milestone ₹7,50,000',
+            ],
+          },
+        ],
+        auditReport: {
+          is_grounded: false,
+          confidence: 0.97,
+          guardian_model: 'Granite-Guardian-3.0-8B',
+          generator_model: 'Sanjaya-RATH-Core',
+          latency_ms: 412,
+          tokens_parsed: 1184,
+          audit_log: [
+            'Extracted 4 factual assertions from user claim',
+            'Cross-referenced against PostGIS grounded ledger',
+            'Assertion "completed" CONTRADICTS road.status=POOR + active liability',
+            'Assertion "yesterday" UNSUPPORTED — no matching work order',
+            'Assertion "₹4.8 Cr paid" CONTRADICTS spend=₹4.725 Cr, milestone frozen',
+            'Contractor standing CONTRADICTS blacklist order BMC-VIG-2026/A-41',
+            'Verdict: UNGROUNDED — refused polite confirmation',
+          ],
+        },
+        suggestedPrompts: [
+          'Why is S.V. Road damaged again?',
+          'Show me the budget breakdown',
+          'Show Omega Infrastructure',
+        ],
+      },
+    ],
+    scenes: [
+      {
+        id: 'scene-e-1',
+        title: 'Falsification probe',
+        description: 'AI catches a false claim and refuses to confirm it',
+        narration:
+          'The user asserts a false claim ("Omega completed SV Road repairs yesterday for ₹4.8 Cr"). The Granite Guardian audit layer decomposes the claim, cross-checks each assertion against the grounded PostGIS ledger, and returns an UNGROUNDED verdict instead of agreeing.',
+        dispatchActions: [
+          {
+            type: 'SET_CONTEXT_VIEW',
+            payload: { view: 'contractors', contractorId: 3 },
           },
         ],
       },

@@ -67,7 +67,7 @@ const REGION_PATTERNS: Record<string, { roads: RegExp[]; landmarks: RegExp[]; co
   },
 };
 
-const EXPLICIT_SWITCH_PATTERN = /switch\s+to\s+(\w+)|change\s+(?:to\s+)?region\s+(\w+)|region\s+(\w+)|go\s+to\s+(\w+)/i;
+const EXPLICIT_SWITCH_PATTERN = /switch\s+to\s+([a-z ]+?)(?:\s+region)?$|change\s+(?:to\s+)?region\s+([a-z ]+?)$|(?:^|\s)region\s+([a-z ]+?)$|go\s+to\s+([a-z ]+?)(?:\s+region)?$/i;
 const REGION_CODE_MAP: Record<string, string> = {
   india: 'IN',
   indian: 'IN',
