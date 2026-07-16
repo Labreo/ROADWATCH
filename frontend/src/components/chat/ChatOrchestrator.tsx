@@ -36,7 +36,7 @@ import {
 import { routeComplaint } from '@/services/routingEngine';
 import { streamConcentrateReply, isConcentrateConfigured } from '@/services/concentrateClient';
 import { useStore } from '@/store/useStore';
-import { detectRegionSwitch, detectRegionFromText } from '@/services/regionDetectionService';
+import { detectRegionSwitch, detectRegionFromText, detectRegionFromGps } from '@/services/regionDetectionService';
 import { isComparisonQuery, getCrossRegionComparison, generateComparisonResponse } from '@/services/regionComparisonService';
 import { setActiveRegion } from '@/services/regionAwareFormat';
 import { getRegionData, regionInfo } from '@/data/regionsMockData';
@@ -54,6 +54,7 @@ import { Road, Contractor, Project, Complaint, ComplaintCategory } from '@/types
 import { calculateRoadTransparency, getScoreGrade, getCitywideTransparencyData } from '@/services/transparencyEngine';
 import { formatCurrency } from '@/services/regionAwareFormat';
 import { demoSnippets, DemoMessage } from '@/data/demoScripts';
+import { buildGroundedReply } from '@/services/groundedReplyEngine';
 
 // ---------------------------------------------------------------------------
 // Demo-mode local fallback: fuzzy keyword matcher against demoSnippets
@@ -278,6 +279,8 @@ export default function ChatOrchestrator() {
     isOnline,
     setIsReporting,
     addComplaint,
+    queueComplaint,
+    regionCode,
     setRegionCode
   } = useStore();
 
@@ -609,6 +612,24 @@ export default function ChatOrchestrator() {
     }
 
     // ------------------------------------------------------------------
+    // GLOBAL APPLICABILITY (KA-4): passive region auto-detect.
+    // Any query mentioning a region-specific road name (M25, I-95, A104) or
+    // landmark (Nairobi, London) flips the active region — currency, format,
+    // road tiers, Regions Hub — without an explicit "switch to" command.
+    // Only high/medium confidence acts; 'low' just echoes the current region.
+    // No early return: this is a passive flip, the query continues to its
+    // normal handler with the region already correct.
+    // ------------------------------------------------------------------
+    const regionHint = detectRegionFromText(textToSend);
+    if (
+      (regionHint.confidence === 'high' || regionHint.confidence === 'medium') &&
+      regionHint.regionCode !== regionCode
+    ) {
+      setRegionCode(regionHint.regionCode);
+      setActiveRegion(regionHint.regionCode);
+    }
+
+    // ------------------------------------------------------------------
     // GLOBAL APPLICABILITY (KA-4): cross-region road budget query.
     // "Show me the M25 smart motorway budget" resolves against the GB/US/KE
     // datasets and answers in the correct currency + authority, switching the
@@ -663,7 +684,7 @@ export default function ChatOrchestrator() {
     // canned response from demoScripts.ts (full evidence + citations).
     // ------------------------------------------------------------------
     if (!isBackendOnline) {
-      const demoReply = findBestDemoReply(textToSend);
+      const demoReply = buildGroundedReply(textToSend) ?? findBestDemoReply(textToSend);
       if (demoReply) {
         await streamResponse(
           demoReply.content,
@@ -695,6 +716,13 @@ export default function ChatOrchestrator() {
       });
       userLat = position.coords.latitude;
       userLon = position.coords.longitude;
+      // Physical location also flips the active region (client-side). Backend
+      // still resolves its own region from the lat/lon it receives.
+      const gpsRegion = detectRegionFromGps(userLat, userLon);
+      if (gpsRegion !== regionCode) {
+        setRegionCode(gpsRegion);
+        setActiveRegion(gpsRegion);
+      }
     } catch (e) {}
 
     // Abort the stream if the backend hangs for more than 10 seconds
@@ -781,7 +809,7 @@ export default function ChatOrchestrator() {
 
       // If backend streamed but returned nothing useful, fall back to demo data
       if (!fullResponse.trim()) {
-        const demoReply = findBestDemoReply(textToSend);
+        const demoReply = buildGroundedReply(textToSend) ?? findBestDemoReply(textToSend);
         if (demoReply) {
           await streamResponse(
             demoReply.content,
@@ -803,7 +831,7 @@ export default function ChatOrchestrator() {
       }
     } catch (error: any) {
       // On timeout/abort or network failure, try the demo data first
-      const demoReply = findBestDemoReply(textToSend);
+      const demoReply = buildGroundedReply(textToSend) ?? findBestDemoReply(textToSend);
       if (demoReply) {
         await streamResponse(
           demoReply.content,
@@ -978,24 +1006,35 @@ export default function ChatOrchestrator() {
     const ticketNo = `RW-2026-${Math.floor(1000 + Math.random() * 9000)}`;
     const workOrder = `WO-HW-2026-${Math.floor(1000 + Math.random() * 9000)}`;
 
-    // Persist to store so the dashboard & Complaints tab update immediately.
+    // Persist to store. When offline, route through queueComplaint so the report
+    // lands in the IndexedDB sync queue (compressed image + OFFLINE QUEUE counter)
+    // and auto-pushes on reconnect via processSyncQueue → Sync Complete toast (KA-5).
+    // When online, add directly as a routed complaint.
     const newId = Math.floor(100000 + Math.random() * 900000);
+    const complaintPayload = {
+      title,
+      description,
+      category: category as ComplaintCategory,
+      priority: 5,
+      escalationLevel: 0,
+      targetResolutionHours: 48,
+      geometry: { type: 'Point' as const, coordinates: [lon, lat] as [number, number] },
+      assignedAuthorityId: authorityId,
+      roadId: 1,
+      imagePreview: photo || '',
+    };
     try {
-      addComplaint({
-        id: newId,
-        title,
-        description,
-        category: category as ComplaintCategory,
-        status: 'routed',
-        priority: 5,
-        escalationLevel: 0,
-        targetResolutionHours: 48,
-        geometry: { type: 'Point', coordinates: [lon, lat] },
-        assignedAuthorityId: authorityId,
-        roadId: 1,
-        createdAt: new Date().toISOString(),
-        imagePreview: photo || '',
-      });
+      if (!isOnline) {
+        // Offline: enqueue for background sync (bumps syncQueueCount → OFFLINE QUEUE badge).
+        await queueComplaint({ ...complaintPayload, status: 'pending' } as any);
+      } else {
+        addComplaint({
+          ...complaintPayload,
+          id: newId,
+          status: 'routed',
+          createdAt: new Date().toISOString(),
+        } as Complaint);
+      }
     } catch (err) {
       console.warn("Failed to persist complaint locally:", err);
     }

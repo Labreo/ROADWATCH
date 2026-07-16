@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useStore } from '@/store/useStore';
 import { useNetworkStatus } from '@/providers/NetworkStatusProvider';
 import { WifiOff, RefreshCw, AlertTriangle, Wifi, ShieldAlert } from 'lucide-react';
@@ -14,10 +14,15 @@ export default function OfflineBanner() {
   const processSyncQueue = useStore(state => state.processSyncQueue);
   const isSyncing = useStore(state => state.isSyncing);
 
+  // Avoid SSR/client hydration mismatch: banner visibility depends on
+  // client-only state (network status + IndexedDB-hydrated queue count).
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const activeOnline = networkOnline && storeOnline;
   const showBanner = !activeOnline || syncQueueCount > 0;
 
-  if (!showBanner) return null;
+  if (!mounted || !showBanner) return null;
 
   return (
     <AnimatePresence>
