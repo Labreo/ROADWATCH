@@ -406,8 +406,9 @@ export const useStore = create<AppState>((set, get) => {
       }
     },
 
-    // Demo Mode
-    demoMode: 'off',
+    // Demo Mode — starts in scripted mode so ChatOrchestrator uses local
+    // hardcoded demo responses instead of hitting the live backend.
+    demoMode: 'scripted',
     setDemoMode: (mode) => set({ demoMode: mode }),
     activeDemoSnippet: null,
     setActiveDemoSnippet: (id) => set({ activeDemoSnippet: id }),

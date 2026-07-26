@@ -246,6 +246,18 @@ function buildCitywide(): DemoMessage {
 export function buildGroundedReply(query: string): DemoMessage | null {
   const q = query.toLowerCase();
 
+  // ── Let scripted demo scenarios win for their specific patterns ──────
+  // Falsification probe (Omega + SV Road + completion claim) must be
+  // left for findBestDemoReply's intent override. If we match the
+  // contractor name here we'd return a bland contractor profile instead
+  // of the full Granite Guardian audit narrative.
+  if (
+    /omega/i.test(q) &&
+    /(sv|s\.?v\.?|road).*(repair|repav|completed|yesterday|4\.8|crore)/i.test(q)
+  ) {
+    return null;
+  }
+
   // Citywide budget query — before named lookups so "all roads" doesn't hit a
   // partial road-name match.
   if (CITYWIDE_INTENT.test(q) && BUDGET_INTENT.test(q)) {

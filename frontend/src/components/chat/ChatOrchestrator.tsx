@@ -281,7 +281,9 @@ export default function ChatOrchestrator() {
     addComplaint,
     queueComplaint,
     regionCode,
-    setRegionCode
+    setRegionCode,
+    demoMode,
+    setDemoMode
   } = useStore();
 
   // Local navigation context state
@@ -680,11 +682,13 @@ export default function ChatOrchestrator() {
     }
 
     // ------------------------------------------------------------------
-    // DEMO FALLBACK: If backend is offline, stream the best matching
-    // canned response from demoScripts.ts (full evidence + citations).
+    // DEMO FALLBACK: If backend is offline OR demo mode is active, stream
+    // the best matching canned response from demoScripts.ts (full evidence
+    // + citations). In demo mode, skip the live backend entirely so hard-
+    // coded scripted responses always play regardless of server status.
     // ------------------------------------------------------------------
-    if (!isBackendOnline) {
-      const demoReply = buildGroundedReply(textToSend) ?? findBestDemoReply(textToSend);
+    if (!isBackendOnline || demoMode !== 'off') {
+      const demoReply = findBestDemoReply(textToSend) ?? buildGroundedReply(textToSend);
       if (demoReply) {
         await streamResponse(
           demoReply.content,
@@ -809,7 +813,7 @@ export default function ChatOrchestrator() {
 
       // If backend streamed but returned nothing useful, fall back to demo data
       if (!fullResponse.trim()) {
-        const demoReply = buildGroundedReply(textToSend) ?? findBestDemoReply(textToSend);
+        const demoReply = findBestDemoReply(textToSend) ?? buildGroundedReply(textToSend);
         if (demoReply) {
           await streamResponse(
             demoReply.content,
@@ -831,7 +835,7 @@ export default function ChatOrchestrator() {
       }
     } catch (error: any) {
       // On timeout/abort or network failure, try the demo data first
-      const demoReply = buildGroundedReply(textToSend) ?? findBestDemoReply(textToSend);
+      const demoReply = findBestDemoReply(textToSend) ?? buildGroundedReply(textToSend);
       if (demoReply) {
         await streamResponse(
           demoReply.content,

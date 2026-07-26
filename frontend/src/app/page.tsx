@@ -55,7 +55,6 @@ import ChatPanel from '@/components/chat/ChatPanel';
 import ChatOrchestrator from '@/components/chat/ChatOrchestrator';
 import OperationsDashboard from '@/components/operations/OperationsDashboard';
 
-import DemoChatMode from '@/components/demo/DemoChatMode';
 import PlaybackDashboard from '@/components/playback/PlaybackDashboard';
 import SensorDashboard from '@/components/sensors/SensorDashboard';
 import DigitalTwinView from '@/components/twin/DigitalTwinView';
@@ -1519,13 +1518,11 @@ export default function Page() {
       )}
 
       {/* VIEW 0: CONVERSATIONAL ORCHESTRATOR SHELL */}
-      {(activeView === 'chat' || isChatDriven) && demoMode !== 'scripted' && (
+      {/* Renders in all modes — when demoMode is active, ChatOrchestrator
+          reads it from the store and uses local demo fallbacks instead of
+          the live backend. When demoMode is 'off', it hits the live API. */}
+      {(activeView === 'chat' || isChatDriven) && (
         <ChatOrchestrator />
-      )}
-
-      {/* VIEW 0b: DEMO CHAT MODE */}
-      {(activeView === 'chat' || isChatDriven) && demoMode === 'scripted' && (
-        <DemoChatMode />
       )}
 
       {/* Responsive Bottom Drawer Overlay for Chat-Driven Views */}
