@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844">
+  
+  <defs>
+    <linearGradient id="bgDark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1120"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#151f32"/>
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#0ea5e9"/>
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="roseGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e11d48"/>
+      <stop offset="100%" stop-color="#f43f5e"/>
+    </linearGradient>
+    <linearGradient id="mapBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0c192c"/>
+      <stop offset="100%" stop-color="#0f243c"/>
+    </linearGradient>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="112%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <rect id="Frame_03_Mobile_BG" x="0" y="0" width="390" height="844" rx="28" fill="#0b1120" stroke="#334155" stroke-width="2"/>
+  
+  <!-- Status Bar -->
+  <g id="StatusBar_3">
+    <text x="24" y="24" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#f8fafc">09:42</text>
+    <rect x="145" y="10" width="100" height="18" rx="9" fill="#000000"/>
+    <text x="310" y="24" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#38bdf8">5G • 100%</text>
+  </g>
+
+  <!-- App Header -->
+  <g id="MobileHeader_3">
+    <rect x="0" y="34" width="390" height="58" fill="#0f172a"/>
+    <line x1="0" y1="92" x2="390" y2="92" stroke="#1e293b" stroke-width="1"/>
+    <rect x="16" y="44" width="28" height="28" rx="7" fill="url(#blueGrad)"/>
+    <text x="30" y="63" font-family="Inter, sans-serif" font-size="13" font-weight="800" fill="#ffffff" text-anchor="middle">R</text>
+    <text x="52" y="56" font-family="Inter, sans-serif" font-size="13.5" font-weight="800" fill="#ffffff">Report Defect — Step 1/3</text>
+    <text x="52" y="71" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#38bdf8">GPS Pinpoint &amp; PostGIS Auto-Snap</text>
+    <rect x="312" y="46" width="62" height="22" rx="5" fill="#1e3a8a" stroke="#3b82f6"/>
+    <text x="343" y="61" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#bfdbfe" text-anchor="middle">F#03</text>
+    <rect x="16" y="80" width="358" height="5" rx="2.5" fill="#1e293b"/>
+    <rect x="16" y="80" width="118" height="5" rx="2.5" fill="url(#blueGrad)"/>
+  </g>
+
+  <!-- Main Mobile Content -->
+  <g id="MobileContent_3">
+    
+    <!-- Interactive Mobile GIS Map -->
+    
+    <g>
+      <rect x="16" y="104" width="358" height="285" rx="10" fill="url(#mapBg)" stroke="#1e293b" stroke-width="1"/>
+      <line x1="56" y1="104" x2="56" y2="389" stroke="#1e293b" stroke-width="0.7"/><line x1="101" y1="104" x2="101" y2="389" stroke="#1e293b" stroke-width="0.7"/><line x1="146" y1="104" x2="146" y2="389" stroke="#1e293b" stroke-width="0.7"/><line x1="191" y1="104" x2="191" y2="389" stroke="#1e293b" stroke-width="0.7"/><line x1="236" y1="104" x2="236" y2="389" stroke="#1e293b" stroke-width="0.7"/><line x1="281" y1="104" x2="281" y2="389" stroke="#1e293b" stroke-width="0.7"/><line x1="326" y1="104" x2="326" y2="389" stroke="#1e293b" stroke-width="0.7"/><line x1="371" y1="104" x2="371" y2="389" stroke="#1e293b" stroke-width="0.7"/><line x1="16" y1="144" x2="374" y2="144" stroke="#1e293b" stroke-width="0.7"/><line x1="16" y1="189" x2="374" y2="189" stroke="#1e293b" stroke-width="0.7"/><line x1="16" y1="234" x2="374" y2="234" stroke="#1e293b" stroke-width="0.7"/><line x1="16" y1="279" x2="374" y2="279" stroke="#1e293b" stroke-width="0.7"/><line x1="16" y1="324" x2="374" y2="324" stroke="#1e293b" stroke-width="0.7"/><line x1="16" y1="369" x2="374" y2="369" stroke="#1e293b" stroke-width="0.7"/>
+      
+      <!-- Authority Jurisdiction Polygons (ST_Contains) -->
+      <polygon points="56,164 188,154 202,261 66,275" fill="#1d4ed8" fill-opacity="0.14" stroke="#3b82f6" stroke-width="1.2" stroke-dasharray="5,4"/>
+      <polygon points="188,154 339,169 329,344 202,261" fill="#059669" fill-opacity="0.12" stroke="#10b981" stroke-width="1.2" stroke-dasharray="5,4"/>
+      <polygon points="66,275 202,261 231,359 76,354" fill="#d97706" fill-opacity="0.12" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="5,4"/>
+
+      <!-- Road LineStrings (roads.geom) -->
+      <!-- WEH-NH8 (Under Construction - Amber) -->
+      <polyline points="106,359 156,289 211,212 266,149" fill="none" stroke="#f59e0b" stroke-width="5" stroke-linecap="round"/>
+      <!-- SV-RD-01 (Poor - Rose Red) -->
+      <polyline points="71,344 111,281 151,204 181,159" fill="none" stroke="#f43f5e" stroke-width="4.5" stroke-linecap="round"/>
+      <!-- EEH-NH8 (Fair - Sky Blue) -->
+      <polyline points="213,354 245,269 281,184 317,149" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/>
+      <!-- SBM-MARG-01 & Marine Drive (Good - Emerald) -->
+      <polyline points="86,309 166,298 288,315" fill="none" stroke="#10b981" stroke-width="4" stroke-linecap="round"/>
+      <!-- LBS-MARG-01 (Poor - Rose Red) -->
+      <polyline points="174,349 195,252 238,174" fill="none" stroke="#f43f5e" stroke-width="4" stroke-dasharray="8,4" stroke-linecap="round"/>
+
+      <!-- Defect Complaint Point Pins (complaints.geom) -->
+      <circle cx="131" cy="241" r="11" fill="#f43f5e" stroke="#ffffff" stroke-width="2"/>
+      <text x="131" y="245" font-family="Inter, sans-serif" font-size="9.5" font-weight="800" fill="#ffffff" text-anchor="middle">P1</text>
+
+      <circle cx="201" cy="224" r="11" fill="#f59e0b" stroke="#ffffff" stroke-width="2"/>
+      <text x="201" y="228" font-family="Inter, sans-serif" font-size="9.5" font-weight="800" fill="#ffffff" text-anchor="middle">C2</text>
+
+      <circle cx="199" cy="246" r="11" fill="#f43f5e" stroke="#ffffff" stroke-width="2"/>
+      <text x="199" y="250" font-family="Inter, sans-serif" font-size="9.5" font-weight="800" fill="#ffffff" text-anchor="middle">W3</text>
+
+      <circle cx="259" cy="229" r="11" fill="#10b981" stroke="#ffffff" stroke-width="2"/>
+      <text x="259" y="233" font-family="Inter, sans-serif" font-size="9.5" font-weight="800" fill="#ffffff" text-anchor="middle">✓</text>
+
+      <!-- Map Overlay Header Pill -->
+      <rect x="30" y="118" width="330" height="30" rx="6" fill="#090d16" fill-opacity="0.88" stroke="#334155"/>
+      <text x="42" y="137" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#38bdf8">GPS Lock: 19.1197°N, 72.8364°E (±3.1m)</text>
+
+      <!-- Map Legend Box -->
+      <rect x="30" y="347" width="330" height="28" rx="6" fill="#090d16" fill-opacity="0.88" stroke="#334155"/>
+      <circle cx="44" cy="361" r="4.5" fill="#10b981"/>
+      <text x="54" y="365" font-family="Inter, sans-serif" font-size="9.5" font-weight="600" fill="#e2e8f0">Good (SBM/Marine)</text>
+      <circle cx="158" cy="361" r="4.5" fill="#38bdf8"/>
+      <text x="168" y="365" font-family="Inter, sans-serif" font-size="9.5" font-weight="600" fill="#e2e8f0">Fair (EEH-NH8)</text>
+      <circle cx="258" cy="361" r="4.5" fill="#f59e0b"/>
+      <text x="268" y="365" font-family="Inter, sans-serif" font-size="9.5" font-weight="600" fill="#e2e8f0">Construction (WEH)</text>
+      <circle cx="376" cy="361" r="4.5" fill="#f43f5e"/>
+      <text x="386" y="365" font-family="Inter, sans-serif" font-size="9.5" font-weight="600" fill="#e2e8f0">Poor (SV/LBS)</text>
+    </g>
+    
+    <!-- Crosshair Target -->
+    <circle cx="195" cy="246" r="26" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="4,3"/>
+    <circle cx="195" cy="246" r="6" fill="#f43f5e" stroke="#ffffff" stroke-width="2"/>
+
+    <!-- Search Address Bar -->
+    <rect x="28" y="150" width="334" height="34" rx="7" fill="#0f172a" fill-opacity="0.92" stroke="#3b82f6"/>
+    <text x="42" y="171" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#f8fafc">📍 Near Andheri Subway Northbound, S.V. Road</text>
+
+    <!-- PostGIS Spatial Resolution Card -->
+    <rect x="16" y="402" width="358" height="176" rx="12" fill="#131c2e" stroke="#3b82f6" stroke-width="1.2"/>
+    <rect x="28" y="414" width="210" height="20" rx="5" fill="#064e3b"/>
+    <text x="36" y="428" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#a7f3d0">✓ POSTGIS SPATIAL MATCH RESOLVED</text>
+
+    <text x="28" y="454" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8">SNAPPED ROAD SEGMENT (ST_DWithin &lt;= 20m)</text>
+    <text x="28" y="472" font-family="Inter, sans-serif" font-size="14" font-weight="800" fill="#ffffff">S.V. Road (Code: SV-RD-01 • 4.2m dist)</text>
+
+    <text x="28" y="498" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8">CONTAINING JURISDICTION (ST_Contains Polygon)</text>
+    <text x="28" y="516" font-family="Inter, sans-serif" font-size="12.5" font-weight="700" fill="#38bdf8">City Municipal Corp — Ward K-West (MCGM-KW)</text>
+
+    <line x1="28" y1="528" x2="362" y2="528" stroke="#1e293b"/>
+    <text x="28" y="548" font-family="JetBrains Mono, monospace" font-size="10" font-weight="600" fill="#f59e0b">⚠️ Active Project Warranty: Zenith Construction</text>
+    <text x="28" y="564" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94a3b8">Contract #PRJ-04 • Defect Liability Period Active</text>
+
+    <!-- Offline Dexie.js Persistence Card -->
+    <rect x="16" y="590" width="358" height="92" rx="10" fill="#0f172a" stroke="#1e293b"/>
+    <text x="28" y="612" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#38bdf8">RESILIENT OFFLINE SYNC (DEXIE.JS INDEXEDDB)</text>
+    <text x="28" y="632" font-family="Inter, sans-serif" font-size="11" fill="#cbd5e1">Client Temp UUID: 8f94c120-7e4a-4b92-9c11</text>
+    <text x="28" y="650" font-family="Inter, sans-serif" font-size="11" fill="#cbd5e1">Geometry WKT: POINT(72.8364 19.1197) SRID=4326</text>
+    <text x="28" y="668" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#10b981">✓ Saved locally • Idempotent sync guaranteed</text>
+
+    <!-- Primary CTA Button -->
+    <rect x="16" y="696" width="358" height="52" rx="10" fill="url(#blueGrad)"/>
+    <text x="195" y="727" font-family="Inter, sans-serif" font-size="14" font-weight="800" fill="#ffffff" text-anchor="middle">Confirm GPS Location &amp; Continue →</text>
+    
+  </g>
+
+  <!-- Bottom Navigation & DB Strip -->
+  <g id="MobileBottomNav_3">
+    <rect x="0" y="770" width="390" height="74" fill="#090d16"/>
+    <line x1="0" y1="770" x2="390" y2="770" stroke="#1e293b" stroke-width="1"/>
+    <circle cx="48" cy="790" r="9" fill="#1e293b" stroke="#64748b" stroke-width="1.2"/><text x="48" y="814" font-family="Inter, sans-serif" font-size="10" font-weight="500" fill="#64748b" text-anchor="middle">GIS Map</text><rect x="113" y="772" width="65" height="3" rx="1.5" fill="#38bdf8"/><circle cx="145" cy="790" r="9" fill="#1e3a8a" stroke="#38bdf8" stroke-width="1.2"/><text x="145" y="814" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#38bdf8" text-anchor="middle">Report Defect</text><circle cx="242" cy="790" r="9" fill="#1e293b" stroke="#64748b" stroke-width="1.2"/><text x="242" y="814" font-family="Inter, sans-serif" font-size="10" font-weight="500" fill="#64748b" text-anchor="middle">My Reports</text><circle cx="339" cy="790" r="9" fill="#1e293b" stroke="#64748b" stroke-width="1.2"/><text x="339" y="814" font-family="Inter, sans-serif" font-size="10" font-weight="500" fill="#64748b" text-anchor="middle">Offline Sync</text>
+    <rect x="0" y="822" width="390" height="22" fill="#050811"/>
+    <text x="195" y="836" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#38bdf8" text-anchor="middle">DBMS: complaints, roads, authorities, project_warranties</text>
+  </g>
+</svg>

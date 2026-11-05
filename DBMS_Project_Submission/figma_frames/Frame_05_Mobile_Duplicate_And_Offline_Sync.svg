@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844">
+  
+  <defs>
+    <linearGradient id="bgDark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1120"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#151f32"/>
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#0ea5e9"/>
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="roseGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e11d48"/>
+      <stop offset="100%" stop-color="#f43f5e"/>
+    </linearGradient>
+    <linearGradient id="mapBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0c192c"/>
+      <stop offset="100%" stop-color="#0f243c"/>
+    </linearGradient>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="112%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <rect id="Frame_05_Mobile_BG" x="0" y="0" width="390" height="844" rx="28" fill="#0b1120" stroke="#334155" stroke-width="2"/>
+  
+  <!-- Status Bar -->
+  <g id="StatusBar_5">
+    <text x="24" y="24" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#f8fafc">09:42</text>
+    <rect x="145" y="10" width="100" height="18" rx="9" fill="#000000"/>
+    <text x="310" y="24" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#38bdf8">5G • 100%</text>
+  </g>
+
+  <!-- App Header -->
+  <g id="MobileHeader_5">
+    <rect x="0" y="34" width="390" height="58" fill="#0f172a"/>
+    <line x1="0" y1="92" x2="390" y2="92" stroke="#1e293b" stroke-width="1"/>
+    <rect x="16" y="44" width="28" height="28" rx="7" fill="url(#blueGrad)"/>
+    <text x="30" y="63" font-family="Inter, sans-serif" font-size="13" font-weight="800" fill="#ffffff" text-anchor="middle">R</text>
+    <text x="52" y="56" font-family="Inter, sans-serif" font-size="13.5" font-weight="800" fill="#ffffff">Duplicate Check &amp; Sync Center</text>
+    <text x="52" y="71" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#38bdf8">Spatial Dedup &amp; Offline Queue</text>
+    <rect x="312" y="46" width="62" height="22" rx="5" fill="#1e3a8a" stroke="#3b82f6"/>
+    <text x="343" y="61" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#bfdbfe" text-anchor="middle">F#05</text>
+    <rect x="16" y="80" width="358" height="5" rx="2.5" fill="#1e293b"/>
+    <rect x="16" y="80" width="358" height="5" rx="2.5" fill="url(#blueGrad)"/>
+  </g>
+
+  <!-- Main Mobile Content -->
+  <g id="MobileContent_5">
+    
+    <!-- Spatial Duplicate Detection Modal Card (DuplicateComplaintDialog.tsx) -->
+    <rect x="16" y="104" width="358" height="256" rx="12" fill="#131c2e" stroke="#f59e0b" stroke-width="1.5"/>
+    <rect x="28" y="116" width="248" height="22" rx="6" fill="#451a03" stroke="#f59e0b"/>
+    <text x="38" y="131" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#fde68a">⚠️ SPATIAL DUPLICATE DETECTED (11.4m)</text>
+
+    <text x="28" y="158" font-family="Inter, sans-serif" font-size="13.5" font-weight="800" fill="#ffffff">Existing Report #CMP-18981 Nearby</text>
+    <text x="28" y="176" font-family="Inter, sans-serif" font-size="11" fill="#94a3b8">PostGIS ST_DWithin found an active pothole report</text>
+    <text x="28" y="192" font-family="Inter, sans-serif" font-size="11" fill="#94a3b8">within 25m on S.V. Road (Ward K-West).</text>
+
+    <rect x="28" y="204" width="334" height="86" rx="8" fill="#0f172a" stroke="#1e293b"/>
+    <text x="40" y="224" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#38bdf8">#CMP-18981 • Deep Pothole Andheri Subway</text>
+    <text x="40" y="242" font-family="Inter, sans-serif" font-size="10.5" fill="#e2e8f0">Status: ROUTED to MCGM-KW • Priority: 4 (High)</text>
+    <text x="40" y="260" font-family="Inter, sans-serif" font-size="10.5" fill="#10b981">14 Citizens Subscribed • Contractor Notified</text>
+    <text x="40" y="278" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94a3b8">Filed 3h ago • SLA Target: 45h remaining</text>
+
+    <rect x="28" y="302" width="196" height="42" rx="8" fill="url(#blueGrad)"/>
+    <text x="126" y="327" font-family="Inter, sans-serif" font-size="11.5" font-weight="700" fill="#ffffff" text-anchor="middle">Upvote &amp; Follow #18981</text>
+    <rect x="232" y="302" width="130" height="42" rx="8" fill="#0f172a" stroke="#475569"/>
+    <text x="297" y="327" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#cbd5e1" text-anchor="middle">File New Anyway</text>
+
+    <!-- Offline Sync Queue Manager (OfflineSyncDialog.tsx) -->
+    <rect x="16" y="374" width="358" height="264" rx="12" fill="#131c2e" stroke="#1e293b"/>
+    <text x="28" y="398" font-family="Inter, sans-serif" font-size="13" font-weight="800" fill="#ffffff">Offline Sync Queue (IndexedDB → PostGIS)</text>
+    <text x="28" y="414" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#38bdf8">POST /api/v1/complaints/sync • Idempotent UUID Key</text>
+
+    <!-- Sync Item 1 -->
+    <rect x="28" y="426" width="334" height="62" rx="8" fill="#0f172a" stroke="#10b981" stroke-width="0.8"/>
+    <text x="40" y="446" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#a7f3d0">UUID: 8f94c120...9c11 → DB ID #18984</text>
+    <text x="40" y="464" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#ffffff">S.V. Road Pothole • 342 KB Image</text>
+    <text x="40" y="480" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#10b981">✓ SYNCED TO POSTGIS • ST_Contains: MCGM-KW</text>
+
+    <!-- Sync Item 2 -->
+    <rect x="28" y="496" width="334" height="62" rx="8" fill="#0f172a" stroke="#0ea5e9" stroke-width="0.8"/>
+    <text x="40" y="516" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#bae6fd">UUID: c4d2881a...11b0 → Uploading (78%)</text>
+    <text x="40" y="534" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#ffffff">LBS Marg Waterlogging • 418 KB Image</text>
+    <rect x="40" y="544" width="310" height="6" rx="3" fill="#1e293b"/><rect x="40" y="544" width="242" height="6" rx="3" fill="#38bdf8"/>
+
+    <!-- Sync Item 3 -->
+    <rect x="28" y="566" width="334" height="58" rx="8" fill="#0f172a" stroke="#f59e0b" stroke-width="0.8"/>
+    <text x="40" y="586" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#fde68a">UUID: f9e0332b...44a9 → Queued in Dexie.js</text>
+    <text x="40" y="604" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#ffffff">Link Road Missing Signage • 280 KB Image</text>
+
+    <!-- Outbound Citizen Notification Status (citizen_notifications table) -->
+    <rect x="16" y="650" width="358" height="102" rx="10" fill="#131c2e" stroke="#1e293b"/>
+    <text x="28" y="672" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#10b981">CITIZEN NOTIFICATION DISPATCH LOG</text>
+    <text x="28" y="694" font-family="Inter, sans-serif" font-size="11" fill="#e2e8f0">📧 Email (kanakwaradkar@gmail.com): SENT (200 OK)</text>
+    <text x="28" y="714" font-family="Inter, sans-serif" font-size="11" fill="#e2e8f0">📱 WhatsApp / SMS (+91-98201-XXXXX): SENT</text>
+    <text x="28" y="736" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94a3b8">Template: tpl_complaint_routed_v2 • Event: routed</text>
+    
+  </g>
+
+  <!-- Bottom Navigation & DB Strip -->
+  <g id="MobileBottomNav_5">
+    <rect x="0" y="770" width="390" height="74" fill="#090d16"/>
+    <line x1="0" y1="770" x2="390" y2="770" stroke="#1e293b" stroke-width="1"/>
+    <circle cx="48" cy="790" r="9" fill="#1e293b" stroke="#64748b" stroke-width="1.2"/><text x="48" y="814" font-family="Inter, sans-serif" font-size="10" font-weight="500" fill="#64748b" text-anchor="middle">GIS Map</text><circle cx="145" cy="790" r="9" fill="#1e293b" stroke="#64748b" stroke-width="1.2"/><text x="145" y="814" font-family="Inter, sans-serif" font-size="10" font-weight="500" fill="#64748b" text-anchor="middle">Report Defect</text><circle cx="242" cy="790" r="9" fill="#1e293b" stroke="#64748b" stroke-width="1.2"/><text x="242" y="814" font-family="Inter, sans-serif" font-size="10" font-weight="500" fill="#64748b" text-anchor="middle">My Reports</text><rect x="307" y="772" width="65" height="3" rx="1.5" fill="#38bdf8"/><circle cx="339" cy="790" r="9" fill="#1e3a8a" stroke="#38bdf8" stroke-width="1.2"/><text x="339" y="814" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#38bdf8" text-anchor="middle">Offline Sync</text>
+    <rect x="0" y="822" width="390" height="22" fill="#050811"/>
+    <text x="195" y="836" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#38bdf8" text-anchor="middle">DBMS: complaints, citizen_notifications, road_documents</text>
+  </g>
+</svg>

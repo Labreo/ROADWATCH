@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ROADWATCH - Project Synopsis</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm 18mm 20mm 18mm;
+            @bottom-right {
+                content: counter(page);
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.6;
+            color: #1e293b;
+            background: #ffffff;
+            margin: 0;
+            padding: 30px 40px;
+        }
+        h1, h2, h3, h4 {
+            color: #0f172a;
+            font-weight: 700;
+            margin-top: 1.4em;
+            margin-bottom: 0.5em;
+            line-height: 1.25;
+        }
+        h1 {
+            font-size: 22pt;
+            border-bottom: 2.5px solid #2563eb;
+            padding-bottom: 8px;
+            margin-top: 0;
+            color: #1e3a8a;
+        }
+        h2 {
+            font-size: 15pt;
+            border-bottom: 1.5px solid #cbd5e1;
+            padding-bottom: 4px;
+            color: #1e40af;
+            page-break-after: avoid;
+        }
+        h3 {
+            font-size: 12.5pt;
+            color: #334155;
+            page-break-after: avoid;
+        }
+        p, ul, ol {
+            margin-top: 0.4em;
+            margin-bottom: 0.8em;
+        }
+        li {
+            margin-bottom: 0.3em;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.2em 0;
+            font-size: 9.5pt;
+            page-break-inside: auto;
+        }
+        tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+        th, td {
+            border: 1px solid #cbd5e1;
+            padding: 7px 10px;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            font-weight: 600;
+        }
+        tr:nth-child(even) td {
+            background-color: #f8fafc;
+        }
+        code, pre {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        code {
+            background-color: #f1f5f9;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 9pt;
+            color: #0369a1;
+        }
+        pre {
+            background-color: #0f172a;
+            color: #f8fafc;
+            padding: 14px 18px;
+            border-radius: 6px;
+            font-size: 8.5pt;
+            line-height: 1.45;
+            overflow-x: auto;
+            page-break-inside: avoid;
+        }
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+            border-radius: 0;
+        }
+        blockquote {
+            margin: 1em 0;
+            padding: 10px 18px;
+            background-color: #eff6ff;
+            border-left: 4px solid #2563eb;
+            color: #1e3a8a;
+            border-radius: 0 4px 4px 0;
+        }
+        blockquote strong {
+            color: #1d4ed8;
+        }
+        .header-meta {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin-bottom: 24px;
+            font-size: 10pt;
+        }
+        .img-container {
+            text-align: center;
+            margin: 20px auto;
+            page-break-inside: avoid;
+        }
+        .img-container img {
+            max-width: 100%;
+            max-height: 220mm;
+            width: auto;
+            height: auto;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+            display: inline-block;
+        }
+        .caption {
+            font-size: 9.5pt;
+            color: #475569;
+            margin-top: 8px;
+            font-style: italic;
+            font-weight: 500;
+        }
+        .page-break {
+            page-break-before: always;
+        }
+    </style>
+</head>
+<body>
+<h1>Project Synopsis</h1>
+
+<p><strong>A concise overview of the proposed Database Management System (DBMS) project.</strong></p>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>1. General Information</h2>
+
+<h3>A) Project Title</h3>
+<p><strong>ROADWATCH — Civic Infrastructure Intelligence &amp; Road Grievance Governance Platform</strong></p>
+<p><em>(A PostGIS-Enabled, Trigger-Driven Municipal Public Works &amp; Grievance Lifecycle Management System)</em></p>
+
+<table>
+<tr>
+<th>* <strong>Member 1 (Team Lead):</strong> Kanak Waradkar</th>
+<th><strong>Roll No:</strong> <code>24B-CO-030</code></th>
+<th><strong>Email:</strong> kanakwaradkar@gmail.com</th>
+</tr>
+<tr>
+<td>* <strong>Member 2:</strong> Krushna Surve</td>
+<td><strong>Roll No:</strong> <code>24B-CO-031</code></td>
+<td><strong>Email:</strong> krushnasurve07@gmail.com</td>
+</tr>
+<tr>
+<td>* <strong>Member 3:</strong> Manjunath Subhash Gavada</td>
+<td><strong>Roll No:</strong> <code>24B-CO-035</code></td>
+<td><strong>Email:</strong> manjunathgavada40@gmail.com</td>
+</tr>
+</table>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>2. Project Overview &amp; Problem Statement</h2>
+
+<h3>• Introduction</h3>
+<p><strong>ROADWATCH</strong> is an enterprise-grade civic infrastructure intelligence and database governance platform engineered for municipal corporations, State Public Works Departments (PWD), Smart City Directorates, and urban citizens. It provides a single source of truth for physical road network assets, municipal maintenance budgets, public procurement tenders, contractor execution scorecards, and citizen-reported road defects (such as potholes, structural cracking, and waterlogging).</p>
+
+<h3>• Problem Statement</h3>
+<p>Urban road networks form the critical economic lifeline of modern cities, yet their maintenance and grievance redressal systems suffer from severe, systemic deficiencies:</p>
+<p>1. <strong>Siloed &amp; Uncoordinated Data:</strong> Road asset inventories, tender awards, financial budget allocations, and citizen grievances are maintained across disconnected paper logs or fragmented spreadsheets.</p>
+<p>2. <strong>Deficit of Contractor Accountability:</strong> Contractors repeatedly deliver substandard resurfacing work that degrades within weeks, yet they face zero administrative penalties or delay tracking, enabling repeatedly blacklisted or non-performing vendors to secure lucrative new tenders.</p>
+<p>3. <strong>Misrouted Citizen Grievances:</strong> Citizens who report road hazards through informal channels (WhatsApp groups, phone calls, social media) experience dropped complaints and bureaucratic finger-pointing because complaints are assigned manually without geospatial jurisdiction validation (e.g., routing a National Highway or PWD defect to a local municipal ward).</p>
+<p>4. <strong>Lack of Automated SLA Enforcement &amp; Auditability:</strong> No automated mechanism exists to escalate overdue grievances or record an immutable audit log when status updates, budget variances, or project deadlines are altered.</p>
+
+<h3>• Proposed Solution</h3>
+<p>ROADWATCH resolves these failures by modeling every road segment, municipal authority jurisdiction, contractor profile, public tender, and citizen grievance as normalized entities within a high-performance relational database (<strong>PostgreSQL with PostGIS extensions</strong>).</p>
+
+<p>Crucially, <strong>business rules, spatial routing, grievance lifecycles, and audit compliance are enforced directly at the database engine layer</strong> using triggers, spatial containment functions (<code>ST_Contains</code>, <code>ST_DWithin</code>), domain check constraints, and role-based views. This architectural decision ensures data integrity, deterministic SLA escalation, and tamper-resistant auditability regardless of which web, mobile, or external API client connects to the database.</p>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>3. Scope and Objectives</h2>
+
+<h3>• Core Goals</h3>
+<p>1. <strong>Design a Rigorously Normalized Relational Schema:</strong> Author an expressive, normalized (3NF/BCNF) relational schema modeling municipal authorities, road geometries, public works contracts, contractors, tenders, and citizen grievances.</p>
+<p>2. <strong>Enforce Database-Level Grievance State Machine:</strong> Implement strict transition validation via triggers preventing invalid status jumps (e.g., rejecting attempts to move a complaint directly from <code>pending</code> to <code>resolved</code> without prior assignment and inspection).</p>
+<p>3. <strong>Implement Automated SLA Breach Escalation:</strong> Create scheduled and event-driven database procedures that automatically increment escalation levels (Level 0 → Level 1 → Level 2) and reassign responsibility when complaints breach category-specific SLA thresholds.</p>
+<p>4. <strong>Automate Dynamic Contractor Performance Metrics:</strong> Calculate objective contractor performance ratings (<code>performance_index</code>, delay ratios, and project completion rates) via triggers upon project completion or delay updates.</p>
+<p>5. <strong>Provide Immutable Audit Logging:</strong> Record all state modifications, budget variances, and data mutations in a central <code>audit_log</code> table capturing timestamp, old/new tuples, and acting user credentials.</p>
+<p>6. <strong>Demonstrate Measurable Query Optimization:</strong> Benchmark complex spatial and analytical queries utilizing Spatial GiST indices and composite B-tree indices against non-indexed executions.</p>
+
+<h3>• In Scope</h3>
+<ul><li><strong>Geospatial Asset &amp; Jurisdiction Modeling:</strong> Roads modeled with spatial LineStrings (<code>GEOMETRY(LineString, 4326)</code>) and administrative jurisdictions modeled with spatial Polygons (<code>GEOMETRY(Polygon, 4326)</code>).</li><li><strong>Automated Spatial Defect Association:</strong> Matching a citizen's GPS report (<code>GEOMETRY(Point, 4326)</code>) to the encompassing authority boundary via <code>ST_Contains</code> and snapping to the nearest road segment within a 20-meter tolerance via <code>ST_DWithin</code>.</li><li><strong>Grievance Lifecycle Management:</strong> Status progression through <code>pending</code> → <code>routed</code> → <code>in_progress</code> → <code>resolved</code> / <code>rejected</code>, with mandatory resolution logs and foreign key links to the acting authority.</li><li><strong>Public Procurement &amp; Tender Lifecycle:</strong> Tracking tenders from publication through contractor bidding (<code>tender_bids</code> associative table) to award and project contract execution.</li><li><strong>Fiscal Transparency &amp; Variance Tracking:</strong> Tracking allocated budget versus actual expenditures, milestone release approvals, and formal budget variance justification logs.</li><li><strong>Role-Based Security Views:</strong> Granular views separating permissions for Citizens, Field Engineers, Municipal Administrators, and Public Auditors.</li></ul>
+
+<h3>• Out of Scope</h3>
+<ul><li>Fabrication or low-level firmware development of physical vehicle accelerometer hardware (vibration sensor data is consumed via pre-formatted REST/JSON endpoints).</li><li>Cellular telecommunications base-station handover logic.</li><li>Financial escrow banking payment gateway execution (funds are tracked at the ledger/allocation level, not direct bank transfer wire).</li><li>Native mobile binary compilation (a mobile-responsive Next.js Progressive Web App client fulfills all user interface requirements).</li></ul>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>4. System Functionalities &amp; User Roles</h2>
+
+<p>Access control is partitioned into four distinct user roles, each interacting with the system through restricted, role-specific database views and stored procedures:</p>
+
+<ul><li><strong>Citizen:</strong></li><li>Can register and authenticate with verified contact credentials.</li><li>Can submit road defect complaints with geo-coordinates, description, category, and photo URL.</li><li>Can view real-time status, escalation history, and assigned department for their own complaints.</li><li>Can query public road transparency views (road condition scorecards, contractor performance rankings, and municipal expenditure per kilometer).</li><li><strong>Field / Ward Engineer (Staff):</strong></li><li>Can view grievances routed specifically to their jurisdictional ward or assigned road segments.</li><li>Can update complaint status from <code>routed</code> to <code>in_progress</code> and subsequently to <code>resolved</code>, providing mandatory repair notes.</li><li>Can log completion of scheduled road maintenance milestones for supervisor review.</li><li><strong>Municipal Authority Administrator (Commissioner / PWD Executive):</strong></li><li>Full administrative oversight across all roads, tenders, contractors, and grievances in their jurisdiction.</li><li>Floats new public tenders, evaluates contractor bids, and awards road maintenance contracts.</li><li>Approves or rejects project budget variances and contingency reserve releases.</li><li>Configures category-wise SLA thresholds (e.g., 24 hours for severe potholes, 72 hours for missing street signage).</li><li><strong>Public Auditor &amp; Oversight Officer:</strong></li><li>Read-only access to immutable system audit trails (<code>audit_log</code>), contractor penalty records, and SLA breach timelines.</li><li>Generates analytics reports on expenditure efficiency (allocated vs. spent per kilometer) and recurring failure zones.</li></ul>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>5. Technology Stack</h2>
+
+<ul><li><strong>Frontend / User Interface:</strong> Next.js 16 (React, TypeScript), Leaflet GIS mapping for interactive spatial road rendering, Framer Motion for stateful micro-interactions, and Tailwind CSS.</li><li><strong>Backend / Application Server:</strong> FastAPI (Python 3.11), SQLAlchemy ORM and <code>psycopg2</code> driver; core data validation, audit triggers, and state rules reside directly inside PostgreSQL.</li><li><strong>Database Engine:</strong> <strong>PostgreSQL 16+</strong> with the <strong>PostGIS 3.4+</strong> spatial extension (utilizing spatial types, GiST spatial indexing, PL/pgSQL stored trigger functions, and JSONB audit logging).</li><li><strong>Database Modeling &amp; Diagramming:</strong> Draw.io / Lucidchart (Chen Notation ER modeling), dbdiagram.io, and PostgreSQL <code>EXPLAIN (ANALYZE, BUFFERS)</code> execution profiler.</li></ul>
+
+</body>
+</html>

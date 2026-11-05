@@ -1,0 +1,271 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" width="1440" height="900">
+  
+  <defs>
+    <linearGradient id="bgDark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1120"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#151f32"/>
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#0ea5e9"/>
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="roseGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e11d48"/>
+      <stop offset="100%" stop-color="#f43f5e"/>
+    </linearGradient>
+    <linearGradient id="mapBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0c192c"/>
+      <stop offset="100%" stop-color="#0f243c"/>
+    </linearGradient>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="112%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <rect id="Frame_10_Background" x="0" y="0" width="1440" height="900" fill="#0b1120"/>
+  <g id="Sidebar_10"><rect x="0" y="0" width="220" height="900" fill="#090d16"/><line x1="220" y1="0" x2="220" y2="900" stroke="#1e293b" stroke-width="1"/><rect x="16" y="14" width="30" height="30" rx="8" fill="url(#blueGrad)"/><text x="31" y="34" font-family="Inter, sans-serif" font-size="14" font-weight="800" fill="#ffffff" text-anchor="middle">R</text><text x="56" y="28" font-family="Inter, sans-serif" font-size="15" font-weight="800" fill="#ffffff" letter-spacing="0.5">ROADWATCH</text><text x="56" y="42" font-family="JetBrains Mono, monospace" font-size="9" font-weight="600" fill="#38bdf8">POSTGIS v16 • CIVIC AI</text><line x1="0" y1="56" x2="220" y2="56" stroke="#1e293b" stroke-width="1"/><text x="18" y="76" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#64748b" letter-spacing="1.2">PLATFORM MODULES</text><rect x="20" y="95" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="108" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">MAP</text><text x="54" y="109" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Geospatial Map</text><rect x="20" y="133" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="146" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">AI</text><text x="54" y="147" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">AI Chat Assistant</text><rect x="20" y="171" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="184" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">INR</text><text x="54" y="185" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Budget Compliance</text><rect x="20" y="209" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="222" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">CON</text><text x="54" y="223" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Contractor Scores</text><rect x="20" y="247" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="260" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">CMP</text><text x="54" y="261" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Citizen Complaints</text><rect x="20" y="285" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="298" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">OPS</text><text x="54" y="299" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Operations Center</text><rect x="20" y="323" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="336" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">SLA</text><text x="54" y="337" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">SLA Escalations</text><rect x="20" y="361" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="374" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">GIS</text><text x="54" y="375" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Boundary Conflicts</text><rect x="20" y="399" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="412" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">SCH</text><text x="54" y="413" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Repair Scheduler</text><rect x="10" y="430" width="200" height="34" rx="7" fill="#1e3a8a" stroke="#3b82f6" stroke-width="1"/><rect x="10" y="437" width="3" height="20" rx="1.5" fill="#38bdf8"/><rect x="20" y="437" width="26" height="20" rx="4" fill="#2563eb"/><text x="33" y="450" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="700" fill="#ffffff" text-anchor="middle"> T </text><text x="54" y="451" font-family="Inter, sans-serif" font-size="11.5" font-weight="700" fill="#ffffff">Historical Playback</text><rect x="20" y="475" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="488" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">IOT</text><text x="54" y="489" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">IoT Sensor Monitor</text><rect x="20" y="513" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="526" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">3D</text><text x="54" y="527" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">3D Digital Twin</text><rect x="20" y="551" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="564" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">REG</text><text x="54" y="565" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Multi-Region Hub</text><rect x="20" y="589" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="602" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">TND</text><text x="54" y="603" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Procurement Ledger</text><rect x="20" y="627" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="640" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">LOG</text><text x="54" y="641" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Forensic Audit Log</text><rect x="12" y="676" width="196" height="92" rx="8" fill="#0f172a" stroke="#1e293b"/><text x="24" y="696" font-family="JetBrains Mono, monospace" font-size="9" font-weight="700" fill="#38bdf8">DB ENGINE TELEMETRY</text><circle cx="28" cy="714" r="4" fill="#10b981"/><text x="38" y="718" font-family="Inter, sans-serif" font-size="10.5" font-weight="600" fill="#e2e8f0">PostGIS 3.4 Spatial GIST</text><text x="24" y="736" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94a3b8">UTC Clock: 14:32:08Z</text><text x="24" y="754" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94a3b8">Sync Queue: 0 Pending</text><rect x="12" y="780" width="196" height="76" rx="8" fill="#131c2e" stroke="#1e293b"/><circle cx="34" cy="810" r="14" fill="#2563eb"/><text x="34" y="814" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">KW</text><text x="56" y="804" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#ffffff">Kanak Waradkar</text><text x="56" y="818" font-family="JetBrains Mono, monospace" font-size="9" fill="#38bdf8">Roll: 24B-CO-030</text><text x="24" y="842" font-family="Inter, sans-serif" font-size="9.5" fill="#94a3b8">Team: Krushna (031) • Manjunath (035)</text></g>
+  
+    <g id="TopNav_10">
+      <rect x="220" y="0" width="1220" height="56" fill="#0f172a"/>
+      <line x1="220" y1="56" x2="1440" y2="56" stroke="#1e293b" stroke-width="1"/>
+      <text x="244" y="23" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#38bdf8" letter-spacing="0.8">ACCOUNTABILITY / HISTORICAL PLAYBACK</text>
+      <text x="244" y="42" font-family="Inter, sans-serif" font-size="14" font-weight="800" fill="#ffffff">Historical Road Deterioration Playback &amp; Snapshot Analyzer</text>
+
+      <!-- Global Search Bar -->
+      <rect x="734" y="12" width="228" height="32" rx="6" fill="#1e293b" stroke="#334155"/>
+      <text x="748" y="32" font-family="Inter, sans-serif" font-size="10.5" fill="#94a3b8">Search WEH-NH8, SV-RD-01, ID...</text>
+      <rect x="924" y="17" width="30" height="22" rx="4" fill="#0f172a"/>
+      <text x="939" y="31" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#64748b" text-anchor="middle">⌘K</text>
+
+      <!-- Region Pill -->
+      <rect x="974" y="12" width="142" height="32" rx="6" fill="#1e293b" stroke="#334155"/>
+      <text x="988" y="32" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#f8fafc">IN • India (Mumbai • ₹)</text>
+
+      <!-- Online Status Pill -->
+      <rect x="1128" y="12" width="124" height="32" rx="6" fill="#064e3b" stroke="#059669"/>
+      <circle cx="1144" cy="28" r="4" fill="#10b981"/>
+      <text x="1156" y="32" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#a7f3d0">POSTGIS ONLINE</text>
+
+      <!-- Role Badge -->
+      <rect x="1264" y="12" width="156" height="32" rx="6" fill="#1e3a8a" stroke="#3b82f6"/>
+      <text x="1342" y="32" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#bfdbfe" text-anchor="middle">Frame #10 • 1440×900</text>
+    </g>
+    
+  <g id="MainContent_10">
+    
+    <!-- Interactive Time-Travel Scrubber Bar (TimelineSlider.tsx) -->
+    <rect x="244" y="72" width="1172" height="92" rx="10" fill="#131c2e" stroke="#3b82f6" stroke-width="1.2"/>
+    <text x="266" y="98" font-family="Inter, sans-serif" font-size="13.5" font-weight="800" fill="#ffffff">Temporal Database Snapshot Scrubber (road_defect_history: 2021 — 2026)</text>
+    <rect x="1140" y="82" width="76" height="26" rx="6" fill="#2563eb"/><text x="1178" y="99" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">▶ Play 2x</text>
+    <rect x="1226" y="82" width="170" height="26" rx="6" fill="#0f172a" stroke="#38bdf8"/><text x="1311" y="99" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#38bdf8" text-anchor="middle">SNAPSHOT: 2026-10-22</text>
+
+    <!-- Timeline Track -->
+    <line x1="280" y1="132" x2="1380" y2="132" stroke="#334155" stroke-width="6" stroke-linecap="round"/>
+    <line x1="280" y1="132" x2="1280" y2="132" stroke="url(#blueGrad)" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="380" cy="132" r="7" fill="#10b981"/><text x="380" y="152" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94a3b8" text-anchor="middle">2021 (Good)</text>
+    <circle cx="580" cy="132" r="7" fill="#38bdf8"/><text x="580" y="152" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94a3b8" text-anchor="middle">2023 (Fair)</text>
+    <circle cx="780" cy="132" r="8" fill="#f59e0b"/><text x="780" y="152" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#fde68a" text-anchor="middle">May 2024 (PRJ-03 Start)</text>
+    <circle cx="1020" cy="132" r="8" fill="#f43f5e"/><text x="1020" y="152" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#fecdd3" text-anchor="middle">Jul 2025 (Halted/Blacklisted)</text>
+    <circle cx="1280" cy="132" r="10" fill="#38bdf8" stroke="#ffffff" stroke-width="2"/><text x="1280" y="152" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle">Oct 2026 (Emergency Fix)</text>
+
+    <!-- Split Temporal Map Comparison & Deterioration Curve -->
+    
+    <g>
+      <rect x="244" y="178" width="576" height="330" rx="10" fill="url(#mapBg)" stroke="#1e293b" stroke-width="1"/>
+      <line x1="284" y1="178" x2="284" y2="508" stroke="#1e293b" stroke-width="0.7"/><line x1="329" y1="178" x2="329" y2="508" stroke="#1e293b" stroke-width="0.7"/><line x1="374" y1="178" x2="374" y2="508" stroke="#1e293b" stroke-width="0.7"/><line x1="419" y1="178" x2="419" y2="508" stroke="#1e293b" stroke-width="0.7"/><line x1="464" y1="178" x2="464" y2="508" stroke="#1e293b" stroke-width="0.7"/><line x1="509" y1="178" x2="509" y2="508" stroke="#1e293b" stroke-width="0.7"/><line x1="554" y1="178" x2="554" y2="508" stroke="#1e293b" stroke-width="0.7"/><line x1="599" y1="178" x2="599" y2="508" stroke="#1e293b" stroke-width="0.7"/><line x1="644" y1="178" x2="644" y2="508" stroke="#1e293b" stroke-width="0.7"/><line x1="689" y1="178" x2="689" y2="508" stroke="#1e293b" stroke-width="0.7"/><line x1="734" y1="178" x2="734" y2="508" stroke="#1e293b" stroke-width="0.7"/><line x1="779" y1="178" x2="779" y2="508" stroke="#1e293b" stroke-width="0.7"/><line x1="244" y1="218" x2="820" y2="218" stroke="#1e293b" stroke-width="0.7"/><line x1="244" y1="263" x2="820" y2="263" stroke="#1e293b" stroke-width="0.7"/><line x1="244" y1="308" x2="820" y2="308" stroke="#1e293b" stroke-width="0.7"/><line x1="244" y1="353" x2="820" y2="353" stroke="#1e293b" stroke-width="0.7"/><line x1="244" y1="398" x2="820" y2="398" stroke="#1e293b" stroke-width="0.7"/><line x1="244" y1="443" x2="820" y2="443" stroke="#1e293b" stroke-width="0.7"/><line x1="244" y1="488" x2="820" y2="488" stroke="#1e293b" stroke-width="0.7"/>
+      
+      <!-- Authority Jurisdiction Polygons (ST_Contains) -->
+      <polygon points="284,238 520,228 544,360 294,376" fill="#1d4ed8" fill-opacity="0.14" stroke="#3b82f6" stroke-width="1.2" stroke-dasharray="5,4"/>
+      <polygon points="520,228 785,243 775,463 544,360" fill="#059669" fill-opacity="0.12" stroke="#10b981" stroke-width="1.2" stroke-dasharray="5,4"/>
+      <polygon points="294,376 544,360 590,478 304,473" fill="#d97706" fill-opacity="0.12" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="5,4"/>
+
+      <!-- Road LineStrings (roads.geom) -->
+      <!-- WEH-NH8 (Under Construction - Amber) -->
+      <polyline points="334,478 384,392 439,303 494,223" fill="none" stroke="#f59e0b" stroke-width="5" stroke-linecap="round"/>
+      <!-- SV-RD-01 (Poor - Rose Red) -->
+      <polyline points="299,463 339,383 379,294 409,233" fill="none" stroke="#f43f5e" stroke-width="4.5" stroke-linecap="round"/>
+      <!-- EEH-NH8 (Fair - Sky Blue) -->
+      <polyline points="561,473 613,369 670,270 728,223" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/>
+      <!-- SBM-MARG-01 & Marine Drive (Good - Emerald) -->
+      <polyline points="314,416 486,402 682,422" fill="none" stroke="#10b981" stroke-width="4" stroke-linecap="round"/>
+      <!-- LBS-MARG-01 (Poor - Rose Red) -->
+      <polyline points="497,468 532,350 601,248" fill="none" stroke="#f43f5e" stroke-width="4" stroke-dasharray="8,4" stroke-linecap="round"/>
+
+      <!-- Defect Complaint Point Pins (complaints.geom) -->
+      <circle cx="359" cy="336" r="11" fill="#f43f5e" stroke="#ffffff" stroke-width="2"/>
+      <text x="359" y="340" font-family="Inter, sans-serif" font-size="9.5" font-weight="800" fill="#ffffff" text-anchor="middle">P1</text>
+
+      <circle cx="429" cy="317" r="11" fill="#f59e0b" stroke="#ffffff" stroke-width="2"/>
+      <text x="429" y="321" font-family="Inter, sans-serif" font-size="9.5" font-weight="800" fill="#ffffff" text-anchor="middle">C2</text>
+
+      <circle cx="538" cy="343" r="11" fill="#f43f5e" stroke="#ffffff" stroke-width="2"/>
+      <text x="538" y="347" font-family="Inter, sans-serif" font-size="9.5" font-weight="800" fill="#ffffff" text-anchor="middle">W3</text>
+
+      <circle cx="636" cy="323" r="11" fill="#10b981" stroke="#ffffff" stroke-width="2"/>
+      <text x="636" y="327" font-family="Inter, sans-serif" font-size="9.5" font-weight="800" fill="#ffffff" text-anchor="middle">✓</text>
+
+      <!-- Map Overlay Header Pill -->
+      <rect x="258" y="192" width="360" height="30" rx="6" fill="#090d16" fill-opacity="0.88" stroke="#334155"/>
+      <text x="270" y="211" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#38bdf8">Historical Spatial State: S.V. Road &amp; LBS Marg</text>
+
+      <!-- Map Legend Box -->
+      <rect x="258" y="466" width="450" height="28" rx="6" fill="#090d16" fill-opacity="0.88" stroke="#334155"/>
+      <circle cx="272" cy="480" r="4.5" fill="#10b981"/>
+      <text x="282" y="484" font-family="Inter, sans-serif" font-size="9.5" font-weight="600" fill="#e2e8f0">Good (SBM/Marine)</text>
+      <circle cx="386" cy="480" r="4.5" fill="#38bdf8"/>
+      <text x="396" y="484" font-family="Inter, sans-serif" font-size="9.5" font-weight="600" fill="#e2e8f0">Fair (EEH-NH8)</text>
+      <circle cx="486" cy="480" r="4.5" fill="#f59e0b"/>
+      <text x="496" y="484" font-family="Inter, sans-serif" font-size="9.5" font-weight="600" fill="#e2e8f0">Construction (WEH)</text>
+      <circle cx="604" cy="480" r="4.5" fill="#f43f5e"/>
+      <text x="614" y="484" font-family="Inter, sans-serif" font-size="9.5" font-weight="600" fill="#e2e8f0">Poor (SV/LBS)</text>
+    </g>
+    
+
+    <!-- Right Chart: Deterioration & Complaint Density Curve -->
+    <rect x="836" y="178" width="580" height="330" rx="10" fill="#131c2e" stroke="#1e293b"/>
+    <text x="856" y="206" font-family="Inter, sans-serif" font-size="14" font-weight="800" fill="#ffffff">Road Condition vs. Active Defect Count &amp; Avg Depth (cm)</text>
+    <text x="856" y="224" font-family="JetBrains Mono, monospace" font-size="10" fill="#38bdf8">Trigger: trg_rdh_complaint_insert → snapshot_road_on_complaint_change()</text>
+
+    <!-- Chart Axes -->
+    <line x1="890" y1="250" x2="890" y2="450" stroke="#334155" stroke-width="1.5"/>
+    <line x1="890" y1="450" x2="1380" y2="450" stroke="#334155" stroke-width="1.5"/>
+    <line x1="890" y1="300" x2="1380" y2="300" stroke="#1e293b" stroke-dasharray="4,4"/>
+    <line x1="890" y1="350" x2="1380" y2="350" stroke="#1e293b" stroke-dasharray="4,4"/>
+    <line x1="890" y1="400" x2="1380" y2="400" stroke="#1e293b" stroke-dasharray="4,4"/>
+
+    <!-- Complaint Surge Curve (Rose) -->
+    <polyline points="910,435 995,418 1080,380 1165,295 1250,268 1350,310" fill="none" stroke="#f43f5e" stroke-width="3.5"/>
+    <!-- PCI Health Curve (Cyan) -->
+    <polyline points="910,265 995,288 1080,325 1165,390 1250,425 1350,375" fill="none" stroke="#38bdf8" stroke-width="3.5"/>
+
+    <text x="910" y="472" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94a3b8">2021        2022        2023        2024        2025        2026</text>
+    <text x="890" y="494" font-family="Inter, sans-serif" font-size="10.5" font-weight="600" fill="#38bdf8">▬ Pavement Health Score (PCI)     </text>
+    <text x="1120" y="494" font-family="Inter, sans-serif" font-size="10.5" font-weight="600" fill="#f43f5e">▬ Open Complaints Count (complaints table)</text>
+
+    <!-- Bottom Snapshot Ledger Table (road_defect_history) -->
+    <g>
+<rect x="244" y="524" width="1172" height="328" rx="10" fill="#131c2e" stroke="#1e293b" stroke-width="1"/>
+<text x="262" y="550" font-family="Inter, sans-serif" font-size="14" font-weight="800" fill="#ffffff">Chronological Road Defect History Snapshots (road_defect_history table)</text>
+<text x="262" y="568" font-family="JetBrains Mono, monospace" font-size="10" fill="#38bdf8">SELECT id, road_id, snapshot_date, status_at_time, complaint_count, project_count, avg_depth_cm, source FROM road_defect_history ORDER BY snapshot_date DESC</text>
+<rect x="245" y="580" width="1170" height="32" fill="#0f172a"/>
+<line x1="244" y1="580" x2="1416" y2="580" stroke="#1e293b"/>
+<line x1="244" y1="612" x2="1416" y2="612" stroke="#1e293b"/>
+<text x="260" y="600" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">SNAPSHOT ID</text>
+<text x="375" y="600" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">ROAD SEGMENT</text>
+<text x="565" y="600" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">SNAPSHOT DATE</text>
+<text x="695" y="600" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">STATUS AT TIME</text>
+<text x="840" y="600" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">OPEN COMPLAINTS</text>
+<text x="980" y="600" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">ACTIVE PROJECTS</text>
+<text x="1115" y="600" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">AVG DEFECT DEPTH</text>
+<text x="1260" y="600" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">TRIGGER SOURCE</text>
+<line x1="256" y1="650" x2="1404" y2="650" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="635" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#RDH-9042</text>
+<text x="375" y="635" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">S.V. Road (SV-RD-01)</text>
+<text x="565" y="635" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">2026-10-22</text>
+
+    <g>
+      <rect x="695" y="620" width="68" height="22" rx="11" fill="#4c0519" stroke="#f43f5e" stroke-width="1"/>
+      <text x="729" y="634.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#fecdd3" text-anchor="middle">POOR</text>
+    </g>
+    
+<text x="840" y="635" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">18 Open</text>
+<text x="980" y="635" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">2 Projects</text>
+<text x="1115" y="635" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">8.40 cm</text>
+<text x="1260" y="635" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">complaint</text>
+<rect x="245" y="650" width="1170" height="38" fill="#0f172a" fill-opacity="0.45"/>
+<line x1="256" y1="688" x2="1404" y2="688" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="673" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#RDH-8810</text>
+<text x="375" y="673" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">S.V. Road (SV-RD-01)</text>
+<text x="565" y="673" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">2026-03-01</text>
+
+    <g>
+      <rect x="695" y="658" width="68" height="22" rx="11" fill="#4c0519" stroke="#f43f5e" stroke-width="1"/>
+      <text x="729" y="672.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#fecdd3" text-anchor="middle">POOR</text>
+    </g>
+    
+<text x="840" y="673" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">24 Open</text>
+<text x="980" y="673" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">2 Projects</text>
+<text x="1115" y="673" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">9.15 cm</text>
+<text x="1260" y="673" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">project</text>
+<line x1="256" y1="726" x2="1404" y2="726" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="711" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#RDH-7920</text>
+<text x="375" y="711" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#e2e8f0">LBS Marg (LBS-MARG-01)</text>
+<text x="565" y="711" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">2025-11-15</text>
+
+    <g>
+      <rect x="695" y="696" width="68" height="22" rx="11" fill="#4c0519" stroke="#f43f5e" stroke-width="1"/>
+      <text x="729" y="710.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#fecdd3" text-anchor="middle">POOR</text>
+    </g>
+    
+<text x="840" y="711" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">15 Open</text>
+<text x="980" y="711" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">1 Project</text>
+<text x="1115" y="711" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">7.80 cm</text>
+<text x="1260" y="711" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">inspection</text>
+<rect x="245" y="726" width="1170" height="38" fill="#0f172a" fill-opacity="0.45"/>
+<line x1="256" y1="764" x2="1404" y2="764" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="749" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#RDH-6412</text>
+<text x="375" y="749" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Western Express (WEH-NH8)</text>
+<text x="565" y="749" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">2025-06-01</text>
+
+    <g>
+      <rect x="695" y="734" width="92" height="22" rx="11" fill="#451a03" stroke="#f59e0b" stroke-width="1"/>
+      <text x="741" y="748.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#fde68a" text-anchor="middle">CONSTRUCTION</text>
+    </g>
+    
+<text x="840" y="749" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">9 Open</text>
+<text x="980" y="749" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">2 Projects</text>
+<text x="1115" y="749" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">5.20 cm</text>
+<text x="1260" y="749" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">project</text>
+<line x1="256" y1="802" x2="1404" y2="802" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="787" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#RDH-5104</text>
+<text x="375" y="787" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Eastern Express (EEH-NH8)</text>
+<text x="565" y="787" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">2024-12-10</text>
+
+    <g>
+      <rect x="695" y="772" width="68" height="22" rx="11" fill="#0c4a6e" stroke="#0ea5e9" stroke-width="1"/>
+      <text x="729" y="786.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#bae6fd" text-anchor="middle">FAIR</text>
+    </g>
+    
+<text x="840" y="787" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">6 Open</text>
+<text x="980" y="787" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">1 Project</text>
+<text x="1115" y="787" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">4.10 cm</text>
+<text x="1260" y="787" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">inspection</text>
+<rect x="245" y="802" width="1170" height="38" fill="#0f172a" fill-opacity="0.45"/>
+<line x1="256" y1="840" x2="1404" y2="840" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="825" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#RDH-3890</text>
+<text x="375" y="825" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Senapati Bapat Marg</text>
+<text x="565" y="825" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">2023-12-10</text>
+
+    <g>
+      <rect x="695" y="810" width="68" height="22" rx="11" fill="#064e3b" stroke="#10b981" stroke-width="1"/>
+      <text x="729" y="824.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#a7f3d0" text-anchor="middle">GOOD</text>
+    </g>
+    
+<text x="840" y="825" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">0 Open</text>
+<text x="980" y="825" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">0 Projects</text>
+<text x="1115" y="825" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">0.00 cm</text>
+<text x="1260" y="825" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">project</text>
+</g>
+    
+  </g>
+  
+    <g id="FooterBar_10">
+      <rect x="220" y="868" width="1220" height="32" fill="#090d16"/>
+      <line x1="220" y1="868" x2="1440" y2="868" stroke="#1e293b" stroke-width="1"/>
+      <text x="244" y="888" font-family="JetBrains Mono, monospace" font-size="10" font-weight="600" fill="#38bdf8">BOUND DBMS RELATIONS: road_defect_history, roads, projects, complaints</text>
+      <text x="1420" y="888" font-family="JetBrains Mono, monospace" font-size="10" fill="#64748b" text-anchor="end">ROADWATCH DBMS • Kanak Waradkar (24B-CO-030) • Krushna Surve (24B-CO-031) • Manjunath Gavada (24B-CO-035)</text>
+    </g>
+    
+</svg>

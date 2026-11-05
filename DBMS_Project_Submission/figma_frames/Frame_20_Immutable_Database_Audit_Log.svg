@@ -1,0 +1,226 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" width="1440" height="900">
+  
+  <defs>
+    <linearGradient id="bgDark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1120"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#151f32"/>
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#0ea5e9"/>
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="roseGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e11d48"/>
+      <stop offset="100%" stop-color="#f43f5e"/>
+    </linearGradient>
+    <linearGradient id="mapBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0c192c"/>
+      <stop offset="100%" stop-color="#0f243c"/>
+    </linearGradient>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="112%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <rect id="Frame_20_Background" x="0" y="0" width="1440" height="900" fill="#0b1120"/>
+  <g id="Sidebar_20"><rect x="0" y="0" width="220" height="900" fill="#090d16"/><line x1="220" y1="0" x2="220" y2="900" stroke="#1e293b" stroke-width="1"/><rect x="16" y="14" width="30" height="30" rx="8" fill="url(#blueGrad)"/><text x="31" y="34" font-family="Inter, sans-serif" font-size="14" font-weight="800" fill="#ffffff" text-anchor="middle">R</text><text x="56" y="28" font-family="Inter, sans-serif" font-size="15" font-weight="800" fill="#ffffff" letter-spacing="0.5">ROADWATCH</text><text x="56" y="42" font-family="JetBrains Mono, monospace" font-size="9" font-weight="600" fill="#38bdf8">POSTGIS v16 • CIVIC AI</text><line x1="0" y1="56" x2="220" y2="56" stroke="#1e293b" stroke-width="1"/><text x="18" y="76" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#64748b" letter-spacing="1.2">PLATFORM MODULES</text><rect x="20" y="95" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="108" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">MAP</text><text x="54" y="109" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Geospatial Map</text><rect x="20" y="133" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="146" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">AI</text><text x="54" y="147" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">AI Chat Assistant</text><rect x="20" y="171" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="184" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">INR</text><text x="54" y="185" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Budget Compliance</text><rect x="20" y="209" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="222" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">CON</text><text x="54" y="223" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Contractor Scores</text><rect x="20" y="247" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="260" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">CMP</text><text x="54" y="261" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Citizen Complaints</text><rect x="20" y="285" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="298" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">OPS</text><text x="54" y="299" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Operations Center</text><rect x="20" y="323" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="336" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">SLA</text><text x="54" y="337" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">SLA Escalations</text><rect x="20" y="361" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="374" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">GIS</text><text x="54" y="375" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Boundary Conflicts</text><rect x="20" y="399" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="412" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">SCH</text><text x="54" y="413" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Repair Scheduler</text><rect x="20" y="437" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="450" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle"> T </text><text x="54" y="451" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Historical Playback</text><rect x="20" y="475" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="488" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">IOT</text><text x="54" y="489" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">IoT Sensor Monitor</text><rect x="20" y="513" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="526" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">3D</text><text x="54" y="527" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">3D Digital Twin</text><rect x="20" y="551" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="564" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">REG</text><text x="54" y="565" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Multi-Region Hub</text><rect x="20" y="589" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="602" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">TND</text><text x="54" y="603" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Procurement Ledger</text><rect x="10" y="620" width="200" height="34" rx="7" fill="#1e3a8a" stroke="#3b82f6" stroke-width="1"/><rect x="10" y="627" width="3" height="20" rx="1.5" fill="#38bdf8"/><rect x="20" y="627" width="26" height="20" rx="4" fill="#2563eb"/><text x="33" y="640" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="700" fill="#ffffff" text-anchor="middle">LOG</text><text x="54" y="641" font-family="Inter, sans-serif" font-size="11.5" font-weight="700" fill="#ffffff">Forensic Audit Log</text><rect x="12" y="676" width="196" height="92" rx="8" fill="#0f172a" stroke="#1e293b"/><text x="24" y="696" font-family="JetBrains Mono, monospace" font-size="9" font-weight="700" fill="#38bdf8">DB ENGINE TELEMETRY</text><circle cx="28" cy="714" r="4" fill="#10b981"/><text x="38" y="718" font-family="Inter, sans-serif" font-size="10.5" font-weight="600" fill="#e2e8f0">PostGIS 3.4 Spatial GIST</text><text x="24" y="736" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94a3b8">UTC Clock: 14:32:08Z</text><text x="24" y="754" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94a3b8">Sync Queue: 0 Pending</text><rect x="12" y="780" width="196" height="76" rx="8" fill="#131c2e" stroke="#1e293b"/><circle cx="34" cy="810" r="14" fill="#2563eb"/><text x="34" y="814" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">KW</text><text x="56" y="804" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#ffffff">Kanak Waradkar</text><text x="56" y="818" font-family="JetBrains Mono, monospace" font-size="9" fill="#38bdf8">Roll: 24B-CO-030</text><text x="24" y="842" font-family="Inter, sans-serif" font-size="9.5" fill="#94a3b8">Team: Krushna (031) • Manjunath (035)</text></g>
+  
+    <g id="TopNav_20">
+      <rect x="220" y="0" width="1220" height="56" fill="#0f172a"/>
+      <line x1="220" y1="56" x2="1440" y2="56" stroke="#1e293b" stroke-width="1"/>
+      <text x="244" y="23" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#38bdf8" letter-spacing="0.8">SYSTEM / FORENSIC AUDIT LOG</text>
+      <text x="244" y="42" font-family="Inter, sans-serif" font-size="14" font-weight="800" fill="#ffffff">Immutable PostgreSQL Audit Log &amp; JSONB Diff Forensics</text>
+
+      <!-- Global Search Bar -->
+      <rect x="734" y="12" width="228" height="32" rx="6" fill="#1e293b" stroke="#334155"/>
+      <text x="748" y="32" font-family="Inter, sans-serif" font-size="10.5" fill="#94a3b8">Search WEH-NH8, SV-RD-01, ID...</text>
+      <rect x="924" y="17" width="30" height="22" rx="4" fill="#0f172a"/>
+      <text x="939" y="31" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#64748b" text-anchor="middle">⌘K</text>
+
+      <!-- Region Pill -->
+      <rect x="974" y="12" width="142" height="32" rx="6" fill="#1e293b" stroke="#334155"/>
+      <text x="988" y="32" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#f8fafc">IN • India (Mumbai • ₹)</text>
+
+      <!-- Online Status Pill -->
+      <rect x="1128" y="12" width="124" height="32" rx="6" fill="#064e3b" stroke="#059669"/>
+      <circle cx="1144" cy="28" r="4" fill="#10b981"/>
+      <text x="1156" y="32" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#a7f3d0">POSTGIS ONLINE</text>
+
+      <!-- Role Badge -->
+      <rect x="1264" y="12" width="156" height="32" rx="6" fill="#1e3a8a" stroke="#3b82f6"/>
+      <text x="1342" y="32" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#bfdbfe" text-anchor="middle">Frame #20 • 1440×900</text>
+    </g>
+    
+  <g id="MainContent_20">
+    
+    <!-- Filter & Cryptographic Integrity Bar -->
+    <rect x="244" y="70" width="1172" height="50" rx="8" fill="#131c2e" stroke="#1e293b"/>
+    <text x="262" y="100" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#38bdf8">AUDIT TABLE FILTER:</text>
+    <rect x="400" y="81" width="105" height="28" rx="6" fill="#1e3a8a" stroke="#3b82f6"/><text x="452" y="99" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">ALL TABLES (7)</text>
+    <rect x="513" y="81" width="95" height="28" rx="6" fill="#0f172a" stroke="#334155"/><text x="560" y="99" font-family="JetBrains Mono, monospace" font-size="10" fill="#cbd5e1" text-anchor="middle">complaints</text>
+    <rect x="616" y="81" width="85" height="28" rx="6" fill="#0f172a" stroke="#334155"/><text x="658" y="99" font-family="JetBrains Mono, monospace" font-size="10" fill="#cbd5e1" text-anchor="middle">projects</text>
+    <rect x="709" y="81" width="95" height="28" rx="6" fill="#0f172a" stroke="#334155"/><text x="756" y="99" font-family="JetBrains Mono, monospace" font-size="10" fill="#cbd5e1" text-anchor="middle">contractors</text>
+    <rect x="812" y="81" width="165" height="28" rx="6" fill="#0f172a" stroke="#334155"/><text x="894" y="99" font-family="JetBrains Mono, monospace" font-size="10" fill="#cbd5e1" text-anchor="middle">budget_variance_reasons</text>
+    <rect x="1140" y="81" width="260" height="28" rx="6" fill="#064e3b" stroke="#10b981"/><text x="1270" y="99" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#a7f3d0" text-anchor="middle">✓ row_to_jsonb_audit() WKT ACTIVE</text>
+
+    <!-- Center Master Audit Log Table (audit_log table) -->
+    <g>
+<rect x="244" y="134" width="1172" height="328" rx="10" fill="#131c2e" stroke="#1e293b" stroke-width="1"/>
+<text x="262" y="160" font-family="Inter, sans-serif" font-size="14" font-weight="800" fill="#ffffff">Append-Only PostgreSQL Trigger Audit Trail (audit_log table)</text>
+<text x="262" y="178" font-family="JetBrains Mono, monospace" font-size="10" fill="#38bdf8">Populated by AFTER INSERT OR UPDATE OR DELETE triggers on complaints, projects, contractors, roads, budget_variance_reasons</text>
+<rect x="245" y="190" width="1170" height="32" fill="#0f172a"/>
+<line x1="244" y1="190" x2="1416" y2="190" stroke="#1e293b"/>
+<line x1="244" y1="222" x2="1416" y2="222" stroke="#1e293b"/>
+<text x="260" y="210" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">AUDIT ID</text>
+<text x="360" y="210" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">CHANGED AT (UTC)</text>
+<text x="515" y="210" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">TARGET TABLE</text>
+<text x="690" y="210" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">RECORD ID</text>
+<text x="785" y="210" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">TG_OP ACTION</text>
+<text x="905" y="210" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">CHANGED BY (APP.CHANGED_BY)</text>
+<text x="1090" y="210" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">JSONB MUTATION SUMMARY</text>
+<line x1="256" y1="260" x2="1404" y2="260" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="245" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#AUD-9941</text>
+<text x="360" y="245" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">2026-10-22 14:32:04</text>
+<text x="515" y="245" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">complaints</text>
+<text x="690" y="245" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">18981</text>
+
+    <g>
+      <rect x="785" y="230" width="68" height="22" rx="11" fill="#0c4a6e" stroke="#0ea5e9" stroke-width="1"/>
+      <text x="819" y="244.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#bae6fd" text-anchor="middle">UPDATE</text>
+    </g>
+    
+<text x="905" y="245" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">er_rajesh_mcgm_kw</text>
+<text x="1090" y="245" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">status: &#x27;routed&#x27; → &#x27;in_progress&#x27; (Selected)</text>
+<rect x="245" y="260" width="1170" height="38" fill="#0f172a" fill-opacity="0.45"/>
+<line x1="256" y1="298" x2="1404" y2="298" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="283" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#AUD-9940</text>
+<text x="360" y="283" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">2026-10-22 14:30:00</text>
+<text x="515" y="283" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">complaints</text>
+<text x="690" y="283" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">18940</text>
+
+    <g>
+      <rect x="785" y="268" width="68" height="22" rx="11" fill="#4c0519" stroke="#f43f5e" stroke-width="1"/>
+      <text x="819" y="282.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#fecdd3" text-anchor="middle">UPDATE</text>
+    </g>
+    
+<text x="905" y="283" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">pg_sla_cron_worker</text>
+<text x="1090" y="283" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">escalation_level: 1 → 2, sla_breached_at set</text>
+<line x1="256" y1="336" x2="1404" y2="336" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="321" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#AUD-9938</text>
+<text x="360" y="321" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">2026-10-22 11:15:22</text>
+<text x="515" y="321" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">budget_variance_reasons</text>
+<text x="690" y="321" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">2</text>
+
+    <g>
+      <rect x="785" y="306" width="68" height="22" rx="11" fill="#1e1b4b" stroke="#6366f1" stroke-width="1"/>
+      <text x="819" y="320.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#c7d2fe" text-anchor="middle">INSERT</text>
+    </g>
+    
+<text x="905" y="321" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">mcgm_commissioner</text>
+<text x="1090" y="321" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Added +₹1.30 Cr variance on Project #3</text>
+<rect x="245" y="336" width="1170" height="38" fill="#0f172a" fill-opacity="0.45"/>
+<line x1="256" y1="374" x2="1404" y2="374" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="359" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#AUD-9935</text>
+<text x="360" y="359" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">2026-10-21 19:04:10</text>
+<text x="515" y="359" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">contractors</text>
+<text x="690" y="359" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">10</text>
+
+    <g>
+      <rect x="785" y="344" width="68" height="22" rx="11" fill="#4c0519" stroke="#f43f5e" stroke-width="1"/>
+      <text x="819" y="358.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#fecdd3" text-anchor="middle">UPDATE</text>
+    </g>
+    
+<text x="905" y="359" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">vigilance_board</text>
+<text x="1090" y="359" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">blacklisted: false → true (CON-00010 Omega)</text>
+<line x1="256" y1="412" x2="1404" y2="412" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="397" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#AUD-9931</text>
+<text x="360" y="397" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">2026-10-21 16:40:00</text>
+<text x="515" y="397" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">projects</text>
+<text x="690" y="397" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">3</text>
+
+    <g>
+      <rect x="785" y="382" width="68" height="22" rx="11" fill="#451a03" stroke="#f59e0b" stroke-width="1"/>
+      <text x="819" y="396.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#fde68a" text-anchor="middle">UPDATE</text>
+    </g>
+    
+<text x="905" y="397" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">se_mcgm_kwest</text>
+<text x="1090" y="397" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">status: &#x27;in_progress&#x27; → &#x27;halted&#x27;, delay=378</text>
+<rect x="245" y="412" width="1170" height="38" fill="#0f172a" fill-opacity="0.45"/>
+<line x1="256" y1="450" x2="1404" y2="450" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="435" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#AUD-9928</text>
+<text x="360" y="435" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">2026-10-21 09:42:11</text>
+<text x="515" y="435" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">complaints</text>
+<text x="690" y="435" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">18981</text>
+
+    <g>
+      <rect x="785" y="420" width="68" height="22" rx="11" fill="#064e3b" stroke="#10b981" stroke-width="1"/>
+      <text x="819" y="434.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#a7f3d0" text-anchor="middle">INSERT</text>
+    </g>
+    
+<text x="905" y="435" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">citizen_kanak_030</text>
+<text x="1090" y="435" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">New pothole POINT(72.8364 19.1197) on SV-RD-01</text>
+</g>
+
+    <!-- Bottom Forensic Side-by-Side JSONB Diff Inspector -->
+    <rect x="244" y="466" width="1172" height="386" rx="10" fill="#131c2e" stroke="#3b82f6" stroke-width="1.2"/>
+    <text x="266" y="494" font-family="Inter, sans-serif" font-size="14" font-weight="800" fill="#ffffff">Forensic JSONB Tuple Diff Inspector — Audit Record #AUD-9941 (complaints.id = 18981)</text>
+    <text x="266" y="512" font-family="JetBrains Mono, monospace" font-size="10" fill="#38bdf8">Helper function row_to_jsonb_audit() automatically serializes PostGIS GEOMETRY columns into WKT via ST_AsText(geom)</text>
+
+    <!-- Left Box: old_values JSONB -->
+    <rect x="264" y="526" width="554" height="308" rx="8" fill="#090d16" stroke="#f43f5e" stroke-width="1"/>
+    <rect x="264" y="526" width="554" height="32" rx="8" fill="#4c0519"/>
+    <text x="280" y="547" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#fecdd3">OLD_VALUES (JSONB BEFORE UPDATE)</text>
+    <text x="280" y="578" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#cbd5e1">{</text>
+    <text x="296" y="598" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#94a3b8">"id": 18981,</text>
+    <text x="296" y="618" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#94a3b8">"client_temp_id": "8f94c120-7e4a-4b92-9c11",</text>
+    <text x="296" y="638" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#94a3b8">"title": "Deep crater near Andheri Subway Northbound",</text>
+    <text x="296" y="658" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#94a3b8">"category": "pothole",</text>
+    <text x="296" y="678" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#38bdf8">"geom": "POINT(72.8364 19.1197)",</text>
+    <rect x="290" y="686" width="510" height="22" rx="4" fill="#4c0519"/>
+    <text x="296" y="701" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#fecdd3">- "status": "routed",</text>
+    <text x="296" y="724" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#94a3b8">"priority": 4, "escalation_level": 0,</text>
+    <text x="296" y="744" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#94a3b8">"assigned_authority_id": 1, "road_id": 3,</text>
+    <rect x="290" y="752" width="510" height="22" rx="4" fill="#4c0519"/>
+    <text x="296" y="767" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#fecdd3">- "updated_at": "2026-10-22T09:43:02Z"</text>
+    <text x="280" y="792" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#cbd5e1">}</text>
+
+    <!-- Right Box: new_values JSONB -->
+    <rect x="842" y="526" width="554" height="308" rx="8" fill="#090d16" stroke="#10b981" stroke-width="1"/>
+    <rect x="842" y="526" width="554" height="32" rx="8" fill="#064e3b"/>
+    <text x="858" y="547" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#a7f3d0">NEW_VALUES (JSONB AFTER UPDATE)</text>
+    <text x="858" y="578" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#cbd5e1">{</text>
+    <text x="874" y="598" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#94a3b8">"id": 18981,</text>
+    <text x="874" y="618" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#94a3b8">"client_temp_id": "8f94c120-7e4a-4b92-9c11",</text>
+    <text x="874" y="638" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#94a3b8">"title": "Deep crater near Andheri Subway Northbound",</text>
+    <text x="874" y="658" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#94a3b8">"category": "pothole",</text>
+    <text x="874" y="678" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#38bdf8">"geom": "POINT(72.8364 19.1197)",</text>
+    <rect x="868" y="686" width="510" height="22" rx="4" fill="#064e3b"/>
+    <text x="874" y="701" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#a7f3d0">+ "status": "in_progress",</text>
+    <text x="874" y="724" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#94a3b8">"priority": 4, "escalation_level": 0,</text>
+    <text x="874" y="744" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#94a3b8">"assigned_authority_id": 1, "road_id": 3,</text>
+    <rect x="868" y="752" width="510" height="22" rx="4" fill="#064e3b"/>
+    <text x="874" y="767" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#a7f3d0">+ "updated_at": "2026-10-22T14:32:04Z"</text>
+    <text x="858" y="792" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#cbd5e1">}</text>
+    
+  </g>
+  
+    <g id="FooterBar_20">
+      <rect x="220" y="868" width="1220" height="32" fill="#090d16"/>
+      <line x1="220" y1="868" x2="1440" y2="868" stroke="#1e293b" stroke-width="1"/>
+      <text x="244" y="888" font-family="JetBrains Mono, monospace" font-size="10" font-weight="600" fill="#38bdf8">BOUND DBMS RELATIONS: audit_log, complaints, projects, contractors, roads, budget_variance_reasons</text>
+      <text x="1420" y="888" font-family="JetBrains Mono, monospace" font-size="10" fill="#64748b" text-anchor="end">ROADWATCH DBMS • Kanak Waradkar (24B-CO-030) • Krushna Surve (24B-CO-031) • Manjunath Gavada (24B-CO-035)</text>
+    </g>
+    
+</svg>

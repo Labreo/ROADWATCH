@@ -1,0 +1,279 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" width="1440" height="900">
+  
+  <defs>
+    <linearGradient id="bgDark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1120"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#151f32"/>
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#0ea5e9"/>
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="roseGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e11d48"/>
+      <stop offset="100%" stop-color="#f43f5e"/>
+    </linearGradient>
+    <linearGradient id="mapBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0c192c"/>
+      <stop offset="100%" stop-color="#0f243c"/>
+    </linearGradient>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="112%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <rect id="Frame_11_Background" x="0" y="0" width="1440" height="900" fill="#0b1120"/>
+  <g id="Sidebar_11"><rect x="0" y="0" width="220" height="900" fill="#090d16"/><line x1="220" y1="0" x2="220" y2="900" stroke="#1e293b" stroke-width="1"/><rect x="16" y="14" width="30" height="30" rx="8" fill="url(#blueGrad)"/><text x="31" y="34" font-family="Inter, sans-serif" font-size="14" font-weight="800" fill="#ffffff" text-anchor="middle">R</text><text x="56" y="28" font-family="Inter, sans-serif" font-size="15" font-weight="800" fill="#ffffff" letter-spacing="0.5">ROADWATCH</text><text x="56" y="42" font-family="JetBrains Mono, monospace" font-size="9" font-weight="600" fill="#38bdf8">POSTGIS v16 • CIVIC AI</text><line x1="0" y1="56" x2="220" y2="56" stroke="#1e293b" stroke-width="1"/><text x="18" y="76" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#64748b" letter-spacing="1.2">PLATFORM MODULES</text><rect x="20" y="95" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="108" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">MAP</text><text x="54" y="109" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Geospatial Map</text><rect x="20" y="133" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="146" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">AI</text><text x="54" y="147" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">AI Chat Assistant</text><rect x="20" y="171" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="184" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">INR</text><text x="54" y="185" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Budget Compliance</text><rect x="20" y="209" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="222" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">CON</text><text x="54" y="223" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Contractor Scores</text><rect x="20" y="247" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="260" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">CMP</text><text x="54" y="261" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Citizen Complaints</text><rect x="10" y="278" width="200" height="34" rx="7" fill="#1e3a8a" stroke="#3b82f6" stroke-width="1"/><rect x="10" y="285" width="3" height="20" rx="1.5" fill="#38bdf8"/><rect x="20" y="285" width="26" height="20" rx="4" fill="#2563eb"/><text x="33" y="298" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="700" fill="#ffffff" text-anchor="middle">OPS</text><text x="54" y="299" font-family="Inter, sans-serif" font-size="11.5" font-weight="700" fill="#ffffff">Operations Center</text><rect x="20" y="323" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="336" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">SLA</text><text x="54" y="337" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">SLA Escalations</text><rect x="20" y="361" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="374" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">GIS</text><text x="54" y="375" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Boundary Conflicts</text><rect x="20" y="399" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="412" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">SCH</text><text x="54" y="413" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Repair Scheduler</text><rect x="20" y="437" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="450" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle"> T </text><text x="54" y="451" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Historical Playback</text><rect x="20" y="475" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="488" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">IOT</text><text x="54" y="489" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">IoT Sensor Monitor</text><rect x="20" y="513" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="526" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">3D</text><text x="54" y="527" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">3D Digital Twin</text><rect x="20" y="551" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="564" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">REG</text><text x="54" y="565" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Multi-Region Hub</text><rect x="20" y="589" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="602" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">TND</text><text x="54" y="603" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Procurement Ledger</text><rect x="20" y="627" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="640" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">LOG</text><text x="54" y="641" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Forensic Audit Log</text><rect x="12" y="676" width="196" height="92" rx="8" fill="#0f172a" stroke="#1e293b"/><text x="24" y="696" font-family="JetBrains Mono, monospace" font-size="9" font-weight="700" fill="#38bdf8">DB ENGINE TELEMETRY</text><circle cx="28" cy="714" r="4" fill="#10b981"/><text x="38" y="718" font-family="Inter, sans-serif" font-size="10.5" font-weight="600" fill="#e2e8f0">PostGIS 3.4 Spatial GIST</text><text x="24" y="736" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94a3b8">UTC Clock: 14:32:08Z</text><text x="24" y="754" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94a3b8">Sync Queue: 0 Pending</text><rect x="12" y="780" width="196" height="76" rx="8" fill="#131c2e" stroke="#1e293b"/><circle cx="34" cy="810" r="14" fill="#2563eb"/><text x="34" y="814" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">KW</text><text x="56" y="804" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#ffffff">Kanak Waradkar</text><text x="56" y="818" font-family="JetBrains Mono, monospace" font-size="9" fill="#38bdf8">Roll: 24B-CO-030</text><text x="24" y="842" font-family="Inter, sans-serif" font-size="9.5" fill="#94a3b8">Team: Krushna (031) • Manjunath (035)</text></g>
+  
+    <g id="TopNav_11">
+      <rect x="220" y="0" width="1220" height="56" fill="#0f172a"/>
+      <line x1="220" y1="56" x2="1440" y2="56" stroke="#1e293b" stroke-width="1"/>
+      <text x="244" y="23" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#38bdf8" letter-spacing="0.8">SYSTEM / OPERATIONS CENTER</text>
+      <text x="244" y="42" font-family="Inter, sans-serif" font-size="14" font-weight="800" fill="#ffffff">Municipal Operations Command Center &amp; Live System Log</text>
+
+      <!-- Global Search Bar -->
+      <rect x="734" y="12" width="228" height="32" rx="6" fill="#1e293b" stroke="#334155"/>
+      <text x="748" y="32" font-family="Inter, sans-serif" font-size="10.5" fill="#94a3b8">Search WEH-NH8, SV-RD-01, ID...</text>
+      <rect x="924" y="17" width="30" height="22" rx="4" fill="#0f172a"/>
+      <text x="939" y="31" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#64748b" text-anchor="middle">⌘K</text>
+
+      <!-- Region Pill -->
+      <rect x="974" y="12" width="142" height="32" rx="6" fill="#1e293b" stroke="#334155"/>
+      <text x="988" y="32" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#f8fafc">IN • India (Mumbai • ₹)</text>
+
+      <!-- Online Status Pill -->
+      <rect x="1128" y="12" width="124" height="32" rx="6" fill="#064e3b" stroke="#059669"/>
+      <circle cx="1144" cy="28" r="4" fill="#10b981"/>
+      <text x="1156" y="32" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#a7f3d0">POSTGIS ONLINE</text>
+
+      <!-- Role Badge -->
+      <rect x="1264" y="12" width="156" height="32" rx="6" fill="#1e3a8a" stroke="#3b82f6"/>
+      <text x="1342" y="32" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#bfdbfe" text-anchor="middle">Frame #11 • 1440×900</text>
+    </g>
+    
+  <g id="MainContent_11">
+    
+    <!-- 4 Executive Operations KPIs -->
+    
+    <g>
+      <rect x="244" y="72" width="281" height="94" rx="10" fill="#131c2e" stroke="#1e293b" stroke-width="1"/>
+      <rect x="244" y="72" width="4" height="94" rx="2" fill="#38bdf8"/>
+      <text x="262" y="96" font-family="Inter, sans-serif" font-size="10.5" font-weight="700" fill="#94a3b8" letter-spacing="0.6">ACTIVE OPEN GRIEVANCES</text>
+      <rect x="437" y="83" width="76" height="20" rx="10" fill="#0f172a" stroke="#38bdf8" stroke-width="0.8"/>
+      <text x="475" y="96" font-family="JetBrains Mono, monospace" font-size="9" font-weight="700" fill="#38bdf8" text-anchor="middle">LIVE TRIAGE</text>
+      <text x="262" y="128" font-family="Inter, sans-serif" font-size="24" font-weight="800" fill="#ffffff">142 Tickets</text>
+      <text x="262" y="148" font-family="Inter, sans-serif" font-size="10.5" font-weight="500" fill="#cbd5e1">88 Routed • 36 In Progress • 18 Pending</text>
+    </g>
+    
+    
+    <g>
+      <rect x="541" y="72" width="281" height="94" rx="10" fill="#131c2e" stroke="#1e293b" stroke-width="1"/>
+      <rect x="541" y="72" width="4" height="94" rx="2" fill="#10b981"/>
+      <text x="559" y="96" font-family="Inter, sans-serif" font-size="10.5" font-weight="700" fill="#94a3b8" letter-spacing="0.6">SLA COMPLIANCE RATE</text>
+      <rect x="734" y="83" width="76" height="20" rx="10" fill="#0f172a" stroke="#10b981" stroke-width="0.8"/>
+      <text x="772" y="96" font-family="JetBrains Mono, monospace" font-size="9" font-weight="700" fill="#10b981" text-anchor="middle">SLA ENGINE</text>
+      <text x="559" y="128" font-family="Inter, sans-serif" font-size="24" font-weight="800" fill="#ffffff">91.5% Within</text>
+      <text x="559" y="148" font-family="Inter, sans-serif" font-size="10.5" font-weight="500" fill="#cbd5e1">Target &lt;= 48h Pothole / &lt;= 24h Drainage</text>
+    </g>
+    
+    
+    <g>
+      <rect x="838" y="72" width="281" height="94" rx="10" fill="#131c2e" stroke="#1e293b" stroke-width="1"/>
+      <rect x="838" y="72" width="4" height="94" rx="2" fill="#f43f5e"/>
+      <text x="856" y="96" font-family="Inter, sans-serif" font-size="10.5" font-weight="700" fill="#94a3b8" letter-spacing="0.6">LEVEL 2 ESCALATIONS</text>
+      <rect x="1031" y="83" width="76" height="20" rx="10" fill="#0f172a" stroke="#f43f5e" stroke-width="0.8"/>
+      <text x="1069" y="96" font-family="JetBrains Mono, monospace" font-size="9" font-weight="700" fill="#f43f5e" text-anchor="middle">NEEDS ACTION</text>
+      <text x="856" y="128" font-family="Inter, sans-serif" font-size="24" font-weight="800" fill="#ffffff">6 Critical</text>
+      <text x="856" y="148" font-family="Inter, sans-serif" font-size="10.5" font-weight="500" fill="#cbd5e1">Escalated toPWD-MUM &amp; NHAI-ROM</text>
+    </g>
+    
+    
+    <g>
+      <rect x="1135" y="72" width="281" height="94" rx="10" fill="#131c2e" stroke="#1e293b" stroke-width="1"/>
+      <rect x="1135" y="72" width="4" height="94" rx="2" fill="#6366f1"/>
+      <text x="1153" y="96" font-family="Inter, sans-serif" font-size="10.5" font-weight="700" fill="#94a3b8" letter-spacing="0.6">WEBHOOK DELIVERY RATE</text>
+      <rect x="1328" y="83" width="76" height="20" rx="10" fill="#0f172a" stroke="#6366f1" stroke-width="0.8"/>
+      <text x="1366" y="96" font-family="JetBrains Mono, monospace" font-size="9" font-weight="700" fill="#6366f1" text-anchor="middle">HTTP 200 OK</text>
+      <text x="1153" y="128" font-family="Inter, sans-serif" font-size="24" font-weight="800" fill="#ffffff">99.4% Sent</text>
+      <text x="1153" y="148" font-family="Inter, sans-serif" font-size="10.5" font-weight="500" fill="#cbd5e1">17 Registered Authority Endpoints</text>
+    </g>
+    
+
+    <!-- Center Grievance Operations Triage Table (ComplaintOperationsPanel.tsx) -->
+    <g>
+<rect x="244" y="182" width="780" height="380" rx="10" fill="#131c2e" stroke="#1e293b" stroke-width="1"/>
+<text x="262" y="208" font-family="Inter, sans-serif" font-size="14" font-weight="800" fill="#ffffff">Municipal Grievance Triage &amp; State Machine Console (complaints table)</text>
+<text x="262" y="226" font-family="JetBrains Mono, monospace" font-size="10" fill="#38bdf8">Enforces valid transitions: pending → routed → in_progress → resolved / rejected</text>
+<rect x="245" y="238" width="778" height="32" fill="#0f172a"/>
+<line x1="244" y1="238" x2="1024" y2="238" stroke="#1e293b"/>
+<line x1="244" y1="270" x2="1024" y2="270" stroke="#1e293b"/>
+<text x="260" y="258" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">TICKET ID</text>
+<text x="355" y="258" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">CATEGORY</text>
+<text x="470" y="258" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">ROAD CODE</text>
+<text x="570" y="258" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">ASSIGNED AUTHORITY</text>
+<text x="695" y="258" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">PRIORITY</text>
+<text x="775" y="258" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">SLA LEVEL</text>
+<text x="870" y="258" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">STATUS</text>
+<line x1="256" y1="310" x2="1012" y2="310" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="294" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#CMP-18981</text>
+<text x="355" y="294" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">pothole</text>
+<text x="470" y="294" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#e2e8f0">SV-RD-01</text>
+<text x="570" y="294" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#e2e8f0">MCGM-KW (Ward K-W)</text>
+<text x="695" y="294" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">4 (High)</text>
+<text x="775" y="294" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">L0 (31h left)</text>
+
+    <g>
+      <rect x="870" y="279" width="86" height="22" rx="11" fill="#0c4a6e" stroke="#0ea5e9" stroke-width="1"/>
+      <text x="913" y="293.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#bae6fd" text-anchor="middle">IN_PROGRESS</text>
+    </g>
+    
+<rect x="245" y="310" width="778" height="40" fill="#0f172a" fill-opacity="0.45"/>
+<line x1="256" y1="350" x2="1012" y2="350" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="334" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#CMP-18940</text>
+<text x="355" y="334" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">waterlogging</text>
+<text x="470" y="334" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#e2e8f0">LBS-MARG-01</text>
+<text x="570" y="334" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#e2e8f0">MCGM-HE (Ward H-E)</text>
+<text x="695" y="334" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">5 (Crit)</text>
+<text x="775" y="334" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">L2 BREACHED</text>
+
+    <g>
+      <rect x="870" y="319" width="92" height="22" rx="11" fill="#4c0519" stroke="#f43f5e" stroke-width="1"/>
+      <text x="916" y="333.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#fecdd3" text-anchor="middle">ESCALATED L2</text>
+    </g>
+    
+<line x1="256" y1="390" x2="1012" y2="390" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="374" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#CMP-18952</text>
+<text x="355" y="374" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">paving_defect</text>
+<text x="470" y="374" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#e2e8f0">WEH-NH8</text>
+<text x="570" y="374" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#e2e8f0">NHAI-ROM (Mumbai)</text>
+<text x="695" y="374" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">4 (High)</text>
+<text x="775" y="374" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">L1 (12h over)</text>
+
+    <g>
+      <rect x="870" y="359" width="92" height="22" rx="11" fill="#451a03" stroke="#f59e0b" stroke-width="1"/>
+      <text x="916" y="373.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#fde68a" text-anchor="middle">ESCALATED L1</text>
+    </g>
+    
+<rect x="245" y="390" width="778" height="40" fill="#0f172a" fill-opacity="0.45"/>
+<line x1="256" y1="430" x2="1012" y2="430" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="414" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#CMP-18990</text>
+<text x="355" y="414" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">pothole</text>
+<text x="470" y="414" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">LINK-RD-01</text>
+<text x="570" y="414" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#e2e8f0">MCGM-KW (Ward K-W)</text>
+<text x="695" y="414" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">3 (Med)</text>
+<text x="775" y="414" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">L0 (44h left)</text>
+
+    <g>
+      <rect x="870" y="399" width="68" height="22" rx="11" fill="#1e1b4b" stroke="#6366f1" stroke-width="1"/>
+      <text x="904" y="413.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#c7d2fe" text-anchor="middle">ROUTED</text>
+    </g>
+    
+<line x1="256" y1="470" x2="1012" y2="470" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="454" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#CMP-18995</text>
+<text x="355" y="454" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">missing_signage</text>
+<text x="470" y="454" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#e2e8f0">EEH-NH8</text>
+<text x="570" y="454" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#e2e8f0">PWD-MUM (State)</text>
+<text x="695" y="454" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">2 (Fair)</text>
+<text x="775" y="454" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">L0 (68h left)</text>
+
+    <g>
+      <rect x="870" y="439" width="68" height="22" rx="11" fill="#451a03" stroke="#f59e0b" stroke-width="1"/>
+      <text x="904" y="453.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#fde68a" text-anchor="middle">PENDING</text>
+    </g>
+    
+<rect x="245" y="470" width="778" height="40" fill="#0f172a" fill-opacity="0.45"/>
+<line x1="256" y1="510" x2="1012" y2="510" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="494" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#CMP-18812</text>
+<text x="355" y="494" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">pothole</text>
+<text x="470" y="494" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#e2e8f0">SBM-MARG-01</text>
+<text x="570" y="494" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#e2e8f0">MCGM-FN (Ward F-N)</text>
+<text x="695" y="494" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">4 (High)</text>
+<text x="775" y="494" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Closed 28h</text>
+
+    <g>
+      <rect x="870" y="479" width="68" height="22" rx="11" fill="#064e3b" stroke="#10b981" stroke-width="1"/>
+      <text x="904" y="493.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#a7f3d0" text-anchor="middle">RESOLVED</text>
+    </g>
+    
+<line x1="256" y1="550" x2="1012" y2="550" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="534" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#CMP-18804</text>
+<text x="355" y="534" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">debris</text>
+<text x="470" y="534" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">MARINE-DR-01</text>
+<text x="570" y="534" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#e2e8f0">MCGM-FN (Ward F-N)</text>
+<text x="695" y="534" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">3 (Med)</text>
+<text x="775" y="534" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Closed 19h</text>
+
+    <g>
+      <rect x="870" y="519" width="68" height="22" rx="11" fill="#064e3b" stroke="#10b981" stroke-width="1"/>
+      <text x="904" y="533.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#a7f3d0" text-anchor="middle">RESOLVED</text>
+    </g>
+    
+</g>
+
+    <!-- Bottom Quick Action Toolbar under Triage Table -->
+    <rect x="244" y="566" width="780" height="284" rx="10" fill="#131c2e" stroke="#1e293b"/>
+    <text x="264" y="594" font-family="Inter, sans-serif" font-size="14" font-weight="800" fill="#ffffff">Outbound Authority Webhook Registry &amp; Delivery Log (authority_webhooks + notification_log)</text>
+    <text x="264" y="612" font-family="JetBrains Mono, monospace" font-size="10" fill="#38bdf8">Subscribed Events: complaint.assigned, complaint.escalated, complaint.updated, complaint.declined</text>
+
+    <rect x="264" y="628" width="740" height="58" rx="8" fill="#0f172a" stroke="#10b981" stroke-width="0.8"/>
+    <text x="280" y="650" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#a7f3d0">MCGM-KW → https://webhooks.mcgm.gov.in/api/v1/k-west/grievances</text>
+    <text x="280" y="670" font-family="Inter, sans-serif" font-size="10.5" fill="#cbd5e1">Last Event: complaint.assigned (#CMP-18981) • HTTP 200 OK • Latency: 118ms • HMAC-SHA256 Verified</text>
+
+    <rect x="264" y="696" width="740" height="58" rx="8" fill="#0f172a" stroke="#f59e0b" stroke-width="0.8"/>
+    <text x="280" y="718" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#fde68a">PWD-MUM → https://pwd.maharashtra.gov.in/hooks/roadwatch-sla</text>
+    <text x="280" y="738" font-family="Inter, sans-serif" font-size="10.5" fill="#cbd5e1">Last Event: complaint.escalated (#CMP-18940 → L2) • HTTP 200 OK • Latency: 204ms • Secret Token Active</text>
+
+    <rect x="264" y="764" width="740" height="58" rx="8" fill="#0f172a" stroke="#3b82f6" stroke-width="0.8"/>
+    <text x="280" y="786" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#93c5fd">NHAI-ROM → https://nhai.gov.in/ro-mumbai/telemetry/webhook</text>
+    <text x="280" y="806" font-family="Inter, sans-serif" font-size="10.5" fill="#cbd5e1">Last Event: complaint.updated (#CMP-18952) • HTTP 200 OK • Latency: 142ms • Active</text>
+
+    <!-- Right Live System Log Terminal (LiveSystemLog.tsx) -->
+    <rect x="1040" y="182" width="376" height="668" rx="10" fill="#090d16" stroke="#334155"/>
+    <rect x="1040" y="182" width="376" height="44" rx="10" fill="#131c2e"/>
+    <circle cx="1062" cy="204" r="5" fill="#f43f5e"/><circle cx="1078" cy="204" r="5" fill="#f59e0b"/><circle cx="1094" cy="204" r="5" fill="#10b981"/>
+    <text x="1114" y="208" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#ffffff">LiveSystemLog.tsx • DB Event Stream</text>
+
+    <text x="1056" y="250" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#10b981">[14:32:04] INFO  POST /api/v1/complaints (201)</text>
+    <text x="1056" y="268" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94a3b8">  ├─ ST_Contains matched authority_id=1 (MCGM-KW)</text>
+    <text x="1056" y="286" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94a3b8">  ├─ ST_DWithin matched road_id=3 (SV-RD-01, 4.2m)</text>
+    <text x="1056" y="304" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#38bdf8">  └─ Trigger: trg_audit_complaints → audit_log#9941</text>
+
+    <text x="1056" y="336" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#f59e0b">[14:30:00] WARN  SLA Worker Cron Tick Executed</text>
+    <text x="1056" y="354" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#fecdd3">  ├─ #CMP-18940 elapsed 51.2h &gt; sla_config(24h)</text>
+    <text x="1056" y="372" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#fecdd3">  ├─ Escalated: from_level=1 → to_level=2</text>
+    <text x="1056" y="390" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#38bdf8">  └─ INSERT INTO sla_escalations (id=412)</text>
+
+    <text x="1056" y="422" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#10b981">[14:28:19] INFO  Trigger trg_rdh_complaint_update</text>
+    <text x="1056" y="440" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94a3b8">  ├─ Snapshot created for road_id=3 (SV-RD-01)</text>
+    <text x="1056" y="458" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94a3b8">  └─ Open complaints: 18 • Status: poor</text>
+
+    <text x="1056" y="490" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#38bdf8">[14:25:11] INFO  Trigger trg_contractor_perf_index</text>
+    <text x="1056" y="508" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94a3b8">  ├─ Recalculated CON-00003 (Zenith Construction)</text>
+    <text x="1056" y="526" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#10b981">  └─ performance_index = 87.91 (42 done, 1 delay)</text>
+
+    <text x="1056" y="558" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#10b981">[14:20:02] INFO  Webhook Dispatch #NL-809</text>
+    <text x="1056" y="576" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94a3b8">  ├─ Target: ward.kw@mcgm.gov.in</text>
+    <text x="1056" y="594" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#10b981">  └─ Response: 200 OK (notification_log updated)</text>
+    
+  </g>
+  
+    <g id="FooterBar_11">
+      <rect x="220" y="868" width="1220" height="32" fill="#090d16"/>
+      <line x1="220" y1="868" x2="1440" y2="868" stroke="#1e293b" stroke-width="1"/>
+      <text x="244" y="888" font-family="JetBrains Mono, monospace" font-size="10" font-weight="600" fill="#38bdf8">BOUND DBMS RELATIONS: complaints, authorities, authority_webhooks, notification_log, audit_log</text>
+      <text x="1420" y="888" font-family="JetBrains Mono, monospace" font-size="10" fill="#64748b" text-anchor="end">ROADWATCH DBMS • Kanak Waradkar (24B-CO-030) • Krushna Surve (24B-CO-031) • Manjunath Gavada (24B-CO-035)</text>
+    </g>
+    
+</svg>

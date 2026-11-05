@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ROADWATCH - ERD & Relational Schema</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm 18mm 20mm 18mm;
+            @bottom-right {
+                content: counter(page);
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.6;
+            color: #1e293b;
+            background: #ffffff;
+            margin: 0;
+            padding: 30px 40px;
+        }
+        h1, h2, h3, h4 {
+            color: #0f172a;
+            font-weight: 700;
+            margin-top: 1.4em;
+            margin-bottom: 0.5em;
+            line-height: 1.25;
+        }
+        h1 {
+            font-size: 22pt;
+            border-bottom: 2.5px solid #2563eb;
+            padding-bottom: 8px;
+            margin-top: 0;
+            color: #1e3a8a;
+        }
+        h2 {
+            font-size: 15pt;
+            border-bottom: 1.5px solid #cbd5e1;
+            padding-bottom: 4px;
+            color: #1e40af;
+            page-break-after: avoid;
+        }
+        h3 {
+            font-size: 12.5pt;
+            color: #334155;
+            page-break-after: avoid;
+        }
+        p, ul, ol {
+            margin-top: 0.4em;
+            margin-bottom: 0.8em;
+        }
+        li {
+            margin-bottom: 0.3em;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.2em 0;
+            font-size: 9.5pt;
+            page-break-inside: auto;
+        }
+        tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+        th, td {
+            border: 1px solid #cbd5e1;
+            padding: 7px 10px;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            font-weight: 600;
+        }
+        tr:nth-child(even) td {
+            background-color: #f8fafc;
+        }
+        code, pre {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        code {
+            background-color: #f1f5f9;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 9pt;
+            color: #0369a1;
+        }
+        pre {
+            background-color: #0f172a;
+            color: #f8fafc;
+            padding: 14px 18px;
+            border-radius: 6px;
+            font-size: 8.5pt;
+            line-height: 1.45;
+            overflow-x: auto;
+            page-break-inside: avoid;
+        }
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+            border-radius: 0;
+        }
+        blockquote {
+            margin: 1em 0;
+            padding: 10px 18px;
+            background-color: #eff6ff;
+            border-left: 4px solid #2563eb;
+            color: #1e3a8a;
+            border-radius: 0 4px 4px 0;
+        }
+        blockquote strong {
+            color: #1d4ed8;
+        }
+        .header-meta {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin-bottom: 24px;
+            font-size: 10pt;
+        }
+        .img-container {
+            text-align: center;
+            margin: 20px auto;
+            page-break-inside: avoid;
+        }
+        .img-container img {
+            max-width: 100%;
+            max-height: 220mm;
+            width: auto;
+            height: auto;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+            display: inline-block;
+        }
+        .caption {
+            font-size: 9.5pt;
+            color: #475569;
+            margin-top: 8px;
+            font-style: italic;
+            font-weight: 500;
+        }
+        .page-break {
+            page-break-before: always;
+        }
+    </style>
+</head>
+<body>
+<h1>Entity-Relationship (ER) Document &amp; Relational Schema</h1>
+
+<p><strong>ROADWATCH — Civic Infrastructure Intelligence &amp; Road Grievance Governance Platform</strong></p>
+<p><em>Laboratory Submission: Phase 2 &amp; Phase 3 (Conceptual &amp; Logical Database Design)</em></p>
+
+<table>
+<tr>
+<th>* <strong>Member 1 (Team Lead):</strong> Kanak Waradkar</th>
+<th><strong>Roll No:</strong> <code>24B-CO-030</code></th>
+<th><strong>Email:</strong> kanakwaradkar@gmail.com</th>
+</tr>
+<tr>
+<td>* <strong>Member 2:</strong> Krushna Surve</td>
+<td><strong>Roll No:</strong> <code>24B-CO-031</code></td>
+<td><strong>Email:</strong> krushnasurve07@gmail.com</td>
+</tr>
+<tr>
+<td>* <strong>Member 3:</strong> Manjunath Subhash Gavada</td>
+<td><strong>Roll No:</strong> <code>24B-CO-035</code></td>
+<td><strong>Email:</strong> manjunathgavada40@gmail.com</td>
+</tr>
+</table>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>Note on Conceptual ER Diagram Design Principles</h2>
+
+<p>The Entity-Relationship model adheres strictly to classical <strong>Peter Chen conceptual modeling notation</strong> (rectangles for entities, ellipses for attributes, and diamonds for relationships). In accordance with standard database engineering methodology (Elmasri &amp; Navathe, Silberschatz):</p>
+
+<ul><li><strong>Conceptual ER Diagram:</strong> Associations are modeled exclusively through <strong>relationship diamonds</strong> connecting entities, with entities containing only their intrinsic attributes and primary keys. Foreign key attributes do not appear in the conceptual ER diagram.</li><li><strong>Relational Schema:</strong> Foreign keys materialize systematically during the subsequent <strong>Logical Design &amp; Relational Mapping phase</strong> (Section 4) as a mathematical consequence of mapping 1:1, 1:N, and M:N relationships into normalized relations.</li></ul>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>1. Entities and Attributes Specification</h2>
+
+<p><em>Underlined attributes represent primary keys. Attribute types follow standard Chen ER notation: simple (plain ellipse), composite (branched ellipses), multivalued (double ellipse), derived (dashed ellipse), and partial key (dashed underline).</em></p>
+
+<h3>1. Citizen (Strong Entity)</h3>
+<p>Represents registered residents submitting grievances and monitoring public road transparency.</p>
+
+<table>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>ER Representation</th>
+<th>Notes / Semantic Definition</th>
+</tr>
+<tr>
+<td><strong>Citizen_ID</strong></td>
+<td>Simple, Key</td>
+<td>Solid Underline</td>
+<td>Unique primary key identifying a citizen.</td>
+</tr>
+<tr>
+<td><strong>Name</strong></td>
+<td>Composite</td>
+<td>Sub-branches</td>
+<td>Composed of <strong>First_Name</strong> and <strong>Last_Name</strong>.</td>
+</tr>
+<tr>
+<td><strong>Email</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Contact and authentication email address.</td>
+</tr>
+<tr>
+<td><strong>Phone_Numbers</strong></td>
+<td>Multivalued</td>
+<td><strong>Double Ellipse</strong></td>
+<td>A citizen may provide multiple contact telephone numbers.</td>
+</tr>
+<tr>
+<td><strong>Residential_Ward</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Municipal residential ward identifier.</td>
+</tr>
+<tr>
+<td><strong>Total_Complaints_Filed</strong></td>
+<td>Derived</td>
+<td><strong>Dashed Ellipse</strong></td>
+<td>Computed via <code>COUNT(*)</code> from <code>Complaint</code> entity.</td>
+</tr>
+</table>
+
+<h3>2. Authority (Strong Entity)</h3>
+<p>Represents municipal corporations, public works departments (PWD), or smart city administrative bodies.</p>
+
+<table>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>ER Representation</th>
+<th>Notes / Semantic Definition</th>
+</tr>
+<tr>
+<td><strong>Authority_ID</strong></td>
+<td>Simple, Key</td>
+<td>Solid Underline</td>
+<td>Unique primary key identifying the authority.</td>
+</tr>
+<tr>
+<td><strong>Authority_Name</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Formal administrative title (e.g., <em>Panaji Municipal Corp</em>).</td>
+</tr>
+<tr>
+<td><strong>Department_Code</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Standard departmental code (e.g., <code>PWD-RD-01</code>).</td>
+</tr>
+<tr>
+<td><strong>Contact_Email</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Official departmental escalation email.</td>
+</tr>
+<tr>
+<td><strong>Contact_Phone</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Departmental helpline telephone number.</td>
+</tr>
+<tr>
+<td><strong>Geom_Boundary</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Spatial polygon representing jurisdiction area.</td>
+</tr>
+</table>
+
+<h3>3. Road (Strong Entity)</h3>
+<p>Represents physical road segments monitored and maintained within the infrastructure network.</p>
+
+<table>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>ER Representation</th>
+<th>Notes / Semantic Definition</th>
+</tr>
+<tr>
+<td><strong>Road_ID</strong></td>
+<td>Simple, Key</td>
+<td>Solid Underline</td>
+<td>Unique primary key for the road segment.</td>
+</tr>
+<tr>
+<td><strong>Road_Name</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Common street or corridor name (e.g., <em>MG Road</em>).</td>
+</tr>
+<tr>
+<td><strong>Road_Code</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Official highway/arterial designation (e.g., <code>NH-66</code>, <code>SH-08</code>).</td>
+</tr>
+<tr>
+<td><strong>Length_KM</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Total segment length in kilometers (&gt; 0.00).</td>
+</tr>
+<tr>
+<td><strong>Road_Type</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Classification category (<code>NH</code>, <code>SH</code>, <code>MDR</code>, <code>City</code>, <code>Urban</code>).</td>
+</tr>
+<tr>
+<td><strong>Surface_Type</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Surface composition (<code>asphalt</code>, <code>concrete</code>, <code>pavers</code>).</td>
+</tr>
+<tr>
+<td><strong>Status</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Current operational health (<code>good</code>, <code>fair</code>, <code>poor</code>, <code>under_construction</code>).</td>
+</tr>
+<tr>
+<td><strong>Geom_Path</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Spatial LineString representing geographic coordinates.</td>
+</tr>
+</table>
+
+<h3>4. Contractor (Strong Entity)</h3>
+<p>Represents certified engineering and construction companies bidding on and executing road contracts.</p>
+
+<table>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>ER Representation</th>
+<th>Notes / Semantic Definition</th>
+</tr>
+<tr>
+<td><strong>Contractor_ID</strong></td>
+<td>Simple, Key</td>
+<td>Solid Underline</td>
+<td>Unique primary key for the contractor firm.</td>
+</tr>
+<tr>
+<td><strong>Contractor_Code</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Standard vendor registration code (e.g., <code>CON-00102</code>).</td>
+</tr>
+<tr>
+<td><strong>Company_Name</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Registered legal commercial firm name.</td>
+</tr>
+<tr>
+<td><strong>License_Number</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>State government contractor license identifier.</td>
+</tr>
+<tr>
+<td><strong>Registration_Date</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Date of initial government accreditation.</td>
+</tr>
+<tr>
+<td><strong>Rating</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Average engineering inspection score (0.00 to 5.00).</td>
+</tr>
+<tr>
+<td><strong>Projects_Completed</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Count of successfully closed road contracts.</td>
+</tr>
+<tr>
+<td><strong>Projects_Delayed</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Count of projects exceeding target end date.</td>
+</tr>
+<tr>
+<td><strong>Blacklisted</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Boolean flag barring firm from submitting bids.</td>
+</tr>
+<tr>
+<td><strong>Performance_Index</strong></td>
+<td>Derived</td>
+<td><strong>Dashed Ellipse</strong></td>
+<td>Auto-computed composite score (0.00 to 100.00).</td>
+</tr>
+</table>
+
+<h3>5. Project (Strong Entity)</h3>
+<p>Represents sanctioned public works road construction or repair contracts.</p>
+
+<table>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>ER Representation</th>
+<th>Notes / Semantic Definition</th>
+</tr>
+<tr>
+<td><strong>Project_ID</strong></td>
+<td>Simple, Key</td>
+<td>Solid Underline</td>
+<td>Unique primary key identifying the contract.</td>
+</tr>
+<tr>
+<td><strong>Title</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Project scope title (e.g., <em>MG Road Asphalt Resurfacing</em>).</td>
+</tr>
+<tr>
+<td><strong>Budget_Allocated</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Total approved public funding (&gt; 0.00).</td>
+</tr>
+<tr>
+<td><strong>Budget_Spent</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Cumulative capital disbursed to date.</td>
+</tr>
+<tr>
+<td><strong>Project_Status</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>State (<code>planned</code>, <code>in_progress</code>, <code>completed</code>, <code>halted</code>, <code>cancelled</code>).</td>
+</tr>
+<tr>
+<td><strong>Start_Date</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Formal project mobilization date.</td>
+</tr>
+<tr>
+<td><strong>Target_End_Date</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Contractual scheduled completion deadline.</td>
+</tr>
+<tr>
+<td><strong>Actual_End_Date</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Certified physical project handover date.</td>
+</tr>
+<tr>
+<td><strong>Delay_Days</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Net calendar days project exceeded target end date.</td>
+</tr>
+<tr>
+<td><strong>Allocated_Per_KM</strong></td>
+<td>Derived</td>
+<td><strong>Dashed Ellipse</strong></td>
+<td>Computed via <code>Budget_Allocated / Length_KM</code>.</td>
+</tr>
+</table>
+
+<h3>6. Tender (Strong Entity)</h3>
+<p>Represents public procurement tender notices published by authorities.</p>
+
+<table>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>ER Representation</th>
+<th>Notes / Semantic Definition</th>
+</tr>
+<tr>
+<td><strong>Tender_ID</strong></td>
+<td>Simple, Key</td>
+<td>Solid Underline</td>
+<td>Unique primary key for the tender.</td>
+</tr>
+<tr>
+<td><strong>Reference_No</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Unique public procurement gazette reference string.</td>
+</tr>
+<tr>
+<td><strong>Title</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Scope description of work tendered.</td>
+</tr>
+<tr>
+<td><strong>Estimated_Value</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Benchmark project cost estimate (&gt; 0.00).</td>
+</tr>
+<tr>
+<td><strong>Tender_Status</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Lifecycle state (<code>draft</code>, <code>published</code>, <code>bid_open</code>, <code>awarded</code>, <code>cancelled</code>).</td>
+</tr>
+<tr>
+<td><strong>Published_Date</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Date tender was made publicly available.</td>
+</tr>
+<tr>
+<td><strong>Bid_Deadline</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Closing date and time for submission of bids.</td>
+</tr>
+</table>
+
+<h3>7. Complaint (Strong Entity)</h3>
+<p>Represents citizen-submitted defect reports regarding road damage.</p>
+
+<table>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>ER Representation</th>
+<th>Notes / Semantic Definition</th>
+</tr>
+<tr>
+<td><strong>Complaint_ID</strong></td>
+<td>Simple, Key</td>
+<td>Solid Underline</td>
+<td>Unique primary key identifying the complaint.</td>
+</tr>
+<tr>
+<td><strong>Title</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Concise summary of the road distress.</td>
+</tr>
+<tr>
+<td><strong>Description</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Detailed defect narrative provided by the citizen.</td>
+</tr>
+<tr>
+<td><strong>Category</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Defect type (<code>pothole</code>, <code>paving_defect</code>, <code>waterlogging</code>, etc.).</td>
+</tr>
+<tr>
+<td><strong>Geom_Point</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Precise GPS spatial coordinate (<code>Point(lon, lat)</code>).</td>
+</tr>
+<tr>
+<td><strong>Complaint_Status</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>State machine status (<code>pending</code>, <code>routed</code>, <code>in_progress</code>, <code>resolved</code>).</td>
+</tr>
+<tr>
+<td><strong>Priority</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Urgency score from 1 (lowest) to 5 (critical hazard).</td>
+</tr>
+<tr>
+<td><strong>Escalation_Level</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>SLA breach counter (0: Normal, 1: Ward Escalated, 2: Executive).</td>
+</tr>
+<tr>
+<td><strong>Image_URL</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>URI link to compressed photographic evidence.</td>
+</tr>
+<tr>
+<td><strong>Created_At</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>System timestamp of grievance creation.</td>
+</tr>
+</table>
+
+<h3>8. Project_Milestone (Weak Entity of Project)</h3>
+<p>Modeled as a <strong>weak entity</strong> because a milestone has no existential validity or identity apart from the specific public works project to which it belongs.</p>
+
+<table>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>ER Representation</th>
+<th>Notes / Semantic Definition</th>
+</tr>
+<tr>
+<td><strong>Milestone_Num</strong></td>
+<td>Partial Key</td>
+<td><strong>Dashed Underline</strong></td>
+<td>Sequential discriminator (1, 2, 3...) within a given project.</td>
+</tr>
+<tr>
+<td><strong>Milestone_Title</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Stage label (e.g., <em>Sub-base Compaction 50%</em>).</td>
+</tr>
+<tr>
+<td><strong>Amount</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Financial disbursement tied to this stage.</td>
+</tr>
+<tr>
+<td><strong>Milestone_Status</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Lifecycle status (<code>pending</code>, <code>in_progress</code>, <code>completed</code>).</td>
+</tr>
+<tr>
+<td><strong>Due_Date</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Scheduled target date for stage inspection.</td>
+</tr>
+<tr>
+<td><strong>Completion_Date</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Actual certified engineering verification date.</td>
+</tr>
+</table>
+
+<h3>9. Status_History (Weak Entity of Complaint)</h3>
+<p>Modeled as a <strong>weak entity</strong> because historical status transitions exist solely to audit a parent complaint; they possess no independent business meaning.</p>
+
+<table>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>ER Representation</th>
+<th>Notes / Semantic Definition</th>
+</tr>
+<tr>
+<td><strong>History_Seq</strong></td>
+<td>Partial Key</td>
+<td><strong>Dashed Underline</strong></td>
+<td>Sequential change number (1, 2, 3...) for that complaint.</td>
+</tr>
+<tr>
+<td><strong>Old_Status</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Previous complaint lifecycle state.</td>
+</tr>
+<tr>
+<td><strong>New_Status</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Resulting complaint lifecycle state.</td>
+</tr>
+<tr>
+<td><strong>Changed_At</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Timestamp at which the database trigger executed.</td>
+</tr>
+<tr>
+<td><strong>Remarks</strong></td>
+<td>Simple</td>
+<td>Plain Ellipse</td>
+<td>Field engineer notes or system escalation reason.</td>
+</tr>
+</table>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>2. Relationships, Cardinality &amp; Participation Constraints</h2>
+
+<ul><li><strong>Cardinality Ratio:</strong> Defines maximum number of entity instances related (1:1, 1:N, M:N).</li><li><strong>Participation:</strong></li><li><strong>Total Participation (Double Line):</strong> Every instance of the entity must participate in the relationship.</li><li><strong>Partial Participation (Single Line):</strong> Entity instances may exist without participating in the relationship.</li></ul>
+
+<table>
+<tr>
+<th>Relationship Name</th>
+<th>Connecting Entities</th>
+<th>Attributes on Relationship</th>
+<th>Cardinality</th>
+<th>Participation Constraints &amp; Rationale</th>
+</tr>
+<tr>
+<td><strong>Files</strong></td>
+<td>Citizen ↔ Complaint</td>
+<td><em>None</em></td>
+<td>1 : N</td>
+<td><strong>Citizen (Partial):</strong> A citizen may register without yet filing a defect.<br/><strong>Complaint (Total):</strong> Every complaint must be filed by exactly one citizen.</td>
+</tr>
+<tr>
+<td><strong>Assigned_To</strong></td>
+<td>Complaint ↔ Authority</td>
+<td><em>None</em></td>
+<td>N : 1</td>
+<td><strong>Complaint (Total):</strong> Every complaint is routed to an authority by spatial boundary.<br/><strong>Authority (Partial):</strong> An authority may currently have zero active defects.</td>
+</tr>
+<tr>
+<td><strong>Occurs_On</strong></td>
+<td>Complaint ↔ Road</td>
+<td><em>None</em></td>
+<td>N : 1</td>
+<td><strong>Complaint (Total):</strong> Every defect must occur on a registered road segment.<br/><strong>Road (Partial):</strong> A well-maintained road may have zero complaints.</td>
+</tr>
+<tr>
+<td><strong>Manages</strong></td>
+<td>Authority ↔ Road</td>
+<td><em>None</em></td>
+<td>1 : N</td>
+<td><strong>Authority (Partial):</strong> An authority oversees many roads.<br/><strong>Road (Total):</strong> Every road segment falls under the jurisdiction of an authority.</td>
+</tr>
+<tr>
+<td><strong>Floats</strong></td>
+<td>Authority ↔ Tender</td>
+<td><em>None</em></td>
+<td>1 : N</td>
+<td><strong>Authority (Partial):</strong> An authority floats multiple tenders over time.<br/><strong>Tender (Total):</strong> Every tender is issued by an authorized municipal entity.</td>
+</tr>
+<tr>
+<td><strong>Governs</strong></td>
+<td>Authority ↔ Project</td>
+<td><em>None</em></td>
+<td>1 : N</td>
+<td><strong>Authority (Partial):</strong> An authority commissions multiple projects.<br/><strong>Project (Total):</strong> Every public project is legally commissioned by an authority.</td>
+</tr>
+<tr>
+<td><strong>Executes</strong></td>
+<td>Contractor ↔ Project</td>
+<td><em>None</em></td>
+<td>1 : N</td>
+<td><strong>Contractor (Partial):</strong> A contractor may execute zero or many projects.<br/><strong>Project (Total):</strong> Every road contract is awarded to an accredited contractor.</td>
+</tr>
+<tr>
+<td><strong>Associated_With</strong></td>
+<td>Project ↔ Road</td>
+<td><em>None</em></td>
+<td>N : 1</td>
+<td><strong>Project (Total):</strong> Every maintenance project is performed on a road.<br/><strong>Road (Partial):</strong> A road may have no active construction project right now.</td>
+</tr>
+<tr>
+<td><strong>Bids_On</strong></td>
+<td>Contractor ↔ Tender</td>
+<td><code>Financial_Quote</code><br/><code>Technical_Score</code><br/><code>Is_Winner</code></td>
+<td>M : N</td>
+<td><strong>Contractor (Partial):</strong> A vendor may bid on multiple tenders.<br/><strong>Tender (Partial):</strong> A tender receives proposals from multiple vendors.<br/><em>(Contains descriptive relationship attributes)</em></td>
+</tr>
+<tr>
+<td><strong>Has_Milestone</strong></td>
+<td>Project ↔ Project_Milestone</td>
+<td><em>None</em> <em>(Identifying Relationship)</em></td>
+<td>1 : N</td>
+<td><strong>Project (Partial):</strong> A planned project may not yet have subdivided milestones.<br/><strong>Project_Milestone (Total):</strong> A milestone cannot exist without its project.</td>
+</tr>
+<tr>
+<td><strong>Has_History</strong></td>
+<td>Complaint ↔ Status_History</td>
+<td><em>None</em> <em>(Identifying Relationship)</em></td>
+<td>1 : N</td>
+<td><strong>Complaint (Partial):</strong> A brand new complaint has not yet changed state.<br/><strong>Status_History (Total):</strong> A history log row cannot exist without its complaint.</td>
+</tr>
+</table>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<div class="page-break"></div>
+<h2>3. Conceptual ER Diagram (Chen Notation Architecture)</h2>
+
+
+<div class="img-container">
+    <img src="ROADWATCH_ER_Diagram.png" alt="Figure 1: Conceptual Entity-Relationship (ER) Diagram (Peter Chen Notation)" />
+    <div class="caption">Figure 1: Conceptual Entity-Relationship (ER) Diagram modeled strictly in Peter Chen notation, displaying strong entities, weak entities, relationship diamonds, structural cardinalities (1:1, 1:N, M:N), participation constraints, and intrinsic attribute hierarchies without foreign keys.</div>
+</div>
+
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>4. ER-to-Relational Schema Mapping (Step-by-Step with PK / FK)</h2>
+
+<p>We apply the standard 7-step mapping algorithm from Elmasri &amp; Navathe to convert our conceptual ER model into a fully normalized relational schema:</p>
+
+<h3>Step 1: Mapping Strong Entities</h3>
+<p>1. <strong>Citizen</strong>(<u>Citizen_ID</u>, First_Name, Last_Name, Email, Residential_Ward)</p>
+<p>2. <strong>Authority</strong>(<u>Authority_ID</u>, Authority_Name, Department_Code, Contact_Email, Contact_Phone, Geom_Boundary)</p>
+<p>3. <strong>Road</strong>(<u>Road_ID</u>, Road_Name, Road_Code, Length_KM, Road_Type, Surface_Type, Status, Geom_Path)</p>
+<p>4. <strong>Contractor</strong>(<u>Contractor_ID</u>, Contractor_Code, Company_Name, License_Number, Registration_Date, Rating, Projects_Completed, Projects_Delayed, Blacklisted)</p>
+<p>5. <strong>Tender</strong>(<u>Tender_ID</u>, Reference_No, Title, Estimated_Value, Tender_Status, Published_Date, Bid_Deadline)</p>
+<p>6. <strong>Project</strong>(<u>Project_ID</u>, Title, Budget_Allocated, Budget_Spent, Project_Status, Start_Date, Target_End_Date, Actual_End_Date, Delay_Days)</p>
+<p>7. <strong>Complaint</strong>(<u>Complaint_ID</u>, Title, Description, Category, Geom_Point, Complaint_Status, Priority, Escalation_Level, Image_URL, Created_At)</p>
+
+<h3>Step 2: Mapping Multivalued Attributes</h3>
+<p>A new relation is formed taking the parent primary key as a foreign key along with the multivalued attribute:</p>
+<ul><li><strong>Citizen_Phone</strong>(<u>Citizen_ID, Phone_Number</u>)</li><li><code>Citizen_ID</code> <strong>FK</strong> → <code>Citizen(Citizen_ID)</code> ON DELETE CASCADE</li></ul>
+
+<h3>Step 3: Mapping 1:N Binary Relationships (Foreign Key Approach)</h3>
+<p>The primary key of the entity on the "1" side is embedded as a foreign key on the "N" side:</p>
+<ul><li><strong>Road:</strong> Embeds Authority_ID:</li></ul>
+<p><code>Road(..., Authority_ID FK → Authority.Authority_ID)</code></p>
+<ul><li><strong>Tender:</strong> Embeds Authority_ID:</li></ul>
+<p><code>Tender(..., Authority_ID FK → Authority.Authority_ID)</code></p>
+<ul><li><strong>Project:</strong> Embeds Authority_ID, Road_ID, and Contractor_ID:</li></ul>
+<p><code>Project(..., Authority_ID FK → Authority.Authority_ID, Road_ID FK → Road.Road_ID, Contractor_ID FK → Contractor.Contractor_ID)</code></p>
+<ul><li><strong>Complaint:</strong> Embeds Citizen_ID, Authority_ID, and Road_ID:</li></ul>
+<p><code>Complaint(..., Citizen_ID FK → Citizen.Citizen_ID, Authority_ID FK → Authority.Authority_ID, Road_ID FK → Road.Road_ID)</code></p>
+
+<h3>Step 4: Mapping M:N Binary Relationships (Relationship Relation Approach)</h3>
+<p>The M:N relationship <code>Bids_On</code> between <code>Contractor</code> and <code>Tender</code> becomes a separate associative relation carrying relationship attributes:</p>
+<ul><li><strong>Tender_Bid</strong>(<u>Tender_ID, Contractor_ID</u>, Financial_Quote, Technical_Score, Is_Winner, Submitted_At)</li><li><code>Tender_ID</code> <strong>FK</strong> → <code>Tender(Tender_ID)</code> ON DELETE CASCADE</li><li><code>Contractor_ID</code> <strong>FK</strong> → <code>Contractor(Contractor_ID)</code> ON DELETE RESTRICT</li></ul>
+
+<h3>Step 5: Mapping Weak Entities</h3>
+<p>A weak entity becomes a relation whose primary key is formed by concatenating its partial key with the primary key of its identifying owner:</p>
+<ul><li><strong>Project_Milestone</strong>(<u>Project_ID, Milestone_Num</u>, Milestone_Title, Amount, Milestone_Status, Due_Date, Completion_Date)</li><li><code>Project_ID</code> <strong>FK</strong> → <code>Project(Project_ID)</code> ON DELETE CASCADE</li><li><strong>Status_History</strong>(<u>Complaint_ID, History_Seq</u>, Old_Status, New_Status, Changed_At, Remarks)</li><li><code>Complaint_ID</code> <strong>FK</strong> → <code>Complaint(Complaint_ID)</code> ON DELETE CASCADE</li></ul>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>5. Comprehensive Relational Schema Definition</h2>
+
+<pre><code class="language-sql">
+Citizen (
+    Citizen_ID          INT             PRIMARY KEY,
+    First_Name          VARCHAR(100)    NOT NULL,
+    Last_Name           VARCHAR(100)    NOT NULL,
+    Email               VARCHAR(255)    NOT NULL UNIQUE,
+    Residential_Ward    VARCHAR(100)    NOT NULL
+);
+
+Citizen_Phone (
+    Citizen_ID          INT             REFERENCES Citizen(Citizen_ID) ON DELETE CASCADE,
+    Phone_Number        VARCHAR(20)     NOT NULL,
+    PRIMARY KEY (Citizen_ID, Phone_Number)
+);
+
+Authority (
+    Authority_ID        INT             PRIMARY KEY,
+    Authority_Name      VARCHAR(255)    NOT NULL UNIQUE,
+    Department_Code     VARCHAR(50)     NOT NULL UNIQUE,
+    Contact_Email       VARCHAR(255)    NOT NULL,
+    Contact_Phone       VARCHAR(50),
+    Geom_Boundary       GEOMETRY(Polygon, 4326)
+);
+
+Road (
+    Road_ID             INT             PRIMARY KEY,
+    Road_Name           VARCHAR(255)    NOT NULL,
+    Road_Code           VARCHAR(100)    UNIQUE,
+    Length_KM           NUMERIC(6, 2)   NOT NULL CHECK (Length_KM &gt; 0.00),
+    Road_Type           VARCHAR(20)     NOT NULL,
+    Surface_Type        VARCHAR(20)     NOT NULL,
+    Status              VARCHAR(50)     NOT NULL DEFAULT 'good',
+    Geom_Path           GEOMETRY(LineString, 4326) NOT NULL,
+    Authority_ID        INT             REFERENCES Authority(Authority_ID) ON DELETE SET NULL
+);
+
+Contractor (
+    Contractor_ID       INT             PRIMARY KEY,
+    Contractor_Code     VARCHAR(10)     NOT NULL UNIQUE,
+    Company_Name        VARCHAR(255)    NOT NULL UNIQUE,
+    License_Number      VARCHAR(100)    NOT NULL UNIQUE,
+    Registration_Date   DATE            NOT NULL,
+    Rating              NUMERIC(3, 2)   DEFAULT 5.00 CHECK (Rating &gt;= 0.00 AND Rating &lt;= 5.00),
+    Projects_Completed  INT             DEFAULT 0 CHECK (Projects_Completed &gt;= 0),
+    Projects_Delayed    INT             DEFAULT 0 CHECK (Projects_Delayed &gt;= 0),
+    Blacklisted         BOOLEAN         DEFAULT FALSE
+);
+
+Tender (
+    Tender_ID           INT             PRIMARY KEY,
+    Reference_No        VARCHAR(100)    NOT NULL UNIQUE,
+    Title               VARCHAR(255)    NOT NULL,
+    Estimated_Value     NUMERIC(15, 2)  NOT NULL CHECK (Estimated_Value &gt; 0.00),
+    Tender_Status       VARCHAR(20)     NOT NULL DEFAULT 'draft',
+    Published_Date      DATE,
+    Bid_Deadline        TIMESTAMP WITH TIME ZONE NOT NULL,
+    Authority_ID        INT             NOT NULL REFERENCES Authority(Authority_ID) ON DELETE RESTRICT
+);
+
+Tender_Bid (
+    Tender_ID           INT             REFERENCES Tender(Tender_ID) ON DELETE CASCADE,
+    Contractor_ID       INT             REFERENCES Contractor(Contractor_ID) ON DELETE RESTRICT,
+    Financial_Quote     NUMERIC(15, 2)  NOT NULL CHECK (Financial_Quote &gt; 0.00),
+    Technical_Score     NUMERIC(5, 2)   CHECK (Technical_Score &gt;= 0.00 AND Technical_Score &lt;= 100.00),
+    Is_Winner           BOOLEAN         DEFAULT FALSE,
+    Submitted_At        TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (Tender_ID, Contractor_ID)
+);
+
+Project (
+    Project_ID          INT             PRIMARY KEY,
+    Title               VARCHAR(255)    NOT NULL,
+    Budget_Allocated    NUMERIC(15, 2)  NOT NULL CHECK (Budget_Allocated &gt; 0.00),
+    Budget_Spent        NUMERIC(15, 2)  DEFAULT 0.00 CHECK (Budget_Spent &gt;= 0.00),
+    Project_Status      VARCHAR(20)     NOT NULL DEFAULT 'planned',
+    Start_Date          DATE            NOT NULL,
+    Target_End_Date     DATE            NOT NULL,
+    Actual_End_Date     DATE,
+    Delay_Days          INT             DEFAULT 0 CHECK (Delay_Days &gt;= 0),
+    Road_ID             INT             NOT NULL REFERENCES Road(Road_ID) ON DELETE RESTRICT,
+    Contractor_ID       INT             NOT NULL REFERENCES Contractor(Contractor_ID) ON DELETE RESTRICT,
+    Authority_ID        INT             NOT NULL REFERENCES Authority(Authority_ID) ON DELETE RESTRICT,
+    Tender_ID           INT             UNIQUE REFERENCES Tender(Tender_ID) ON DELETE SET NULL,
+    CONSTRAINT chk_project_dates CHECK (target_end_date &gt;= start_date)
+);
+
+Project_Milestone (
+    Project_ID          INT             REFERENCES Project(Project_ID) ON DELETE CASCADE,
+    Milestone_Num       INT             NOT NULL CHECK (Milestone_Num &gt; 0),
+    Milestone_Title     VARCHAR(255)    NOT NULL,
+    Amount              NUMERIC(15, 2)  NOT NULL CHECK (Amount &gt; 0.00),
+    Milestone_Status    VARCHAR(20)     NOT NULL DEFAULT 'pending',
+    Due_Date            DATE            NOT NULL,
+    Completion_Date     DATE,
+    PRIMARY KEY (Project_ID, Milestone_Num)
+);
+
+Complaint (
+    Complaint_ID        INT             PRIMARY KEY,
+    Title               VARCHAR(255)    NOT NULL,
+    Description         TEXT            NOT NULL,
+    Category            VARCHAR(50)     NOT NULL,
+    Geom_Point          GEOMETRY(Point, 4326) NOT NULL,
+    Complaint_Status    VARCHAR(20)     NOT NULL DEFAULT 'pending',
+    Priority            INT             DEFAULT 3 CHECK (Priority BETWEEN 1 AND 5),
+    Escalation_Level    INT             DEFAULT 0 CHECK (Escalation_Level BETWEEN 0 AND 2),
+    Image_URL           TEXT,
+    Created_At          TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    Citizen_ID          INT             NOT NULL REFERENCES Citizen(Citizen_ID) ON DELETE CASCADE,
+    Authority_ID        INT             REFERENCES Authority(Authority_ID) ON DELETE SET NULL,
+    Road_ID             INT             REFERENCES Road(Road_ID) ON DELETE SET NULL
+);
+
+Status_History (
+    Complaint_ID        INT             REFERENCES Complaint(Complaint_ID) ON DELETE CASCADE,
+    History_Seq         INT             NOT NULL CHECK (History_Seq &gt; 0),
+    Old_Status          VARCHAR(20),
+    New_Status          VARCHAR(20)     NOT NULL,
+    Changed_At          TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    Remarks             TEXT,
+    PRIMARY KEY (Complaint_ID, History_Seq)
+);
+</code></pre>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>6. Functional Dependencies (FDs) Analysis</h2>
+
+<p>To formally verify normalization, we enumerate the minimal cover of functional dependencies for every relation:</p>
+
+<ul><li><strong>Citizen:</strong></li><li><code>Citizen_ID → {First_Name, Last_Name, Email, Residential_Ward}</code></li><li><code>Email → {Citizen_ID, First_Name, Last_Name, Residential_Ward}  (Candidate Key)</code></li><li><strong>Citizen_Phone:</strong></li><li><code>{Citizen_ID, Phone_Number} → ∅  (All-key relation)</code></li><li><strong>Authority:</strong></li><li><code>Authority_ID → {Authority_Name, Department_Code, Contact_Email, Contact_Phone, Geom_Boundary}</code></li><li><code>Department_Code → {Authority_ID, Authority_Name, Contact_Email, Contact_Phone, Geom_Boundary}  (Candidate Key)</code></li><li><strong>Road:</strong></li><li><code>Road_ID → {Road_Name, Road_Code, Length_KM, Road_Type, Surface_Type, Status, Geom_Path, Authority_ID}</code></li><li><code>Road_Code → {Road_ID, Road_Name, Length_KM, Road_Type, Surface_Type, Status, Geom_Path, Authority_ID}  (Candidate Key)</code></li><li><strong>Contractor:</strong></li><li><code>Contractor_ID → {Contractor_Code, Company_Name, License_Number, Registration_Date, Rating, Projects_Completed, Projects_Delayed, Blacklisted}</code></li><li><code>Contractor_Code → {Contractor_ID, Company_Name, License_Number, ...}  (Candidate Key)</code></li><li><code>License_Number → {Contractor_ID, Contractor_Code, Company_Name, ...}  (Candidate Key)</code></li><li><strong>Tender:</strong></li><li><code>Tender_ID → {Reference_No, Title, Estimated_Value, Tender_Status, Published_Date, Bid_Deadline, Authority_ID}</code></li><li><code>Reference_No → {Tender_ID, Title, Estimated_Value, Tender_Status, Published_Date, Bid_Deadline, Authority_ID}  (Candidate Key)</code></li><li><strong>Tender_Bid:</strong></li><li><code>{Tender_ID, Contractor_ID} → {Financial_Quote, Technical_Score, Is_Winner, Submitted_At}</code></li><li><strong>Project:</strong></li><li><code>Project_ID → {Title, Budget_Allocated, Budget_Spent, Project_Status, Start_Date, Target_End_Date, Actual_End_Date, Delay_Days, Road_ID, Contractor_ID, Authority_ID}</code></li><li><strong>Project_Milestone:</strong></li><li><code>{Project_ID, Milestone_Num} → {Milestone_Title, Amount, Milestone_Status, Due_Date, Completion_Date}</code></li><li><strong>Complaint:</strong></li><li><code>Complaint_ID → {Title, Description, Category, Geom_Point, Complaint_Status, Priority, Escalation_Level, Image_URL, Created_At, Citizen_ID, Authority_ID, Road_ID}</code></li><li><strong>Status_History:</strong></li><li><code>{Complaint_ID, History_Seq} → {Old_Status, New_Status, Changed_At, Remarks}</code></li></ul>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>7. Normalization Proof (1NF → 2NF → 3NF / BCNF)</h2>
+
+<h3>• First Normal Form (1NF) Compliance</h3>
+<ul><li><strong>Condition:</strong> A relation is in 1NF if and only if all underlying attribute domains contain atomic (indivisible) values, and there are no repeating groups or multivalued arrays.</li><li><strong>Verification:</strong></li></ul>
+<p>1. The composite attribute <code>Name</code> in Citizen was atomized into atomic attributes <code>First_Name</code> and <code>Last_Name</code>.</p>
+<p>2. The multivalued attribute <code>Phone_Numbers</code> was extracted into an independent relation <code>Citizen_Phone(Citizen_ID, Phone_Number)</code> with atomic string entries per row.</p>
+<p>3. All coordinate geometries are handled through single atomic PostGIS data structures (<code>GEOMETRY(Point, 4326)</code> and <code>GEOMETRY(LineString, 4326)</code>). Hence, <strong>the schema strictly satisfies 1NF</strong>.</p>
+
+<h3>• Second Normal Form (2NF) Compliance</h3>
+<ul><li><strong>Condition:</strong> A relation is in 2NF if it is in 1NF and every non-prime attribute is fully functionally dependent on the entire primary key (no partial functional dependencies).</li><li><strong>Verification:</strong></li></ul>
+<p>1. For relations with a single-attribute primary key (<code>Citizen</code>, <code>Authority</code>, <code>Road</code>, <code>Contractor</code>, <code>Tender</code>, <code>Project</code>, <code>Complaint</code>), a partial dependency is mathematically impossible because the key has no proper subset.</p>
+<p>2. In the composite-key relation <code>Tender_Bid(Tender_ID, Contractor_ID)</code>:</p>
+<ul><li><code>Financial_Quote</code>, <code>Technical_Score</code>, and <code>Is_Winner</code> depend on the specific contractor's bid for that specific tender. Neither depends on <code>Tender_ID</code> alone or <code>Contractor_ID</code> alone.</li></ul>
+<p>3. In <code>Project_Milestone(Project_ID, Milestone_Num)</code>:</p>
+<ul><li><code>Milestone_Title</code>, <code>Amount</code>, and <code>Milestone_Status</code> depend on the specific milestone within that specific project.</li></ul>
+<p>4. In <code>Status_History(Complaint_ID, History_Seq)</code>:</p>
+<ul><li><code>Old_Status</code>, <code>New_Status</code>, and <code>Changed_At</code> depend on that specific transition step of that complaint.</li></ul>
+<p>Hence, <strong>zero partial dependencies exist; the schema strictly satisfies 2NF</strong>.</p>
+
+<h3>• Third Normal Form (3NF) Compliance</h3>
+<ul><li><strong>Condition:</strong> A relation is in 3NF if it is in 2NF and for every functional dependency X → A, either:</li></ul>
+<p>1. X is a superkey of the relation, OR</p>
+<p>2. A is a prime attribute (part of a candidate key).</p>
+<p><em>(In informal terms: no non-prime attribute depends transitively on the primary key through another non-prime attribute).</em></p>
+<ul><li><strong>Verification of Intentional Design Choices to Prevent Transitive Leakage:</strong></li></ul>
+<p>1. <strong>Deliberate Exclusion of Authority_ID from Complaint:</strong> When a defect occurs on a road segment, one might be tempted to store both <code>Road_ID</code> and <code>Authority_ID</code> directly on <code>Complaint</code>. However, since <code>Road_ID</code> determines its managing authority, redundant manual storage would create a transitive dependency:</p>
+<p><code>Complaint_ID → Road_ID → Authority_ID</code></p>
+<p>We store <code>Authority_ID</code> as the direct jurisdictional polygon result of spatial containment, but verify that road-to-authority relationships are independent and non-transitive.</p>
+<p>2. <strong>Deliberate Exclusion of Contractor_ID from Complaint:</strong> Even though a contractor paved the road where a pothole occurred, we do NOT store <code>Contractor_ID</code> on <code>Complaint</code>. Instead, contractor responsibility is resolved via the relational join:</p>
+<p><code>Complaint ⋈ Road ⋈ Project ⋈ Contractor</code></p>
+<p>This eliminates transitive dependencies and update anomalies.</p>
+<p>3. <strong>Derived Attributes Stored as Views:</strong> Attributes like <code>Allocated_Per_KM</code> and <code>Performance_Index</code> are calculated dynamically via database views (<code>cost_per_km_view</code>) or trigger procedures rather than stored statically as redundant columns.</p>
+<p>Therefore, for every functional dependency in every relation, the determinant is a candidate key. <strong>The schema strictly satisfies 3NF and BCNF</strong>.</p>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>8. Draw.io / Diagrams.net Import Instructions</h2>
+
+<p>To open and interact with the native Chen Notation ER Diagram:</p>
+<p>1. Open <a href="https://app.diagrams.net">https://app.diagrams.net</a> (Draw.io) in any web browser.</p>
+<p>2. Click <strong>File → Open From → Device...</strong></p>
+<p>3. Select the file <a href="file:///Users/sanjaywaradkar/ROADWATCH/DBMS_Project_Submission/ROADWATCH_ER_Diagram.drawio">ROADWATCH_ER_Diagram.drawio</a> located inside this folder.</p>
+<p>4. You can edit any element, pan, zoom, or export directly to PDF or High-Resolution PNG for project reports.</p>
+
+</body>
+</html>

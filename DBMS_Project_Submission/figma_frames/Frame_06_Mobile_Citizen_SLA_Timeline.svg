@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844">
+  
+  <defs>
+    <linearGradient id="bgDark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1120"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#151f32"/>
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#0ea5e9"/>
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="roseGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e11d48"/>
+      <stop offset="100%" stop-color="#f43f5e"/>
+    </linearGradient>
+    <linearGradient id="mapBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0c192c"/>
+      <stop offset="100%" stop-color="#0f243c"/>
+    </linearGradient>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="112%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <rect id="Frame_06_Mobile_BG" x="0" y="0" width="390" height="844" rx="28" fill="#0b1120" stroke="#334155" stroke-width="2"/>
+  
+  <!-- Status Bar -->
+  <g id="StatusBar_6">
+    <text x="24" y="24" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#f8fafc">09:42</text>
+    <rect x="145" y="10" width="100" height="18" rx="9" fill="#000000"/>
+    <text x="310" y="24" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#38bdf8">5G • 100%</text>
+  </g>
+
+  <!-- App Header -->
+  <g id="MobileHeader_6">
+    <rect x="0" y="34" width="390" height="58" fill="#0f172a"/>
+    <line x1="0" y1="92" x2="390" y2="92" stroke="#1e293b" stroke-width="1"/>
+    <rect x="16" y="44" width="28" height="28" rx="7" fill="url(#blueGrad)"/>
+    <text x="30" y="63" font-family="Inter, sans-serif" font-size="13" font-weight="800" fill="#ffffff" text-anchor="middle">R</text>
+    <text x="52" y="56" font-family="Inter, sans-serif" font-size="13.5" font-weight="800" fill="#ffffff">My Grievances &amp; SLA Timeline</text>
+    <text x="52" y="71" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#38bdf8">Citizen Lifecycle &amp; Routing Feedback</text>
+    <rect x="312" y="46" width="62" height="22" rx="5" fill="#1e3a8a" stroke="#3b82f6"/>
+    <text x="343" y="61" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#bfdbfe" text-anchor="middle">F#06</text>
+    <rect x="16" y="80" width="358" height="5" rx="2.5" fill="#1e293b"/>
+    <rect x="16" y="80" width="358" height="5" rx="2.5" fill="url(#blueGrad)"/>
+  </g>
+
+  <!-- Main Mobile Content -->
+  <g id="MobileContent_6">
+    
+    <!-- Citizen Summary KPI Strip -->
+    <rect x="16" y="104" width="112" height="64" rx="8" fill="#131c2e" stroke="#1e293b"/>
+    <text x="72" y="126" font-family="Inter, sans-serif" font-size="9.5" font-weight="700" fill="#94a3b8" text-anchor="middle">TOTAL FILED</text>
+    <text x="72" y="154" font-family="Inter, sans-serif" font-size="20" font-weight="800" fill="#ffffff" text-anchor="middle">8</text>
+
+    <rect x="139" y="104" width="112" height="64" rx="8" fill="#131c2e" stroke="#0ea5e9"/>
+    <text x="195" y="126" font-family="Inter, sans-serif" font-size="9.5" font-weight="700" fill="#38bdf8" text-anchor="middle">ACTIVE SLA</text>
+    <text x="195" y="154" font-family="Inter, sans-serif" font-size="20" font-weight="800" fill="#38bdf8" text-anchor="middle">2</text>
+
+    <rect x="262" y="104" width="112" height="64" rx="8" fill="#131c2e" stroke="#10b981"/>
+    <text x="318" y="126" font-family="Inter, sans-serif" font-size="9.5" font-weight="700" fill="#10b981" text-anchor="middle">RESOLVED</text>
+    <text x="318" y="154" font-family="Inter, sans-serif" font-size="20" font-weight="800" fill="#10b981" text-anchor="middle">6</text>
+
+    <!-- Active Ticket Lifecycle Card (ComplaintTimeline.tsx) -->
+    <rect x="16" y="180" width="358" height="392" rx="12" fill="#131c2e" stroke="#3b82f6" stroke-width="1.2"/>
+    <text x="28" y="204" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">TICKET #CMP-18981 • S.V. ROAD (SV-RD-01)</text>
+    
+    <g>
+      <rect x="282" y="188" width="86" height="22" rx="11" fill="#0c4a6e" stroke="#0ea5e9" stroke-width="1"/>
+      <text x="325" y="202.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#bae6fd" text-anchor="middle">IN_PROGRESS</text>
+    </g>
+    
+    <text x="28" y="226" font-family="Inter, sans-serif" font-size="13.5" font-weight="800" fill="#ffffff">Deep Crater Near Andheri Subway</text>
+
+    <!-- SLA Countdown Bar -->
+    <rect x="28" y="238" width="334" height="44" rx="8" fill="#0f172a" stroke="#1e293b"/>
+    <text x="40" y="256" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#10b981">SLA COUNTDOWN: 31h 15m REMAINING (TARGET 48h)</text>
+    <rect x="40" y="266" width="310" height="7" rx="3.5" fill="#1e293b"/>
+    <rect x="40" y="266" width="205" height="7" rx="3.5" fill="url(#emeraldGrad)"/>
+
+    <!-- 5-Stage State Machine Timeline -->
+    <line x1="44" y1="304" x2="44" y2="525" stroke="#334155" stroke-width="2"/>
+
+    <circle cx="44" cy="308" r="8" fill="#10b981"/>
+    <text x="64" y="306" font-family="Inter, sans-serif" font-size="11.5" font-weight="700" fill="#ffffff">1. Complaint Logged &amp; Geo-Indexed</text>
+    <text x="64" y="322" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94a3b8">22 Oct 09:42 • Status: pending • GIST Point</text>
+
+    <circle cx="44" cy="360" r="8" fill="#10b981"/>
+    <text x="64" y="358" font-family="Inter, sans-serif" font-size="11.5" font-weight="700" fill="#ffffff">2. Auto-Routed via PostGIS ST_Contains</text>
+    <text x="64" y="374" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94a3b8">22 Oct 09:43 • Assigned: MCGM Ward K-West</text>
+
+    <circle cx="44" cy="412" r="9" fill="#0ea5e9" stroke="#bae6fd" stroke-width="2"/>
+    <text x="64" y="410" font-family="Inter, sans-serif" font-size="11.5" font-weight="800" fill="#38bdf8">3. Field Repair Crew Dispatched (Active)</text>
+    <text x="64" y="426" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#bae6fd">22 Oct 14:10 • Zenith Construction Co (#CON-00003)</text>
+
+    <circle cx="44" cy="464" r="7" fill="#1e293b" stroke="#64748b" stroke-width="1.5"/>
+    <text x="64" y="462" font-family="Inter, sans-serif" font-size="11.5" font-weight="600" fill="#64748b">4. Hot-Mix Asphalt Patching &amp; QA Test</text>
+    <text x="64" y="478" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#475569">Awaiting contractor completion photo upload</text>
+
+    <circle cx="44" cy="516" r="7" fill="#1e293b" stroke="#64748b" stroke-width="1.5"/>
+    <text x="64" y="514" font-family="Inter, sans-serif" font-size="11.5" font-weight="600" fill="#64748b">5. Citizen Resolution Sign-off &amp; Closure</text>
+    <text x="64" y="530" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#475569">Triggers snapshot_road_on_complaint_change()</text>
+
+    <!-- Citizen Routing Accuracy Feedback Card (routing_feedback table) -->
+    <rect x="16" y="584" width="358" height="168" rx="12" fill="#131c2e" stroke="#1e293b"/>
+    <text x="28" y="606" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#38bdf8">ROUTING FEEDBACK VERIFICATION (routing_feedback)</text>
+    <text x="28" y="626" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#ffffff">Was MCGM Ward K-West the right authority?</text>
+    <text x="28" y="644" font-family="Inter, sans-serif" font-size="10.5" fill="#94a3b8">Your feedback updates authorities.routing_accuracy_score</text>
+    <text x="28" y="658" font-family="Inter, sans-serif" font-size="10.5" fill="#94a3b8">(Current MCGM-KW Accuracy Score: 96.40%).</text>
+
+    <rect x="28" y="674" width="160" height="38" rx="8" fill="#064e3b" stroke="#10b981"/>
+    <text x="108" y="698" font-family="Inter, sans-serif" font-size="11.5" font-weight="700" fill="#a7f3d0" text-anchor="middle">✓ Yes, Confirmed</text>
+
+    <rect x="198" y="674" width="164" height="38" rx="8" fill="#0f172a" stroke="#475569"/>
+    <text x="280" y="698" font-family="Inter, sans-serif" font-size="11.5" font-weight="600" fill="#cbd5e1" text-anchor="middle">✕ Flag Wrong Dept</text>
+
+    <text x="28" y="736" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#64748b">UNIQUE(complaint_id) • Citizen: Kanak Waradkar</text>
+    
+  </g>
+
+  <!-- Bottom Navigation & DB Strip -->
+  <g id="MobileBottomNav_6">
+    <rect x="0" y="770" width="390" height="74" fill="#090d16"/>
+    <line x1="0" y1="770" x2="390" y2="770" stroke="#1e293b" stroke-width="1"/>
+    <circle cx="48" cy="790" r="9" fill="#1e293b" stroke="#64748b" stroke-width="1.2"/><text x="48" y="814" font-family="Inter, sans-serif" font-size="10" font-weight="500" fill="#64748b" text-anchor="middle">GIS Map</text><circle cx="145" cy="790" r="9" fill="#1e293b" stroke="#64748b" stroke-width="1.2"/><text x="145" y="814" font-family="Inter, sans-serif" font-size="10" font-weight="500" fill="#64748b" text-anchor="middle">Report Defect</text><rect x="210" y="772" width="65" height="3" rx="1.5" fill="#38bdf8"/><circle cx="242" cy="790" r="9" fill="#1e3a8a" stroke="#38bdf8" stroke-width="1.2"/><text x="242" y="814" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#38bdf8" text-anchor="middle">My Reports</text><circle cx="339" cy="790" r="9" fill="#1e293b" stroke="#64748b" stroke-width="1.2"/><text x="339" y="814" font-family="Inter, sans-serif" font-size="10" font-weight="500" fill="#64748b" text-anchor="middle">Offline Sync</text>
+    <rect x="0" y="822" width="390" height="22" fill="#050811"/>
+    <text x="195" y="836" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#38bdf8" text-anchor="middle">DBMS: complaints, sla_escalations, routing_feedback</text>
+  </g>
+</svg>

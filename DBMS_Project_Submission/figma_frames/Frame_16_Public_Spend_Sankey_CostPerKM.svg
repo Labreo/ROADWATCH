@@ -1,0 +1,301 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" width="1440" height="900">
+  
+  <defs>
+    <linearGradient id="bgDark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1120"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#151f32"/>
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#0ea5e9"/>
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="roseGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e11d48"/>
+      <stop offset="100%" stop-color="#f43f5e"/>
+    </linearGradient>
+    <linearGradient id="mapBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0c192c"/>
+      <stop offset="100%" stop-color="#0f243c"/>
+    </linearGradient>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="112%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <rect id="Frame_16_Background" x="0" y="0" width="1440" height="900" fill="#0b1120"/>
+  <g id="Sidebar_16"><rect x="0" y="0" width="220" height="900" fill="#090d16"/><line x1="220" y1="0" x2="220" y2="900" stroke="#1e293b" stroke-width="1"/><rect x="16" y="14" width="30" height="30" rx="8" fill="url(#blueGrad)"/><text x="31" y="34" font-family="Inter, sans-serif" font-size="14" font-weight="800" fill="#ffffff" text-anchor="middle">R</text><text x="56" y="28" font-family="Inter, sans-serif" font-size="15" font-weight="800" fill="#ffffff" letter-spacing="0.5">ROADWATCH</text><text x="56" y="42" font-family="JetBrains Mono, monospace" font-size="9" font-weight="600" fill="#38bdf8">POSTGIS v16 • CIVIC AI</text><line x1="0" y1="56" x2="220" y2="56" stroke="#1e293b" stroke-width="1"/><text x="18" y="76" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#64748b" letter-spacing="1.2">PLATFORM MODULES</text><rect x="20" y="95" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="108" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">MAP</text><text x="54" y="109" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Geospatial Map</text><rect x="20" y="133" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="146" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">AI</text><text x="54" y="147" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">AI Chat Assistant</text><rect x="10" y="164" width="200" height="34" rx="7" fill="#1e3a8a" stroke="#3b82f6" stroke-width="1"/><rect x="10" y="171" width="3" height="20" rx="1.5" fill="#38bdf8"/><rect x="20" y="171" width="26" height="20" rx="4" fill="#2563eb"/><text x="33" y="184" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="700" fill="#ffffff" text-anchor="middle">INR</text><text x="54" y="185" font-family="Inter, sans-serif" font-size="11.5" font-weight="700" fill="#ffffff">Budget Compliance</text><rect x="20" y="209" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="222" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">CON</text><text x="54" y="223" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Contractor Scores</text><rect x="20" y="247" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="260" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">CMP</text><text x="54" y="261" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Citizen Complaints</text><rect x="20" y="285" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="298" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">OPS</text><text x="54" y="299" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Operations Center</text><rect x="20" y="323" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="336" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">SLA</text><text x="54" y="337" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">SLA Escalations</text><rect x="20" y="361" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="374" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">GIS</text><text x="54" y="375" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Boundary Conflicts</text><rect x="20" y="399" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="412" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">SCH</text><text x="54" y="413" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Repair Scheduler</text><rect x="20" y="437" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="450" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle"> T </text><text x="54" y="451" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Historical Playback</text><rect x="20" y="475" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="488" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">IOT</text><text x="54" y="489" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">IoT Sensor Monitor</text><rect x="20" y="513" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="526" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">3D</text><text x="54" y="527" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">3D Digital Twin</text><rect x="20" y="551" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="564" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">REG</text><text x="54" y="565" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Multi-Region Hub</text><rect x="20" y="589" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="602" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">TND</text><text x="54" y="603" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Procurement Ledger</text><rect x="20" y="627" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="640" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">LOG</text><text x="54" y="641" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Forensic Audit Log</text><rect x="12" y="676" width="196" height="92" rx="8" fill="#0f172a" stroke="#1e293b"/><text x="24" y="696" font-family="JetBrains Mono, monospace" font-size="9" font-weight="700" fill="#38bdf8">DB ENGINE TELEMETRY</text><circle cx="28" cy="714" r="4" fill="#10b981"/><text x="38" y="718" font-family="Inter, sans-serif" font-size="10.5" font-weight="600" fill="#e2e8f0">PostGIS 3.4 Spatial GIST</text><text x="24" y="736" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94a3b8">UTC Clock: 14:32:08Z</text><text x="24" y="754" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94a3b8">Sync Queue: 0 Pending</text><rect x="12" y="780" width="196" height="76" rx="8" fill="#131c2e" stroke="#1e293b"/><circle cx="34" cy="810" r="14" fill="#2563eb"/><text x="34" y="814" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">KW</text><text x="56" y="804" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#ffffff">Kanak Waradkar</text><text x="56" y="818" font-family="JetBrains Mono, monospace" font-size="9" fill="#38bdf8">Roll: 24B-CO-030</text><text x="24" y="842" font-family="Inter, sans-serif" font-size="9.5" fill="#94a3b8">Team: Krushna (031) • Manjunath (035)</text></g>
+  
+    <g id="TopNav_16">
+      <rect x="220" y="0" width="1220" height="56" fill="#0f172a"/>
+      <line x1="220" y1="56" x2="1440" y2="56" stroke="#1e293b" stroke-width="1"/>
+      <text x="244" y="23" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#38bdf8" letter-spacing="0.8">ACCOUNTABILITY / BUDGET COMPLIANCE</text>
+      <text x="244" y="42" font-family="Inter, sans-serif" font-size="14" font-weight="800" fill="#ffffff">Public Spend Transparency, Sankey Fund Flow &amp; Cost-Per-KM</text>
+
+      <!-- Global Search Bar -->
+      <rect x="734" y="12" width="228" height="32" rx="6" fill="#1e293b" stroke="#334155"/>
+      <text x="748" y="32" font-family="Inter, sans-serif" font-size="10.5" fill="#94a3b8">Search WEH-NH8, SV-RD-01, ID...</text>
+      <rect x="924" y="17" width="30" height="22" rx="4" fill="#0f172a"/>
+      <text x="939" y="31" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#64748b" text-anchor="middle">⌘K</text>
+
+      <!-- Region Pill -->
+      <rect x="974" y="12" width="142" height="32" rx="6" fill="#1e293b" stroke="#334155"/>
+      <text x="988" y="32" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#f8fafc">IN • India (Mumbai • ₹)</text>
+
+      <!-- Online Status Pill -->
+      <rect x="1128" y="12" width="124" height="32" rx="6" fill="#064e3b" stroke="#059669"/>
+      <circle cx="1144" cy="28" r="4" fill="#10b981"/>
+      <text x="1156" y="32" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#a7f3d0">POSTGIS ONLINE</text>
+
+      <!-- Role Badge -->
+      <rect x="1264" y="12" width="156" height="32" rx="6" fill="#1e3a8a" stroke="#3b82f6"/>
+      <text x="1342" y="32" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#bfdbfe" text-anchor="middle">Frame #16 • 1440×900</text>
+    </g>
+    
+  <g id="MainContent_16">
+    
+    <!-- Top 4 Fiscal KPIs -->
+    
+    <g>
+      <rect x="244" y="72" width="281" height="94" rx="10" fill="#131c2e" stroke="#1e293b" stroke-width="1"/>
+      <rect x="244" y="72" width="4" height="94" rx="2" fill="#38bdf8"/>
+      <text x="262" y="96" font-family="Inter, sans-serif" font-size="10.5" font-weight="700" fill="#94a3b8" letter-spacing="0.6">TOTAL ALLOCATED (MUMBAI)</text>
+      <rect x="437" y="83" width="76" height="20" rx="10" fill="#0f172a" stroke="#38bdf8" stroke-width="0.8"/>
+      <text x="475" y="96" font-family="JetBrains Mono, monospace" font-size="9" font-weight="700" fill="#38bdf8" text-anchor="middle">10 PROJECTS</text>
+      <text x="262" y="128" font-family="Inter, sans-serif" font-size="24" font-weight="800" fill="#ffffff">₹92.20 Cr</text>
+      <text x="262" y="148" font-family="Inter, sans-serif" font-size="10.5" font-weight="500" fill="#cbd5e1">Across 10 Active &amp; Completed Contracts</text>
+    </g>
+    
+    
+    <g>
+      <rect x="541" y="72" width="281" height="94" rx="10" fill="#131c2e" stroke="#1e293b" stroke-width="1"/>
+      <rect x="541" y="72" width="4" height="94" rx="2" fill="#10b981"/>
+      <text x="559" y="96" font-family="Inter, sans-serif" font-size="10.5" font-weight="700" fill="#94a3b8" letter-spacing="0.6">TOTAL DISBURSED SPEND</text>
+      <rect x="734" y="83" width="76" height="20" rx="10" fill="#0f172a" stroke="#10b981" stroke-width="0.8"/>
+      <text x="772" y="96" font-family="JetBrains Mono, monospace" font-size="9" font-weight="700" fill="#10b981" text-anchor="middle">VERIFIED</text>
+      <text x="559" y="128" font-family="Inter, sans-serif" font-size="24" font-weight="800" fill="#ffffff">₹61.62 Cr</text>
+      <text x="559" y="148" font-family="Inter, sans-serif" font-size="10.5" font-weight="500" fill="#cbd5e1">66.8% Utilization • Audited Vouchers</text>
+    </g>
+    
+    
+    <g>
+      <rect x="838" y="72" width="281" height="94" rx="10" fill="#131c2e" stroke="#1e293b" stroke-width="1"/>
+      <rect x="838" y="72" width="4" height="94" rx="2" fill="#6366f1"/>
+      <text x="856" y="96" font-family="Inter, sans-serif" font-size="10.5" font-weight="700" fill="#94a3b8" letter-spacing="0.6">NORMALIZED COST / KM</text>
+      <rect x="1031" y="83" width="76" height="20" rx="10" fill="#0f172a" stroke="#6366f1" stroke-width="0.8"/>
+      <text x="1069" y="96" font-family="JetBrains Mono, monospace" font-size="9" font-weight="700" fill="#6366f1" text-anchor="middle">BENCHMARK</text>
+      <text x="856" y="128" font-family="Inter, sans-serif" font-size="24" font-weight="800" fill="#ffffff">₹7.39 Cr/km</text>
+      <text x="856" y="148" font-family="Inter, sans-serif" font-size="10.5" font-weight="500" fill="#cbd5e1">Computed via cost_per_km_view SQL View</text>
+    </g>
+    
+    
+    <g>
+      <rect x="1135" y="72" width="281" height="94" rx="10" fill="#131c2e" stroke="#1e293b" stroke-width="1"/>
+      <rect x="1135" y="72" width="4" height="94" rx="2" fill="#f59e0b"/>
+      <text x="1153" y="96" font-family="Inter, sans-serif" font-size="10.5" font-weight="700" fill="#94a3b8" letter-spacing="0.6">POPULATION SERVED</text>
+      <rect x="1328" y="83" width="76" height="20" rx="10" fill="#0f172a" stroke="#f59e0b" stroke-width="0.8"/>
+      <text x="1366" y="96" font-family="JetBrains Mono, monospace" font-size="9" font-weight="700" fill="#f59e0b" text-anchor="middle">BENEFICIARIES</text>
+      <text x="1153" y="128" font-family="Inter, sans-serif" font-size="24" font-weight="800" fill="#ffffff">4.82 Million</text>
+      <text x="1153" y="148" font-family="Inter, sans-serif" font-size="10.5" font-weight="500" fill="#cbd5e1">Aggregated via road_beneficiary_view</text>
+    </g>
+    
+
+    <!-- Center Left: Sankey Multi-Tier Fund Flow Diagram (SankeyFlowVisualizer.tsx / fund_sources) -->
+    <rect x="244" y="182" width="660" height="310" rx="10" fill="#131c2e" stroke="#1e293b"/>
+    <text x="264" y="208" font-family="Inter, sans-serif" font-size="14" font-weight="800" fill="#ffffff">Multi-Tier Public Fund Allocation Sankey Flow (fund_sources table)</text>
+    <text x="264" y="226" font-family="JetBrains Mono, monospace" font-size="10" fill="#38bdf8">Component: SankeyFlowVisualizer.tsx • Source Tier → Authority Tier → Road Contract Tier</text>
+
+    <!-- Left Nodes: Fund Sources -->
+    <rect x="268" y="248" width="155" height="48" rx="6" fill="#1e3a8a" stroke="#38bdf8"/>
+    <text x="345" y="270" font-family="Inter, sans-serif" font-size="10.5" font-weight="700" fill="#ffffff" text-anchor="middle">Central Road Infra Fund</text>
+    <text x="345" y="286" font-family="JetBrains Mono, monospace" font-size="10" fill="#93c5fd" text-anchor="middle">₹25.00 Cr (27.1%)</text>
+
+    <rect x="268" y="310" width="155" height="48" rx="6" fill="#064e3b" stroke="#10b981"/>
+    <text x="345" y="332" font-family="Inter, sans-serif" font-size="10.5" font-weight="700" fill="#ffffff" text-anchor="middle">State PWD Allocations</text>
+    <text x="345" y="348" font-family="JetBrains Mono, monospace" font-size="10" fill="#a7f3d0" text-anchor="middle">₹28.20 Cr (30.6%)</text>
+
+    <rect x="268" y="372" width="155" height="48" rx="6" fill="#451a03" stroke="#f59e0b"/>
+    <text x="345" y="394" font-family="Inter, sans-serif" font-size="10.5" font-weight="700" fill="#ffffff" text-anchor="middle">Municipal General Tier</text>
+    <text x="345" y="410" font-family="JetBrains Mono, monospace" font-size="10" fill="#fde68a" text-anchor="middle">₹39.00 Cr (42.3%)</text>
+
+    <!-- Flow Curves -->
+    <path d="M 423 272 C 475 272, 475 268, 525 268" fill="none" stroke="#38bdf8" stroke-width="14" stroke-opacity="0.45"/>
+    <path d="M 423 334 C 475 334, 475 334, 525 334" fill="none" stroke="#10b981" stroke-width="16" stroke-opacity="0.45"/>
+    <path d="M 423 396 C 475 396, 475 400, 525 400" fill="none" stroke="#f59e0b" stroke-width="20" stroke-opacity="0.45"/>
+
+    <!-- Middle Nodes: Authorities -->
+    <rect x="525" y="248" width="130" height="44" rx="6" fill="#0f172a" stroke="#38bdf8"/>
+    <text x="590" y="274" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#38bdf8" text-anchor="middle">NHAI-ROM (₹32.5Cr)</text>
+
+    <rect x="525" y="312" width="130" height="44" rx="6" fill="#0f172a" stroke="#10b981"/>
+    <text x="590" y="338" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#10b981" text-anchor="middle">PWD-MUM (₹20.8Cr)</text>
+
+    <rect x="525" y="376" width="130" height="44" rx="6" fill="#0f172a" stroke="#f59e0b"/>
+    <text x="590" y="402" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#f59e0b" text-anchor="middle">MCGM Wards (₹38.9Cr)</text>
+
+    <!-- Flow Curves to Projects -->
+    <path d="M 655 270 C 695 270, 695 268, 735 268" fill="none" stroke="#38bdf8" stroke-width="14" stroke-opacity="0.45"/>
+    <path d="M 655 334 C 695 334, 695 334, 735 334" fill="none" stroke="#10b981" stroke-width="14" stroke-opacity="0.45"/>
+    <path d="M 655 398 C 695 398, 695 400, 735 400" fill="none" stroke="#f59e0b" stroke-width="18" stroke-opacity="0.45"/>
+
+    <!-- Right Nodes: Major Projects -->
+    <rect x="735" y="248" width="150" height="44" rx="6" fill="#0f172a" stroke="#cbd5e1"/>
+    <text x="810" y="274" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle">WEH &amp; Ghodbunder</text>
+
+    <rect x="735" y="312" width="150" height="44" rx="6" fill="#0f172a" stroke="#cbd5e1"/>
+    <text x="810" y="338" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle">Link Rd &amp; SBM Concrete</text>
+
+    <rect x="735" y="376" width="150" height="44" rx="6" fill="#0f172a" stroke="#f43f5e"/>
+    <text x="810" y="402" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#fecdd3" text-anchor="middle">SV Rd &amp; LBS Sewer</text>
+
+    <text x="268" y="466" font-family="JetBrains Mono, monospace" font-size="10" fill="#94a3b8">✓ 100% Traceable from Taxpayer Source → Authority → Road Segment → Beneficiary Population</text>
+
+    <!-- Center Right: Value for Money & Beneficiary Card (VfmScoreCard.tsx) -->
+    <rect x="920" y="182" width="496" height="310" rx="10" fill="#131c2e" stroke="#1e293b"/>
+    <text x="940" y="208" font-family="Inter, sans-serif" font-size="14" font-weight="800" fill="#ffffff">Cost-Per-KM &amp; Beneficiary Impact (road_beneficiary_view)</text>
+    <text x="940" y="226" font-family="JetBrains Mono, monospace" font-size="10" fill="#38bdf8">Joins projects ⋈ roads ⋈ project_beneficiaries (residential/commuters)</text>
+
+    <rect x="940" y="244" width="220" height="104" rx="8" fill="#0f172a" stroke="#10b981"/>
+    <text x="956" y="266" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8">BEST VALUE FOR MONEY</text>
+    <text x="956" y="294" font-family="Inter, sans-serif" font-size="16" font-weight="800" fill="#10b981">Ghodbunder Hwy</text>
+    <text x="956" y="314" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#e2e8f0">₹0.93 Cr/km • 85k AADT</text>
+    <text x="956" y="332" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#10b981">Saved ₹30.0 Lakhs under budget</text>
+
+    <rect x="1176" y="244" width="220" height="104" rx="8" fill="#0f172a" stroke="#f43f5e"/>
+    <text x="1192" y="266" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8">COST OVERRUN FLAGGED</text>
+    <text x="1192" y="294" font-family="Inter, sans-serif" font-size="16" font-weight="800" fill="#f43f5e">EEH Remediation</text>
+    <text x="1192" y="314" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#e2e8f0">+₹12.0 Lakhs Overrun</text>
+    <text x="1192" y="332" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#fecdd3">Spent ₹1.92 Cr vs ₹1.80 Cr Alloc</text>
+
+    <rect x="940" y="362" width="456" height="112" rx="8" fill="#0f172a" stroke="#1e293b"/>
+    <text x="956" y="384" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#38bdf8">BENEFICIARY DEMOGRAPHICS (project_beneficiaries table)</text>
+    <text x="956" y="408" font-family="Inter, sans-serif" font-size="11.5" fill="#e2e8f0">• Commuters Served Daily: 603,000 vehicles/day across 8 corridors</text>
+    <text x="956" y="430" font-family="Inter, sans-serif" font-size="11.5" fill="#e2e8f0">• Households Directly Connected: 412,500 Census Households (2021 Base)</text>
+    <text x="956" y="452" font-family="Inter, sans-serif" font-size="11.5" fill="#10b981">• Per-Capita Infrastructure Spend: ₹1,912 per citizen beneficiary</text>
+
+    <!-- Bottom SQL View Table (cost_per_km_view) -->
+    <g>
+<rect x="244" y="508" width="1172" height="328" rx="10" fill="#131c2e" stroke="#1e293b" stroke-width="1"/>
+<text x="262" y="534" font-family="Inter, sans-serif" font-size="14" font-weight="800" fill="#ffffff">Normalized Project Cost-Per-Kilometer SQL View (cost_per_km_view)</text>
+<text x="262" y="552" font-family="JetBrains Mono, monospace" font-size="10" fill="#38bdf8">SELECT project_id, title, road_name, length_km, budget_allocated, budget_spent, allocated_per_km, spent_per_km, overrun_per_km, status FROM cost_per_km_view</text>
+<rect x="245" y="564" width="1170" height="32" fill="#0f172a"/>
+<line x1="244" y1="564" x2="1416" y2="564" stroke="#1e293b"/>
+<line x1="244" y1="596" x2="1416" y2="596" stroke="#1e293b"/>
+<text x="260" y="584" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">PROJECT ID</text>
+<text x="355" y="584" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">CONTRACT TITLE</text>
+<text x="605" y="584" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">ROAD NAME</text>
+<text x="780" y="584" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">LENGTH</text>
+<text x="860" y="584" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">ALLOCATED / KM</text>
+<text x="990" y="584" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">SPENT / KM</text>
+<text x="1120" y="584" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">OVERRUN / KM</text>
+<text x="1255" y="584" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">STATUS</text>
+<line x1="256" y1="634" x2="1404" y2="634" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="619" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#PRJ-01</text>
+<text x="355" y="619" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#e2e8f0">WEH Flyover Resurfacing &amp; Grouting</text>
+<text x="605" y="619" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Western Express Hwy</text>
+<text x="780" y="619" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">25.5 km</text>
+<text x="860" y="619" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#10b981">₹0.94 Cr/km</text>
+<text x="990" y="619" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#10b981">₹0.73 Cr/km</text>
+<text x="1120" y="619" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">-₹0.21 Cr (Under)</text>
+
+    <g>
+      <rect x="1255" y="604" width="86" height="22" rx="11" fill="#0c4a6e" stroke="#0ea5e9" stroke-width="1"/>
+      <text x="1298" y="618.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#bae6fd" text-anchor="middle">IN_PROGRESS</text>
+    </g>
+    
+<rect x="245" y="634" width="1170" height="38" fill="#0f172a" fill-opacity="0.45"/>
+<line x1="256" y1="672" x2="1404" y2="672" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="657" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#PRJ-02</text>
+<text x="355" y="657" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#e2e8f0">EEH Pothole Remediation Campaign</text>
+<text x="605" y="657" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Eastern Express Hwy</text>
+<text x="780" y="657" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">22.1 km</text>
+<text x="860" y="657" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#10b981">₹0.081 Cr/km</text>
+<text x="990" y="657" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#10b981">₹0.087 Cr/km</text>
+<text x="1120" y="657" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">+₹0.006 Cr (OVER)</text>
+
+    <g>
+      <rect x="1255" y="642" width="98" height="22" rx="11" fill="#4c0519" stroke="#f43f5e" stroke-width="1"/>
+      <text x="1304" y="656.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#fecdd3" text-anchor="middle">OVERRUN AUDIT</text>
+    </g>
+    
+<line x1="256" y1="710" x2="1404" y2="710" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="695" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#PRJ-03</text>
+<text x="355" y="695" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">SV Road Drainage Microtunnelling</text>
+<text x="605" y="695" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">S.V. Road</text>
+<text x="780" y="695" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">16.8 km</text>
+<text x="860" y="695" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#10b981">₹0.57 Cr/km</text>
+<text x="990" y="695" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#10b981">₹0.27 Cr/km</text>
+<text x="1120" y="695" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Frozen at 47%</text>
+
+    <g>
+      <rect x="1255" y="680" width="98" height="22" rx="11" fill="#4c0519" stroke="#f43f5e" stroke-width="1"/>
+      <text x="1304" y="694.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#fecdd3" text-anchor="middle">HALTED • 378d</text>
+    </g>
+    
+<rect x="245" y="710" width="1170" height="38" fill="#0f172a" fill-opacity="0.45"/>
+<line x1="256" y1="748" x2="1404" y2="748" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="733" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#PRJ-05</text>
+<text x="355" y="733" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Link Road Concrete Upgrade Ph.2</text>
+<text x="605" y="733" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Link Road</text>
+<text x="780" y="733" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">18.2 km</text>
+<text x="860" y="733" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#10b981">₹0.80 Cr/km</text>
+<text x="990" y="733" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#10b981">₹0.41 Cr/km</text>
+<text x="1120" y="733" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">-₹0.39 Cr (Under)</text>
+
+    <g>
+      <rect x="1255" y="718" width="86" height="22" rx="11" fill="#0c4a6e" stroke="#0ea5e9" stroke-width="1"/>
+      <text x="1298" y="732.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#bae6fd" text-anchor="middle">IN_PROGRESS</text>
+    </g>
+    
+<line x1="256" y1="786" x2="1404" y2="786" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="771" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#PRJ-07</text>
+<text x="355" y="771" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#e2e8f0">SBM Micro-Silica Concrete Topping</text>
+<text x="605" y="771" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Senapati Bapat Marg</text>
+<text x="780" y="771" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">7.5 km</text>
+<text x="860" y="771" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#10b981">₹1.13 Cr/km</text>
+<text x="990" y="771" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#10b981">₹1.12 Cr/km</text>
+<text x="1120" y="771" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">-₹0.01 Cr (Saved)</text>
+
+    <g>
+      <rect x="1255" y="756" width="74" height="22" rx="11" fill="#064e3b" stroke="#10b981" stroke-width="1"/>
+      <text x="1292" y="770.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#a7f3d0" text-anchor="middle">COMPLETED</text>
+    </g>
+    
+<rect x="245" y="786" width="1170" height="38" fill="#0f172a" fill-opacity="0.45"/>
+<line x1="256" y1="824" x2="1404" y2="824" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="809" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#PRJ-08</text>
+<text x="355" y="809" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Ghodbunder Mast-Asphalt Overlay</text>
+<text x="605" y="809" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Ghodbunder Road</text>
+<text x="780" y="809" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">20.0 km</text>
+<text x="860" y="809" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#10b981">₹0.95 Cr/km</text>
+<text x="990" y="809" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#10b981">₹0.93 Cr/km</text>
+<text x="1120" y="809" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">-₹0.02 Cr (Saved)</text>
+
+    <g>
+      <rect x="1255" y="794" width="74" height="22" rx="11" fill="#064e3b" stroke="#10b981" stroke-width="1"/>
+      <text x="1292" y="808.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#a7f3d0" text-anchor="middle">COMPLETED</text>
+    </g>
+    
+</g>
+    
+  </g>
+  
+    <g id="FooterBar_16">
+      <rect x="220" y="868" width="1220" height="32" fill="#090d16"/>
+      <line x1="220" y1="868" x2="1440" y2="868" stroke="#1e293b" stroke-width="1"/>
+      <text x="244" y="888" font-family="JetBrains Mono, monospace" font-size="10" font-weight="600" fill="#38bdf8">BOUND DBMS RELATIONS: projects, fund_sources, cost_per_km_view, project_beneficiaries</text>
+      <text x="1420" y="888" font-family="JetBrains Mono, monospace" font-size="10" fill="#64748b" text-anchor="end">ROADWATCH DBMS • Kanak Waradkar (24B-CO-030) • Krushna Surve (24B-CO-031) • Manjunath Gavada (24B-CO-035)</text>
+    </g>
+    
+</svg>

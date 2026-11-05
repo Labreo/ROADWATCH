@@ -1,0 +1,279 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" width="1440" height="900">
+  
+  <defs>
+    <linearGradient id="bgDark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1120"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#151f32"/>
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#0ea5e9"/>
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="roseGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e11d48"/>
+      <stop offset="100%" stop-color="#f43f5e"/>
+    </linearGradient>
+    <linearGradient id="mapBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0c192c"/>
+      <stop offset="100%" stop-color="#0f243c"/>
+    </linearGradient>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="112%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <rect id="Frame_02_Background" x="0" y="0" width="1440" height="900" fill="#0b1120"/>
+  <g id="Sidebar_2"><rect x="0" y="0" width="220" height="900" fill="#090d16"/><line x1="220" y1="0" x2="220" y2="900" stroke="#1e293b" stroke-width="1"/><rect x="16" y="14" width="30" height="30" rx="8" fill="url(#blueGrad)"/><text x="31" y="34" font-family="Inter, sans-serif" font-size="14" font-weight="800" fill="#ffffff" text-anchor="middle">R</text><text x="56" y="28" font-family="Inter, sans-serif" font-size="15" font-weight="800" fill="#ffffff" letter-spacing="0.5">ROADWATCH</text><text x="56" y="42" font-family="JetBrains Mono, monospace" font-size="9" font-weight="600" fill="#38bdf8">POSTGIS v16 • CIVIC AI</text><line x1="0" y1="56" x2="220" y2="56" stroke="#1e293b" stroke-width="1"/><text x="18" y="76" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#64748b" letter-spacing="1.2">PLATFORM MODULES</text><rect x="10" y="88" width="200" height="34" rx="7" fill="#1e3a8a" stroke="#3b82f6" stroke-width="1"/><rect x="10" y="95" width="3" height="20" rx="1.5" fill="#38bdf8"/><rect x="20" y="95" width="26" height="20" rx="4" fill="#2563eb"/><text x="33" y="108" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="700" fill="#ffffff" text-anchor="middle">MAP</text><text x="54" y="109" font-family="Inter, sans-serif" font-size="11.5" font-weight="700" fill="#ffffff">Geospatial Map</text><rect x="20" y="133" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="146" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">AI</text><text x="54" y="147" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">AI Chat Assistant</text><rect x="20" y="171" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="184" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">INR</text><text x="54" y="185" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Budget Compliance</text><rect x="20" y="209" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="222" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">CON</text><text x="54" y="223" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Contractor Scores</text><rect x="20" y="247" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="260" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">CMP</text><text x="54" y="261" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Citizen Complaints</text><rect x="20" y="285" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="298" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">OPS</text><text x="54" y="299" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Operations Center</text><rect x="20" y="323" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="336" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">SLA</text><text x="54" y="337" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">SLA Escalations</text><rect x="20" y="361" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="374" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">GIS</text><text x="54" y="375" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Boundary Conflicts</text><rect x="20" y="399" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="412" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">SCH</text><text x="54" y="413" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Repair Scheduler</text><rect x="20" y="437" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="450" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle"> T </text><text x="54" y="451" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Historical Playback</text><rect x="20" y="475" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="488" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">IOT</text><text x="54" y="489" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">IoT Sensor Monitor</text><rect x="20" y="513" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="526" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">3D</text><text x="54" y="527" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">3D Digital Twin</text><rect x="20" y="551" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="564" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">REG</text><text x="54" y="565" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Multi-Region Hub</text><rect x="20" y="589" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="602" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">TND</text><text x="54" y="603" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Procurement Ledger</text><rect x="20" y="627" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="640" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">LOG</text><text x="54" y="641" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Forensic Audit Log</text><rect x="12" y="676" width="196" height="92" rx="8" fill="#0f172a" stroke="#1e293b"/><text x="24" y="696" font-family="JetBrains Mono, monospace" font-size="9" font-weight="700" fill="#38bdf8">DB ENGINE TELEMETRY</text><circle cx="28" cy="714" r="4" fill="#10b981"/><text x="38" y="718" font-family="Inter, sans-serif" font-size="10.5" font-weight="600" fill="#e2e8f0">PostGIS 3.4 Spatial GIST</text><text x="24" y="736" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94a3b8">UTC Clock: 14:32:08Z</text><text x="24" y="754" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94a3b8">Sync Queue: 0 Pending</text><rect x="12" y="780" width="196" height="76" rx="8" fill="#131c2e" stroke="#1e293b"/><circle cx="34" cy="810" r="14" fill="#2563eb"/><text x="34" y="814" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">KW</text><text x="56" y="804" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#ffffff">Kanak Waradkar</text><text x="56" y="818" font-family="JetBrains Mono, monospace" font-size="9" fill="#38bdf8">Roll: 24B-CO-030</text><text x="24" y="842" font-family="Inter, sans-serif" font-size="9.5" fill="#94a3b8">Team: Krushna (031) • Manjunath (035)</text></g>
+  
+    <g id="TopNav_2">
+      <rect x="220" y="0" width="1220" height="56" fill="#0f172a"/>
+      <line x1="220" y1="56" x2="1440" y2="56" stroke="#1e293b" stroke-width="1"/>
+      <text x="244" y="23" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#38bdf8" letter-spacing="0.8">INTELLIGENCE / ROAD REGISTRY</text>
+      <text x="244" y="42" font-family="Inter, sans-serif" font-size="14" font-weight="800" fill="#ffffff">Interactive Geospatial Road Registry &amp; PostGIS Explorer</text>
+
+      <!-- Global Search Bar -->
+      <rect x="734" y="12" width="228" height="32" rx="6" fill="#1e293b" stroke="#334155"/>
+      <text x="748" y="32" font-family="Inter, sans-serif" font-size="10.5" fill="#94a3b8">Search WEH-NH8, SV-RD-01, ID...</text>
+      <rect x="924" y="17" width="30" height="22" rx="4" fill="#0f172a"/>
+      <text x="939" y="31" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#64748b" text-anchor="middle">⌘K</text>
+
+      <!-- Region Pill -->
+      <rect x="974" y="12" width="142" height="32" rx="6" fill="#1e293b" stroke="#334155"/>
+      <text x="988" y="32" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#f8fafc">IN • India (Mumbai • ₹)</text>
+
+      <!-- Online Status Pill -->
+      <rect x="1128" y="12" width="124" height="32" rx="6" fill="#064e3b" stroke="#059669"/>
+      <circle cx="1144" cy="28" r="4" fill="#10b981"/>
+      <text x="1156" y="32" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#a7f3d0">POSTGIS ONLINE</text>
+
+      <!-- Role Badge -->
+      <rect x="1264" y="12" width="156" height="32" rx="6" fill="#1e3a8a" stroke="#3b82f6"/>
+      <text x="1342" y="32" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#bfdbfe" text-anchor="middle">Frame #02 • 1440×900</text>
+    </g>
+    
+  <g id="MainContent_2">
+    
+    <!-- Filter & Spatial Query Toolbar -->
+    <rect x="244" y="70" width="760" height="46" rx="8" fill="#131c2e" stroke="#1e293b"/>
+    <text x="262" y="97" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#38bdf8">LAYER FILTERS:</text>
+    <rect x="372" y="79" width="88" height="28" rx="6" fill="#1e3a8a" stroke="#3b82f6"/>
+    <text x="416" y="97" font-family="Inter, sans-serif" font-size="10.5" font-weight="700" fill="#ffffff" text-anchor="middle">All Roads (8)</text>
+    <rect x="468" y="79" width="110" height="28" rx="6" fill="#0f172a" stroke="#334155"/>
+    <text x="523" y="97" font-family="Inter, sans-serif" font-size="10.5" fill="#cbd5e1" text-anchor="middle">Complaints (42)</text>
+    <rect x="586" y="79" width="132" height="28" rx="6" fill="#0f172a" stroke="#334155"/>
+    <text x="652" y="97" font-family="Inter, sans-serif" font-size="10.5" fill="#cbd5e1" text-anchor="middle">GIST Polygons (5)</text>
+    <rect x="726" y="79" width="128" height="28" rx="6" fill="#0f172a" stroke="#334155"/>
+    <text x="790" y="97" font-family="Inter, sans-serif" font-size="10.5" fill="#cbd5e1" text-anchor="middle">Defect Heatmap</text>
+    <rect x="862" y="79" width="130" height="28" rx="6" fill="#064e3b" stroke="#10b981"/>
+    <text x="927" y="97" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#a7f3d0" text-anchor="middle">SRID:4326 ACTIVE</text>
+
+    <!-- Main Interactive GIS Map Canvas -->
+    
+    <g>
+      <rect x="244" y="128" width="760" height="460" rx="10" fill="url(#mapBg)" stroke="#1e293b" stroke-width="1"/>
+      <line x1="284" y1="128" x2="284" y2="588" stroke="#1e293b" stroke-width="0.7"/><line x1="329" y1="128" x2="329" y2="588" stroke="#1e293b" stroke-width="0.7"/><line x1="374" y1="128" x2="374" y2="588" stroke="#1e293b" stroke-width="0.7"/><line x1="419" y1="128" x2="419" y2="588" stroke="#1e293b" stroke-width="0.7"/><line x1="464" y1="128" x2="464" y2="588" stroke="#1e293b" stroke-width="0.7"/><line x1="509" y1="128" x2="509" y2="588" stroke="#1e293b" stroke-width="0.7"/><line x1="554" y1="128" x2="554" y2="588" stroke="#1e293b" stroke-width="0.7"/><line x1="599" y1="128" x2="599" y2="588" stroke="#1e293b" stroke-width="0.7"/><line x1="644" y1="128" x2="644" y2="588" stroke="#1e293b" stroke-width="0.7"/><line x1="689" y1="128" x2="689" y2="588" stroke="#1e293b" stroke-width="0.7"/><line x1="734" y1="128" x2="734" y2="588" stroke="#1e293b" stroke-width="0.7"/><line x1="779" y1="128" x2="779" y2="588" stroke="#1e293b" stroke-width="0.7"/><line x1="824" y1="128" x2="824" y2="588" stroke="#1e293b" stroke-width="0.7"/><line x1="869" y1="128" x2="869" y2="588" stroke="#1e293b" stroke-width="0.7"/><line x1="914" y1="128" x2="914" y2="588" stroke="#1e293b" stroke-width="0.7"/><line x1="959" y1="128" x2="959" y2="588" stroke="#1e293b" stroke-width="0.7"/><line x1="244" y1="168" x2="1004" y2="168" stroke="#1e293b" stroke-width="0.7"/><line x1="244" y1="213" x2="1004" y2="213" stroke="#1e293b" stroke-width="0.7"/><line x1="244" y1="258" x2="1004" y2="258" stroke="#1e293b" stroke-width="0.7"/><line x1="244" y1="303" x2="1004" y2="303" stroke="#1e293b" stroke-width="0.7"/><line x1="244" y1="348" x2="1004" y2="348" stroke="#1e293b" stroke-width="0.7"/><line x1="244" y1="393" x2="1004" y2="393" stroke="#1e293b" stroke-width="0.7"/><line x1="244" y1="438" x2="1004" y2="438" stroke="#1e293b" stroke-width="0.7"/><line x1="244" y1="483" x2="1004" y2="483" stroke="#1e293b" stroke-width="0.7"/><line x1="244" y1="528" x2="1004" y2="528" stroke="#1e293b" stroke-width="0.7"/><line x1="244" y1="573" x2="1004" y2="573" stroke="#1e293b" stroke-width="0.7"/>
+      
+      <!-- Authority Jurisdiction Polygons (ST_Contains) -->
+      <polygon points="284,188 609,178 639,381 294,404" fill="#1d4ed8" fill-opacity="0.14" stroke="#3b82f6" stroke-width="1.2" stroke-dasharray="5,4"/>
+      <polygon points="609,178 969,193 959,543 639,381" fill="#059669" fill-opacity="0.12" stroke="#10b981" stroke-width="1.2" stroke-dasharray="5,4"/>
+      <polygon points="294,404 639,381 700,558 304,553" fill="#d97706" fill-opacity="0.12" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="5,4"/>
+
+      <!-- Road LineStrings (roads.geom) -->
+      <!-- WEH-NH8 (Under Construction - Amber) -->
+      <polyline points="334,558 384,427 439,303 494,173" fill="none" stroke="#f59e0b" stroke-width="5" stroke-linecap="round"/>
+      <!-- SV-RD-01 (Poor - Rose Red) -->
+      <polyline points="299,543 339,413 379,289 409,183" fill="none" stroke="#f43f5e" stroke-width="4.5" stroke-linecap="round"/>
+      <!-- EEH-NH8 (Fair - Sky Blue) -->
+      <polyline points="662,553 730,395 806,257 882,173" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round"/>
+      <!-- SBM-MARG-01 & Marine Drive (Good - Emerald) -->
+      <polyline points="314,459 563,441 822,468" fill="none" stroke="#10b981" stroke-width="4" stroke-linecap="round"/>
+      <!-- LBS-MARG-01 (Poor - Rose Red) -->
+      <polyline points="578,548 624,367 715,198" fill="none" stroke="#f43f5e" stroke-width="4" stroke-dasharray="8,4" stroke-linecap="round"/>
+
+      <!-- Defect Complaint Point Pins (complaints.geom) -->
+      <circle cx="359" cy="349" r="11" fill="#f43f5e" stroke="#ffffff" stroke-width="2"/>
+      <text x="359" y="353" font-family="Inter, sans-serif" font-size="9.5" font-weight="800" fill="#ffffff" text-anchor="middle">P1</text>
+
+      <circle cx="429" cy="321" r="11" fill="#f59e0b" stroke="#ffffff" stroke-width="2"/>
+      <text x="429" y="325" font-family="Inter, sans-serif" font-size="9.5" font-weight="800" fill="#ffffff" text-anchor="middle">C2</text>
+
+      <circle cx="632" cy="358" r="11" fill="#f43f5e" stroke="#ffffff" stroke-width="2"/>
+      <text x="632" y="362" font-family="Inter, sans-serif" font-size="9.5" font-weight="800" fill="#ffffff" text-anchor="middle">W3</text>
+
+      <circle cx="761" cy="330" r="11" fill="#10b981" stroke="#ffffff" stroke-width="2"/>
+      <text x="761" y="334" font-family="Inter, sans-serif" font-size="9.5" font-weight="800" fill="#ffffff" text-anchor="middle">✓</text>
+
+      <!-- Map Overlay Header Pill -->
+      <rect x="258" y="142" width="360" height="30" rx="6" fill="#090d16" fill-opacity="0.88" stroke="#334155"/>
+      <text x="270" y="161" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#38bdf8">Mumbai Road Network — PostGIS GEOMETRY(LineString, 4326)</text>
+
+      <!-- Map Legend Box -->
+      <rect x="258" y="546" width="450" height="28" rx="6" fill="#090d16" fill-opacity="0.88" stroke="#334155"/>
+      <circle cx="272" cy="560" r="4.5" fill="#10b981"/>
+      <text x="282" y="564" font-family="Inter, sans-serif" font-size="9.5" font-weight="600" fill="#e2e8f0">Good (SBM/Marine)</text>
+      <circle cx="386" cy="560" r="4.5" fill="#38bdf8"/>
+      <text x="396" y="564" font-family="Inter, sans-serif" font-size="9.5" font-weight="600" fill="#e2e8f0">Fair (EEH-NH8)</text>
+      <circle cx="486" cy="560" r="4.5" fill="#f59e0b"/>
+      <text x="496" y="564" font-family="Inter, sans-serif" font-size="9.5" font-weight="600" fill="#e2e8f0">Construction (WEH)</text>
+      <circle cx="604" cy="560" r="4.5" fill="#f43f5e"/>
+      <text x="614" y="564" font-family="Inter, sans-serif" font-size="9.5" font-weight="600" fill="#e2e8f0">Poor (SV/LBS)</text>
+    </g>
+    
+
+    <!-- Bottom Road Segment Quick Matrix under Map -->
+    <g>
+<rect x="244" y="602" width="760" height="244" rx="10" fill="#131c2e" stroke="#1e293b" stroke-width="1"/>
+<text x="262" y="628" font-family="Inter, sans-serif" font-size="14" font-weight="800" fill="#ffffff">Gazetted Road Segments in Active Map Viewport</text>
+<text x="262" y="646" font-family="JetBrains Mono, monospace" font-size="10" fill="#38bdf8">Spatial GIST Index Scan: idx_roads_geom • Bounding Box [72.80, 18.90, 72.96, 19.28]</text>
+<rect x="245" y="658" width="758" height="32" fill="#0f172a"/>
+<line x1="244" y1="658" x2="1004" y2="658" stroke="#1e293b"/>
+<line x1="244" y1="690" x2="1004" y2="690" stroke="#1e293b"/>
+<text x="260" y="678" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">ROAD CODE</text>
+<text x="360" y="678" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">NAME</text>
+<text x="525" y="678" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">TYPE</text>
+<text x="580" y="678" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">LENGTH</text>
+<text x="655" y="678" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">SURFACE / LANES</text>
+<text x="780" y="678" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">AADT TRAFFIC</text>
+<text x="885" y="678" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">CONDITION</text>
+<line x1="256" y1="726" x2="992" y2="726" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="712" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#e2e8f0">SV-RD-01</text>
+<text x="360" y="712" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">S.V. Road (Selected)</text>
+<text x="525" y="712" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">City</text>
+<text x="580" y="712" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">16.8 km</text>
+<text x="655" y="712" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Asphalt • 4L (14.5m)</text>
+<text x="780" y="712" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">62,000 / day</text>
+
+    <g>
+      <rect x="885" y="697" width="68" height="22" rx="11" fill="#4c0519" stroke="#f43f5e" stroke-width="1"/>
+      <text x="919" y="711.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#fecdd3" text-anchor="middle">POOR</text>
+    </g>
+    
+<rect x="245" y="726" width="758" height="36" fill="#0f172a" fill-opacity="0.45"/>
+<line x1="256" y1="762" x2="992" y2="762" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="748" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#e2e8f0">WEH-NH8</text>
+<text x="360" y="748" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Western Express Hwy</text>
+<text x="525" y="748" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">NH</text>
+<text x="580" y="748" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">25.5 km</text>
+<text x="655" y="748" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Asphalt • 6L (35.5m)</text>
+<text x="780" y="748" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">185,000 / day</text>
+
+    <g>
+      <rect x="885" y="733" width="92" height="22" rx="11" fill="#451a03" stroke="#f59e0b" stroke-width="1"/>
+      <text x="931" y="747.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#fde68a" text-anchor="middle">CONSTRUCTION</text>
+    </g>
+    
+<line x1="256" y1="798" x2="992" y2="798" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="784" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#e2e8f0">LBS-MARG-01</text>
+<text x="360" y="784" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#e2e8f0">LBS Marg Arterial</text>
+<text x="525" y="784" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">City</text>
+<text x="580" y="784" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">21.0 km</text>
+<text x="655" y="784" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Asphalt • 4L (16.0m)</text>
+<text x="780" y="784" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">78,000 / day</text>
+
+    <g>
+      <rect x="885" y="769" width="68" height="22" rx="11" fill="#4c0519" stroke="#f43f5e" stroke-width="1"/>
+      <text x="919" y="783.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#fecdd3" text-anchor="middle">POOR</text>
+    </g>
+    
+<rect x="245" y="798" width="758" height="36" fill="#0f172a" fill-opacity="0.45"/>
+<line x1="256" y1="834" x2="992" y2="834" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="820" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#e2e8f0">EEH-NH8</text>
+<text x="360" y="820" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Eastern Express Hwy</text>
+<text x="525" y="820" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">SH</text>
+<text x="580" y="820" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">22.1 km</text>
+<text x="655" y="820" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Asphalt • 4L (22.0m)</text>
+<text x="780" y="820" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">95,000 / day</text>
+
+    <g>
+      <rect x="885" y="805" width="68" height="22" rx="11" fill="#0c4a6e" stroke="#0ea5e9" stroke-width="1"/>
+      <text x="919" y="819.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#bae6fd" text-anchor="middle">FAIR</text>
+    </g>
+    
+</g>
+
+    <!-- Right Slide-Over Inspector Drawer (RoadDetailsPanel.tsx) -->
+    <rect x="1020" y="70" width="396" height="784" rx="12" fill="#131c2e" stroke="#3b82f6" stroke-width="1.2"/>
+    <rect x="1020" y="70" width="396" height="68" rx="12" fill="#1e293b"/>
+    <text x="1040" y="96" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#38bdf8">SELECTED ROAD INSPECTOR • ID #3</text>
+    <text x="1040" y="120" font-family="Inter, sans-serif" font-size="18" font-weight="800" fill="#ffffff">S.V. Road (SV-RD-01)</text>
+    
+    <g>
+      <rect x="1316" y="94" width="86" height="22" rx="11" fill="#4c0519" stroke="#f43f5e" stroke-width="1"/>
+      <text x="1359" y="108.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#fecdd3" text-anchor="middle">POOR STATUS</text>
+    </g>
+    
+
+    <!-- Physical Telemetry Specs -->
+    <rect x="1038" y="152" width="172" height="62" rx="8" fill="#0f172a" stroke="#1e293b"/>
+    <text x="1050" y="172" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">LENGTH &amp; WIDTH</text>
+    <text x="1050" y="198" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="#ffffff">16.80 km • 14.5m</text>
+
+    <rect x="1224" y="152" width="174" height="62" rx="8" fill="#0f172a" stroke="#1e293b"/>
+    <text x="1236" y="172" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">DAILY TRAFFIC (AADT)</text>
+    <text x="1236" y="198" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="#38bdf8">62,000 veh/day</text>
+
+    <rect x="1038" y="224" width="172" height="62" rx="8" fill="#0f172a" stroke="#1e293b"/>
+    <text x="1050" y="244" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">SURFACE &amp; LANES</text>
+    <text x="1050" y="270" font-family="JetBrains Mono, monospace" font-size="13" font-weight="700" fill="#ffffff">Asphalt • 4 Lanes</text>
+
+    <rect x="1224" y="224" width="174" height="62" rx="8" fill="#0f172a" stroke="#1e293b"/>
+    <text x="1236" y="244" font-family="Inter, sans-serif" font-size="10" fill="#94a3b8">LAST RELAYED DATE</text>
+    <text x="1236" y="270" font-family="JetBrains Mono, monospace" font-size="13" font-weight="700" fill="#f43f5e">2018-06-10 (Overdue)</text>
+
+    <!-- Jurisdiction & Contractor Card -->
+    <rect x="1038" y="300" width="360" height="118" rx="8" fill="#0f172a" stroke="#1e293b"/>
+    <text x="1052" y="322" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#38bdf8">MANAGING AUTHORITY &amp; CONTRACTOR</text>
+    <text x="1052" y="344" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#ffffff">City Municipal Corp — Ward K-West (MCGM-KW)</text>
+    <text x="1052" y="362" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#94a3b8">ward.kw@mcgm.gov.in • +91-22-2623-0000</text>
+    <line x1="1052" y1="372" x2="1382" y2="372" stroke="#1e293b"/>
+    <text x="1052" y="392" font-family="Inter, sans-serif" font-size="11.5" font-weight="700" fill="#f43f5e">Contractor: Omega Infrastructure (CON-00010)</text>
+    <text x="1052" y="408" font-family="JetBrains Mono, monospace" font-size="10" fill="#fecdd3">⚠️ BLACKLISTED • Rating 1.80★ • Perf Index: 21.60</text>
+
+    <!-- Active Projects on Road -->
+    <rect x="1038" y="432" width="360" height="170" rx="8" fill="#0f172a" stroke="#1e293b"/>
+    <text x="1052" y="454" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#38bdf8">LINKED CONTRACTS (projects table)</text>
+    <rect x="1050" y="466" width="336" height="58" rx="6" fill="#131c2e" stroke="#f43f5e" stroke-width="0.8"/>
+    <text x="1062" y="484" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#ffffff">#PRJ-03: SV Road Drainage Microtunnelling</text>
+    <text x="1062" y="502" font-family="JetBrains Mono, monospace" font-size="10" fill="#f43f5e">Alloc: ₹9.50 Cr • Spent: ₹4.50 Cr • Delay: 378d (HALTED)</text>
+
+    <rect x="1050" y="532" width="336" height="58" rx="6" fill="#131c2e" stroke="#0ea5e9" stroke-width="0.8"/>
+    <text x="1062" y="550" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#ffffff">#PRJ-04: SV Road Emergency Asphalt Laying</text>
+    <text x="1062" y="568" font-family="JetBrains Mono, monospace" font-size="10" fill="#38bdf8">Alloc: ₹3.50 Cr • Spent: ₹1.20 Cr • Zenith Con (ACTIVE)</text>
+
+    <!-- Data Quality Scorecard (DataQualityCard.tsx) -->
+    <rect x="1038" y="616" width="360" height="162" rx="8" fill="#0f172a" stroke="#1e293b"/>
+    <text x="1052" y="638" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#10b981">DATA QUALITY SCORE: 88 / 100 (GRADE B+)</text>
+    <text x="1052" y="662" font-family="Inter, sans-serif" font-size="10.5" fill="#cbd5e1">Completeness (14/14 fields)</text>
+    <rect x="1230" y="652" width="150" height="8" rx="4" fill="#1e293b"/><rect x="1230" y="652" width="142" height="8" rx="4" fill="#10b981"/>
+    <text x="1052" y="688" font-family="Inter, sans-serif" font-size="10.5" fill="#cbd5e1">Freshness (Inspected 2025)</text>
+    <rect x="1230" y="678" width="150" height="8" rx="4" fill="#1e293b"/><rect x="1230" y="678" width="124" height="8" rx="4" fill="#38bdf8"/>
+    <text x="1052" y="714" font-family="Inter, sans-serif" font-size="10.5" fill="#cbd5e1">Spatial Validity (ST_IsValid)</text>
+    <rect x="1230" y="704" width="150" height="8" rx="4" fill="#1e293b"/><rect x="1230" y="704" width="150" height="8" rx="4" fill="#10b981"/>
+    <text x="1052" y="740" font-family="Inter, sans-serif" font-size="10.5" fill="#cbd5e1">Relational Consistency</text>
+    <rect x="1230" y="730" width="150" height="8" rx="4" fill="#1e293b"/><rect x="1230" y="730" width="136" height="8" rx="4" fill="#10b981"/>
+
+    <rect x="1038" y="792" width="360" height="46" rx="8" fill="url(#blueGrad)"/>
+    <text x="1218" y="820" font-family="Inter, sans-serif" font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle">+ File Defect Complaint on S.V. Road</text>
+    
+  </g>
+  
+    <g id="FooterBar_2">
+      <rect x="220" y="868" width="1220" height="32" fill="#090d16"/>
+      <line x1="220" y1="868" x2="1440" y2="868" stroke="#1e293b" stroke-width="1"/>
+      <text x="244" y="888" font-family="JetBrains Mono, monospace" font-size="10" font-weight="600" fill="#38bdf8">BOUND DBMS RELATIONS: roads, authorities, contractors, projects, road_defect_history</text>
+      <text x="1420" y="888" font-family="JetBrains Mono, monospace" font-size="10" fill="#64748b" text-anchor="end">ROADWATCH DBMS • Kanak Waradkar (24B-CO-030) • Krushna Surve (24B-CO-031) • Manjunath Gavada (24B-CO-035)</text>
+    </g>
+    
+</svg>

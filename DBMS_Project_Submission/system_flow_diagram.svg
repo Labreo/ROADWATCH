@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 950" width="1100" height="950" style="background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif;">
+
+    <defs>
+        <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%" filterUnits="userSpaceOnUse">
+            <feDropShadow dx="2" dy="2" stdDeviation="2.5" flood-opacity="0.10"/>
+        </filter>
+        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/>
+        </marker>
+        <style>
+            .flow-box { fill: #f8fafc; stroke: #3b82f6; stroke-width: 2; rx: 8; filter: url(#shadow); }
+            .db-box { fill: #eff6ff; stroke: #1d4ed8; stroke-width: 2.2; rx: 8; filter: url(#shadow); }
+            .audit-box { fill: #f0fdf4; stroke: #15803d; stroke-width: 2; rx: 8; filter: url(#shadow); }
+            .flow-text-title { font-size: 15px; font-weight: bold; fill: #0f172a; text-anchor: middle; }
+            .flow-text-desc { font-size: 12.5px; fill: #475569; text-anchor: middle; }
+            .flow-arrow { stroke: #334155; stroke-width: 2; marker-end: url(#arrow); fill: none; }
+        </style>
+    </defs>
+    
+<rect x="25" y="25" width="1050" height="900" rx="12" fill="#fafafa" stroke="#e2e8f0" stroke-width="2"/>
+<text x="550.0" y="65" font-size="20" font-weight="bold" fill="#1e293b" text-anchor="middle">ROADWATCH: Preliminary System &amp; Data Flow</text>
+<line x1="50" y1="85" x2="1050" y2="85" stroke="#cbd5e1" stroke-width="1.5"/>
+
+    <g transform="translate(150, 110)">
+        <rect class="flow-box" width="800" height="75"/>
+        <text class="flow-text-title" x="400" y="32">1. Client Layer: Citizen &amp; Staff Interaction</text>
+        <text class="flow-text-desc" x="400" y="54">Citizen submits road defect (GPS coordinates, category, photo) or Staff logs in via role dashboard</text>
+    </g>
+    
+<path class="flow-arrow" d="M 550 185 L 550 225"/>
+
+    <g transform="translate(150, 230)">
+        <rect class="flow-box" width="800" height="75"/>
+        <text class="flow-text-title" x="400" y="32">2. Application Server Layer: FastAPI &amp; Payload Sanitization</text>
+        <text class="flow-text-desc" x="400" y="54">Authenticates JWT token, validates schema types, extracts WGS84 GPS point, and opens DB transaction</text>
+    </g>
+    
+<path class="flow-arrow" d="M 550 305 L 550 345"/>
+
+    <g transform="translate(150, 350)">
+        <rect class="db-box" width="800" height="150"/>
+        <text class="flow-text-title" x="400" y="32" fill="#1e3a8a">3. Database Layer: PostGIS &amp; Trigger-Driven State Engine</text>
+        <text class="flow-text-desc" x="400" y="58">• Spatial Jurisdiction: ST_Contains(authorities.geom_boundary, complaint.geom) assigns Authority_ID</text>
+        <text class="flow-text-desc" x="400" y="80">• Road Network Snapping: ST_DWithin(roads.geom, complaint.geom, 20m) associates nearest Road_ID</text>
+        <text class="flow-text-desc" x="400" y="102">• State Machine Check: Validates status sequence (pending -&gt; routed -&gt; in_progress -&gt; resolved)</text>
+        <text class="flow-text-desc" x="400" y="124">• Immutable Audit: trg_audit_complaints fires AFTER INSERT/UPDATE, logging before/after JSONB state</text>
+    </g>
+    
+<path class="flow-arrow" d="M 550 500 L 550 540"/>
+
+    <g transform="translate(150, 545)">
+        <rect class="flow-box" width="800" height="95"/>
+        <text class="flow-text-title" x="400" y="32">4. Field Execution &amp; Automated SLA Escalation</text>
+        <text class="flow-text-desc" x="400" y="56">Ward engineer inspects defect, attaches repair completion notes, and marks complaint resolved</text>
+        <text class="flow-text-desc" x="400" y="76">Automated SLA event triggers: IF elapsed_time &gt; category_sla_hours THEN increment escalation_level</text>
+    </g>
+    
+<path class="flow-arrow" d="M 550 640 L 550 680"/>
+
+    <g transform="translate(150, 685)">
+        <rect class="audit-box" width="800" height="100"/>
+        <text class="flow-text-title" x="400" y="32" fill="#14532d">5. Governance, Dynamic Scoring &amp; Public Transparency</text>
+        <text class="flow-text-desc" x="400" y="56">• Contractor rating auto-calculated upon project milestone completion: recalculate_performance_index()</text>
+        <text class="flow-text-desc" x="400" y="78">• Public Views: cost_per_km_view &amp; road_beneficiary_view provide real-time fiscal accountability</text>
+    </g>
+    
+</svg>

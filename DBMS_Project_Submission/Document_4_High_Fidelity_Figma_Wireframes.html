@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ROADWATCH - High-Fidelity Figma Wireframes Specification</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm 18mm 20mm 18mm;
+            @bottom-right {
+                content: counter(page);
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.6;
+            color: #1e293b;
+            background: #ffffff;
+            margin: 0;
+            padding: 30px 40px;
+        }
+        h1, h2, h3, h4 {
+            color: #0f172a;
+            font-weight: 700;
+            margin-top: 1.4em;
+            margin-bottom: 0.5em;
+            line-height: 1.25;
+        }
+        h1 {
+            font-size: 22pt;
+            border-bottom: 2.5px solid #2563eb;
+            padding-bottom: 8px;
+            margin-top: 0;
+            color: #1e3a8a;
+        }
+        h2 {
+            font-size: 15pt;
+            border-bottom: 1.5px solid #cbd5e1;
+            padding-bottom: 4px;
+            color: #1e40af;
+            page-break-after: avoid;
+        }
+        h3 {
+            font-size: 12.5pt;
+            color: #334155;
+            page-break-after: avoid;
+        }
+        p, ul, ol {
+            margin-top: 0.4em;
+            margin-bottom: 0.8em;
+        }
+        li {
+            margin-bottom: 0.3em;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.2em 0;
+            font-size: 9.5pt;
+            page-break-inside: auto;
+        }
+        tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+        th, td {
+            border: 1px solid #cbd5e1;
+            padding: 7px 10px;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            font-weight: 600;
+        }
+        tr:nth-child(even) td {
+            background-color: #f8fafc;
+        }
+        code, pre {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        code {
+            background-color: #f1f5f9;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 9pt;
+            color: #0369a1;
+        }
+        pre {
+            background-color: #0f172a;
+            color: #f8fafc;
+            padding: 14px 18px;
+            border-radius: 6px;
+            font-size: 8.5pt;
+            line-height: 1.45;
+            overflow-x: auto;
+            page-break-inside: avoid;
+        }
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+            border-radius: 0;
+        }
+        blockquote {
+            margin: 1em 0;
+            padding: 10px 18px;
+            background-color: #eff6ff;
+            border-left: 4px solid #2563eb;
+            color: #1e3a8a;
+            border-radius: 0 4px 4px 0;
+        }
+        blockquote strong {
+            color: #1d4ed8;
+        }
+        .header-meta {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin-bottom: 24px;
+            font-size: 10pt;
+        }
+        .img-container {
+            text-align: center;
+            margin: 20px auto;
+            page-break-inside: avoid;
+        }
+        .img-container img {
+            max-width: 100%;
+            max-height: 220mm;
+            width: auto;
+            height: auto;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+            display: inline-block;
+        }
+        .caption {
+            font-size: 9.5pt;
+            color: #475569;
+            margin-top: 8px;
+            font-style: italic;
+            font-weight: 500;
+        }
+        .page-break {
+            page-break-before: always;
+        }
+    </style>
+</head>
+<body>
+<h1>Document 4: High-Fidelity Wireframes &amp; UI/UX Design Specification</h1>
+
+<p><strong>Figma Design System Architecture &amp; 20-Screen High-Fidelity Wireframe Blueprint for ROADWATCH DBMS</strong></p>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>1. Project Information &amp; Metadata</h2>
+
+<ul><li><strong>Project Title:</strong> ROADWATCH — Civic Infrastructure Intelligence &amp; Road Accountability Platform</li><li><strong>Subject:</strong> Database Management Systems Laboratory (DBMS)</li><li><strong>Submission Phase:</strong> Document 4 — High-Fidelity Figma Wireframes &amp; Relational UI Mapping (20 Screens)</li><li><strong>Team Members:</strong></li></ul>
+<table>
+<tr>
+<th>* <strong>Kanak Waradkar</strong></th>
+<th><strong>Roll No:</strong> <code>24B-CO-030</code></th>
+<th><strong>Email:</strong> kanakwaradkar@gmail.com <em>(Team Lead)</em></th>
+</tr>
+<tr>
+<td>* <strong>Krushna Surve</strong></td>
+<td><strong>Roll No:</strong> <code>24B-CO-031</code></td>
+<td><strong>Email:</strong> krushnasurve07@gmail.com</td>
+</tr>
+<tr>
+<td>* <strong>Manjunath Subhash Gavada</strong></td>
+<td><strong>Roll No:</strong> <code>24B-CO-035</code></td>
+<td><strong>Email:</strong> manjunathgavada40@gmail.com</td>
+</tr>
+</table>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>2. Executive Design System &amp; UI/UX Architecture</h2>
+
+<p>The ROADWATCH interface architecture is engineered around the real Next.js 14 application routes (<code>/</code>, <code>/map</code>, <code>/report</code>, <code>/chat</code>, <code>/twin</code>, <code>/operations</code>, <code>/ledger</code>) and binds directly to the 31 PostgreSQL 15 / PostGIS 3.3 database relations, analytical views, and PL/pgSQL trigger functions defined in <code>docs/schema.sql</code>.</p>
+
+<p>In accordance with professional Figma design conventions, each <strong>Frame</strong> represents a distinct, full-viewport standalone screen of the application:</p>
+<ul><li><strong>16 Desktop Widescreen Frames (<code>1440 x 900 px</code>):</strong> 12-column layout grid (<code>220px</code> persistent left navigation sidebar, <code>56px</code> top multi-region header bar, <code>1220px</code> workspace canvas).</li><li><strong>4 Citizen Mobile PWA Frames (<code>390 x 844 px</code>):</strong> iPhone 15/16 viewport standard with status bar, progressive wizard header, geospatial map canvas, and bottom tab bar.</li></ul>
+
+<h3>2.1 Color System &amp; Database Domain Token Mapping</h3>
+
+<table>
+<tr>
+<th>Token Name</th>
+<th>Hex Code</th>
+<th>UI Role &amp; Database Constraint Binding</th>
+</tr>
+<tr>
+<td><strong>Brand Primary</strong></td>
+<td><code>#2563EB</code></td>
+<td>Primary interactive actions, active route indicators, spatial selection highlights</td>
+</tr>
+<tr>
+<td><strong>Surface App Canvas</strong></td>
+<td><code>#F8FAFC</code></td>
+<td>Primary application background across desktop and mobile viewports</td>
+</tr>
+<tr>
+<td><strong>Surface Elevated Card</strong></td>
+<td><code>#FFFFFF</code></td>
+<td>Data tables, inspection drawers, KPI metric cards, modal containers</td>
+</tr>
+<tr>
+<td><strong>Map &amp; Twin Dark Surface</strong></td>
+<td><code>#0F172A</code></td>
+<td>PostGIS interactive dark map canvas, 3D WebGL Digital Twin, IoT sensor HUD</td>
+</tr>
+<tr>
+<td><strong>Status: Resolved / Healthy</strong></td>
+<td><code>#16A34A</code></td>
+<td><code>complaints.status = 'resolved'</code>, <code>health_score &gt;= 75</code>, <code>warranty_status = 'Active'</code></td>
+</tr>
+<tr>
+<td><strong>Status: Routed / In Progress</strong></td>
+<td><code>#0284C7</code></td>
+<td><code>complaints.status IN ('routed', 'in_progress')</code>, active tender evaluations</td>
+</tr>
+<tr>
+<td><strong>Status: Pending / Warning</strong></td>
+<td><code>#D97706</code></td>
+<td><code>complaints.status = 'pending'</code>, moderate PCI degradation (<code>50-74</code>), SLA warning</td>
+</tr>
+<tr>
+<td><strong>Status: Critical / SLA Breach</strong></td>
+<td><code>#DC2626</code></td>
+<td><code>severity = 'critical'</code>, <code>escalation_level &gt; 0</code>, <code>contractors.is_blacklisted = TRUE</code></td>
+</tr>
+</table>
+
+<h3>2.2 Typography Hierarchy</h3>
+
+<ul><li><strong>UI Sans-Serif (<code>Inter</code> / System Sans):</strong></li><li><strong>Page Header (H1):</strong> <code>22px</code> Bold (<code>700</code>), tracking <code>-0.02em</code>, color <code>#0F172A</code></li><li><strong>Card / Section Header (H2):</strong> <code>15px</code> Bold (<code>700</code>), color <code>#0F172A</code></li><li><strong>Table &amp; Form Body:</strong> <code>12px</code> Regular/Medium (<code>400</code>/<code>500</code>), color <code>#334155</code></li><li><strong>Micro Badges &amp; Domain Pills:</strong> <code>10px</code> Semi-Bold (<code>600</code>), uppercase</li><li><strong>Technical Monospace (<code>JetBrains Mono</code> / <code>SF Mono</code>):</strong></li><li>Used across all GPS coordinates (<code>19.1197 N, 72.8464 E</code>), primary/foreign keys (<code>SV-RD-01</code>, <code>CMP-00142</code>, <code>CON-00010</code>), PostGIS spatial operators (<code>ST_Contains</code>, <code>ST_DWithin</code>), and JSONB audit diffs.</li></ul>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>3. Master Index of the 20 High-Fidelity Figma Frames</h2>
+
+<table>
+<tr>
+<th>Frame No.</th>
+<th>Figma Frame Name</th>
+<th>Viewport</th>
+<th>Application Route</th>
+<th>Primary PostgreSQL / PostGIS Relations Bound</th>
+</tr>
+<tr>
+<td><strong>Frame 01</strong></td>
+<td><code>Frame_01_Civic_Portal_Landing_Hero</code></td>
+<td><code>1440 x 900</code></td>
+<td><code>/</code></td>
+<td><code>regions</code>, <code>roads</code>, <code>complaints</code>, <code>projects</code>, <code>cost_per_km_view</code></td>
+</tr>
+<tr>
+<td><strong>Frame 02</strong></td>
+<td><code>Frame_02_Geospatial_Road_Registry_Map</code></td>
+<td><code>1440 x 900</code></td>
+<td><code>/map</code></td>
+<td><code>roads</code>, <code>authorities</code>, <code>contractors</code>, <code>projects</code>, <code>complaints</code></td>
+</tr>
+<tr>
+<td><strong>Frame 03</strong></td>
+<td><code>Frame_03_Mobile_Wizard_Step1_GPS_Snap</code></td>
+<td><code>390 x 844</code></td>
+<td><code>/report</code> (Step 1)</td>
+<td><code>roads.geom</code>, <code>authorities.jurisdiction_geom</code> (<code>ST_DWithin</code>, <code>ST_Contains</code>)</td>
+</tr>
+<tr>
+<td><strong>Frame 04</strong></td>
+<td><code>Frame_04_Mobile_Wizard_Step2_AI_Vision</code></td>
+<td><code>390 x 844</code></td>
+<td><code>/report</code> (Step 2)</td>
+<td><code>complaints</code>, <code>ai_Condition_Assessments</code></td>
+</tr>
+<tr>
+<td><strong>Frame 05</strong></td>
+<td><code>Frame_05_Mobile_Duplicate_And_Offline_Sync</code></td>
+<td><code>390 x 844</code></td>
+<td><code>/report</code> (Step 3)</td>
+<td><code>complaints</code> (<code>upvote_count</code>), IndexedDB / Dexie offline queue</td>
+</tr>
+<tr>
+<td><strong>Frame 06</strong></td>
+<td><code>Frame_06_Mobile_Citizen_SLA_Timeline</code></td>
+<td><code>390 x 844</code></td>
+<td><code>/report/history</code></td>
+<td><code>complaints</code>, <code>status_history</code>, <code>sla_config</code>, <code>routing_feedback</code></td>
+</tr>
+<tr>
+<td><strong>Frame 07</strong></td>
+<td><code>Frame_07_AI_Accountability_Chat_RAG</code></td>
+<td><code>1440 x 900</code></td>
+<td><code>/chat</code></td>
+<td><code>complaints</code>, <code>authorities</code>, <code>authority_contacts</code>, <code>escalation_rules</code></td>
+</tr>
+<tr>
+<td><strong>Frame 08</strong></td>
+<td><code>Frame_08_3D_Digital_Twin_Inspection</code></td>
+<td><code>1440 x 900</code></td>
+<td><code>/twin</code> (3D Mesh)</td>
+<td><code>roads</code>, <code>road_materials</code>, <code>project_warranties</code>, <code>ai_Condition_Assessments</code></td>
+</tr>
+<tr>
+<td><strong>Frame 09</strong></td>
+<td><code>Frame_09_IoT_Pavement_Sensor_Network</code></td>
+<td><code>1440 x 900</code></td>
+<td><code>/twin</code> (Sensors)</td>
+<td><code>iot_Sensors</code>, <code>sensor_Readings</code>, <code>road_materials</code></td>
+</tr>
+<tr>
+<td><strong>Frame 10</strong></td>
+<td><code>Frame_10_Historical_Deterioration_Playback</code></td>
+<td><code>1440 x 900</code></td>
+<td><code>/twin</code> (Timeline)</td>
+<td><code>road_defect_history</code>, <code>projects</code>, <code>complaints</code></td>
+</tr>
+<tr>
+<td><strong>Frame 11</strong></td>
+<td><code>Frame_11_Municipal_Operations_Command</code></td>
+<td><code>1440 x 900</code></td>
+<td><code>/operations</code></td>
+<td><code>complaints</code>, <code>authorities</code>, <code>authority_webhooks</code>, <code>status_history</code></td>
+</tr>
+<tr>
+<td><strong>Frame 12</strong></td>
+<td><code>Frame_12_Automated_SLA_Escalation_Engine</code></td>
+<td><code>1440 x 900</code></td>
+<td><code>/operations/sla</code></td>
+<td><code>sla_config</code>, <code>sla_escalations</code>, <code>escalation_rules</code>, <code>authority_contacts</code></td>
+</tr>
+<tr>
+<td><strong>Frame 13</strong></td>
+<td><code>Frame_13_Geospatial_Conflict_Resolver</code></td>
+<td><code>1440 x 900</code></td>
+<td><code>/operations/gis</code></td>
+<td><code>road_conflict_groups</code>, <code>road_aliases</code>, <code>road_region_crossings</code></td>
+</tr>
+<tr>
+<td><strong>Frame 14</strong></td>
+<td><code>Frame_14_Field_Repair_Milestone_Scheduler</code></td>
+<td><code>1440 x 900</code></td>
+<td><code>/operations/gantt</code></td>
+<td><code>projects</code>, <code>project_milestones</code>, <code>contractors</code>, <code>authorities</code></td>
+</tr>
+<tr>
+<td><strong>Frame 15</strong></td>
+<td><code>Frame_15_Multi_Region_Hub_Data_Catalog</code></td>
+<td><code>1440 x 900</code></td>
+<td><code>/operations/regions</code></td>
+<td><code>regions</code>, <code>region_import_log</code>, <code>cpi_data</code>, <code>classification_Standards</code></td>
+</tr>
+<tr>
+<td><strong>Frame 16</strong></td>
+<td><code>Frame_16_Public_Spend_Sankey_CostPerKM</code></td>
+<td><code>1440 x 900</code></td>
+<td><code>/ledger</code> (Sankey)</td>
+<td><code>fund_sources</code>, <code>projects</code>, <code>cost_per_km_view</code>, <code>project_beneficiaries</code></td>
+</tr>
+<tr>
+<td><strong>Frame 17</strong></td>
+<td><code>Frame_17_Budget_Variance_Approval_Trail</code></td>
+<td><code>1440 x 900</code></td>
+<td><code>/ledger/variance</code></td>
+<td><code>budget_variance_reasons</code>, <code>contingency_reserves</code>, <code>approval_trail</code></td>
+</tr>
+<tr>
+<td><strong>Frame 18</strong></td>
+<td><code>Frame_18_Contractor_Scorecards_Blacklist</code></td>
+<td><code>1440 x 900</code></td>
+<td><code>/ledger/contractors</code></td>
+<td><code>contractors</code>, <code>projects</code>, <code>project_warranties</code> (<code>trg_contractor_perf_index</code>)</td>
+</tr>
+<tr>
+<td><strong>Frame 19</strong></td>
+<td><code>Frame_19_Public_Procurement_Tenders_Matrix</code></td>
+<td><code>1440 x 900</code></td>
+<td><code>/ledger/tenders</code></td>
+<td><code>tenders</code>, <code>tender_bids</code>, <code>evaluation_criteria</code>, <code>contractors</code></td>
+</tr>
+<tr>
+<td><strong>Frame 20</strong></td>
+<td><code>Frame_20_Immutable_Database_Audit_Log</code></td>
+<td><code>1440 x 900</code></td>
+<td><code>/ledger/audit</code></td>
+<td><code>audit_log</code> (<code>row_to_jsonb_audit</code> PL/pgSQL trigger)</td>
+</tr>
+</table>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>4. Detailed High-Fidelity Wireframe Specifications &amp; Visual Renders</h2>
+
+<h3>Frame 01: Civic Portal Landing &amp; Mumbai Live Accountability Hero</h3>
+<table>
+<tr>
+<th>* <strong>Figma Frame ID:</strong> <code>Frame_01_Civic_Portal_Landing_Hero</code></th>
+<th><strong>Viewport:</strong> Desktop (<code>1440 x 900 px</code>)</th>
+</tr>
+</table>
+<ul><li><strong>Target Persona:</strong> General Public, Commuters, Civic Researchers, Journalists.</li><li><strong>UI Architecture &amp; Components:</strong></li><li>Persistent left <code>Sidebar</code> (<code>220px</code>) with route links and live PostGIS database heartbeat badge (<code>PostgreSQL 15 + PostGIS 3.3</code>).</li><li>Top <code>TopNav</code> (<code>56px</code>) featuring the <code>RegionSelector</code> (<code>IN - India / Mumbai</code>), global search bar (<code>Cmd+K</code>), and primary <code>Report Road Issue</code> CTA.</li><li>Hero banner presenting the platform value proposition alongside a live interactive PostGIS mini-map preview of Mumbai arterial corridors (<code>WEH-NH8</code>, <code>SV-RD-01</code>, <code>LBS-01</code>, <code>BWSL-01</code>, <code>EEH-NH4</code>).</li><li>Four executive database KPI cards (<code>412 Gazetted Roads</code>, <code>Rs 412.8 Cr Active Capital Spend</code>, <code>1,284 Citizen Complaints</code>, <code>89.6% SLA Compliance</code>) and a bottom preview table of critical road corridors.</li><li><strong>Database Binding:</strong> Reads aggregated metrics from <code>regions</code>, <code>roads</code>, <code>complaints</code>, <code>projects</code>, and <code>cost_per_km_view</code>.</li></ul>
+
+
+<div class="img-container">
+    <img src="figma_frames/png/Frame_01_Civic_Portal_Landing_Hero.png" alt="Frame 01: Civic Portal Landing & Mumbai Live Accountability Hero" style="max-height: 125mm;"/>
+    <div class="caption">Frame 01: Civic Portal Landing & Mumbai Live Accountability Hero</div>
+</div>
+
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h3>Frame 02: Interactive Geospatial Road Registry Map &amp; RoadDetailsPanel</h3>
+<table>
+<tr>
+<th>* <strong>Figma Frame ID:</strong> <code>Frame_02_Geospatial_Road_Registry_Map</code></th>
+<th><strong>Viewport:</strong> Desktop (<code>1440 x 900 px</code>)</th>
+</tr>
+</table>
+<ul><li><strong>Target Persona:</strong> Citizens, Urban Planners, Ward Engineers inspecting specific road segments.</li><li><strong>UI Architecture &amp; Components:</strong></li><li>Full-bleed dark PostGIS vector map (<code>#0B1120</code>) rendering <code>WardsLayer</code> jurisdictional polygons (<code>BMC</code>, <code>MMRDA</code>, <code>MSRDC</code>) and color-coded <code>RoadsLayer</code> polylines (<code>GEOMETRY(LineString, 4326)</code>).</li><li>Floating <code>MapSearchBar</code> and <code>LayerControls</code> filter bar at top-left, plus a <code>MapLegend</code> overlay at bottom-left.</li><li>Open <code>RoadDetailsPanel</code> right-hand drawer (<code>450px</code> wide) inspecting <strong>Swami Vivekananda Road (<code>SV-RD-01</code>)</strong> with tabs for <code>Overview &amp; Specs</code>, <code>Projects &amp; Cost/KM (3)</code>, <code>Complaints (68)</code>, and <code>Contractors (2)</code>.</li><li><strong>Database Binding:</strong> Queries <code>roads</code> joined with <code>authorities</code>, <code>projects</code>, <code>contractors</code>, and <code>complaints</code> where <code>road_id = 'RD-IN-002'</code>.</li></ul>
+
+
+<div class="img-container">
+    <img src="figma_frames/png/Frame_02_Geospatial_Road_Registry_Map.png" alt="Frame 02: Interactive Geospatial Road Registry Map & RoadDetailsPanel" style="max-height: 125mm;"/>
+    <div class="caption">Frame 02: Interactive Geospatial Road Registry Map & RoadDetailsPanel</div>
+</div>
+
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h3>Frame 03: Citizen Mobile Wizard Step 1 — GPS Pinpoint &amp; PostGIS Auto-Snap</h3>
+<table>
+<tr>
+<th>* <strong>Figma Frame ID:</strong> <code>Frame_03_Mobile_Wizard_Step1_GPS_Snap</code></th>
+<th><strong>Viewport:</strong> Mobile (<code>390 x 844 px</code>)</th>
+</tr>
+</table>
+<ul><li><strong>Target Persona:</strong> Commuter reporting a road hazard on-site via smartphone PWA.</li><li><strong>UI Architecture &amp; Components:</strong></li><li>3-step wizard progress bar at Step 1 (<code>1. GPS &amp; Snap</code>).</li><li>Interactive mobile dark GIS map centered on the user's live GPS fix (<code>19.1197 N, 72.8464 E</code>) with a blue target reticle and a dashed snap vector (<code>4.2m</code>) connecting the raw GPS coordinate to the <code>SV-RD-01</code> LineString centerline.</li><li>Bottom sheet card displaying the deterministic spatial resolution output: Auto-Snapped Road (<code>Swami Vivekananda Road</code>), Jurisdiction (<code>Brihanmumbai Municipal Corporation</code>), and Active Warranty Liability (<code>M/s Apex Roadbuilders</code>).</li><li><strong>Database Binding:</strong> Executes <code>ST_DWithin(roads.geom, ST_SetSRID(ST_MakePoint(lng, lat), 4326), 20.0)</code> and <code>ST_Contains(authorities.jurisdiction_geom, ST_SetSRID(ST_MakePoint(lng, lat), 4326))</code>.</li></ul>
+
+
+<div class="img-container">
+    <img src="figma_frames/png/Frame_03_Mobile_Wizard_Step1_GPS_Snap.png" alt="Frame 03: Citizen Mobile Wizard Step 1 — GPS Pinpoint & PostGIS Auto-Snap" style="max-height: 125mm;"/>
+    <div class="caption">Frame 03: Citizen Mobile Wizard Step 1 — GPS Pinpoint & PostGIS Auto-Snap</div>
+</div>
+
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h3>Frame 04: Citizen Mobile Wizard Step 2 — Geotagged Photo &amp; AI Vision Bounding Box Triage</h3>
+<table>
+<tr>
+<th>* <strong>Figma Frame ID:</strong> <code>Frame_04_Mobile_Wizard_Step2_AI_Vision</code></th>
+<th><strong>Viewport:</strong> Mobile (<code>390 x 844 px</code>)</th>
+</tr>
+</table>
+<ul><li><strong>Target Persona:</strong> Commuter capturing visual proof of a pothole or structural failure.</li><li><strong>UI Architecture &amp; Components:</strong></li><li>Camera viewfinder displaying the asphalt defect with an EXIF GPS/timestamp watermark and two red/amber AI Vision bounding boxes (<code>pothole_cluster: 96.4%</code>, <code>edge_ravelling: 88.1%</code>).</li><li>AI Triage Assessment banner (<code>ai_Condition_Assessments</code>) recommending <code>CRITICAL</code> severity based on <code>9.5cm</code> estimated crater depth.</li><li>Defect category selector grid (<code>Pothole / Crater</code>, <code>Surface Cracking</code>, <code>Waterlogging</code>, <code>Open Manhole</code>, <code>Subsidence</code>, <code>Edge Erosion</code>) and 5-level severity segmented bar.</li><li><strong>Database Binding:</strong> Populates <code>complaints</code> (<code>defect_type</code>, <code>severity</code>, <code>photo_url</code>, <code>description</code>) and inserts telemetry into <code>ai_Condition_Assessments</code>.</li></ul>
+
+
+<div class="img-container">
+    <img src="figma_frames/png/Frame_04_Mobile_Wizard_Step2_AI_Vision.png" alt="Frame 04: Citizen Mobile Wizard Step 2 — Geotagged Photo & AI Vision Bounding Box Triage" style="max-height: 125mm;"/>
+    <div class="caption">Frame 04: Citizen Mobile Wizard Step 2 — Geotagged Photo & AI Vision Bounding Box Triage</div>
+</div>
+
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h3>Frame 05: Spatial Duplicate Check (<code>DuplicateComplaintDialog</code>) &amp; Dexie.js Offline Sync</h3>
+<table>
+<tr>
+<th>* <strong>Figma Frame ID:</strong> <code>Frame_05_Mobile_Duplicate_And_Offline_Sync</code></th>
+<th><strong>Viewport:</strong> Mobile (<code>390 x 844 px</code>)</th>
+</tr>
+</table>
+<ul><li><strong>Target Persona:</strong> Citizen submitting a defect in an area with existing reports or intermittent cellular connectivity.</li><li><strong>UI Architecture &amp; Components:</strong></li><li><code>DuplicateComplaintDialog</code> warning banner triggered when PostGIS <code>ST_DWithin</code> detects an active complaint (<code>#CMP-00142</code>) within a <code>25-meter</code> radius on the same road segment.</li><li>Side-by-side action choice: <code>Upvote Existing #CMP-00142 (+1 Priority Boost)</code> vs. <code>Submit as Separate New Ticket</code>.</li><li>Local-first IndexedDB (<code>Dexie.js</code>) Offline Sync Queue card showing queued photo blobs and exponential backoff retry status (<code>synced</code> vs. <code>pending_retry</code>).</li><li><strong>Database Binding:</strong> Updates <code>complaints.upvote_count</code> or inserts a new row into <code>complaints</code> via idempotent client UUID sync.</li></ul>
+
+
+<div class="img-container">
+    <img src="figma_frames/png/Frame_05_Mobile_Duplicate_And_Offline_Sync.png" alt="Frame 05: Spatial Duplicate Check & Dexie.js Offline Sync" style="max-height: 125mm;"/>
+    <div class="caption">Frame 05: Spatial Duplicate Check & Dexie.js Offline Sync</div>
+</div>
+
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h3>Frame 06: Citizen "My Reports" Dashboard, SLA Countdown &amp; Routing Verification</h3>
+<table>
+<tr>
+<th>* <strong>Figma Frame ID:</strong> <code>Frame_06_Mobile_Citizen_SLA_Timeline</code></th>
+<th><strong>Viewport:</strong> Mobile (<code>390 x 844 px</code>)</th>
+</tr>
+</table>
+<ul><li><strong>Target Persona:</strong> Citizen tracking the resolution progress and statutory SLA deadline of submitted tickets.</li><li><strong>UI Architecture &amp; Components:</strong></li><li>Citizen summary strip (<code>14 Submitted</code>, <code>11 Resolved</code>, <code>2 In Progress</code>, <code>1 SLA Escalated</code>) and live SLA countdown badge (<code>06h 18m Left</code> out of <code>24h Critical SLA</code>).</li><li>5-stage vertical <code>status_history</code> audit stepper tracing the ticket from <code>Submitted &amp; Geo-Validated</code> to <code>Contractor Crew Dispatched</code>.</li><li>Interactive <code>RoutingFeedback</code> card asking the citizen to verify whether <code>BMC K-West Ward</code> is the correct authority (<code>routing_feedback</code> table).</li><li><strong>Database Binding:</strong> Queries <code>complaints</code> joined with <code>status_history</code>, <code>sla_config</code>, and <code>routing_feedback</code>.</li></ul>
+
+
+<div class="img-container">
+    <img src="figma_frames/png/Frame_06_Mobile_Citizen_SLA_Timeline.png" alt="Frame 06: Citizen My Reports Dashboard, SLA Countdown & Routing Verification" style="max-height: 125mm;"/>
+    <div class="caption">Frame 06: Citizen My Reports Dashboard, SLA Countdown & Routing Verification</div>
+</div>
+
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h3>Frame 07: AI Accountability Chat Assistant (<code>/chat</code>) &amp; Automated Routing Cards</h3>
+<table>
+<tr>
+<th>* <strong>Figma Frame ID:</strong> <code>Frame_07_AI_Accountability_Chat_RAG</code></th>
+<th><strong>Viewport:</strong> Desktop (<code>1440 x 900 px</code>)</th>
+</tr>
+</table>
+<ul><li><strong>Target Persona:</strong> Citizens, investigative journalists, and municipal auditors querying infrastructure accountability in natural language.</li><li><strong>UI Architecture &amp; Components:</strong></li><li>Left conversational thread with transparent SQL/PostGIS tool execution pills (<code>resolve_jurisdiction_postgis</code>, <code>query_road_warranty_and_projects</code>, <code>fetch_escalation_chain</code>) showing query execution latency.</li><li>Structured AI response table detailing contractor warranty liability (<code>CON-00001</code>), budget utilization (<code>Rs 40.10 Cr / Rs 38.50 Cr</code>), and defect density on <code>SV-RD-01</code>.</li><li>Right-hand live accountability panel containing the <code>RoutedToCard</code> (<code>authority_contacts</code>) and 3-tier <code>EscalationChainCard</code> (<code>escalation_rules</code>).</li><li><strong>Database Binding:</strong> Reads from <code>roads</code>, <code>projects</code>, <code>project_warranties</code>, <code>contractors</code>, <code>authorities</code>, <code>authority_contacts</code>, and <code>escalation_rules</code>.</li></ul>
+
+
+<div class="img-container">
+    <img src="figma_frames/png/Frame_07_AI_Accountability_Chat_RAG.png" alt="Frame 07: AI Accountability Chat Assistant & Automated Routing Cards" style="max-height: 125mm;"/>
+    <div class="caption">Frame 07: AI Accountability Chat Assistant & Automated Routing Cards</div>
+</div>
+
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h3>Frame 08: 3D Digital Twin Inspection (<code>/twin</code>), Road Materials &amp; Warranty Layer</h3>
+<table>
+<tr>
+<th>* <strong>Figma Frame ID:</strong> <code>Frame_08_3D_Digital_Twin_Inspection</code></th>
+<th><strong>Viewport:</strong> Desktop (<code>1440 x 900 px</code>)</th>
+</tr>
+</table>
+<ul><li><strong>Target Persona:</strong> Structural Highway Engineers, Digital Twin Operators, Quality Assurance Inspectors.</li><li><strong>UI Architecture &amp; Components:</strong></li><li>Interactive 3D perspective corridor mesh of <strong>Western Express Highway (<code>WEH-NH8</code>)</strong> (<code>Three.js / WebGL</code>) with volumetric defect heatmaps (<code>CRACK-09</code>, <code>POTHOLE-14</code>) and camera orbit controls.</li><li>Left <code>RoadSelector</code> rail listing monitored corridors (<code>WEH-NH8</code>, <code>SV-RD-01</code>, <code>BWSL-01</code>, <code>LBS-01</code>) with live PCI scores.</li><li>Right-hand structural telemetry panel displaying the 4-layer pavement cross-section from <code>road_materials</code> (<code>SMA Wearing Course</code>, <code>DBM Base</code>, <code>Wet Mix Macadam</code>, <code>Granular Sub-Base</code>) and active <code>project_warranties</code> penalty status.</li><li><strong>Database Binding:</strong> Queries <code>roads</code>, <code>road_materials</code>, <code>project_warranties</code>, and <code>ai_Condition_Assessments</code>.</li></ul>
+
+
+<div class="img-container">
+    <img src="figma_frames/png/Frame_08_3D_Digital_Twin_Inspection.png" alt="Frame 08: 3D Digital Twin Inspection, Road Materials & Warranty Layer" style="max-height: 125mm;"/>
+    <div class="caption">Frame 08: 3D Digital Twin Inspection, Road Materials & Warranty Layer</div>
+</div>
+
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h3>Frame 09: IoT Pavement Sensor Network HUD, Underground Cross-Section &amp; Telemetry</h3>
+<table>
+<tr>
+<th>* <strong>Figma Frame ID:</strong> <code>Frame_09_IoT_Pavement_Sensor_Network</code></th>
+<th><strong>Viewport:</strong> Desktop (<code>1440 x 900 px</code>)</th>
+</tr>
+</table>
+<ul><li><strong>Target Persona:</strong> Smart City IoT Telemetry Engineers, Structural Maintenance Teams.</li><li><strong>UI Architecture &amp; Components:</strong></li><li>Top KPI strip summarizing <code>24 Embedded Nodes</code>, <code>18.4% Peak Sub-Base Moisture</code>, <code>4.42 G Peak Axle Vibration</code>, and <code>99.2% LoRaWAN Uplink Uptime</code>.</li><li>Left <code>UndergroundCrossSection</code> diagram showing physical sensor placement across asphalt and sub-base strata (<code>SEN-WEH-01</code> to <code>SEN-WEH-04</code>) alongside a 24-hour time-series anomaly chart (<code>sensor_Readings</code>).</li><li>Right-hand <code>iot_Sensors</code> hardware registry table with battery health, calibration dates, and alert thresholds.</li><li><strong>Database Binding:</strong> Queries <code>iot_Sensors</code> joined with time-series records in <code>sensor_Readings</code> and <code>road_materials</code>.</li></ul>
+
+
+<div class="img-container">
+    <img src="figma_frames/png/Frame_09_IoT_Pavement_Sensor_Network.png" alt="Frame 09: IoT Pavement Sensor Network HUD, Underground Cross-Section & Telemetry" style="max-height: 125mm;"/>
+    <div class="caption">Frame 09: IoT Pavement Sensor Network HUD, Underground Cross-Section & Telemetry</div>
+</div>
+
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h3>Frame 10: Historical Deterioration Playback (<code>TimelineSlider</code> &amp; <code>road_defect_history</code>)</h3>
+<table>
+<tr>
+<th>* <strong>Figma Frame ID:</strong> <code>Frame_10_Historical_Deterioration_Playback</code></th>
+<th><strong>Viewport:</strong> Desktop (<code>1440 x 900 px</code>)</th>
+</tr>
+</table>
+<ul><li><strong>Target Persona:</strong> Highway Asset Planners, Forensic Pavement Auditors analyzing post-monsoon degradation.</li><li><strong>UI Architecture &amp; Components:</strong></li><li>Interactive 6-year <code>TimelineSlider</code> (<code>2021</code> to <code>2026</code>) with play/step controls and monsoon scrubbing markers.</li><li>Side-by-side longitudinal corridor comparison of <code>SV-RD-01</code> contrasting post-resurfacing baseline (<code>Oct 2022, PCI 91/100</code>) against current post-monsoon condition (<code>Oct 2026, PCI 48/100</code>).</li><li>Historical PCI decay curve plotted against cumulative monsoon rainfall and a bottom <code>road_defect_history</code> ledger linking recurring defects to warranty recovery claims.</li><li><strong>Database Binding:</strong> Queries <code>road_defect_history</code> joined with <code>roads</code>, <code>projects</code>, and <code>complaints</code>.</li></ul>
+
+
+<div class="img-container">
+    <img src="figma_frames/png/Frame_10_Historical_Deterioration_Playback.png" alt="Frame 10: Historical Deterioration Playback" style="max-height: 125mm;"/>
+    <div class="caption">Frame 10: Historical Deterioration Playback</div>
+</div>
+
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h3>Frame 11: Municipal Operations Command Center (<code>/operations</code>), Triage &amp; Webhooks</h3>
+<table>
+<tr>
+<th>* <strong>Figma Frame ID:</strong> <code>Frame_11_Municipal_Operations_Command</code></th>
+<th><strong>Viewport:</strong> Desktop (<code>1440 x 900 px</code>)</th>
+</tr>
+</table>
+<ul><li><strong>Target Persona:</strong> Municipal Grievance Dispatchers, Ward Control Room Operators.</li><li><strong>UI Architecture &amp; Components:</strong></li><li>Operational KPI header (<code>184 Open Queue</code>, <code>14 Critical Overdue</code>, <code>19.4h Mean Time to Repair</code>, <code>99.4% Webhook Delivery Rate</code>).</li><li>Multi-filter Grievance Triage Table displaying live SLA countdown timers, auto-routed authorities, and one-click <code>Dispatch</code> / <code>Escalate</code> actions.</li><li>Right-hand <code>authority_webhooks</code> endpoint health monitor and dark <code>LiveSystemLog</code> terminal streaming real-time PostGIS trigger and webhook events.</li><li><strong>Database Binding:</strong> Queries <code>complaints</code>, <code>authorities</code>, <code>authority_webhooks</code>, and <code>status_history</code>.</li></ul>
+
+
+<div class="img-container">
+    <img src="figma_frames/png/Frame_11_Municipal_Operations_Command.png" alt="Frame 11: Municipal Operations Command Center, Triage & Webhooks" style="max-height: 125mm;"/>
+    <div class="caption">Frame 11: Municipal Operations Command Center, Triage & Webhooks</div>
+</div>
+
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h3>Frame 12: Automated SLA Escalation Engine (<code>sla_config</code> &amp; <code>sla_escalations</code>)</h3>
+<table>
+<tr>
+<th>* <strong>Figma Frame ID:</strong> <code>Frame_12_Automated_SLA_Escalation_Engine</code></th>
+<th><strong>Viewport:</strong> Desktop (<code>1440 x 900 px</code>)</th>
+</tr>
+</table>
+<ul><li><strong>Target Persona:</strong> Chief Vigilance Officer, Municipal Commissioner, Ward Executive Engineers.</li><li><strong>UI Architecture &amp; Components:</strong></li><li>Left <code>sla_config</code> statutory matrix defining response, repair, and escalation windows across <code>CRITICAL (24h)</code>, <code>HIGH (48h)</code>, <code>MEDIUM (72h)</code>, and <code>LOW (168h)</code> severities, plus a visual 3-tier escalation pipeline (<code>L1 Ward JE -&gt; L2 Executive Eng -&gt; L3 Municipal Commissioner</code>).</li><li>Right-hand <code>sla_escalations</code> breach incident feed highlighting overdue tickets (<code>#CMP-00142</code>, <code>#CMP-00139</code>, <code>#CMP-00131</code>) with accrued contractor liquidated damages and <code>Force Contractor Penalty</code> controls.</li><li><strong>Database Binding:</strong> Queries <code>sla_config</code>, <code>sla_escalations</code>, <code>escalation_rules</code>, and <code>authority_contacts</code>.</li></ul>
+
+
+<div class="img-container">
+    <img src="figma_frames/png/Frame_12_Automated_SLA_Escalation_Engine.png" alt="Frame 12: Automated SLA Escalation Engine" style="max-height: 125mm;"/>
+    <div class="caption">Frame 12: Automated SLA Escalation Engine</div>
+</div>
+
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h3>Frame 13: Geospatial Jurisdiction Boundary &amp; Conflict Resolver</h3>
+<table>
+<tr>
+<th>* <strong>Figma Frame ID:</strong> <code>Frame_13_Geospatial_Conflict_Resolver</code></th>
+<th><strong>Viewport:</strong> Desktop (<code>1440 x 900 px</code>)</th>
+</tr>
+</table>
+<ul><li><strong>Target Persona:</strong> Municipal GIS Administrators, Inter-Agency Coordination Officers (<code>BMC</code> vs. <code>MMRDA</code> vs. <code>MSRDC</code>).</li><li><strong>UI Architecture &amp; Components:</strong></li><li>Split GIS conflict map illustrating overlapping authority polygon boundaries (<code>ST_Intersection</code>, <code>ST_Overlaps</code>) at the <strong>Andheri Flyover Junction (<code>WEH-NH8</code> / <code>SV-RD-01</code>)</strong> where MMRDA flyover deck jurisdiction intersects BMC surface slip-roads.</li><li>Right-hand <code>road_conflict_groups</code> adjudication console (<code>CFG-IN-001</code> to <code>CFG-IN-003</code>) and <code>road_aliases</code> / <code>road_region_crossings</code> canonical mapping table.</li><li><strong>Database Binding:</strong> Queries <code>road_conflict_groups</code>, <code>road_aliases</code>, <code>road_region_crossings</code>, <code>roads</code>, and <code>authorities</code>.</li></ul>
+
+
+<div class="img-container">
+    <img src="figma_frames/png/Frame_13_Geospatial_Conflict_Resolver.png" alt="Frame 13: Geospatial Jurisdiction Boundary & Conflict Resolver" style="max-height: 125mm;"/>
+    <div class="caption">Frame 13: Geospatial Jurisdiction Boundary & Conflict Resolver</div>
+</div>
+
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h3>Frame 14: Field Repair Gantt Scheduler &amp; <code>project_milestones</code> Verification</h3>
+<table>
+<tr>
+<th>* <strong>Figma Frame ID:</strong> <code>Frame_14_Field_Repair_Milestone_Scheduler</code></th>
+<th><strong>Viewport:</strong> Desktop (<code>1440 x 900 px</code>)</th>
+</tr>
+</table>
+<ul><li><strong>Target Persona:</strong> Project Executive Engineers, Field Auditors, Treasury Disbursement Officers.</li><li><strong>UI Architecture &amp; Components:</strong></li><li>Interactive 6-month Gantt timeline (<code>Jul 2026 - Dec 2026</code>) tracking <code>project_milestones</code> (<code>M1 Milling</code> through <code>M5 Final Core Audit</code>) for <strong>PRJ-00012: S.V. Road Asphalt Resurfacing</strong>.</li><li>Right-hand Field Inspector verification drawer displaying core sample laboratory test results (<code>51.2 mm</code> compacted thickness, <code>98.4%</code> Marshall density), dual digital signatures, and treasury payout authorization (<code>Rs 9.60 Cr</code>).</li><li><strong>Database Binding:</strong> Queries <code>projects</code> joined with <code>project_milestones</code>, <code>contractors</code>, and <code>authorities</code>.</li></ul>
+
+
+<div class="img-container">
+    <img src="figma_frames/png/Frame_14_Field_Repair_Milestone_Scheduler.png" alt="Frame 14: Field Repair Gantt Scheduler & project_milestones Verification" style="max-height: 125mm;"/>
+    <div class="caption">Frame 14: Field Repair Gantt Scheduler & project_milestones Verification</div>
+</div>
+
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h3>Frame 15: Multi-Region Governance Hub (<code>IN</code>, <code>US</code>, <code>GB</code>, <code>KE</code>) &amp; Data Catalog</h3>
+<table>
+<tr>
+<th>* <strong>Figma Frame ID:</strong> <code>Frame_15_Multi_Region_Hub_Data_Catalog</code></th>
+<th><strong>Viewport:</strong> Desktop (<code>1440 x 900 px</code>)</th>
+</tr>
+</table>
+<ul><li><strong>Target Persona:</strong> Global Platform Administrators, Open-Data ETL Engineers.</li><li><strong>UI Architecture &amp; Components:</strong></li><li>4 regional configuration cards (<code>IN - Mumbai</code>, <code>US - Detroit</code>, <code>GB - London</code>, <code>KE - Nairobi</code>) detailing localized currencies (<code>INR</code>, <code>USD</code>, <code>GBP</code>, <code>KES</code>), administrative hierarchies, and design standards (<code>IRC:37</code>, <code>AASHTO</code>, <code>DMRB</code>, <code>RDM</code>).</li><li>Left <code>region_import_log</code> GeoJSON/Shapefile ingestion pipeline history (<code>IMP-2026-089</code> to <code>IMP-2026-081</code>).</li><li>Right <code>cpi_data</code> inflation normalization table and <code>classification_Standards</code> cross-country road hierarchy equivalencies.</li><li><strong>Database Binding:</strong> Queries <code>regions</code>, <code>region_import_log</code>, <code>cpi_data</code>, and <code>classification_Standards</code>.</li></ul>
+
+
+<div class="img-container">
+    <img src="figma_frames/png/Frame_15_Multi_Region_Hub_Data_Catalog.png" alt="Frame 15: Multi-Region Governance Hub & Data Catalog" style="max-height: 125mm;"/>
+    <div class="caption">Frame 15: Multi-Region Governance Hub & Data Catalog</div>
+</div>
+
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h3>Frame 16: Public Spend Transparency (<code>/ledger</code>), Sankey Flow &amp; <code>cost_per_km_view</code></h3>
+<table>
+<tr>
+<th>* <strong>Figma Frame ID:</strong> <code>Frame_16_Public_Spend_Sankey_CostPerKM</code></th>
+<th><strong>Viewport:</strong> Desktop (<code>1440 x 900 px</code>)</th>
+</tr>
+</table>
+<ul><li><strong>Target Persona:</strong> Public Citizens, Fiscal Policy Analysts, Municipal Budget Committee.</li><li><strong>UI Architecture &amp; Components:</strong></li><li>Multi-stage <code>SankeyFlowVisualizer</code> tracing <code>Rs 412.8 Cr</code> from <code>fund_sources</code> (<code>BMC Capital Fund</code>, <code>MMRDA Infra Grant</code>, <code>World Bank Urban</code>) through <code>authorities</code> (<code>BMC</code>, <code>MMRDA</code>, <code>MSRDC</code>) to executing <code>contractors</code> (<code>Apex Infra</code>, <code>L&amp;T Geo</code>, <code>Omega Infra</code>).</li><li>Right-hand <code>project_beneficiaries</code> socio-economic impact panel (<code>4.82M Daily Commuters</code>).</li><li>Bottom <code>cost_per_km_view</code> analytical table benchmarking CPI-adjusted <code>Cost / KM</code> against statutory highway class norms (<code>+53.5% CRITICAL OVERRUN</code> flagged on <code>LBS-01</code>).</li><li><strong>Database Binding:</strong> Queries <code>fund_sources</code>, <code>projects</code>, <code>cost_per_km_view</code>, <code>cpi_data</code>, and <code>project_beneficiaries</code>.</li></ul>
+
+
+<div class="img-container">
+    <img src="figma_frames/png/Frame_16_Public_Spend_Sankey_CostPerKM.png" alt="Frame 16: Public Spend Transparency, Sankey Flow & cost_per_km_view" style="max-height: 125mm;"/>
+    <div class="caption">Frame 16: Public Spend Transparency, Sankey Flow & cost_per_km_view</div>
+</div>
+
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h3>Frame 17: Budget Variance Reasons, Contingency Reserves &amp; <code>approval_trail</code></h3>
+<table>
+<tr>
+<th>* <strong>Figma Frame ID:</strong> <code>Frame_17_Budget_Variance_Approval_Trail</code></th>
+<th><strong>Viewport:</strong> Desktop (<code>1440 x 900 px</code>)</th>
+</tr>
+</table>
+<ul><li><strong>Target Persona:</strong> Comptroller and Auditor General (CAG) Auditors, Municipal Finance Committee.</li><li><strong>UI Architecture &amp; Components:</strong></li><li>Top variance summary KPI strip (<code>Rs 384.0 Cr Original Sanctioned</code>, <code>Rs 412.8 Cr Revised Actual</code>, <code>+Rs 28.8 Cr Net Variance</code>, <code>Rs 14.2 Cr Contingency Remaining</code>).</li><li>Left <code>budget_variance_reasons</code> itemization ledger (<code>BVR-0041</code> to <code>BVR-0032</code>) with forensic audit flags (<code>AUDIT QUERY</code> on <code>PRJ-00019</code> unverified rate escalation).</li><li>Right <code>approval_trail</code> multi-stage sign-off chain (<code>Junior Eng -&gt; Executive Eng -&gt; Chief Eng -&gt; Standing Committee</code>) and <code>contingency_reserves</code> utilization gauge.</li><li><strong>Database Binding:</strong> Queries <code>budget_variance_reasons</code>, <code>contingency_reserves</code>, <code>approval_trail</code>, and <code>projects</code>.</li></ul>
+
+
+<div class="img-container">
+    <img src="figma_frames/png/Frame_17_Budget_Variance_Approval_Trail.png" alt="Frame 17: Budget Variance Reasons, Contingency Reserves & approval_trail" style="max-height: 125mm;"/>
+    <div class="caption">Frame 17: Budget Variance Reasons, Contingency Reserves & approval_trail</div>
+</div>
+
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h3>Frame 18: Contractor Scorecards (<code>trg_contractor_perf_index</code>) &amp; Blacklist Dossier</h3>
+<table>
+<tr>
+<th>* <strong>Figma Frame ID:</strong> <code>Frame_18_Contractor_Scorecards_Blacklist</code></th>
+<th><strong>Viewport:</strong> Desktop (<code>1440 x 900 px</code>)</th>
+</tr>
+</table>
+<ul><li><strong>Target Persona:</strong> Municipal Procurement Board, Vigilance &amp; Debarment Committee.</li><li><strong>UI Architecture &amp; Components:</strong></li><li>Top banner displaying the live PostgreSQL trigger formula (<code>trg_contractor_perf_index</code>) that automatically recalculates contractor grades whenever project milestones or warranty defects change.</li><li>Left <code>contractors</code> registry table ranking firms by <code>performance_index</code>, delay rate, and warranty defect recurrence.</li><li>Right-hand Debarment &amp; Sanction Dossier for <strong>M/s Omega Infrastructure (<code>CON-00010</code>)</strong>, detailing <code>is_blacklisted = TRUE</code> enforcement, <code>Rs 4.20 Cr</code> surety bond forfeiture, and 6-axis radar scorecard comparison against <code>Apex Roadbuilders</code>.</li><li><strong>Database Binding:</strong> Queries <code>contractors</code>, <code>projects</code>, and <code>project_warranties</code>, governed by trigger <code>trg_contractor_perf_index</code>.</li></ul>
+
+
+<div class="img-container">
+    <img src="figma_frames/png/Frame_18_Contractor_Scorecards_Blacklist.png" alt="Frame 18: Contractor Scorecards & Blacklist Dossier" style="max-height: 125mm;"/>
+    <div class="caption">Frame 18: Contractor Scorecards & Blacklist Dossier</div>
+</div>
+
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h3>Frame 19: Public Procurement Ledger (<code>tenders</code>, <code>tender_bids</code>, <code>evaluation_criteria</code>)</h3>
+<table>
+<tr>
+<th>* <strong>Figma Frame ID:</strong> <code>Frame_19_Public_Procurement_Tenders_Matrix</code></th>
+<th><strong>Viewport:</strong> Desktop (<code>1440 x 900 px</code>)</th>
+</tr>
+</table>
+<ul><li><strong>Target Persona:</strong> Chief Tendering Officer, Technical &amp; Financial Bid Evaluation Committee.</li><li><strong>UI Architecture &amp; Components:</strong></li><li>Active tender header for <strong>TND-BMC-2026-042 (<code>S.V. Road Phase-II Full-Depth Reclamation</code>)</strong> with <code>Rs 42.00 Cr</code> engineer estimate.</li><li>Left <code>tender_bids</code> L1/QCBS comparative evaluation matrix showing automated database trigger rejection (<code>REJECTED (DB TRIGGER)</code>) of blacklisted bidder <code>CON-00010</code> and <code>L1 WINNER</code> recommendation for <code>M/s Larsen &amp; Toubro Geo (</code>CON-00002<code>)</code>.</li><li>Right <code>evaluation_criteria</code> weightage breakdown (<code>Technical 70% + Financial 30%</code>) and one-click <code>Authorize Award &amp; Generate Project</code> workflow.</li><li><strong>Database Binding:</strong> Queries <code>tenders</code>, <code>tender_bids</code>, <code>evaluation_criteria</code>, and <code>contractors</code>.</li></ul>
+
+
+<div class="img-container">
+    <img src="figma_frames/png/Frame_19_Public_Procurement_Tenders_Matrix.png" alt="Frame 19: Public Procurement Ledger & Tender Bidding Matrix" style="max-height: 125mm;"/>
+    <div class="caption">Frame 19: Public Procurement Ledger & Tender Bidding Matrix</div>
+</div>
+
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h3>Frame 20: Immutable PostgreSQL <code>audit_log</code> &amp; Side-by-Side JSONB Diff Explorer</h3>
+<table>
+<tr>
+<th>* <strong>Figma Frame ID:</strong> <code>Frame_20_Immutable_Database_Audit_Log</code></th>
+<th><strong>Viewport:</strong> Desktop (<code>1440 x 900 px</code>)</th>
+</tr>
+</table>
+<ul><li><strong>Target Persona:</strong> Database Administrators (DBAs), Forensic IT Auditors, Vigilance Investigators.</li><li><strong>UI Architecture &amp; Components:</strong></li><li>Top security banner confirming append-only <code>audit_log</code> enforcement (<code>REVOKE UPDATE, DELETE ON audit_log FROM PUBLIC</code>) via trigger <code>row_to_jsonb_audit()</code>.</li><li>Left chronological mutation table filtering <code>INSERT</code>, <code>UPDATE</code>, and <code>DELETE</code> events across <code>contractors</code>, <code>complaints</code>, <code>project_milestones</code>, and <code>budget_variance_reasons</code>.</li><li>Right-hand forensic JSONB payload inspector displaying a color-coded side-by-side diff (<code>old_data</code> in red vs. <code>new_data</code> in green) for <code>AUD-099482</code> (<code>CON-00010</code> blacklist enforcement) with <code>SHA-256</code> row hash verification.</li><li><strong>Database Binding:</strong> Queries the append-only <code>audit_log</code> table populated by <code>row_to_jsonb_audit()</code>.</li></ul>
+
+
+<div class="img-container">
+    <img src="figma_frames/png/Frame_20_Immutable_Database_Audit_Log.png" alt="Frame 20: Immutable PostgreSQL audit_log & Side-by-Side JSONB Diff Explorer" style="max-height: 125mm;"/>
+    <div class="caption">Frame 20: Immutable PostgreSQL audit_log & Side-by-Side JSONB Diff Explorer</div>
+</div>
+
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>5. Importing the 20 Frames into Figma</h2>
+
+<p>All 20 frames have been generated as native, vector-editable SVG artboards (<code>1440 x 900</code> Desktop and <code>390 x 844</code> Mobile) that Figma natively parses into top-level <strong>Figma Frames</strong>, nested <strong>Groups</strong>, <strong>Vector Paths</strong>, and <strong>Editable Text Layers</strong>:</p>
+
+<p>1. <strong>Method 1 — Drag &amp; Drop All 20 Frames at Once into Figma:</strong></p>
+<ul><li>Open your Figma design file (<code>https://www.figma.com</code>).</li><li>Drag and drop <code>DBMS_Project_Submission/ROADWATCH_All_20_Figma_Frames.svg</code> (or all 20 individual files inside <code>DBMS_Project_Submission/figma_frames/Frame_01_<em>.svg</code> to <code>Frame_20_</em>.svg</code>) directly onto the Figma canvas.</li><li>Figma immediately creates 20 properly named top-level Frames (<code>Frame_01_Civic_Portal_Landing_Hero</code> through <code>Frame_20_Immutable_Database_Audit_Log</code>) arranged in a 4-column design canvas grid.</li></ul>
+<p>2. <strong>Method 2 — 1-Click Copy &amp; Paste (<code>Cmd+V</code>) from Interactive Showcase:</strong></p>
+<ul><li>Open <code>DBMS_Project_Submission/wireframes/index.html</code> in any browser.</li><li>Click <strong>Copy Frame SVG for Figma (<code>Cmd+V</code>)</strong> on any screen (or <strong>Copy All 20 Frames for Figma (<code>Cmd+V</code>)</strong> in the top bar), switch to Figma, and press <code>Cmd+V</code> (<code>Ctrl+V</code>).</li></ul>
+
+</body>
+</html>

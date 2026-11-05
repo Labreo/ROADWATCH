@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844">
+  
+  <defs>
+    <linearGradient id="bgDark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1120"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#151f32"/>
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#0ea5e9"/>
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="roseGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e11d48"/>
+      <stop offset="100%" stop-color="#f43f5e"/>
+    </linearGradient>
+    <linearGradient id="mapBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0c192c"/>
+      <stop offset="100%" stop-color="#0f243c"/>
+    </linearGradient>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="112%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <rect id="Frame_04_Mobile_BG" x="0" y="0" width="390" height="844" rx="28" fill="#0b1120" stroke="#334155" stroke-width="2"/>
+  
+  <!-- Status Bar -->
+  <g id="StatusBar_4">
+    <text x="24" y="24" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#f8fafc">09:42</text>
+    <rect x="145" y="10" width="100" height="18" rx="9" fill="#000000"/>
+    <text x="310" y="24" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#38bdf8">5G • 100%</text>
+  </g>
+
+  <!-- App Header -->
+  <g id="MobileHeader_4">
+    <rect x="0" y="34" width="390" height="58" fill="#0f172a"/>
+    <line x1="0" y1="92" x2="390" y2="92" stroke="#1e293b" stroke-width="1"/>
+    <rect x="16" y="44" width="28" height="28" rx="7" fill="url(#blueGrad)"/>
+    <text x="30" y="63" font-family="Inter, sans-serif" font-size="13" font-weight="800" fill="#ffffff" text-anchor="middle">R</text>
+    <text x="52" y="56" font-family="Inter, sans-serif" font-size="13.5" font-weight="800" fill="#ffffff">Report Defect — Step 2/3</text>
+    <text x="52" y="71" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#38bdf8">AI Vision Analysis &amp; Classification</text>
+    <rect x="312" y="46" width="62" height="22" rx="5" fill="#1e3a8a" stroke="#3b82f6"/>
+    <text x="343" y="61" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#bfdbfe" text-anchor="middle">F#04</text>
+    <rect x="16" y="80" width="358" height="5" rx="2.5" fill="#1e293b"/>
+    <rect x="16" y="80" width="236" height="5" rx="2.5" fill="url(#blueGrad)"/>
+  </g>
+
+  <!-- Main Mobile Content -->
+  <g id="MobileContent_4">
+    
+    <!-- Geotagged Photo Preview with AI Vision Bounding Box -->
+    <rect x="16" y="104" width="358" height="196" rx="12" fill="#131c2e" stroke="#3b82f6" stroke-width="1.2"/>
+    <!-- Simulated Road Surface & Pothole Crater Vector -->
+    <rect x="26" y="114" width="338" height="148" rx="8" fill="#1e293b"/>
+    <line x1="60" y1="262" x2="140" y2="114" stroke="#475569" stroke-width="2" stroke-dasharray="8,6"/>
+    <line x1="330" y1="262" x2="250" y2="114" stroke="#475569" stroke-width="2" stroke-dasharray="8,6"/>
+    <ellipse cx="195" cy="196" rx="68" ry="32" fill="#090d16" stroke="#64748b" stroke-width="2"/>
+    <ellipse cx="195" cy="200" rx="52" ry="22" fill="#020617"/>
+    <!-- AI Bounding Box -->
+    <rect x="118" y="156" width="154" height="82" fill="none" stroke="#f43f5e" stroke-width="2" stroke-dasharray="5,3"/>
+    <rect x="118" y="136" width="176" height="20" rx="4" fill="#f43f5e"/>
+    <text x="206" y="150" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#ffffff" text-anchor="middle">AI VISION: POTHOLE 96.4%</text>
+    <text x="34" y="282" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#38bdf8">EXIF: 19.1197°N 72.8364°E • 342KB WebP • Est Depth: 9.2cm</text>
+
+    <!-- Category Selector (complaints.category CHECK constraint) -->
+    <text x="18" y="320" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#94a3b8">DEFECT CATEGORY (DB CHECK CONSTRAINT)</text>
+    <rect x="16" y="328" width="114" height="44" rx="8" fill="#1e3a8a" stroke="#38bdf8" stroke-width="1.5"/>
+    <text x="73" y="354" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#ffffff" text-anchor="middle">✓ pothole</text>
+
+    <rect x="138" y="328" width="114" height="44" rx="8" fill="#131c2e" stroke="#1e293b"/>
+    <text x="195" y="354" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#94a3b8" text-anchor="middle">paving_defect</text>
+
+    <rect x="260" y="328" width="114" height="44" rx="8" fill="#131c2e" stroke="#1e293b"/>
+    <text x="317" y="354" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#94a3b8" text-anchor="middle">waterlogging</text>
+
+    <rect x="16" y="380" width="175" height="36" rx="8" fill="#131c2e" stroke="#1e293b"/>
+    <text x="103" y="402" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#94a3b8" text-anchor="middle">debris</text>
+
+    <rect x="199" y="380" width="175" height="36" rx="8" fill="#131c2e" stroke="#1e293b"/>
+    <text x="286" y="402" font-family="JetBrains Mono, monospace" font-size="10.5" fill="#94a3b8" text-anchor="middle">missing_signage</text>
+
+    <!-- Priority / Severity Slider (1 to 5) -->
+    <rect x="16" y="428" width="358" height="74" rx="10" fill="#131c2e" stroke="#1e293b"/>
+    <text x="28" y="448" font-family="Inter, sans-serif" font-size="10.5" font-weight="700" fill="#94a3b8">PRIORITY SCORE (1–5) &amp; SLA CLOCK</text>
+    <text x="362" y="448" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#f43f5e" text-anchor="end">SLA: 24h L1 / 48h L2</text>
+    <rect x="28" y="458" width="60" height="32" rx="6" fill="#0f172a" stroke="#1e293b"/><text x="58" y="479" font-family="Inter, sans-serif" font-size="11" fill="#64748b" text-anchor="middle">1 Low</text>
+    <rect x="96" y="458" width="60" height="32" rx="6" fill="#0f172a" stroke="#1e293b"/><text x="126" y="479" font-family="Inter, sans-serif" font-size="11" fill="#64748b" text-anchor="middle">2 Fair</text>
+    <rect x="164" y="458" width="60" height="32" rx="6" fill="#0f172a" stroke="#1e293b"/><text x="194" y="479" font-family="Inter, sans-serif" font-size="11" fill="#64748b" text-anchor="middle">3 Med</text>
+    <rect x="232" y="458" width="68" height="32" rx="6" fill="#4c0519" stroke="#f43f5e" stroke-width="1.5"/><text x="266" y="479" font-family="Inter, sans-serif" font-size="11" font-weight="800" fill="#fecdd3" text-anchor="middle">4 High ✓</text>
+    <rect x="308" y="458" width="54" height="32" rx="6" fill="#0f172a" stroke="#1e293b"/><text x="335" y="479" font-family="Inter, sans-serif" font-size="11" fill="#64748b" text-anchor="middle">5 Crit</text>
+
+    <!-- Title, Description & Citizen Contact Inputs -->
+    <rect x="16" y="514" width="358" height="170" rx="10" fill="#131c2e" stroke="#1e293b"/>
+    <text x="28" y="534" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8">COMPLAINT TITLE &amp; AI SUMMARY</text>
+    <rect x="28" y="540" width="334" height="30" rx="6" fill="#0f172a" stroke="#334155"/>
+    <text x="38" y="559" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#f8fafc">Deep crater near Andheri Subway Northbound lane</text>
+
+    <text x="28" y="586" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8">DESCRIPTION &amp; CITIZEN CONTACT (citizen_contact)</text>
+    <rect x="28" y="592" width="334" height="44" rx="6" fill="#0f172a" stroke="#334155"/>
+    <text x="38" y="610" font-family="Inter, sans-serif" font-size="10.5" fill="#cbd5e1">Water-filled pothole 9.2cm deep causing severe</text>
+    <text x="38" y="626" font-family="Inter, sans-serif" font-size="10.5" fill="#cbd5e1">two-wheeler skidding risk during peak traffic.</text>
+    <text x="28" y="656" font-family="JetBrains Mono, monospace" font-size="10" fill="#38bdf8">Notify: kanakwaradkar@gmail.com • +91-98201-XXXXX</text>
+
+    <!-- Submit Button -->
+    <rect x="16" y="696" width="358" height="52" rx="10" fill="url(#emeraldGrad)"/>
+    <text x="195" y="727" font-family="Inter, sans-serif" font-size="14" font-weight="800" fill="#ffffff" text-anchor="middle">Submit Verified Grievance Report →</text>
+    
+  </g>
+
+  <!-- Bottom Navigation & DB Strip -->
+  <g id="MobileBottomNav_4">
+    <rect x="0" y="770" width="390" height="74" fill="#090d16"/>
+    <line x1="0" y1="770" x2="390" y2="770" stroke="#1e293b" stroke-width="1"/>
+    <circle cx="48" cy="790" r="9" fill="#1e293b" stroke="#64748b" stroke-width="1.2"/><text x="48" y="814" font-family="Inter, sans-serif" font-size="10" font-weight="500" fill="#64748b" text-anchor="middle">GIS Map</text><rect x="113" y="772" width="65" height="3" rx="1.5" fill="#38bdf8"/><circle cx="145" cy="790" r="9" fill="#1e3a8a" stroke="#38bdf8" stroke-width="1.2"/><text x="145" y="814" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#38bdf8" text-anchor="middle">Report Defect</text><circle cx="242" cy="790" r="9" fill="#1e293b" stroke="#64748b" stroke-width="1.2"/><text x="242" y="814" font-family="Inter, sans-serif" font-size="10" font-weight="500" fill="#64748b" text-anchor="middle">My Reports</text><circle cx="339" cy="790" r="9" fill="#1e293b" stroke="#64748b" stroke-width="1.2"/><text x="339" y="814" font-family="Inter, sans-serif" font-size="10" font-weight="500" fill="#64748b" text-anchor="middle">Offline Sync</text>
+    <rect x="0" y="822" width="390" height="22" fill="#050811"/>
+    <text x="195" y="836" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#38bdf8" text-anchor="middle">DBMS: complaints, sla_config, road_documents</text>
+  </g>
+</svg>

@@ -1,0 +1,304 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" width="1440" height="900">
+  
+  <defs>
+    <linearGradient id="bgDark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1120"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#151f32"/>
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#0ea5e9"/>
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="roseGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e11d48"/>
+      <stop offset="100%" stop-color="#f43f5e"/>
+    </linearGradient>
+    <linearGradient id="mapBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0c192c"/>
+      <stop offset="100%" stop-color="#0f243c"/>
+    </linearGradient>
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="112%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <rect id="Frame_15_Background" x="0" y="0" width="1440" height="900" fill="#0b1120"/>
+  <g id="Sidebar_15"><rect x="0" y="0" width="220" height="900" fill="#090d16"/><line x1="220" y1="0" x2="220" y2="900" stroke="#1e293b" stroke-width="1"/><rect x="16" y="14" width="30" height="30" rx="8" fill="url(#blueGrad)"/><text x="31" y="34" font-family="Inter, sans-serif" font-size="14" font-weight="800" fill="#ffffff" text-anchor="middle">R</text><text x="56" y="28" font-family="Inter, sans-serif" font-size="15" font-weight="800" fill="#ffffff" letter-spacing="0.5">ROADWATCH</text><text x="56" y="42" font-family="JetBrains Mono, monospace" font-size="9" font-weight="600" fill="#38bdf8">POSTGIS v16 • CIVIC AI</text><line x1="0" y1="56" x2="220" y2="56" stroke="#1e293b" stroke-width="1"/><text x="18" y="76" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#64748b" letter-spacing="1.2">PLATFORM MODULES</text><rect x="20" y="95" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="108" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">MAP</text><text x="54" y="109" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Geospatial Map</text><rect x="20" y="133" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="146" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">AI</text><text x="54" y="147" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">AI Chat Assistant</text><rect x="20" y="171" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="184" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">INR</text><text x="54" y="185" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Budget Compliance</text><rect x="20" y="209" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="222" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">CON</text><text x="54" y="223" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Contractor Scores</text><rect x="20" y="247" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="260" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">CMP</text><text x="54" y="261" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Citizen Complaints</text><rect x="20" y="285" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="298" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">OPS</text><text x="54" y="299" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Operations Center</text><rect x="20" y="323" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="336" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">SLA</text><text x="54" y="337" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">SLA Escalations</text><rect x="20" y="361" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="374" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">GIS</text><text x="54" y="375" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Boundary Conflicts</text><rect x="20" y="399" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="412" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">SCH</text><text x="54" y="413" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Repair Scheduler</text><rect x="20" y="437" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="450" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle"> T </text><text x="54" y="451" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Historical Playback</text><rect x="20" y="475" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="488" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">IOT</text><text x="54" y="489" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">IoT Sensor Monitor</text><rect x="20" y="513" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="526" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">3D</text><text x="54" y="527" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">3D Digital Twin</text><rect x="10" y="544" width="200" height="34" rx="7" fill="#1e3a8a" stroke="#3b82f6" stroke-width="1"/><rect x="10" y="551" width="3" height="20" rx="1.5" fill="#38bdf8"/><rect x="20" y="551" width="26" height="20" rx="4" fill="#2563eb"/><text x="33" y="564" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="700" fill="#ffffff" text-anchor="middle">REG</text><text x="54" y="565" font-family="Inter, sans-serif" font-size="11.5" font-weight="700" fill="#ffffff">Multi-Region Hub</text><rect x="20" y="589" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="602" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">TND</text><text x="54" y="603" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Procurement Ledger</text><rect x="20" y="627" width="26" height="20" rx="4" fill="#1e293b"/><text x="33" y="640" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="600" fill="#94a3b8" text-anchor="middle">LOG</text><text x="54" y="641" font-family="Inter, sans-serif" font-size="11.5" font-weight="500" fill="#94a3b8">Forensic Audit Log</text><rect x="12" y="676" width="196" height="92" rx="8" fill="#0f172a" stroke="#1e293b"/><text x="24" y="696" font-family="JetBrains Mono, monospace" font-size="9" font-weight="700" fill="#38bdf8">DB ENGINE TELEMETRY</text><circle cx="28" cy="714" r="4" fill="#10b981"/><text x="38" y="718" font-family="Inter, sans-serif" font-size="10.5" font-weight="600" fill="#e2e8f0">PostGIS 3.4 Spatial GIST</text><text x="24" y="736" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94a3b8">UTC Clock: 14:32:08Z</text><text x="24" y="754" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94a3b8">Sync Queue: 0 Pending</text><rect x="12" y="780" width="196" height="76" rx="8" fill="#131c2e" stroke="#1e293b"/><circle cx="34" cy="810" r="14" fill="#2563eb"/><text x="34" y="814" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#ffffff" text-anchor="middle">KW</text><text x="56" y="804" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#ffffff">Kanak Waradkar</text><text x="56" y="818" font-family="JetBrains Mono, monospace" font-size="9" fill="#38bdf8">Roll: 24B-CO-030</text><text x="24" y="842" font-family="Inter, sans-serif" font-size="9.5" fill="#94a3b8">Team: Krushna (031) • Manjunath (035)</text></g>
+  
+    <g id="TopNav_15">
+      <rect x="220" y="0" width="1220" height="56" fill="#0f172a"/>
+      <line x1="220" y1="56" x2="1440" y2="56" stroke="#1e293b" stroke-width="1"/>
+      <text x="244" y="23" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#38bdf8" letter-spacing="0.8">INTELLIGENCE / MULTI-REGION HUB</text>
+      <text x="244" y="42" font-family="Inter, sans-serif" font-size="14" font-weight="800" fill="#ffffff">Multi-Region Governance Hub &amp; Data Quality Catalog</text>
+
+      <!-- Global Search Bar -->
+      <rect x="734" y="12" width="228" height="32" rx="6" fill="#1e293b" stroke="#334155"/>
+      <text x="748" y="32" font-family="Inter, sans-serif" font-size="10.5" fill="#94a3b8">Search WEH-NH8, SV-RD-01, ID...</text>
+      <rect x="924" y="17" width="30" height="22" rx="4" fill="#0f172a"/>
+      <text x="939" y="31" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#64748b" text-anchor="middle">⌘K</text>
+
+      <!-- Region Pill -->
+      <rect x="974" y="12" width="142" height="32" rx="6" fill="#1e293b" stroke="#334155"/>
+      <text x="988" y="32" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#f8fafc">IN • India (Mumbai • ₹)</text>
+
+      <!-- Online Status Pill -->
+      <rect x="1128" y="12" width="124" height="32" rx="6" fill="#064e3b" stroke="#059669"/>
+      <circle cx="1144" cy="28" r="4" fill="#10b981"/>
+      <text x="1156" y="32" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#a7f3d0">POSTGIS ONLINE</text>
+
+      <!-- Role Badge -->
+      <rect x="1264" y="12" width="156" height="32" rx="6" fill="#1e3a8a" stroke="#3b82f6"/>
+      <text x="1342" y="32" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#bfdbfe" text-anchor="middle">Frame #15 • 1440×900</text>
+    </g>
+    
+  <g id="MainContent_15">
+    
+    <!-- 4 Global Region Cards (regions table) -->
+    
+    <g>
+      <rect x="244" y="72" width="281" height="108" rx="10" fill="#131c2e" stroke="#1e293b" stroke-width="1"/>
+      <rect x="244" y="72" width="4" height="108" rx="2" fill="#38bdf8"/>
+      <text x="262" y="96" font-family="Inter, sans-serif" font-size="10.5" font-weight="700" fill="#94a3b8" letter-spacing="0.6">🇮🇳 INDIA (REGION: IN)</text>
+      <rect x="437" y="83" width="76" height="20" rx="10" fill="#0f172a" stroke="#38bdf8" stroke-width="0.8"/>
+      <text x="475" y="96" font-family="JetBrains Mono, monospace" font-size="9" font-weight="700" fill="#38bdf8" text-anchor="middle">Asia/Kolkata</text>
+      <text x="262" y="128" font-family="Inter, sans-serif" font-size="24" font-weight="800" fill="#ffffff">Mumbai • INR (₹)</text>
+      <text x="262" y="148" font-family="Inter, sans-serif" font-size="10.5" font-weight="500" fill="#cbd5e1">5 Authorities • 8 Roads • 10 Projects</text>
+    </g>
+    
+    
+    <g>
+      <rect x="541" y="72" width="281" height="108" rx="10" fill="#131c2e" stroke="#1e293b" stroke-width="1"/>
+      <rect x="541" y="72" width="4" height="108" rx="2" fill="#10b981"/>
+      <text x="559" y="96" font-family="Inter, sans-serif" font-size="10.5" font-weight="700" fill="#94a3b8" letter-spacing="0.6">🇺🇸 UNITED STATES (US)</text>
+      <rect x="734" y="83" width="76" height="20" rx="10" fill="#0f172a" stroke="#10b981" stroke-width="0.8"/>
+      <text x="772" y="96" font-family="JetBrains Mono, monospace" font-size="9" font-weight="700" fill="#10b981" text-anchor="middle">America/Detroit</text>
+      <text x="559" y="128" font-family="Inter, sans-serif" font-size="24" font-weight="800" fill="#ffffff">Detroit • USD ($)</text>
+      <text x="559" y="148" font-family="Inter, sans-serif" font-size="10.5" font-weight="500" fill="#cbd5e1">4 Authorities • 4 Roads • 4 Projects</text>
+    </g>
+    
+    
+    <g>
+      <rect x="838" y="72" width="281" height="108" rx="10" fill="#131c2e" stroke="#1e293b" stroke-width="1"/>
+      <rect x="838" y="72" width="4" height="108" rx="2" fill="#6366f1"/>
+      <text x="856" y="96" font-family="Inter, sans-serif" font-size="10.5" font-weight="700" fill="#94a3b8" letter-spacing="0.6">🇬🇧 UNITED KINGDOM (GB)</text>
+      <rect x="1031" y="83" width="76" height="20" rx="10" fill="#0f172a" stroke="#6366f1" stroke-width="0.8"/>
+      <text x="1069" y="96" font-family="JetBrains Mono, monospace" font-size="9" font-weight="700" fill="#6366f1" text-anchor="middle">Europe/London</text>
+      <text x="856" y="128" font-family="Inter, sans-serif" font-size="24" font-weight="800" fill="#ffffff">London • GBP (£)</text>
+      <text x="856" y="148" font-family="Inter, sans-serif" font-size="10.5" font-weight="500" fill="#cbd5e1">4 Authorities • 4 Roads • 4 Projects</text>
+    </g>
+    
+    
+    <g>
+      <rect x="1135" y="72" width="281" height="108" rx="10" fill="#131c2e" stroke="#1e293b" stroke-width="1"/>
+      <rect x="1135" y="72" width="4" height="108" rx="2" fill="#f59e0b"/>
+      <text x="1153" y="96" font-family="Inter, sans-serif" font-size="10.5" font-weight="700" fill="#94a3b8" letter-spacing="0.6">🇰🇪 KENYA (REGION: KE)</text>
+      <rect x="1328" y="83" width="76" height="20" rx="10" fill="#0f172a" stroke="#f59e0b" stroke-width="0.8"/>
+      <text x="1366" y="96" font-family="JetBrains Mono, monospace" font-size="9" font-weight="700" fill="#f59e0b" text-anchor="middle">Africa/Nairobi</text>
+      <text x="1153" y="128" font-family="Inter, sans-serif" font-size="24" font-weight="800" fill="#ffffff">Nairobi • KES (KSh)</text>
+      <text x="1153" y="148" font-family="Inter, sans-serif" font-size="10.5" font-weight="500" fill="#cbd5e1">4 Authorities • 6 Roads • 8 Projects</text>
+    </g>
+    
+
+    <!-- Center Left: OSM Import Log & CPI Inflation Table (region_import_log + cpi_data) -->
+    <g>
+<rect x="244" y="196" width="610" height="244" rx="10" fill="#131c2e" stroke="#1e293b" stroke-width="1"/>
+<text x="262" y="222" font-family="Inter, sans-serif" font-size="14" font-weight="800" fill="#ffffff">External OSM Geospatial Import Runs (region_import_log)</text>
+<text x="262" y="240" font-family="JetBrains Mono, monospace" font-size="10" fill="#38bdf8">Tracks automated OpenStreetMap LineString ingestion &amp; validation</text>
+<rect x="245" y="252" width="608" height="32" fill="#0f172a"/>
+<line x1="244" y1="252" x2="854" y2="252" stroke="#1e293b"/>
+<line x1="244" y1="284" x2="854" y2="284" stroke="#1e293b"/>
+<text x="260" y="272" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">RUN ID</text>
+<text x="335" y="272" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">REGION</text>
+<text x="400" y="272" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">SOURCE</text>
+<text x="475" y="272" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">IMPORTED</text>
+<text x="555" y="272" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">SKIPPED</text>
+<text x="630" y="272" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">ERRORS</text>
+<text x="695" y="272" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">FINISHED AT</text>
+<line x1="256" y1="320" x2="842" y2="320" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="306" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#IMP-41</text>
+<text x="335" y="306" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">IN</text>
+<text x="400" y="306" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">osm_overpass</text>
+<text x="475" y="306" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">842</text>
+<text x="555" y="306" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">14</text>
+<text x="630" y="306" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">0</text>
+<text x="695" y="306" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">2026-10-22 04:00</text>
+<rect x="245" y="320" width="608" height="36" fill="#0f172a" fill-opacity="0.45"/>
+<line x1="256" y1="356" x2="842" y2="356" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="342" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#IMP-40</text>
+<text x="335" y="342" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">US</text>
+<text x="400" y="342" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">tiger_osm</text>
+<text x="475" y="342" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">618</text>
+<text x="555" y="342" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">9</text>
+<text x="630" y="342" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">0</text>
+<text x="695" y="342" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">2026-10-22 03:30</text>
+<line x1="256" y1="392" x2="842" y2="392" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="378" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#IMP-39</text>
+<text x="335" y="378" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">GB</text>
+<text x="400" y="378" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">os_highways</text>
+<text x="475" y="378" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">512</text>
+<text x="555" y="378" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">4</text>
+<text x="630" y="378" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">0</text>
+<text x="695" y="378" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">2026-10-22 03:00</text>
+<rect x="245" y="392" width="608" height="36" fill="#0f172a" fill-opacity="0.45"/>
+<line x1="256" y1="428" x2="842" y2="428" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="414" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#38bdf8">#IMP-38</text>
+<text x="335" y="414" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">KE</text>
+<text x="400" y="414" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">kura_osm</text>
+<text x="475" y="414" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">394</text>
+<text x="555" y="414" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">19</text>
+<text x="630" y="414" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">1</text>
+<text x="695" y="414" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">2026-10-22 02:30</text>
+</g>
+
+    <!-- Center Right: CPI Inflation Normalization Panel (cpi_data table) -->
+    <rect x="870" y="196" width="546" height="248" rx="10" fill="#131c2e" stroke="#1e293b"/>
+    <text x="890" y="224" font-family="Inter, sans-serif" font-size="14" font-weight="800" fill="#ffffff">Cross-Region CPI Inflation Normalization (cpi_data table)</text>
+    <text x="890" y="242" font-family="JetBrains Mono, monospace" font-size="10" fill="#38bdf8">UNIQUE(region_code, year) • Normalizes 2020–2026 historical road budgets</text>
+
+    <rect x="890" y="260" width="244" height="76" rx="8" fill="#0f172a" stroke="#1e293b"/>
+    <text x="906" y="282" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#38bdf8">IN (India CPI Index)</text>
+    <text x="906" y="304" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#ffffff">2023: 181.2  →  2026: 198.6</text>
+    <text x="906" y="322" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#10b981">Inflation Deflator: +9.6%</text>
+
+    <rect x="1152" y="260" width="244" height="76" rx="8" fill="#0f172a" stroke="#1e293b"/>
+    <text x="1168" y="282" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#10b981">US (Detroit CPI Index)</text>
+    <text x="1168" y="304" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#ffffff">2023: 304.7  →  2026: 324.1</text>
+    <text x="1168" y="322" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#10b981">Inflation Deflator: +6.4%</text>
+
+    <rect x="890" y="348" width="244" height="76" rx="8" fill="#0f172a" stroke="#1e293b"/>
+    <text x="906" y="370" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#6366f1">GB (UK CPI Index)</text>
+    <text x="906" y="392" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#ffffff">2023: 130.5  →  2026: 139.8</text>
+    <text x="906" y="410" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#10b981">Inflation Deflator: +7.1%</text>
+
+    <rect x="1152" y="348" width="244" height="76" rx="8" fill="#0f172a" stroke="#1e293b"/>
+    <text x="1168" y="370" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="700" fill="#f59e0b">KE (Kenya CPI Index)</text>
+    <text x="1168" y="392" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#ffffff">2023: 134.0  →  2026: 152.4</text>
+    <text x="1168" y="410" font-family="JetBrains Mono, monospace" font-size="9.5" fill="#f59e0b">Inflation Deflator: +13.7%</text>
+
+    <!-- Bottom Multi-Region Road Data Catalog Table -->
+    <g>
+<rect x="244" y="460" width="1172" height="328" rx="10" fill="#131c2e" stroke="#1e293b" stroke-width="1"/>
+<text x="262" y="486" font-family="Inter, sans-serif" font-size="14" font-weight="800" fill="#ffffff">Global Multi-Region Road Asset &amp; Data Quality Catalog (22 Seeded Corridors Across IN, US, GB, KE)</text>
+<text x="262" y="504" font-family="JetBrains Mono, monospace" font-size="10" fill="#38bdf8">Evaluates 4 Data Quality Dimensions: Completeness, Freshness, Relational Consistency, PostGIS Spatial Validity</text>
+<rect x="245" y="516" width="1170" height="32" fill="#0f172a"/>
+<line x1="244" y1="516" x2="1416" y2="516" stroke="#1e293b"/>
+<line x1="244" y1="548" x2="1416" y2="548" stroke="#1e293b"/>
+<text x="260" y="536" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">REGION</text>
+<text x="335" y="536" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">ROAD CODE</text>
+<text x="450" y="536" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">CORRIDOR NAME</text>
+<text x="665" y="536" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">MANAGING AUTHORITY</text>
+<text x="890" y="536" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">LENGTH</text>
+<text x="975" y="536" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">SURFACE / WIDTH</text>
+<text x="1120" y="536" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">AADT</text>
+<text x="1230" y="536" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#94a3b8" letter-spacing="0.5">DATA QUALITY GRADE</text>
+<line x1="256" y1="586" x2="1404" y2="586" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="571" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">🇮🇳 IN</text>
+<text x="335" y="571" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#e2e8f0">WEH-NH8</text>
+<text x="450" y="571" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Western Express Highway</text>
+<text x="665" y="571" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#e2e8f0">NHAI-ROM (RO Mumbai)</text>
+<text x="890" y="571" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">25.5 km</text>
+<text x="975" y="571" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Asphalt • 35.5m</text>
+<text x="1120" y="571" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">185,000</text>
+
+    <g>
+      <rect x="1230" y="556" width="98" height="22" rx="11" fill="#064e3b" stroke="#10b981" stroke-width="1"/>
+      <text x="1279" y="570.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#a7f3d0" text-anchor="middle">GRADE A (94%)</text>
+    </g>
+    
+<rect x="245" y="586" width="1170" height="38" fill="#0f172a" fill-opacity="0.45"/>
+<line x1="256" y1="624" x2="1404" y2="624" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="609" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">🇮🇳 IN</text>
+<text x="335" y="609" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#e2e8f0">SV-RD-01</text>
+<text x="450" y="609" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">S.V. Road Corridor</text>
+<text x="665" y="609" font-family="JetBrains Mono, monospace" font-size="11" font-weight="700" fill="#e2e8f0">MCGM-KW (Ward K-West)</text>
+<text x="890" y="609" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">16.8 km</text>
+<text x="975" y="609" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Asphalt • 14.5m</text>
+<text x="1120" y="609" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">62,000</text>
+
+    <g>
+      <rect x="1230" y="594" width="104" height="22" rx="11" fill="#0c4a6e" stroke="#0ea5e9" stroke-width="1"/>
+      <text x="1282" y="608.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#bae6fd" text-anchor="middle">GRADE B+ (88%)</text>
+    </g>
+    
+<line x1="256" y1="662" x2="1404" y2="662" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="647" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">🇺🇸 US</text>
+<text x="335" y="647" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">I94-WD-01</text>
+<text x="450" y="647" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">I-94 Edsel Ford Freeway</text>
+<text x="665" y="647" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">FHWA-MI (Michigan Div)</text>
+<text x="890" y="647" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">45.2 km</text>
+<text x="975" y="647" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Asphalt • 35.0m</text>
+<text x="1120" y="647" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">155,000</text>
+
+    <g>
+      <rect x="1230" y="632" width="98" height="22" rx="11" fill="#064e3b" stroke="#10b981" stroke-width="1"/>
+      <text x="1279" y="646.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#a7f3d0" text-anchor="middle">GRADE A (92%)</text>
+    </g>
+    
+<rect x="245" y="662" width="1170" height="38" fill="#0f172a" fill-opacity="0.45"/>
+<line x1="256" y1="700" x2="1404" y2="700" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="685" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">🇺🇸 US</text>
+<text x="335" y="685" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">WOODWARD-01</text>
+<text x="450" y="685" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Woodward Avenue M-1</text>
+<text x="665" y="685" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">MDOT-LAN (Michigan DOT)</text>
+<text x="890" y="685" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">27.0 km</text>
+<text x="975" y="685" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Asphalt • 24.0m</text>
+<text x="1120" y="685" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">72,000</text>
+
+    <g>
+      <rect x="1230" y="670" width="98" height="22" rx="11" fill="#064e3b" stroke="#10b981" stroke-width="1"/>
+      <text x="1279" y="684.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#a7f3d0" text-anchor="middle">GRADE A (95%)</text>
+    </g>
+    
+<line x1="256" y1="738" x2="1404" y2="738" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="723" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">🇬🇧 GB</text>
+<text x="335" y="723" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">M25-01</text>
+<text x="450" y="723" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">M25 London Orbital J8-12</text>
+<text x="665" y="723" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">NH-SE (National Hwys)</text>
+<text x="890" y="723" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">18.9 km</text>
+<text x="975" y="723" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Asphalt • 36.0m</text>
+<text x="1120" y="723" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">180,000</text>
+
+    <g>
+      <rect x="1230" y="708" width="104" height="22" rx="11" fill="#064e3b" stroke="#10b981" stroke-width="1"/>
+      <text x="1282" y="722.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#a7f3d0" text-anchor="middle">GRADE A+ (97%)</text>
+    </g>
+    
+<rect x="245" y="738" width="1170" height="38" fill="#0f172a" fill-opacity="0.45"/>
+<line x1="256" y1="776" x2="1404" y2="776" stroke="#1e293b" stroke-width="0.6"/>
+<text x="260" y="761" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">🇰🇪 KE</text>
+<text x="335" y="761" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">THIKA-SHWY-01</text>
+<text x="450" y="761" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Thika Superhighway (A2)</text>
+<text x="665" y="761" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">KURA-HQ (Kenya Urban)</text>
+<text x="890" y="761" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">12.5 km</text>
+<text x="975" y="761" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">Asphalt • 35.0m</text>
+<text x="1120" y="761" font-family="Inter, sans-serif" font-size="11" font-weight="500" fill="#e2e8f0">95,000</text>
+
+    <g>
+      <rect x="1230" y="746" width="98" height="22" rx="11" fill="#064e3b" stroke="#10b981" stroke-width="1"/>
+      <text x="1279" y="760.5" font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="700" fill="#a7f3d0" text-anchor="middle">GRADE A (91%)</text>
+    </g>
+    
+</g>
+    
+  </g>
+  
+    <g id="FooterBar_15">
+      <rect x="220" y="868" width="1220" height="32" fill="#090d16"/>
+      <line x1="220" y1="868" x2="1440" y2="868" stroke="#1e293b" stroke-width="1"/>
+      <text x="244" y="888" font-family="JetBrains Mono, monospace" font-size="10" font-weight="600" fill="#38bdf8">BOUND DBMS RELATIONS: regions, region_import_log, cpi_data, roads, authorities</text>
+      <text x="1420" y="888" font-family="JetBrains Mono, monospace" font-size="10" fill="#64748b" text-anchor="end">ROADWATCH DBMS • Kanak Waradkar (24B-CO-030) • Krushna Surve (24B-CO-031) • Manjunath Gavada (24B-CO-035)</text>
+    </g>
+    
+</svg>

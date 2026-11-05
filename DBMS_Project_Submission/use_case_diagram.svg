@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 1450" width="1100" height="1450" style="background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif;">
+
+    <defs>
+        <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%" filterUnits="userSpaceOnUse">
+            <feDropShadow dx="2" dy="2" stdDeviation="2.5" flood-opacity="0.10"/>
+        </filter>
+        <style>
+            .actor-box { fill: #dbeafe; stroke: #2563eb; stroke-width: 2; rx: 10; filter: url(#shadow); }
+            .actor-auto { fill: #ffedd5; stroke: #ea580c; stroke-width: 2; rx: 10; filter: url(#shadow); }
+            .actor-text { font-size: 15px; font-weight: bold; fill: #1e3a8a; text-anchor: middle; dominant-baseline: central; }
+            .actor-auto-text { font-size: 14px; font-weight: bold; fill: #9a3412; text-anchor: middle; dominant-baseline: central; }
+            .uc-ellipse { fill: #ffffff; stroke: #0284c7; stroke-width: 1.8; filter: url(#shadow); }
+            .uc-text { font-size: 13.5px; fill: #0f172a; text-anchor: middle; dominant-baseline: central; }
+            .uc-line { stroke: #475569; stroke-width: 1.5; }
+        </style>
+    </defs>
+    
+<rect x="25" y="25" width="1050" height="1400" rx="12" fill="#fafafa" stroke="#e2e8f0" stroke-width="2"/>
+<text x="550.0" y="65" font-size="20" font-weight="bold" fill="#1e293b" text-anchor="middle">ROADWATCH: System Use Case Diagram</text>
+<line x1="50" y1="85" x2="1050" y2="85" stroke="#cbd5e1" stroke-width="1.5"/>
+<line class="uc-line" x1="200.0" y1="260" x2="480" y2="140"/>
+<line class="uc-line" x1="200.0" y1="260" x2="460" y2="205"/>
+<line class="uc-line" x1="200.0" y1="260" x2="475" y2="270"/>
+<line class="uc-line" x1="200.0" y1="260" x2="475" y2="335"/>
+<line class="uc-line" x1="200.0" y1="520" x2="480" y2="140"/>
+<line class="uc-line" x1="200.0" y1="520" x2="475" y2="430"/>
+<line class="uc-line" x1="200.0" y1="520" x2="470" y2="495"/>
+<line class="uc-line" x1="200.0" y1="520" x2="475" y2="560"/>
+<line class="uc-line" x1="200.0" y1="520" x2="475" y2="625"/>
+<line class="uc-line" x1="200.0" y1="830" x2="480" y2="140"/>
+<line class="uc-line" x1="200.0" y1="830" x2="480" y2="720"/>
+<line class="uc-line" x1="200.0" y1="830" x2="480" y2="785"/>
+<line class="uc-line" x1="200.0" y1="830" x2="480" y2="850"/>
+<line class="uc-line" x1="200.0" y1="830" x2="460" y2="915"/>
+<line class="uc-line" x1="200.0" y1="830" x2="475" y2="980"/>
+<line class="uc-line" x1="200.0" y1="1110" x2="480" y2="140"/>
+<line class="uc-line" x1="200.0" y1="1110" x2="455" y2="1080"/>
+<line class="uc-line" x1="200.0" y1="1110" x2="465" y2="1145"/>
+<line class="uc-line" x1="200.0" y1="1330" x2="455" y2="1260"/>
+<line class="uc-line" x1="200.0" y1="1330" x2="460" y2="1325"/>
+<line class="uc-line" x1="200.0" y1="1330" x2="470" y2="1390"/>
+<rect class="actor-box" x="60.0" y="235.0" width="140" height="50"/>
+<text class="actor-text" x="130" y="260">Citizen</text>
+<rect class="actor-box" x="60.0" y="493.0" width="140" height="54"/>
+<text class="actor-text" x="130" y="512">Field Engineer</text>
+<text class="actor-text" x="130" y="531">(Staff)</text>
+<rect class="actor-box" x="60.0" y="803.0" width="140" height="54"/>
+<text class="actor-text" x="130" y="822">Authority Admin</text>
+<text class="actor-text" x="130" y="841">(Commissioner)</text>
+<rect class="actor-box" x="60.0" y="1085.0" width="140" height="50"/>
+<text class="actor-text" x="130" y="1110">Public Auditor</text>
+<rect class="actor-auto" x="60.0" y="1303.0" width="140" height="54"/>
+<text class="actor-auto-text" x="130" y="1322">System</text>
+<text class="actor-auto-text" x="130" y="1341">(Automated)</text>
+<ellipse class="uc-ellipse" cx="620" cy="140" rx="140" ry="24"/>
+<text class="uc-text" x="620" y="140">User Login &amp; Authentication</text>
+<ellipse class="uc-ellipse" cx="620" cy="205" rx="160" ry="24"/>
+<text class="uc-text" x="620" y="205">File Road Grievance (GPS &amp; Photo)</text>
+<ellipse class="uc-ellipse" cx="620" cy="270" rx="145" ry="24"/>
+<text class="uc-text" x="620" y="270">Track My Grievance Status</text>
+<ellipse class="uc-ellipse" cx="620" cy="335" rx="145" ry="24"/>
+<text class="uc-text" x="620" y="335">View Road Condition &amp; Spend</text>
+<ellipse class="uc-ellipse" cx="620" cy="430" rx="145" ry="24"/>
+<text class="uc-text" x="620" y="430">View Ward Assigned Defects</text>
+<ellipse class="uc-ellipse" cx="620" cy="495" rx="150" ry="24"/>
+<text class="uc-text" x="620" y="495">Update Defect Status Lifecycle</text>
+<ellipse class="uc-ellipse" cx="620" cy="560" rx="145" ry="24"/>
+<text class="uc-text" x="620" y="560">Add Repair Verification Note</text>
+<ellipse class="uc-ellipse" cx="620" cy="625" rx="145" ry="24"/>
+<text class="uc-text" x="620" y="625">Certify Road Work Milestone</text>
+<ellipse class="uc-ellipse" cx="620" cy="720" rx="140" ry="24"/>
+<text class="uc-text" x="620" y="720">Float Road Work Tender</text>
+<ellipse class="uc-ellipse" cx="620" cy="785" rx="140" ry="24"/>
+<text class="uc-text" x="620" y="785">Evaluate Contractor Bids</text>
+<ellipse class="uc-ellipse" cx="620" cy="850" rx="140" ry="24"/>
+<text class="uc-text" x="620" y="850">Award Project Contract</text>
+<ellipse class="uc-ellipse" cx="620" cy="915" rx="160" ry="24"/>
+<text class="uc-text" x="620" y="915">Log Budget Variance Justification</text>
+<ellipse class="uc-ellipse" cx="620" cy="980" rx="145" ry="24"/>
+<text class="uc-text" x="620" y="980">Configure Category SLA Hours</text>
+<ellipse class="uc-ellipse" cx="620" cy="1080" rx="165" ry="24"/>
+<text class="uc-text" x="620" y="1080">Inspect Tamper-Evident Audit Log</text>
+<ellipse class="uc-ellipse" cx="620" cy="1145" rx="155" ry="24"/>
+<text class="uc-text" x="620" y="1145">Generate Cost-Per-KM Analytics</text>
+<ellipse class="uc-ellipse" cx="620" cy="1260" rx="165" ry="24"/>
+<text class="uc-text" x="620" y="1260">Auto-Route Grievance via PostGIS</text>
+<ellipse class="uc-ellipse" cx="620" cy="1325" rx="160" ry="24"/>
+<text class="uc-text" x="620" y="1325">Auto-Escalate Overdue SLA Level</text>
+<ellipse class="uc-ellipse" cx="620" cy="1390" rx="150" ry="24"/>
+<text class="uc-text" x="620" y="1390">Recalculate Contractor Rating</text>
+</svg>

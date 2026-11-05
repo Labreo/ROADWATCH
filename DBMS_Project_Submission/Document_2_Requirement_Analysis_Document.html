@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ROADWATCH - Requirement Analysis Document</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm 18mm 20mm 18mm;
+            @bottom-right {
+                content: counter(page);
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.6;
+            color: #1e293b;
+            background: #ffffff;
+            margin: 0;
+            padding: 30px 40px;
+        }
+        h1, h2, h3, h4 {
+            color: #0f172a;
+            font-weight: 700;
+            margin-top: 1.4em;
+            margin-bottom: 0.5em;
+            line-height: 1.25;
+        }
+        h1 {
+            font-size: 22pt;
+            border-bottom: 2.5px solid #2563eb;
+            padding-bottom: 8px;
+            margin-top: 0;
+            color: #1e3a8a;
+        }
+        h2 {
+            font-size: 15pt;
+            border-bottom: 1.5px solid #cbd5e1;
+            padding-bottom: 4px;
+            color: #1e40af;
+            page-break-after: avoid;
+        }
+        h3 {
+            font-size: 12.5pt;
+            color: #334155;
+            page-break-after: avoid;
+        }
+        p, ul, ol {
+            margin-top: 0.4em;
+            margin-bottom: 0.8em;
+        }
+        li {
+            margin-bottom: 0.3em;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.2em 0;
+            font-size: 9.5pt;
+            page-break-inside: auto;
+        }
+        tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+        th, td {
+            border: 1px solid #cbd5e1;
+            padding: 7px 10px;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            font-weight: 600;
+        }
+        tr:nth-child(even) td {
+            background-color: #f8fafc;
+        }
+        code, pre {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        code {
+            background-color: #f1f5f9;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 9pt;
+            color: #0369a1;
+        }
+        pre {
+            background-color: #0f172a;
+            color: #f8fafc;
+            padding: 14px 18px;
+            border-radius: 6px;
+            font-size: 8.5pt;
+            line-height: 1.45;
+            overflow-x: auto;
+            page-break-inside: avoid;
+        }
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+            border-radius: 0;
+        }
+        blockquote {
+            margin: 1em 0;
+            padding: 10px 18px;
+            background-color: #eff6ff;
+            border-left: 4px solid #2563eb;
+            color: #1e3a8a;
+            border-radius: 0 4px 4px 0;
+        }
+        blockquote strong {
+            color: #1d4ed8;
+        }
+        .header-meta {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin-bottom: 24px;
+            font-size: 10pt;
+        }
+        .img-container {
+            text-align: center;
+            margin: 20px auto;
+            page-break-inside: avoid;
+        }
+        .img-container img {
+            max-width: 100%;
+            max-height: 220mm;
+            width: auto;
+            height: auto;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+            display: inline-block;
+        }
+        .caption {
+            font-size: 9.5pt;
+            color: #475569;
+            margin-top: 8px;
+            font-style: italic;
+            font-weight: 500;
+        }
+        .page-break {
+            page-break-before: always;
+        }
+    </style>
+</head>
+<body>
+<h1>Requirement Analysis Document (RAD)</h1>
+
+<p><strong>Software Requirements Specification &amp; System Analysis for the Database Management System (DBMS) Project.</strong></p>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>1. Project Title &amp; Metadata</h2>
+
+<ul><li><strong>Project Title:</strong> ROADWATCH — Civic Infrastructure Intelligence &amp; Road Grievance Governance Platform</li><li><strong>Subject:</strong> Database Management Systems Laboratory (DBMS)</li><li><strong>Academic Year:</strong> 2026–2027</li><li><strong>Team Members:</strong></li></ul>
+<table>
+<tr>
+<th>* <strong>Kanak Waradkar</strong></th>
+<th><strong>Roll No:</strong> <code>24B-CO-030</code></th>
+<th><strong>Email:</strong> kanakwaradkar@gmail.com <em>(Team Lead)</em></th>
+</tr>
+<tr>
+<td>* <strong>Krushna Surve</strong></td>
+<td><strong>Roll No:</strong> <code>24B-CO-031</code></td>
+<td><strong>Email:</strong> krushnasurve07@gmail.com</td>
+</tr>
+<tr>
+<td>* <strong>Manjunath Subhash Gavada</strong></td>
+<td><strong>Roll No:</strong> <code>24B-CO-035</code></td>
+<td><strong>Email:</strong> manjunathgavada40@gmail.com</td>
+</tr>
+</table>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>2. Introduction &amp; Background</h2>
+
+<p>Urban road transportation infrastructure constitutes one of the largest capital investments managed by municipal governments and state public works agencies. Despite continuous public fund expenditures, road deterioration remains pervasive across urban clusters, marked by recurring potholes, waterlogging, surface erosion, and structurally compromised pavements.</p>
+
+<p>A primary root cause of this infrastructure crisis is administrative and technological fragmentation. Information regarding road assets, municipal tender contracts, contractor past performance, and citizen complaints is typically spread across uncoordinated operational silos. Field inspectors, administrative commissioners, and citizens have neither a unified visual ledger of road assets nor an accountable audit mechanism.</p>
+
+<p>The <strong>ROADWATCH DBMS</strong> project is designed to eliminate these operational barriers. It provides an enterprise relational and geospatial database foundation engineered to store, correlate, and track the complete lifecycle of road infrastructure: from initial procurement tenders and contractor selection, through spatial defect registration and automated SLA escalation, to financial milestone disbursement and immutable audit tracking.</p>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>3. Problem Statement &amp; Need for the System</h2>
+
+<p>Traditional municipal road grievance and maintenance mechanisms suffer from four structural vulnerabilities:</p>
+
+<p>1. <strong>Absence of Centralized Asset &amp; Defect Registry:</strong> Road segments and citizen complaints lack standardized relational representations with spatial coordinate anchoring, leading to duplicate records, unverified coordinates, and inaccurate defect prioritization.</p>
+<p>2. <strong>Disconnected Contractor Accountability:</strong> Municipalities routinely award new road contracts without dynamic visibility into a vendor's historical project delivery performance, average delay days, or unresolved defect count.</p>
+<p>3. <strong>Manual, Error-Prone Grievance Routing:</strong> Citizen grievances are manually handled by administrative clerks, frequently causing complaints to be misrouted across overlapping administrative boundaries (e.g., National Highways vs. State PWD vs. Municipal Corporation wards).</p>
+<p>4. <strong>Lack of Database-Level Integrity &amp; Escalation:</strong> In existing workflows, business constraints and status changes are loosely enforced in superficial application code. If a staff member ignores a critical defect or manually alters a record without logging, the system provides zero tamper evidence and zero automatic escalation.</p>
+
+<p><strong>Need for the System:</strong> A modern municipal infrastructure database must enforce relational integrity, spatial indexing, automated lifecycle triggers, and tamper-evident audit logging at the database engine tier, guaranteeing that operational policies execute deterministically regardless of external client applications.</p>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>4. Project Objectives</h2>
+
+<p>1. <strong>To Design a Normalized Relational &amp; Geospatial Schema:</strong> Develop a 3NF/BCNF relational database incorporating OpenGIS spatial types (<code>Point</code>, <code>LineString</code>, <code>Polygon</code>) modeling road networks, administrative authorities, contractors, tenders, and grievances.</p>
+<p>2. <strong>To Implement a Database-Enforced State Machine:</strong> Formulate database triggers and domain constraints that regulate grievance status transitions (<code>pending</code> → <code>routed</code> → <code>in_progress</code> → <code>resolved</code>/<code>rejected</code>) and disallow illegal lifecycle skips.</p>
+<p>3. <strong>To Automate Spatial Association &amp; Jurisdiction Matching:</strong> Utilize PostGIS topological functions (<code>ST_Contains</code>, <code>ST_DWithin</code>) within stored functions to automatically bind a defect to its parent administrative authority and nearest monitored road segment.</p>
+<p>4. <strong>To Build Dynamic Trigger-Driven Performance Metrics:</strong> Implement database triggers that compute contractor ratings (<code>performance_index</code>) and track project delays immediately upon milestone completion or contract closeout.</p>
+<p>5. <strong>To Establish an Immutable, Tamper-Evident Audit Trail:</strong> Capture all insert, update, and delete actions on critical operational tables within a centralized, append-only <code>audit_log</code> table storing before/after JSONB payloads, actor identity, and system timestamps.</p>
+<p>6. <strong>To Maximize Spatial and Relational Query Performance:</strong> Implement GiST (Generalized Search Tree) spatial indexing and composite B-tree indexing to ensure sub-millisecond retrieval of road segments, nearby grievances, and contractor scorecards under heavy concurrency.</p>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>5. Functional Requirements</h2>
+
+<table>
+<tr>
+<th>FR ID</th>
+<th>Requirement Statement</th>
+<th>Target Actors</th>
+<th>Database Tables / Entities</th>
+</tr>
+<tr>
+<td><strong>FR1</strong></td>
+<td>The system shall authenticate citizens, field engineers, authority admins, and auditors using secure credentials and role designations.</td>
+<td>All Users</td>
+<td><code>Citizen</code>, <code>Authority</code>, <code>Staff</code></td>
+</tr>
+<tr>
+<td><strong>FR2</strong></td>
+<td>The system shall allow citizens to register road complaints with GPS coordinates, title, description, category, and an optional image URL.</td>
+<td>Citizen</td>
+<td><code>Complaint</code>, <code>Citizen</code></td>
+</tr>
+<tr>
+<td><strong>FR3</strong></td>
+<td>The system shall automatically resolve the governing municipal authority by determining which administrative polygon contains the complaint coordinates (<code>ST_Contains</code>).</td>
+<td>System (Automated)</td>
+<td><code>Complaint</code>, <code>Authority</code></td>
+</tr>
+<tr>
+<td><strong>FR4</strong></td>
+<td>The system shall snap the reported grievance to the nearest monitored road segment within a defined spatial proximity radius (<code>ST_DWithin</code>).</td>
+<td>System (Automated)</td>
+<td><code>Complaint</code>, <code>Road</code></td>
+</tr>
+<tr>
+<td><strong>FR5</strong></td>
+<td>The system shall restrict citizens to viewing the detailed progression, status changes, and resolution notes only for complaints filed by their own account.</td>
+<td>Citizen</td>
+<td><code>Complaint</code>, <code>Citizen</code></td>
+</tr>
+<tr>
+<td><strong>FR6</strong></td>
+<td>The system shall enable ward engineers to inspect grievances assigned to their jurisdiction and transition status to <code>in_progress</code>.</td>
+<td>Field Staff</td>
+<td><code>Complaint</code>, <code>Authority</code></td>
+</tr>
+<tr>
+<td><strong>FR7</strong></td>
+<td>The system shall require field engineers to append mandatory verification notes and resolution timestamp when closing a complaint as <code>resolved</code>.</td>
+<td>Field Staff</td>
+<td><code>Complaint</code>, <code>Status_History</code></td>
+</tr>
+<tr>
+<td><strong>FR8</strong></td>
+<td>The system shall disallow illegal complaint status skips (e.g., jumping from <code>pending</code> directly to <code>resolved</code>) via a database-level trigger validation function.</td>
+<td>System (Automated)</td>
+<td><code>Complaint</code>, <code>Status_History</code></td>
+</tr>
+<tr>
+<td><strong>FR9</strong></td>
+<td>The system shall automatically detect SLA breaches and increment the escalation level (<code>escalation_level</code> 0 → 1 → 2) once open duration exceeds category SLA hours.</td>
+<td>System (Automated)</td>
+<td><code>Complaint</code>, <code>SLA_Config</code>, <code>SLA_Escalation</code></td>
+</tr>
+<tr>
+<td><strong>FR10</strong></td>
+<td>The system shall record an audit record in <code>audit_log</code> whenever an update or delete occurs on complaints, projects, roads, or contractor tables.</td>
+<td>System (Automated)</td>
+<td><code>Audit_Log</code></td>
+</tr>
+<tr>
+<td><strong>FR11</strong></td>
+<td>The system shall allow authority administrators to float public tenders with estimated budgets, requirements, and bidding deadlines.</td>
+<td>Admin</td>
+<td><code>Tender</code>, <code>Authority</code></td>
+</tr>
+<tr>
+<td><strong>FR12</strong></td>
+<td>The system shall record contractor bids for active tenders, evaluating financial quotes and technical qualification scores.</td>
+<td>Admin, Contractor</td>
+<td><code>Tender_Bid</code>, <code>Contractor</code>, <code>Tender</code></td>
+</tr>
+<tr>
+<td><strong>FR13</strong></td>
+<td>The system shall allow administrators to approve or log budget variance justifications when actual project spending exceeds allocated contract funds.</td>
+<td>Admin</td>
+<td><code>Project</code>, <code>Budget_Variance_Reason</code></td>
+</tr>
+<tr>
+<td><strong>FR14</strong></td>
+<td>The system shall automatically recompute a contractor’s <code>performance_index</code> via trigger whenever a linked project completes or logs delay days.</td>
+<td>System (Automated)</td>
+<td><code>Contractor</code>, <code>Project</code></td>
+</tr>
+<tr>
+<td><strong>FR15</strong></td>
+<td>The system shall track milestone-based payment disbursements for road works, validating completion verification before fund release.</td>
+<td>Admin, Staff</td>
+<td><code>Project_Milestone</code>, <code>Project</code></td>
+</tr>
+<tr>
+<td><strong>FR16</strong></td>
+<td>The system shall provide analytical views summarizing road condition indices, average resolution time, contractor rankings, and public cost-per-kilometer.</td>
+<td>All Roles / Auditor</td>
+<td><code>Road</code>, <code>Project</code>, <code>Complaint</code>, Views</td>
+</tr>
+</table>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>6. User Roles and Permissions Matrix</h2>
+
+<p>The database defines four granular user profiles with role-specific views and execution permissions:</p>
+
+<table>
+<tr>
+<th>Permission / Operation</th>
+<th>Citizen</th>
+<th>Field Staff / Ward Engineer</th>
+<th>Authority Admin (Commissioner)</th>
+<th>Auditor / Public Oversight</th>
+</tr>
+<tr>
+<td><strong>File Grievance with GPS &amp; Photo</strong></td>
+<td>Permitted</td>
+<td>Restricted</td>
+<td>Restricted</td>
+<td>Restricted</td>
+</tr>
+<tr>
+<td><strong>View Own Complaints &amp; Timeline</strong></td>
+<td>Full Access</td>
+<td>Restricted</td>
+<td>Ward Access</td>
+<td>Read-Only View</td>
+</tr>
+<tr>
+<td><strong>Inspect Jurisdiction Complaints</strong></td>
+<td>Restricted</td>
+<td>Ward Access</td>
+<td>Full Access</td>
+<td>Read-Only View</td>
+</tr>
+<tr>
+<td><strong>Update Complaint Status &amp; Notes</strong></td>
+<td>Restricted</td>
+<td>Trigger Validated</td>
+<td>Full Access</td>
+<td>Restricted</td>
+</tr>
+<tr>
+<td><strong>Float Tenders &amp; Award Contracts</strong></td>
+<td>Restricted</td>
+<td>Restricted</td>
+<td>Full Access</td>
+<td>Restricted</td>
+</tr>
+<tr>
+<td><strong>Submit Tender Bids</strong></td>
+<td>Restricted</td>
+<td>Restricted</td>
+<td>Restricted (Vendors)</td>
+<td>Restricted</td>
+</tr>
+<tr>
+<td><strong>Approve Budget Variances &amp; Milestones</strong></td>
+<td>Restricted</td>
+<td>Restricted</td>
+<td>Full Access</td>
+<td>Restricted</td>
+</tr>
+<tr>
+<td><strong>Configure Department SLAs</strong></td>
+<td>Restricted</td>
+<td>Restricted</td>
+<td>Full Access</td>
+<td>Restricted</td>
+</tr>
+<tr>
+<td><strong>Inspect Immutable Audit Trail (<code>audit_log</code>)</strong></td>
+<td>Restricted</td>
+<td>Restricted</td>
+<td>Full Access</td>
+<td>Dedicated View</td>
+</tr>
+<tr>
+<td><strong>View Public Scorecards &amp; Cost/KM</strong></td>
+<td>Public Access</td>
+<td>Public Access</td>
+<td>Full Access</td>
+<td>Dedicated View</td>
+</tr>
+</table>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>7. Major System Modules</h2>
+
+<pre><code class="language-">
+┌────────────────────────────────────────────────────────────────────────┐
+│                        ROADWATCH DBMS PLATFORM                         │
+└──────────────────────────────────┬─────────────────────────────────────┘
+                                   │
+         ┌─────────────────────────┼─────────────────────────┐
+         ▼                         ▼                         ▼
+┌──────────────────┐      ┌──────────────────┐      ┌──────────────────┐
+│  Asset &amp; Spatial │      │   Grievance &amp;    │      │  Procurement &amp;   │
+│  Infrastructure  │      │    Lifecycle     │      │   Contractor     │
+│  Module          │      │    Module        │      │   Module         │
+└──────────────────┘      └──────────────────┘      └──────────────────┘
+         │                         │                         │
+         ├─────────────────────────┼─────────────────────────┤
+         ▼                         ▼                         ▼
+┌──────────────────┐      ┌──────────────────┐      ┌──────────────────┐
+│  Fiscal &amp; Budget │      │   SLA &amp; Auto-    │      │  Audit Trail &amp;   │
+│  Governance      │      │   Escalation     │      │  Public Analytics│
+│  Module          │      │   Module         │      │  Module          │
+└──────────────────┘      └──────────────────┘      └──────────────────┘
+</code></pre>
+
+<p>1. <strong>Asset &amp; Spatial Infrastructure Module:</strong> Maintains spatial definitions of road segments (<code>LineString</code>), surface materials, width, lane counts, and municipal jurisdiction boundaries (<code>Polygon</code>). Computes topological intersections and containment.</p>
+<p>2. <strong>Grievance &amp; Lifecycle Module:</strong> Handles registration, classification (<code>pothole</code>, <code>paving_defect</code>, <code>waterlogging</code>, <code>debris</code>, <code>missing_signage</code>), and status progression with trigger-enforced state machine checks.</p>
+<p>3. <strong>Geospatial Jurisdiction &amp; Routing Module:</strong> Automatically matches complaint coordinates to jurisdictional authorities and road segments using PostGIS indexed spatial algorithms (<code>ST_Contains</code>, <code>ST_DWithin</code>).</p>
+<p>4. <strong>Procurement &amp; Contractor Governance Module:</strong> Manages contractor licensing, tender publications, competitive bidding, contractor performance scorecards, and blacklisting registries.</p>
+<p>5. <strong>Fiscal &amp; Budget Governance Module:</strong> Governs capital allocation, milestone progress verification, contingency reserves, and formal budget variance justification trails.</p>
+<p>6. <strong>SLA &amp; Automated Escalation Module:</strong> Evaluates real-time grievance age against configured SLAs, executing automated priority escalation and departmental notifications upon SLA breach.</p>
+<p>7. <strong>Audit Trail &amp; Governance Module:</strong> Transparently logs before/after snapshots of mutated rows, executing database user, and exact timestamp into an append-only audit repository.</p>
+<p>8. <strong>Public Analytics &amp; Reporting Module:</strong> Provides pre-aggregated database views calculating cost-per-kilometer, average resolution turnaround, contractor delay metrics, and recurrent defect heatmaps.</p>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>8. Use Cases &amp; Use Case Diagram</h2>
+
+<h3>Use Case Specifications</h3>
+
+<table>
+<tr>
+<th>Use Case ID</th>
+<th>Use Case Name</th>
+<th>Primary Actor</th>
+<th>Description</th>
+<th>Precondition</th>
+<th>Postcondition</th>
+</tr>
+<tr>
+<td><strong>UC01</strong></td>
+<td>User Authentication</td>
+<td>Citizen / Staff / Admin</td>
+<td>User logs into system with credentials.</td>
+<td>Registered account exists.</td>
+<td>Role-specific session created.</td>
+</tr>
+<tr>
+<td><strong>UC02</strong></td>
+<td>Submit Road Grievance</td>
+<td>Citizen</td>
+<td>Citizen logs defect with GPS point and photo.</td>
+<td>Valid citizen session.</td>
+<td>Complaint persisted, authority resolved.</td>
+</tr>
+<tr>
+<td><strong>UC03</strong></td>
+<td>Auto-Route Complaint</td>
+<td>System (Automated)</td>
+<td>Spatial trigger identifies authority &amp; nearest road.</td>
+<td>Complaint coordinate entered.</td>
+<td><code>assigned_authority_id</code> &amp; <code>road_id</code> populated.</td>
+</tr>
+<tr>
+<td><strong>UC04</strong></td>
+<td>View My Grievances</td>
+<td>Citizen</td>
+<td>Citizen queries history of their own reports.</td>
+<td>Citizen authenticated.</td>
+<td>Only citizen's own records displayed.</td>
+</tr>
+<tr>
+<td><strong>UC05</strong></td>
+<td>Inspect &amp; Accept Defect</td>
+<td>Field Staff</td>
+<td>Engineer verifies defect and marks <code>in_progress</code>.</td>
+<td>Complaint assigned to staff's ward.</td>
+<td>Status updated; audit row inserted.</td>
+</tr>
+<tr>
+<td><strong>UC06</strong></td>
+<td>Complete Repair &amp; Close</td>
+<td>Field Staff</td>
+<td>Engineer attaches repair log and marks <code>resolved</code>.</td>
+<td>Complaint in <code>in_progress</code> state.</td>
+<td>Status set to <code>resolved</code>; duration logged.</td>
+</tr>
+<tr>
+<td><strong>UC07</strong></td>
+<td>Auto-Escalate Overdue</td>
+<td>System (Automated)</td>
+<td>System detects SLA breach and escalates level.</td>
+<td>Complaint age &gt; SLA threshold.</td>
+<td><code>escalation_level</code> raised; log recorded.</td>
+</tr>
+<tr>
+<td><strong>UC08</strong></td>
+<td>Float Public Tender</td>
+<td>Authority Admin</td>
+<td>Admin publishes road construction tender.</td>
+<td>Road asset &amp; budget approved.</td>
+<td>Tender enters <code>published</code> state.</td>
+</tr>
+<tr>
+<td><strong>UC09</strong></td>
+<td>Submit Contractor Bid</td>
+<td>Contractor</td>
+<td>Contractor submits financial &amp; technical proposal.</td>
+<td>Tender in <code>bid_open</code> state.</td>
+<td>Bid stored in <code>tender_bids</code>.</td>
+</tr>
+<tr>
+<td><strong>UC10</strong></td>
+<td>Award Tender &amp; Project</td>
+<td>Authority Admin</td>
+<td>Admin selects winning bid and creates project.</td>
+<td>Tender evaluation complete.</td>
+<td>Project created; contractor assigned.</td>
+</tr>
+<tr>
+<td><strong>UC11</strong></td>
+<td>Approve Milestone</td>
+<td>Authority Admin</td>
+<td>Admin verifies milestone and releases payment.</td>
+<td>Milestone inspection certified.</td>
+<td><code>project_milestones.status = 'completed'</code>.</td>
+</tr>
+<tr>
+<td><strong>UC12</strong></td>
+<td>Log Budget Variance</td>
+<td>Authority Admin</td>
+<td>Admin records revised budget and formal justification.</td>
+<td>Spending exceeds initial allocation.</td>
+<td>Record added to <code>budget_variance_reasons</code>.</td>
+</tr>
+<tr>
+<td><strong>UC13</strong></td>
+<td>Auto-Score Contractor</td>
+<td>System (Automated)</td>
+<td>Trigger calculates contractor <code>performance_index</code>.</td>
+<td>Project marked completed/delayed.</td>
+<td>Contractor scorecard updated.</td>
+</tr>
+<tr>
+<td><strong>UC14</strong></td>
+<td>Inspect System Audit Log</td>
+<td>Auditor</td>
+<td>Auditor reviews system mutations and timestamps.</td>
+<td>Auditor credentials verified.</td>
+<td>Append-only audit history presented.</td>
+</tr>
+</table>
+
+<div class="page-break"></div>
+<h3>Use Case Diagram</h3>
+
+
+<div class="img-container">
+    <img src="use_case_diagram.png" alt="Figure 1: UML Use Case Diagram for ROADWATCH DBMS Platform" />
+    <div class="caption">Figure 1: UML Use Case Diagram illustrating role-based interactions across Citizens, Field Engineers, Authority Administrators, Public Auditors, and Automated Database Triggers.</div>
+</div>
+
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>9. Data Requirements</h2>
+
+<p><em>(Note: In accordance with standard DBMS design methodology, this section identifies information requirements without foreign key relational artifacts, which are formalized in the ERD and Relational Schema stages.)</em></p>
+
+<table>
+<tr>
+<th>Data Category</th>
+<th>Conceptual Data Items Required</th>
+</tr>
+<tr>
+<td><strong>Authority</strong></td>
+<td>Identifier, Name, Department Code, Contact Email, Contact Phone, Geographic Jurisdiction Boundary (Polygon).</td>
+</tr>
+<tr>
+<td><strong>Road Asset</strong></td>
+<td>Identifier, Road Name, Highway/Road Code, Structural Condition Status, Length in KM, Road Classification Type, Surface Material, Lane Count, Spatial Geometry Path (LineString).</td>
+</tr>
+<tr>
+<td><strong>Contractor</strong></td>
+<td>Identifier, Contractor Code, Corporate Name, Registration License Number, Registration Date, Contact Email, Average Rating, Projects Completed Count, Projects Delayed Count, Blacklist Status, Derived Performance Index.</td>
+</tr>
+<tr>
+<td><strong>Project (Contract)</strong></td>
+<td>Identifier, Contract Title, Allocated Budget, Spent Budget, Execution Status, Planned Start Date, Target Completion Date, Actual Completion Date, Delay Days Count.</td>
+</tr>
+<tr>
+<td><strong>Citizen</strong></td>
+<td>Identifier, Citizen Name (First Name, Last Name), Email Address, Contact Phone Numbers (multivalued), Residential Ward Location.</td>
+</tr>
+<tr>
+<td><strong>Complaint (Grievance)</strong></td>
+<td>Identifier, Title, Problem Description, Defect Category, Spatial GPS Coordinate (Point), Lifecycle Status, Priority Level, Escalation Level, Photo URL, Created Timestamp, Updated Timestamp.</td>
+</tr>
+<tr>
+<td><strong>Tender</strong></td>
+<td>Identifier, Reference Number, Title, Detailed Description, Estimated Capital Value, Procurement Status, Publication Date, Bid Deadline Date, Award Date.</td>
+</tr>
+<tr>
+<td><strong>Project Milestone</strong></td>
+<td>Milestone Number (within Project), Milestone Title, Work Description, Allocation Amount, Milestone Status, Due Date, Actual Completion Date. <em>(Weak Entity)</em></td>
+</tr>
+<tr>
+<td><strong>Status History</strong></td>
+<td>Sequence Number (within Complaint), Previous Status, New Transition Status, Updated Timestamp, Transition Remarks. <em>(Weak Entity)</em></td>
+</tr>
+<tr>
+<td><strong>SLA Policy</strong></td>
+<td>Identifier, Defect Category, Maximum Resolution Hours, Escalation Threshold Level, Notification Template.</td>
+</tr>
+<tr>
+<td><strong>Audit Event</strong></td>
+<td>Event Identifier, Modified Table Name, Target Record Identifier, Mutation Action (INSERT/UPDATE/DELETE), Snapshot of Old Values (JSONB), Snapshot of New Values (JSONB), Acting User, Event Timestamp.</td>
+</tr>
+</table>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>10. Business Rules</h2>
+
+<p>1. <strong>BR1 (Citizen Grievance Integrity):</strong> Every complaint must be filed by exactly one registered citizen, must contain valid geographic point coordinates within the municipal boundary, and must fall into a pre-approved defect category.</p>
+<p>2. <strong>BR2 (Automated Spatial Ownership):</strong> A complaint's governing authority is determined dynamically by geometric polygon containment (<code>ST_Contains(authorities.geom_boundary, complaints.geom)</code>); it cannot be manually assigned arbitrarily.</p>
+<p>3. <strong>BR3 (Strict State Transition Validation):</strong> A complaint must transition sequentially through:</p>
+<p><code>pending</code> → <code>routed</code> → <code>in_progress</code> → <code>resolved</code> / <code>rejected</code></p>
+<p>Direct skips (such as <code>pending</code> directly to <code>resolved</code>) must be rejected by database triggers with an explicit SQL exception.</p>
+<p>4. <strong>BR4 (Mandatory Resolution Documentation):</strong> Setting a complaint to <code>resolved</code> requires a non-empty repair explanation and timestamp.</p>
+<p>5. <strong>BR5 (Automated SLA Breach Escalation):</strong> If an open complaint's elapsed duration exceeds the category SLA hours, the database must escalate its level (<code>0</code> → <code>1</code> → <code>2</code>) and record the escalation event in <code>sla_escalations</code>.</p>
+<p>6. <strong>BR6 (Contractor Bidding Eligibility):</strong> A contractor currently marked as <code>blacklisted = TRUE</code> is strictly barred from submitting bids on active tenders.</p>
+<p>7. <strong>BR7 (Contract Date Sanity Constraint):</strong> A project's <code>target_end_date</code> must be greater than or equal to its <code>start_date</code>. If provided, <code>actual_end_date</code> must also equal or exceed <code>start_date</code>.</p>
+<p>8. <strong>BR8 (Dynamic Contractor Score Calculation):</strong> Whenever a project completes or logs delay days, the contractor's <code>performance_index</code> is automatically recalculated:</p>
+<p><code>performance_index = (projects_completed / max(projects_completed + projects_delayed, 1)) × rating × 20</code></p>
+<p>9. <strong>BR9 (Milestone Payment Constraint):</strong> A project milestone payment cannot be authorized unless the milestone status is certified as <code>completed</code>. Total milestone amounts must not exceed the project allocated budget.</p>
+<p>10. <strong>BR10 (Budget Variance Justification):</strong> Any increase in project expenditures beyond <code>budget_allocated</code> requires a corresponding record in <code>budget_variance_reasons</code> documenting the variance amount, formal reason, and approving official.</p>
+<p>11. <strong>BR11 (Zero Unlogged Mutations):</strong> Every INSERT, UPDATE, and DELETE on core tables (<code>complaints</code>, <code>projects</code>, <code>roads</code>, <code>contractors</code>) must execute an AFTER trigger logging complete before/after state to <code>audit_log</code>.</p>
+<p>12. <strong>BR12 (Administrative Deletion Restrictions):</strong> Core infrastructure assets (Roads, Authorities) cannot be hard-deleted if active projects or open complaints reference them (<code>ON DELETE RESTRICT</code>).</p>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>11. Input Requirements</h2>
+
+<table>
+<tr>
+<th>Input Description</th>
+<th>Submitted By</th>
+<th>Input Format / Validation Rules</th>
+<th>Target Purpose</th>
+</tr>
+<tr>
+<td><strong>Citizen Registration</strong></td>
+<td>Citizen</td>
+<td>Name, valid email regex, 10-digit phone, residential ward.</td>
+<td>Account creation &amp; notification routing.</td>
+</tr>
+<tr>
+<td><strong>Grievance Submission</strong></td>
+<td>Citizen</td>
+<td>Text title (max 255), description, category dropdown, GPS Point (WGS84 lat/lon), photo URL.</td>
+<td>Defect registration and spatial matching.</td>
+</tr>
+<tr>
+<td><strong>Defect Status Progression</strong></td>
+<td>Field Staff</td>
+<td>Enum: <code>['routed', 'in_progress', 'resolved', 'rejected']</code>, mandatory resolution text if resolved.</td>
+<td>State machine progression.</td>
+</tr>
+<tr>
+<td><strong>Public Tender Creation</strong></td>
+<td>Authority Admin</td>
+<td>Reference No (unique string), title, estimated amount (&gt;0), published date, deadline (&gt;= published date).</td>
+<td>Initiating public procurement.</td>
+</tr>
+<tr>
+<td><strong>Contractor Bid Submission</strong></td>
+<td>Contractor</td>
+<td>Financial quote (&gt;0), technical score, contractor license validation.</td>
+<td>Competitive procurement evaluation.</td>
+</tr>
+<tr>
+<td><strong>Milestone Certification</strong></td>
+<td>Field Staff / Admin</td>
+<td>Milestone title, target due date, completion date, verification officer signature.</td>
+<td>Payment release authorization.</td>
+</tr>
+<tr>
+<td><strong>Budget Variance Request</strong></td>
+<td>Authority Admin</td>
+<td>Original budget, revised budget, positive variance amount, formal justification text, approval URL.</td>
+<td>Fiscal accountability audit.</td>
+</tr>
+<tr>
+<td><strong>SLA Configuration Threshold</strong></td>
+<td>Authority Admin</td>
+<td>Defect category, resolution timeout hours (integer &gt; 0), escalation target authority ID.</td>
+<td>Defining operational SLA policies.</td>
+</tr>
+</table>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>12. Output Requirements &amp; Reports</h2>
+
+<table>
+<tr>
+<th>Output / Report Name</th>
+<th>Intended Audience</th>
+<th>Core Metrics &amp; Information Displayed</th>
+<th>Operational Value</th>
+</tr>
+<tr>
+<td><strong>Citizen Complaint Tracker</strong></td>
+<td>Citizen</td>
+<td>Tracking ID, current status badge, nearest road name, assigned authority, elapsed time, photo preview.</td>
+<td>Citizen transparency &amp; trust.</td>
+</tr>
+<tr>
+<td><strong>Ward Grievance Queue</strong></td>
+<td>Field Staff</td>
+<td>List of active defects within ward boundary, priority score, category, SLA countdown timer.</td>
+<td>Prioritized daily field repair tasks.</td>
+</tr>
+<tr>
+<td><strong>Overdue SLA Escalation Report</strong></td>
+<td>Authority Admin</td>
+<td>List of complaints exceeding SLA, days overdue, escalation tier (Level 1/2), failing department.</td>
+<td>Administrative intervention &amp; accountability.</td>
+</tr>
+<tr>
+<td><strong>Contractor Performance Matrix</strong></td>
+<td>Authority Admin</td>
+<td>Contractor code, projects completed, delay days, average rating, calculated <code>performance_index</code>, blacklist flag.</td>
+<td>Objective procurement award decisions.</td>
+</tr>
+<tr>
+<td><strong>Project Cost-Per-KM View</strong></td>
+<td>Public / Auditor</td>
+<td>Project title, road name, length (km), budget allocated, budget spent, calculated allocated/spent per km, variance.</td>
+<td>Detecting public expenditure inflation.</td>
+</tr>
+<tr>
+<td><strong>Municipal Defect Trend Report</strong></td>
+<td>Municipal Council</td>
+<td>Monthly complaint count by category, repeat defect roads, seasonal pothole density overlays.</td>
+<td>Long-term capital budgeting decisions.</td>
+</tr>
+<tr>
+<td><strong>Tamper-Evident Audit Dossier</strong></td>
+<td>State Auditor</td>
+<td>Chronological log of table mutations, acting DB user, timestamp, JSON diff of modified attributes.</td>
+<td>Forensic investigation of corruption or data tampering.</td>
+</tr>
+</table>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>13. System Constraints &amp; Assumptions</h2>
+
+<p>1. <strong>Database Platform Constraint:</strong> The operational database must run on PostgreSQL 16+ with PostGIS 3.4+ installed and enabled.</p>
+<p>2. <strong>Spatial Coordinate Reference System:</strong> All spatial geographic geometries must be projected in EPSG:4326 (WGS 84 latitude/longitude) for interoperability with GPS and OpenStreetMap.</p>
+<p>3. <strong>Spatial Proximity Radius:</strong> Defect-to-road snapping is calibrated with a maximum default threshold of 20 meters (<code>ST_DWithin</code>); defects beyond 20 meters from any registered road segment are flagged for manual GIS alignment.</p>
+<p>4. <strong>Data Integrity Over Speed:</strong> Strict referential integrity, foreign key cascading constraints, and audit trigger execution take precedence over asynchronous eventual consistency.</p>
+<p>5. <strong>Single Municipality / Regional Scalability:</strong> The relational schema accommodates multi-region deployments via region codes (<code>regions</code>), but jurisdiction queries assume non-overlapping municipal authority polygons per region.</p>
+<p>6. <strong>Network Connectivity Assumption:</strong> Field engineers and citizens operate with intermittent cellular networks; the application layer buffers submissions, but the database transactions execute with ACID guarantees upon reaching the server.</p>
+<p>7. <strong>Append-Only Audit Guarantee:</strong> The <code>audit_log</code> table allows INSERT operations only; UPDATE and DELETE privileges on <code>audit_log</code> are revoked from general application users to prevent history alteration.</p>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>14. Proposed Technology Stack</h2>
+
+<table>
+<tr>
+<th>Layer</th>
+<th>Technology</th>
+<th>Version / Tooling</th>
+<th>Architectural Responsibility</th>
+</tr>
+<tr>
+<td><strong>Database Engine</strong></td>
+<td>PostgreSQL + PostGIS</td>
+<td>PostgreSQL 16.2 / PostGIS 3.4</td>
+<td>Primary relational data store, spatial geometry math, triggers, stored procedures, audit logging.</td>
+</tr>
+<tr>
+<td><strong>Application Backend</strong></td>
+<td>Python / FastAPI</td>
+<td>Python 3.11, SQLAlchemy, Psycopg2</td>
+<td>Thin REST API gateway translating HTTP calls to parameterized SQL queries and executing stored procedures.</td>
+</tr>
+<tr>
+<td><strong>Spatial Querying</strong></td>
+<td>PostGIS Functions</td>
+<td><code>ST_Contains</code>, <code>ST_DWithin</code>, <code>ST_AsGeoJSON</code></td>
+<td>Real-time topological routing and proximity calculations.</td>
+</tr>
+<tr>
+<td><strong>User Interface</strong></td>
+<td>Next.js (React)</td>
+<td>Next.js 16 App Router, TypeScript</td>
+<td>Interactive responsive web application, Leaflet GIS map rendering, citizen reporting wizard.</td>
+</tr>
+<tr>
+<td><strong>Styling &amp; Motion</strong></td>
+<td>Tailwind CSS / Framer</td>
+<td>Tailwind CSS v4, Framer Motion</td>
+<td>High-visibility accessible user interface, stateful animations.</td>
+</tr>
+<tr>
+<td><strong>Development &amp; Modeling</strong></td>
+<td>Database Modeling</td>
+<td>Draw.io, dbdiagram.io, EXPLAIN ANALYZE</td>
+<td>Conceptual Chen ER modeling, schema mapping, query profiling.</td>
+</tr>
+</table>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<div class="page-break"></div>
+<h2>15. Preliminary System Flow</h2>
+
+
+<div class="img-container">
+    <img src="system_flow_diagram.png" alt="Figure 2: System Architecture and Preliminary Data Flow" />
+    <div class="caption">Figure 2: Architectural and preliminary data flow pipeline from client submission through application validation, PostGIS spatial processing, trigger-driven state machine transition, automated SLA monitoring, and public transparency views.</div>
+</div>
+
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>16. Traceability Matrix</h2>
+
+<p>This matrix establishes 100% bidirectional traceability between functional requirements, structural modules, and database tables:</p>
+
+<table>
+<tr>
+<th>Requirement ID</th>
+<th>System Module</th>
+<th>Governing Database Table(s)</th>
+<th>Primary Operation / Enforcement Mechanism</th>
+</tr>
+<tr>
+<td><strong>FR1</strong></td>
+<td>User Management</td>
+<td><code>Citizen</code>, <code>Authority</code>, <code>Staff</code></td>
+<td>Password hashing, role-based view filtering.</td>
+</tr>
+<tr>
+<td><strong>FR2, FR5</strong></td>
+<td>Grievance Management</td>
+<td><code>Complaint</code>, <code>Citizen</code></td>
+<td><code>INSERT</code>, <code>SELECT</code> restricted by <code>citizen_id</code>.</td>
+</tr>
+<tr>
+<td><strong>FR3, FR4</strong></td>
+<td>Geospatial Jurisdiction</td>
+<td><code>Complaint</code>, <code>Authority</code>, <code>Road</code></td>
+<td><code>ST_Contains</code> and <code>ST_DWithin</code> spatial trigger functions.</td>
+</tr>
+<tr>
+<td><strong>FR6, FR7, FR8</strong></td>
+<td>Lifecycle State Machine</td>
+<td><code>Complaint</code>, <code>Status_History</code></td>
+<td><code>BEFORE UPDATE</code> trigger rejecting invalid transitions.</td>
+</tr>
+<tr>
+<td><strong>FR9</strong></td>
+<td>SLA &amp; Escalation</td>
+<td><code>Complaint</code>, <code>SLA_Config</code>, <code>SLA_Escalations</code></td>
+<td>Scheduled evaluation trigger &amp; <code>escalation_level</code> counter.</td>
+</tr>
+<tr>
+<td><strong>FR10</strong></td>
+<td>Governance &amp; Audit</td>
+<td><code>Audit_Log</code></td>
+<td><code>AFTER INSERT/UPDATE/DELETE</code> triggers on core tables.</td>
+</tr>
+<tr>
+<td><strong>FR11, FR12</strong></td>
+<td>Procurement &amp; Tenders</td>
+<td><code>Tender</code>, <code>Tender_Bid</code>, <code>Contractor</code></td>
+<td>Foreign keys, unique reference numbers, bid scoring constraints.</td>
+</tr>
+<tr>
+<td><strong>FR13, FR15</strong></td>
+<td>Fiscal Governance</td>
+<td><code>Project</code>, <code>Project_Milestone</code>, <code>Budget_Variance_Reasons</code></td>
+<td>Domain check constraints, milestone verification checks.</td>
+</tr>
+<tr>
+<td><strong>FR14</strong></td>
+<td>Contractor Scoring</td>
+<td><code>Contractor</code>, <code>Project</code></td>
+<td><code>trg_contractor_perf_index</code> calculating <code>performance_index</code>.</td>
+</tr>
+<tr>
+<td><strong>FR16</strong></td>
+<td>Public Analytics</td>
+<td>Views (<code>cost_per_km_view</code>, <code>road_beneficiary_view</code>)</td>
+<td>Aggregate relational queries calculating spending efficiency.</td>
+</tr>
+</table>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>17. Summary &amp; Real-World Impact</h2>
+
+<p>The <strong>ROADWATCH DBMS</strong> replaces fragmented, unaccountable, and paper-dependent municipal road maintenance with a unified, trigger-driven relational and spatial database architecture.</p>
+
+<p>By enforcing grievance lifecycles, automated PostGIS jurisdiction routing, dynamic contractor performance scoring, and immutable audit trails directly at the database engine level, the platform guarantees systemic transparency. Public funds allocated to road repairs can be traced down to the exact kilometer, overdue grievances are escalated automatically without human bias, and blacklisted contractors are prevented from securing public contracts. This delivers a resilient, self-healing database backbone for smart cities.</p>
+
+<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+
+<h2>18. Academic References</h2>
+
+<p>1. <strong>Elmasri, R., &amp; Navathe, S. B.</strong> (2018). <em>Fundamentals of Database Systems</em> (7th ed.). Pearson Education.</p>
+<p>2. <strong>Silberschatz, A., Korth, H. F., &amp; Sudarshan, S.</strong> (2020). <em>Database System Concepts</em> (7th ed.). McGraw-Hill Education.</p>
+<p>3. <strong>Ramakrishnan, R., &amp; Gehrke, J.</strong> (2003). <em>Database Management Systems</em> (3rd ed.). McGraw-Hill Education.</p>
+<p>4. <strong>PostgreSQL Global Development Group.</strong> (2024). <em>PostgreSQL 16 Documentation</em>. https://www.postgresql.org/docs/16/</p>
+<p>5. <strong>PostGIS Project Steering Committee.</strong> (2024). <em>PostGIS 3.4 Spatial Database Manual</em>. https://postgis.net/documentation/</p>
+<p>6. <strong>ISO/IEC/IEEE 29148:2018.</strong> <em>Systems and software engineering — Life cycle processes — Requirements engineering</em>. IEEE Standards Association.</p>
+
+</body>
+</html>
