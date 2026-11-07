@@ -19,6 +19,7 @@ from app.api.demo import router as demo_router
 from app.api.data_validation import router as data_validation_router
 from app.api.data_quality import router as data_quality_router
 from app.api.public import router as public_router
+from app.api.screens import router as screens_router
 from app.api.procurement import router as procurement_router
 from app.api.budget import router as budget_router
 from app.services.sla_service import SlaService
@@ -87,6 +88,7 @@ app.include_router(budget_router, prefix="/api/v1")
 app.include_router(data_validation_router, prefix="/api/v1")
 app.include_router(data_quality_router, prefix="/api/v1")
 app.include_router(public_router, prefix="/api/v1")
+app.include_router(screens_router, prefix="/api/v1")
 
 
 @app.get("/")

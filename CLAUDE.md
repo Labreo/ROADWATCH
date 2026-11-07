@@ -120,6 +120,19 @@ docker compose up -d                # Start DB + Redis + Backend
 cd frontend && npm run dev          # Start frontend separately
 ```
 
+### Running without Docker (lighter)
+Needs a conda env holding PostgreSQL, PostGIS and the backend packages:
+```bash
+conda create -n roadwatch-db -c conda-forge postgis python=3.11 pip
+~/miniforge3/envs/roadwatch-db/bin/pip install -r backend/requirements.txt
+./scripts/dev-db.sh                 # Local PostGIS in .roadwatch-pg/, seeded on first run
+./scripts/dev-backend.sh            # API on http://localhost:8000
+cd frontend && npm run dev          # App on http://localhost:3000
+```
+`docs/schema_documented.sql` adds what Documents 1, 3 and 4 specify (citizens, status history, state machine, audit lock, role views, sensors). Load order: `schema.sql`, `mock_data.sql`, `schema_documented.sql`.
+
+The wireframe screens live in `frontend/src/components/live/` and read `backend/app/api/screens.py`.
+
 ## Project Directory Structure
 ```
 ROADWATCH/

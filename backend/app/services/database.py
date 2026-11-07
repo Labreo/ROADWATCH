@@ -53,7 +53,7 @@ class Database:
     def __init__(self):
         # Create connection pool via SQLAlchemy
         self.engine = create_engine(
-            DATABASE_URL,
+            DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://", 1),
             pool_size=10,
             max_overflow=20,
             pool_pre_ping=True

@@ -246,6 +246,7 @@ export default function ComplaintWizard() {
   } = useStore();
 
   const [step, setStep] = useState(1);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [selectedPresetIndex, setSelectedPresetIndex] = useState(0);
 
   // Form details resolved by AI and customized by user
@@ -432,9 +433,14 @@ export default function ComplaintWizard() {
       imagePreview: base64Preview || undefined
     };
 
-    const ticket = await queueComplaint(complaintData);
-    setTicketResult(ticket);
-    setStep(5);
+    setSubmitError(null);
+    try {
+      const ticket = await queueComplaint(complaintData);
+      setTicketResult(ticket);
+      setStep(5);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'This report could not be filed.');
+    }
   };
 
   const handleClose = () => {
@@ -873,6 +879,11 @@ export default function ComplaintWizard() {
             </div>
 
             <div className="space-y-2 pt-2">
+              {submitError && (
+                <p role="alert" className="rounded-lg border border-rose-400/40 bg-rose-500/10 px-3 py-2 text-[11px] leading-4 text-rose-300">
+                  {submitError}
+                </p>
+              )}
               <button
                 onClick={handleSubmit}
                 className="w-full py-3.5 rounded-2xl bg-cyan-400 hover:bg-cyan-500 text-slate-950 text-xs font-black tracking-widest uppercase hover:scale-101 active:scale-99 transition-all cursor-pointer shadow-lg shadow-cyan-400/10"
@@ -914,7 +925,7 @@ export default function ComplaintWizard() {
               <div className="p-3.5 rounded-xl border border-white/[0.04] bg-white/[0.01] max-w-xs mx-auto space-y-1.5 text-[9px] text-left">
                 <div className="flex justify-between font-mono">
                   <span className="text-[#55555f]">TICKET ID:</span>
-                  <span className="text-slate-350 font-bold">{ticketResult.clientTempId || `RW-2026-${ticketResult.id}`}</span>
+                  <span className="text-slate-350 font-bold">{`CMP-${String(ticketResult.id).padStart(5, '0')}`}</span>
                 </div>
                 <div className="flex justify-between font-mono">
                   <span className="text-[#55555f]">DISPATCH:</span>

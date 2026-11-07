@@ -38,7 +38,8 @@ backend/*.sqlite
 Thumbs.db
 
 # Submitted files uploaded separately
-docs/
+docs/*
+!docs/schema_documented.sql
 README.md
 *.zip
 *.docx
@@ -46,3 +47,5 @@ README.md
 
 Competiton
 post_mortem_analysis
+# Local PostgreSQL data directory (scripts/dev-db.sh)
+.roadwatch-pg/

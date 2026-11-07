@@ -14,6 +14,7 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./docs/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
       - ./docs/mock_data.sql:/docker-entrypoint-initdb.d/02_mock_data.sql
+      - ./docs/schema_documented.sql:/docker-entrypoint-initdb.d/03_schema_documented.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d roadwatch"]
       interval: 5s

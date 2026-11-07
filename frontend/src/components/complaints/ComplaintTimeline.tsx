@@ -233,7 +233,7 @@ export default function ComplaintTimeline({ complaint }: ComplaintTimelineProps)
 
         <div className="flex items-center gap-3 text-[8px] text-slate-500 font-mono border-t border-slate-800/40 pt-2">
           <span>
-            #{complaint.clientTempId || `RW-2026-${complaint.id}`}
+            #{`CMP-${String(complaint.id).padStart(5, '0')}`}
           </span>
           <span>Responsible: {authorityName}</span>
         </div>

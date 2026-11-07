@@ -176,9 +176,10 @@ export default function LeafletMap() {
     return () => observer.disconnect();
   }, []);
 
-  const tileUrl = isLightMode 
-    ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-    : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+  // CARTO basemaps now require an API key, so use OpenStreetMap tiles and
+  // darken them with the .dark-map-tiles CSS filter in dark mode.
+  const tileUrl = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+  const tileClass = isLightMode ? '' : 'dark-map-tiles';
 
   // Generate sensors & stress zones once (stable deterministic values)
   const allSensors = generateSensorsForRoads(roads as any);
@@ -289,10 +290,11 @@ export default function LeafletMap() {
         zoomControl={true}
         className="w-full h-full"
       >
-        {/* Sleek Cinematic CartoDB Dynamic Tile Layer */}
         <TileLayer
-          attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
+          key={tileClass}
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url={tileUrl}
+          className={tileClass}
         />
 
         {/* ── Underground Utility Overlays ── */}

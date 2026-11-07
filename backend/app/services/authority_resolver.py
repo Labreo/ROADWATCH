@@ -270,10 +270,10 @@ class AuthorityResolver:
             CASE
                 WHEN ST_Contains(a.geom_boundary, ST_GeomFromText(%s, 4326))
                 THEN ROUND(
-                    (ST_Area(ST_Intersection(
+                    ((ST_Area(ST_Intersection(
                         ST_Buffer(ST_GeomFromText(%s, 4326)::geography, %s)::geometry,
                         a.geom_boundary
-                    )) / NULLIF(ST_Area(ST_Buffer(ST_GeomFromText(%s, 4326)::geography, %s)::geometry), 0)) * 100::numeric, 2
+                    )) / NULLIF(ST_Area(ST_Buffer(ST_GeomFromText(%s, 4326)::geography, %s)::geometry), 0)) * 100)::numeric, 2
                 )
                 ELSE 0.0
             END AS area_match_percentage

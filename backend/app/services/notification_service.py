@@ -223,6 +223,11 @@ class NotificationService:
             status = "failed"
             response_code = 0
             response_body = "timeout"
+        except httpx.HTTPError as exc:
+            # An unreachable authority endpoint must not fail the complaint.
+            status = "failed"
+            response_code = 0
+            response_body = f"connection error: {exc}"[:500]
 
         # Log notification
         db.execute(

@@ -118,7 +118,7 @@ CREATE TABLE complaints (
     last_escalated_at TIMESTAMP WITH TIME ZONE,
     target_resolution_hours INTEGER DEFAULT 48,
     declined_authority_ids INTEGER[] DEFAULT '{}',
-    image_url VARCHAR(512),
+    image_url TEXT,
     assigned_authority_id INT REFERENCES authorities(id) ON DELETE SET NULL,
     road_id INT REFERENCES roads(id) ON DELETE SET NULL, -- Spatial match to nearest road segment
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -414,6 +414,28 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Register audit triggers (AFTER — reads final committed values)
+-- Audit trigger for any table with an integer id column
+CREATE OR REPLACE FUNCTION audit_trigger_generic()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_changed_by TEXT := COALESCE(NULLIF(current_setting('app.changed_by', true), ''), 'system');
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        INSERT INTO audit_log (table_name, record_id, action, old_values, new_values, changed_by)
+        VALUES (TG_TABLE_NAME, NEW.id, 'INSERT', NULL, row_to_jsonb_audit(NEW, TG_TABLE_NAME::varchar), v_changed_by);
+        RETURN NEW;
+    ELSIF TG_OP = 'UPDATE' THEN
+        INSERT INTO audit_log (table_name, record_id, action, old_values, new_values, changed_by)
+        VALUES (TG_TABLE_NAME, NEW.id, 'UPDATE', row_to_jsonb_audit(OLD, TG_TABLE_NAME::varchar),
+                row_to_jsonb_audit(NEW, TG_TABLE_NAME::varchar), v_changed_by);
+        RETURN NEW;
+    END IF;
+    INSERT INTO audit_log (table_name, record_id, action, old_values, new_values, changed_by)
+    VALUES (TG_TABLE_NAME, OLD.id, 'DELETE', row_to_jsonb_audit(OLD, TG_TABLE_NAME::varchar), NULL, v_changed_by);
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE TRIGGER trg_audit_complaints AFTER INSERT OR UPDATE OR DELETE ON complaints FOR EACH ROW EXECUTE FUNCTION audit_trigger_complaints();
 CREATE TRIGGER trg_audit_projects AFTER INSERT OR UPDATE OR DELETE ON projects FOR EACH ROW EXECUTE FUNCTION audit_trigger_projects();
 CREATE TRIGGER trg_audit_contractors AFTER INSERT OR UPDATE OR DELETE ON contractors FOR EACH ROW EXECUTE FUNCTION audit_trigger_contractors();
@@ -659,8 +681,7 @@ CREATE TABLE IF NOT EXISTS project_milestones (
     payment_release_date DATE,
     notes TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT check_milestone_dates CHECK (completion_date IS NULL OR completion_date >= due_date)
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX IF NOT EXISTS idx_milestones_project ON project_milestones(project_id);
@@ -869,7 +890,7 @@ CREATE INDEX IF NOT EXISTS idx_beneficiaries_project ON project_beneficiaries(pr
 
 -- Audit trigger for project_beneficiaries
 CREATE TRIGGER trg_audit_beneficiaries AFTER INSERT OR UPDATE OR DELETE ON project_beneficiaries
-FOR EACH ROW EXECUTE FUNCTION audit_trigger_projects();
+FOR EACH ROW EXECUTE FUNCTION audit_trigger_generic();
 
 -- =========================================================================
 -- 27. BENEFICIARY VIEW — Aggregate population served per road
@@ -920,7 +941,7 @@ CREATE INDEX IF NOT EXISTS idx_road_materials_project ON road_materials(project_
 
 -- Audit trigger for road_materials
 CREATE TRIGGER trg_audit_road_materials AFTER INSERT OR UPDATE OR DELETE ON road_materials
-FOR EACH ROW EXECUTE FUNCTION audit_trigger_roads();
+FOR EACH ROW EXECUTE FUNCTION audit_trigger_generic();
 
 -- =========================================================================
 -- 30. PROJECT WARRANTIES TABLE (A1: Defect liability tracking)
@@ -945,7 +966,7 @@ CREATE INDEX IF NOT EXISTS idx_project_warranties_project ON project_warranties(
 
 -- Audit trigger for project_warranties
 CREATE TRIGGER trg_audit_project_warranties AFTER INSERT OR UPDATE OR DELETE ON project_warranties
-FOR EACH ROW EXECUTE FUNCTION audit_trigger_projects();
+FOR EACH ROW EXECUTE FUNCTION audit_trigger_generic();
 
 -- =========================================================================
 -- 31. ROAD DOCUMENTS TABLE (A5: Photo/Attachment storage)

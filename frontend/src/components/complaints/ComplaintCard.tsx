@@ -206,7 +206,7 @@ export default function ComplaintCard({ complaint, onLink }: ComplaintCardProps)
 
           {/* VIA ID */}
           <span className="truncate max-w-[120px]">
-            #{complaint.clientTempId || `RW-2026-${complaint.id}`}
+            #{`CMP-${String(complaint.id).padStart(5, '0')}`}
           </span>
         </div>
 

@@ -30,14 +30,19 @@ export function NetworkStatusProvider({ children }: { children: React.ReactNode 
 
     // Service Worker Registration
     if ('serviceWorker' in navigator) {
-      // Register immediately or on window load
-      navigator.serviceWorker.register('/sw.js')
-        .then((registration) => {
-          console.log('ROADWATCH Service Worker registered with scope:', registration.scope);
-        })
-        .catch((error) => {
-          console.error('Service Worker registration failed:', error);
-        });
+      if (process.env.NODE_ENV === 'production') {
+        navigator.serviceWorker.register('/sw.js')
+          .then((registration) => {
+            console.log('ROADWATCH Service Worker registered with scope:', registration.scope);
+          })
+          .catch((error) => {
+            console.error('Service Worker registration failed:', error);
+          });
+      } else {
+        // A worker left over from an earlier run serves stale dev chunks.
+        navigator.serviceWorker.getRegistrations()
+          .then((registrations) => registrations.forEach((registration) => registration.unregister()));
+      }
     }
 
     const getConnectionInfo = () => {

@@ -12,6 +12,9 @@ import {
   Globe,
   Clock,
   Activity,
+  Home,
+  TriangleAlert,
+  FileText,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -78,19 +81,23 @@ export default function Sidebar() {
   const isAdmin = mounted && userRole === 'admin';
 
   const citizenItems: { id: AppView; label: string; icon: any; badge?: string | number }[] = [
+    { id: 'dashboard'   as AppView, label: 'Overview',          icon: Home },
     { id: 'chat'        as AppView, label: 'Chat Assistant',    icon: MessageSquare, badge: syncQueueCount > 0 ? syncQueueCount : undefined },
     { id: 'roads'       as AppView, label: 'Geospatial Map',    icon: Map },
     { id: 'budgets'     as AppView, label: 'Budget Compliance', icon: Coins },
-    { id: 'complaints'  as AppView, label: 'Complaints',        icon: MessageSquare },
+    { id: 'contractors' as AppView, label: 'Contractor Scores', icon: HardHat },
+    { id: 'complaints'  as AppView, label: 'Report an Issue',   icon: TriangleAlert },
+    { id: 'reports'     as AppView, label: 'My Reports',        icon: FileText },
     { id: 'regions'     as AppView, label: 'Regions Hub',       icon: Globe },
   ];
 
   const adminItems: { id: AppView; label: string; icon: any; badge?: string | number }[] = [
+    { id: 'dashboard'   as AppView, label: 'Overview',            icon: Home },
     { id: 'chat'        as AppView, label: 'Chat Assistant',      icon: MessageSquare, badge: syncQueueCount > 0 ? syncQueueCount : undefined },
     { id: 'roads'       as AppView, label: 'Geospatial Map',      icon: Map },
     { id: 'budgets'     as AppView, label: 'Budget Compliance',   icon: Coins },
     { id: 'contractors' as AppView, label: 'Contractor Scores',   icon: HardHat },
-    { id: 'complaints'  as AppView, label: 'Complaints',          icon: MessageSquare },
+    { id: 'complaints'  as AppView, label: 'Complaints',          icon: TriangleAlert },
     { id: 'admin'       as AppView, label: 'Operations Dashboard', icon: Shield },
     { id: 'playback'    as AppView, label: 'Playback',            icon: Clock },
     { id: 'sensors'     as AppView, label: 'Sensor Monitor',      icon: Activity },

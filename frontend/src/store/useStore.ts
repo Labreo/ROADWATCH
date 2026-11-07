@@ -6,7 +6,7 @@ import { OfflineSyncManager } from '@/services/offlineSync';
 import { playbackSteps } from '@/data/historicalData';
 import { generateStressZones } from '@/data/sensorData';
 
-export type AppView = 'dashboard' | 'roads' | 'contractors' | 'budgets' | 'complaints' | 'admin' | 'playback' | 'sensors' | 'twin' | 'chat' | 'regions';
+export type AppView = 'dashboard' | 'reports' | 'roads' | 'contractors' | 'budgets' | 'complaints' | 'admin' | 'playback' | 'sensors' | 'twin' | 'chat' | 'regions';
 
 export type DemoMode = 'off' | 'tour' | 'scripted';
 
@@ -156,6 +156,12 @@ interface AppState {
   setDemoNarration: (narration: string) => void;
 }
 
+export class DuplicateComplaintError extends Error {
+  constructor() {
+    super('A similar report is already open near this location. Your report was not filed again.');
+  }
+}
+
 // Helper to load custom complaints from LocalStorage
 const getStoredComplaints = (): Complaint[] => {
   if (typeof window === 'undefined') return [];
@@ -203,7 +209,7 @@ export const useStore = create<AppState>((set, get) => {
     setSelectedContractorId: (id) => set({ selectedContractorId: id }),
 
     // Navigation
-    activeView: 'chat',
+    activeView: 'dashboard',
     setActiveView: (view) => set({ activeView: view, selectedRoadId: null, selectedComplaintId: null, selectedContractorId: null, isChatDriven: false }),
     isChatDriven: false,
     setIsChatDriven: (val) => set({ isChatDriven: val }),
@@ -531,7 +537,7 @@ export const useStore = create<AppState>((set, get) => {
     // Complaints database state
     complaintsList: mockComplaints,
     addComplaint: (complaint) => {
-      const updatedList = [complaint, ...get().complaintsList];
+      const updatedList = [complaint, ...get().complaintsList.filter(c => c.id !== complaint.id)];
       set({ complaintsList: updatedList });
 
       // Save custom complaints to local storage. Strip heavy base64 image data
@@ -671,7 +677,7 @@ export const useStore = create<AppState>((set, get) => {
     queueComplaint: async (complaintData) => {
       const generatedId = Math.floor(100000 + Math.random() * 900000);
       const generatedCreatedAt = new Date().toISOString();
-      const tempTicketId = `RW-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+      const tempTicketId = crypto.randomUUID();
 
       let processedImagePreview = complaintData.imagePreview;
       if (processedImagePreview && processedImagePreview.startsWith('data:image')) {
@@ -703,11 +709,32 @@ export const useStore = create<AppState>((set, get) => {
 
       const { isOnline: onlineState, offlineQueue, addComplaint } = get();
 
+      let reachedServer = false;
       if (onlineState) {
-        // If online, submit immediately
-        addComplaint({ ...newComplaint, status: 'routed' });
-      } else {
-        // If offline, save in sync queue
+        try {
+          const res = await fetch('http://localhost:8000/api/v1/complaints', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newComplaint)
+          });
+          reachedServer = true;
+          if (res.status === 409) {
+            throw new DuplicateComplaintError();
+          }
+          if (!res.ok) {
+            throw new Error(`The server rejected this report (${res.status}).`);
+          }
+          const saved = await res.json();
+          const stored: Complaint = { ...newComplaint, id: saved.id, status: saved.status ?? 'routed' };
+          addComplaint(stored);
+          return stored;
+        } catch (err) {
+          if (reachedServer) throw err;
+          // Network failure: fall through and queue it on this device.
+        }
+      }
+
+      {
         const syncItem: SyncQueueItem = {
           id: `sync-${generatedId}`,
           action: 'create_complaint',
@@ -756,9 +783,6 @@ export const useStore = create<AppState>((set, get) => {
         await new Promise(resolve => setTimeout(resolve, 1200));
 
         let responseStatus = 200;
-        const isConflict = 
-          item.payload.title?.toLowerCase().includes('conflict') ||
-          item.payload.description?.toLowerCase().includes('conflict');
 
         try {
           const res = await fetch('http://localhost:8000/api/v1/complaints', {
@@ -768,8 +792,7 @@ export const useStore = create<AppState>((set, get) => {
           });
           responseStatus = res.status;
         } catch (e) {
-          // If connection fails/no route, fallback to simulated status code
-          responseStatus = isConflict ? 409 : 200;
+          responseStatus = 0; // Network failure: keep the item queued
         }
 
         // Catch 409 data conflict status code
@@ -824,11 +847,12 @@ export const useStore = create<AppState>((set, get) => {
           break;
         }
 
-        // 2. Simulate 15% chance of random municipal gateway error to show retry resilience
-        const hasNetworkHiccup = Math.random() < 0.15;
-        if (hasNetworkHiccup) {
+        // 2. Anything other than success stays queued for another attempt
+        if (responseStatus < 200 || responseStatus >= 300) {
           failedCount++;
-          errorOccurredMsg = 'Intermittent Municipal Gateway Error (Timeout 504)';
+          errorOccurredMsg = responseStatus === 0
+            ? 'Server unreachable'
+            : `Server returned ${responseStatus}`;
           
           const failedItem: SyncQueueItem = {
             ...item,
@@ -931,9 +955,6 @@ export const useStore = create<AppState>((set, get) => {
       await new Promise(resolve => setTimeout(resolve, 1500));
 
       let responseStatus = 200;
-      const isConflict = 
-        item.payload.title?.toLowerCase().includes('conflict') ||
-        item.payload.description?.toLowerCase().includes('conflict');
 
       try {
         const res = await fetch('http://localhost:8000/api/v1/complaints', {
@@ -943,7 +964,7 @@ export const useStore = create<AppState>((set, get) => {
         });
         responseStatus = res.status;
       } catch (e) {
-        responseStatus = isConflict ? 409 : 200;
+        responseStatus = 0; // Network failure: keep the item queued
       }
 
       if (responseStatus === 409) {
@@ -995,6 +1016,17 @@ export const useStore = create<AppState>((set, get) => {
         await CachedRoadRepository.addSyncLog(syncLog);
         
         set({ isSyncing: false });
+        return;
+      }
+
+      if (responseStatus < 200 || responseStatus >= 300) {
+        const failedItem: SyncQueueItem = {
+          ...item,
+          status: 'failed',
+          error: responseStatus === 0 ? 'Server unreachable' : `Server returned ${responseStatus}`
+        };
+        set({ offlineQueue: get().offlineQueue.map(q => q.id === id ? failedItem : q), isSyncing: false });
+        await CachedRoadRepository.enqueue(failedItem);
         return;
       }
 
