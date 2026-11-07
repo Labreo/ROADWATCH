@@ -1,6 +1,7 @@
 'use client';
 
 import { useStore, AppView } from '@/store/useStore';
+import { apiPost } from '@/services/api';
 import {
   MessageSquare,
   Map,
@@ -59,7 +60,9 @@ export default function Sidebar() {
     setActiveView,
     syncQueueCount,
     userRole,
-    setUserRole,
+    session,
+    setSession,
+    setLoginOpen,
   } = useStore();
 
   const clock = useClock();
@@ -78,7 +81,12 @@ export default function Sidebar() {
   }, [setSidebarOpen]);
 
   const mounted = useMounted();
-  const isAdmin = mounted && userRole === 'admin';
+  const isAdmin = mounted && userRole !== 'citizen';
+  const signedIn = mounted && session !== null;
+  const signOut = () => {
+    apiPost('/auth/logout').catch(() => undefined);
+    setSession(null);
+  };
 
   const citizenItems: { id: AppView; label: string; icon: any; badge?: string | number }[] = [
     { id: 'dashboard'   as AppView, label: 'Overview',          icon: Home },
@@ -219,10 +227,10 @@ export default function Sidebar() {
         {!sidebarOpen && (
           <div className="hidden lg:flex flex-col items-center gap-1 py-2 border-t border-white/[0.055] shrink-0">
             <button
-              onClick={() => setUserRole(isAdmin ? 'citizen' : 'admin')}
+              onClick={() => signedIn ? signOut() : setLoginOpen(true)}
               className="p-1.5 rounded-lg border border-white/[0.06] hover:border-cyan-500/30 text-[#55555f] hover:text-cyan-400 bg-black/20 transition-all duration-200"
-              aria-label={`Switch to ${isAdmin ? 'Citizen' : 'Admin'} mode`}
-              title={isAdmin ? 'Switch to Citizen' : 'Switch to Admin'}
+              aria-label={signedIn ? 'Sign out' : 'Sign in'}
+              title={signedIn ? 'Sign out' : 'Sign in'}
             >
               <Shield className="w-3.5 h-3.5" />
             </button>
@@ -238,22 +246,18 @@ export default function Sidebar() {
 
         {sidebarOpen && (
           <div className="px-3 pb-4 pt-2 border-t border-white/[0.055] shrink-0 space-y-2">
-            {/* Role toggle */}
+            {/* Account */}
             <button
-              onClick={() => setUserRole(isAdmin ? 'citizen' : 'admin')}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl border border-white/[0.06] hover:border-cyan-500/30 text-[#55555f] hover:text-cyan-400 bg-black/20 transition-all duration-200"
-              aria-label={`Switch to ${isAdmin ? 'Citizen' : 'Admin'} mode`}
+              onClick={() => signedIn ? signOut() : setLoginOpen(true)}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl border border-white/[0.06] hover:border-cyan-500/30 text-slate-300 transition-all"
+              aria-label={signedIn ? `Sign out ${session?.user.display_name}` : 'Sign in'}
             >
               <Shield className="w-3.5 h-3.5" />
-              <span className="flex-1 text-left text-[10px] font-bold tracking-wide truncate">
-                {isAdmin ? 'Switch to Citizen' : 'Switch to Admin'}
+              <span className="flex-1 text-left text-[11px] font-semibold truncate">
+                {signedIn ? session?.user.display_name : 'Sign in'}
               </span>
-              <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded border ${
-                isAdmin
-                  ? 'text-cyan-400 border-cyan-800/30 bg-cyan-950/30'
-                  : 'text-indigo-400 border-indigo-800/30 bg-indigo-950/30'
-              }`}>
-                {isAdmin ? 'admin' : 'citizen'}
+              <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded border text-cyan-400 border-cyan-800/30 bg-cyan-950/30">
+                {signedIn ? `${session?.user.role} · sign out` : 'guest'}
               </span>
             </button>
             {/* Status row */}

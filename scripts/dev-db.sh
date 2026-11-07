@@ -33,6 +33,6 @@ fi
 
 # Idempotent, so document-driven changes apply to an existing database too.
 psql -U postgres -h localhost -p "$PORT" -d roadwatch -q -v ON_ERROR_STOP=1 \
-  -c "SET client_min_messages = warning;" -f "$ROOT/docs/schema_documented.sql" >/dev/null
+  -c "SET client_min_messages = warning;" -f "$ROOT/docs/schema_documented.sql" -f "$ROOT/docs/seed_wireframes.sql" >/dev/null
 
 echo "PostGIS ready on localhost:$PORT (database: roadwatch)"

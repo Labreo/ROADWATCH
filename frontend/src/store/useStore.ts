@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { RoadStatus, Complaint, SyncQueueItem, Road, NotificationItem, FontSizeLevel, ContrastMode, Locale, UserRole } from '@/types';
 import { complaints as mockComplaints, roads as mockRoads } from '@/data/mockData';
+import { Session, authHeaders, loadSession, saveSession } from '@/services/api';
 import { CachedRoadRepository, SyncLog } from '@/services/cachedRoadRepository';
 import { OfflineSyncManager } from '@/services/offlineSync';
 import { playbackSteps } from '@/data/historicalData';
@@ -137,7 +138,10 @@ interface AppState {
 
   // User Role
   userRole: UserRole;
-  setUserRole: (role: UserRole) => void;
+  session: Session | null;
+  setSession: (session: Session | null) => void;
+  loginOpen: boolean;
+  setLoginOpen: (open: boolean) => void;
 
   // Onboarding
   hasSeenOnboarding: boolean;
@@ -397,12 +401,20 @@ export const useStore = create<AppState>((set, get) => {
     },
 
     userRole: 'citizen',
-    setUserRole: (role) => {
-      set({ userRole: role });
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('rw_role', role);
-      }
+    session: null,
+    setSession: (session) => {
+      saveSession(session);
+      const wasStaff = get().userRole !== 'citizen';
+      const role = session?.user.role ?? 'citizen';
+      set({
+        session,
+        userRole: role,
+        // Leaving a staff view after sign-out would otherwise strand the user on it.
+        ...(wasStaff && role === 'citizen' ? { activeView: 'dashboard' as AppView } : {}),
+      });
     },
+    loginOpen: false,
+    setLoginOpen: (open) => set({ loginOpen: open }),
 
     hasSeenOnboarding: false,
     setHasSeenOnboarding: (val) => {
@@ -452,7 +464,8 @@ export const useStore = create<AppState>((set, get) => {
           const savedContrast = (localStorage.getItem('rw_contrast') as ContrastMode) || 'normal';
           const savedFontSize = (localStorage.getItem('rw_fontsize') as FontSizeLevel) || 'default';
           const savedLocale = (localStorage.getItem('rw_locale') as Locale) || 'en-IN';
-          const savedRole = (localStorage.getItem('rw_role') as UserRole) || 'citizen';
+          const savedSession = loadSession();
+          const savedRole: UserRole = savedSession?.user.role ?? 'citizen';
           const savedOnboarding = localStorage.getItem('rw_onboarding') === 'true';
           const isOnline = window.navigator.onLine;
           const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -486,6 +499,7 @@ export const useStore = create<AppState>((set, get) => {
             locale: savedLocale,
             reducedMotion: prefersReducedMotion,
             userRole: savedRole,
+            session: savedSession,
             hasSeenOnboarding: savedOnboarding,
             isOnline: isOnline,
             complaintsList,
@@ -611,7 +625,7 @@ export const useStore = create<AppState>((set, get) => {
           `http://localhost:8000/api/v1/complaints/${complaintId}/decline`,
           {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', ...authHeaders() },
             body: JSON.stringify({ authorityId, reason }),
           }
         );
@@ -714,7 +728,7 @@ export const useStore = create<AppState>((set, get) => {
         try {
           const res = await fetch('http://localhost:8000/api/v1/complaints', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', ...authHeaders() },
             body: JSON.stringify(newComplaint)
           });
           reachedServer = true;
@@ -787,7 +801,7 @@ export const useStore = create<AppState>((set, get) => {
         try {
           const res = await fetch('http://localhost:8000/api/v1/complaints', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', ...authHeaders() },
             body: JSON.stringify(item.payload)
           });
           responseStatus = res.status;
@@ -959,7 +973,7 @@ export const useStore = create<AppState>((set, get) => {
       try {
         const res = await fetch('http://localhost:8000/api/v1/complaints', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', ...authHeaders() },
           body: JSON.stringify(item.payload)
         });
         responseStatus = res.status;

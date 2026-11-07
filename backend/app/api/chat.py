@@ -109,10 +109,11 @@ async def analyze_photo_endpoint(
     image: UploadFile = File(...),
     gps_coords: Optional[str] = Form(None),
     latitude: Optional[float] = Form(None),
-    longitude: Optional[float] = Form(None)
+    longitude: Optional[float] = Form(None),
+    persist: bool = Form(True)
 ):
     """
-    Exposes photo analysis endpoint. Decodes the image, runs Concentrate API evaluation,
+    Exposes photo analysis endpoint. Decodes the image, runs AI vision evaluation,
     resolves responsible authorities & roads, and registers it inside the mock SQLite database.
     Returns a streaming response of NDJSON packets.
     """
@@ -169,7 +170,7 @@ async def analyze_photo_endpoint(
                 "longitude": resolved_lon
             }) + "\n"
             
-            yield json.dumps({"type": "status", "content": "Analyzing image via Concentrate AI..."}) + "\n"
+            yield json.dumps({"type": "status", "content": "Analyzing image with AI vision..."}) + "\n"
 
             # 2. Run vision damage evaluation pipeline streaming
             evaluator = RoadDamageEvaluator()
@@ -194,7 +195,10 @@ async def analyze_photo_endpoint(
             try:
                 analysis = json.loads(cleaned_response)
             except Exception as json_err:
-                print(f"Failed to parse Concentrate AI response JSON: {json_err}. Raw: {full_ai_response}")
+                print(f"Failed to parse vision response JSON: {json_err}. Raw: {full_ai_response}")
+                if not persist:
+                    yield json.dumps({"type": "error", "content": "The photo could not be analysed. Try another photo."}) + "\n"
+                    return
                 analysis = {
                     "defectType": "pothole",
                     "estimatedDepthCm": 12.0,
@@ -265,14 +269,15 @@ async def analyze_photo_endpoint(
                 created_at_iso
             )
             
-            try:
-                new_id = db.execute(sql, params)
-            except Exception as db_err:
-                print(f"Database insertion failed: {db_err}")
-                new_id = None
-                
-            if new_id is None:
-                new_id = 9999 # mock ID fallback
+            new_id = None
+            if persist:
+                try:
+                    new_id = db.execute(sql, params)
+                except Exception as db_err:
+                    print(f"Database insertion failed: {db_err}")
+
+                if new_id is None:
+                    new_id = 9999 # mock ID fallback
                 
             # Structure draft complaint record matching frontend Complaint state contracts
             draft_complaint = {

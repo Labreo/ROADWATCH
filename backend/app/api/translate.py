@@ -26,7 +26,7 @@ async def translate_text(req: TranslateRequest):
     a simple identity pass-through for development.
     """
     api_url = os.environ.get("LIBRETRANSLATE_URL")
-    api_key = os.environ.get("CONCENTRATE_TRANSLATION_API_KEY")
+    api_key = os.environ.get("LIBRETRANSLATE_API_KEY")
 
     if api_url:
         try:

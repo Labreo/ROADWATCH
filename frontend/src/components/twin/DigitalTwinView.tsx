@@ -8,10 +8,10 @@ import {
   MapPin, TrendingUp, TrendingDown, Minus, ChevronRight,
   Wifi, Shield, Clock, Zap, Database
 } from 'lucide-react';
-import { roads, projects, contractors } from '@/data/mockData';
-import { generateSensorsForRoads, generateStressZones, SENSOR_LEVEL_COLORS } from '@/data/sensorData';
-import StressIndicator from '@/components/sensors/StressIndicator';
-import RoadInspectionScene from '@/components/3d/RoadInspectionScene';
+import { roads } from '@/data/mockData';
+import { useLive } from '@/services/api';
+import { SENSOR_LEVEL_COLORS } from '@/data/sensorData';
+import RoadInspectionScene, { POTHOLE_POSITIONS, SENSOR_POSITIONS, type SceneLiveData } from '@/components/3d/RoadInspectionScene';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { useStore } from '@/store/useStore';
 import { formatCurrency } from '@/services/regionAwareFormat';
@@ -72,10 +72,12 @@ function buildTerrainPath(road: Road, w: number, h: number): string {
 // ── Sub-components ──────────────────────────────────────────
 
 function HUDStrip({ clock }: { clock: string }) {
-  const allSensors = useMemo(() => generateSensorsForRoads(roads as any), []);
-  const critCount = allSensors.filter(s => s.level === 'critical').length;
-  const elevCount = allSensors.filter(s => s.level === 'elevated').length;
-  const nomCount  = allSensors.filter(s => s.level === 'nominal').length;
+  const regionCode = useStore(s => s.regionCode);
+  const { data: complaints } = useLive<{ priority: number; status: string }[]>(`/screens/complaints?region=${regionCode}`, 30000);
+  const open = (complaints ?? []).filter(c => !['resolved', 'rejected'].includes(c.status));
+  const critCount = open.filter(c => c.priority >= 4).length;
+  const elevCount = open.filter(c => c.priority === 3).length;
+  const nomCount  = open.filter(c => c.priority < 3).length;
 
   return (
     <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 py-2 border-b border-white/[0.04] bg-black/60 backdrop-blur-md pointer-events-auto">
@@ -91,11 +93,11 @@ function HUDStrip({ clock }: { clock: string }) {
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-            <span className="mono-label text-[9px]">{elevCount} ELEVATED</span>
+            <span className="mono-label text-[9px]">{elevCount} MEDIUM</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            <span className="mono-label text-[9px]">{nomCount} NOMINAL</span>
+            <span className="mono-label text-[9px]">{nomCount} LOW</span>
           </div>
         </div>
       </div>
@@ -117,8 +119,6 @@ function RoadListPanel({
   selected: Road | null;
   onSelect: (r: Road) => void;
 }) {
-  const allSensors = useMemo(() => generateSensorsForRoads(roads as any), []);
-
   return (
     <div className="flex flex-col h-full overflow-hidden glass-command rounded-xl border border-white/[0.04]">
       {/* Header */}
@@ -133,10 +133,8 @@ function RoadListPanel({
       {/* List */}
       <div className="flex-1 overflow-y-auto">
         {roads.map(road => {
-          const roadSensors = allSensors.filter(s => s.roadId === road.id);
-          const critSensors = roadSensors.filter(s => s.level === 'critical').length;
           const isActive = selected?.id === road.id;
-          const alertLevel = critSensors > 2 ? 'critical' : critSensors > 0 ? 'elevated' : 'nominal';
+          const alertLevel = road.status === 'poor' ? 'critical' : road.status === 'good' ? 'nominal' : 'elevated';
 
           return (
             <button
@@ -153,9 +151,6 @@ function RoadListPanel({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-1">
                     <span className="text-[10px] font-bold text-slate-200 truncate">{road.name}</span>
-                    {critSensors > 0 && (
-                      <span className="shrink-0 text-[8px] font-black text-rose-400">{critSensors}▲</span>
-                    )}
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
                     <span className="mono-label text-[8px]">{road.roadCode}</span>
@@ -265,33 +260,52 @@ function TerrainProfile({ road }: { road: Road }) {
   );
 }
 
+interface TwinData {
+  project: { budget_allocated: number; budget_spent: number } | null;
+  contractor_detail: { name: string; rating: number; projects_completed: number; projects_delayed: number; blacklisted: boolean } | null;
+  defects: { id: number; title: string; priority: number }[];
+  sensors: { sensor_code: string; unit: string; alert_threshold: number | null; latest: number | null }[];
+  materials: { material_type: string; specification_grade: string | null }[];
+  warranties: { status: string; warranty_end_date: string | null }[];
+}
+
 function IntelligencePanel({
   road,
+  live,
   canvasAction,
   setCanvasAction
 }: {
   road: Road;
+  live: TwinData | null;
   canvasAction: any;
   setCanvasAction: (action: any) => void;
 }) {
-  const allSensors = useMemo(() => generateSensorsForRoads(roads as any), []);
-  const zones = useMemo(() => generateStressZones(roads as any), []);
-  const roadSensors = allSensors.filter(s => s.roadId === road.id);
-  const zone = zones.find(z => z.roadId === road.id);
-  const roadProjects = projects.filter(p => p.roadId === road.id);
-  const primaryProject = roadProjects[0];
-  const contractor = primaryProject
-    ? contractors.find(c => c.id === primaryProject.contractorId)
+  const primaryProject = live?.project
+    ? { budgetAllocated: Number(live.project.budget_allocated), budgetSpent: Number(live.project.budget_spent) }
+    : null;
+  const contractor = live?.contractor_detail
+    ? {
+        name: live.contractor_detail.name,
+        blacklisted: live.contractor_detail.blacklisted,
+        rating: Number(live.contractor_detail.rating),
+        projectsCompleted: live.contractor_detail.projects_completed,
+        projectsDelayed: live.contractor_detail.projects_delayed,
+      }
     : null;
 
-  const critCount = roadSensors.filter(s => s.level === 'critical').length;
-  const elevCount = roadSensors.filter(s => s.level === 'elevated').length;
+  const focusTargets = [
+    ...(live?.sensors ?? []).slice(0, SENSOR_POSITIONS.length).map((sensor, i) => ({ label: sensor.sensor_code, coords: SENSOR_POSITIONS[i] })),
+    ...(live?.defects ?? []).slice(0, POTHOLE_POSITIONS.length).map((defect, i) => ({ label: defect.title, coords: POTHOLE_POSITIONS[i] })),
+  ];
 
-  const alertLevel = critCount > 2 ? 'critical' : critCount > 0 || elevCount > 2 ? 'elevated' : 'nominal';
+  const urgent = (live?.defects ?? []).filter(d => d.priority >= 4).length;
+  const critCount = urgent;
+  const elevCount = (live?.defects ?? []).filter(d => d.priority === 3).length;
+  const lowCount = (live?.defects ?? []).filter(d => d.priority < 3).length;
+  const sensorAlerts = (live?.sensors ?? []).filter(s => s.alert_threshold !== null && Number(s.latest) > Number(s.alert_threshold)).length;
+  const alertLevel = urgent > 0 || road.status === 'poor' ? 'critical' : sensorAlerts > 0 || (live?.defects.length ?? 0) > 0 ? 'elevated' : 'nominal';
   const statusLabel = alertLevel === 'critical' ? 'CRITICAL' : alertLevel === 'elevated' ? 'ELEVATED' : 'NOMINAL';
   const statusColor = SENSOR_LEVEL_COLORS[alertLevel];
-
-
 
   const budgetPct = primaryProject
     ? Math.min(100, Math.round((primaryProject.budgetSpent / primaryProject.budgetAllocated) * 100))
@@ -324,32 +338,12 @@ function IntelligencePanel({
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-5">
-        {/* Stress waveform */}
-        {zone && (
-          <div className="space-y-1.5">
-            <div className="mono-label text-[9px]">STRUCTURAL STRESS WAVE</div>
-            <StressIndicator
-              value={zone.stressIndex}
-              level={alertLevel}
-              width={240}
-              height={40}
-              showLabel
-              animated
-            />
-          </div>
-        )}
-
         {/* 3D Telemetry Relays (Camera focusing) */}
         <div className="space-y-2">
-          <div className="mono-label text-[9px]">WebGL CAMERA TELEMETRY RELAYS</div>
+          <div className="mono-label text-[9px]">FOCUS ON SENSOR OR DEFECT</div>
           <div className="grid grid-cols-1 gap-1">
-            {[
-              { label: "Telemetry Node A-01", coords: [-1.1, 0.25, 0.6] as [number,number,number] },
-              { label: "Telemetry Node B-04", coords: [0.1, 0.35, -0.8] as [number,number,number] },
-              { label: "Telemetry Node C-02", coords: [1.2, 0.15, 0.3] as [number,number,number] },
-              { label: "Pothole Wave Alpha", coords: [0.3, 0.0, 0.5] as [number,number,number] },
-              { label: "Stress Zone Beta", coords: [-0.5, 0.02, 0.1] as [number,number,number] }
-            ].map((anomaly, idx) => {
+            {focusTargets.length === 0 && <p className="text-[10px] text-[#7c7c8a]">No sensors or open defects on this road.</p>}
+            {focusTargets.map((anomaly, idx) => {
               const active = canvasAction && canvasAction.coordinates && 
                              Math.abs(canvasAction.coordinates[0] - anomaly.coords[0]) < 0.01 &&
                              Math.abs(canvasAction.coordinates[1] - anomaly.coords[1]) < 0.01 &&
@@ -371,8 +365,7 @@ function IntelligencePanel({
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span>{anomaly.label}</span>
-                    <span className="text-[7px] text-[#55555f] font-normal">{anomaly.coords.map(c => c.toFixed(1)).join(', ')}</span>
+                    <span className="truncate">{anomaly.label}</span>
                   </div>
                 </button>
               );
@@ -388,12 +381,12 @@ function IntelligencePanel({
 
         {/* Sensor summary grid */}
         <div className="space-y-2">
-          <div className="mono-label text-[9px]">SENSOR COVERAGE // {roadSensors.length} FEEDS</div>
+          <div className="mono-label text-[9px]">OPEN DEFECTS BY PRIORITY</div>
           <div className="grid grid-cols-3 gap-1.5">
             {[
               { label: 'Critical', count: critCount, color: '#f43f5e' },
-              { label: 'Elevated', count: elevCount, color: '#f59e0b' },
-              { label: 'Nominal',  count: roadSensors.filter(s => s.level === 'nominal').length, color: '#34d399' },
+              { label: 'Medium', count: elevCount, color: '#f59e0b' },
+              { label: 'Low',  count: lowCount, color: '#34d399' },
             ].map(({ label, count, color }) => (
               <div key={label} className="p-2 rounded-sm border border-white/[0.04] bg-white/[0.02] text-center">
                 <div className="mono-readout text-sm" style={{ color }}>{count}</div>
@@ -402,6 +395,51 @@ function IntelligencePanel({
             ))}
           </div>
         </div>
+
+        {/* Open defects from complaints */}
+        <div className="space-y-1.5">
+          <div className="mono-label text-[9px]">OPEN DEFECTS ({live?.defects.length ?? 0})</div>
+          {live?.defects.map(d => (
+            <div key={d.id} className="flex justify-between gap-2 text-[10px] text-slate-300">
+              <span className="truncate">{d.title}</span>
+              <span className={`mono-readout text-[9px] ${d.priority >= 4 ? 'text-rose-400' : ''}`}>P{d.priority}</span>
+            </div>
+          ))}
+          {live?.defects.length === 0 && <p className="text-[10px] text-[#7c7c8a]">No open defects on this road.</p>}
+        </div>
+
+        {/* Pavement materials */}
+        <div className="space-y-1.5">
+          <div className="mono-label text-[9px]">PAVEMENT MATERIALS</div>
+          {live?.materials.map((m, i) => (
+            <div key={`${m.material_type}-${i}`} className="flex justify-between gap-2 text-[10px] text-slate-300">
+              <span className="capitalize">{m.material_type.replace('_', ' ')}</span>
+              <span className="truncate text-[#a3a3b4]">{m.specification_grade ?? '—'}</span>
+            </div>
+          ))}
+          {live?.materials.length === 0 && <p className="text-[10px] text-[#7c7c8a]">No material records.</p>}
+        </div>
+
+        {/* Warranty */}
+        {live?.warranties.map((w, i) => (
+          <div key={i} className="flex justify-between gap-2 text-[10px] text-slate-300">
+            <span>Warranty {w.status}</span>
+            <span className="mono-readout text-[9px]">{w.warranty_end_date?.slice(0, 10)}</span>
+          </div>
+        ))}
+
+        {/* Embedded sensors */}
+        {(live?.sensors.length ?? 0) > 0 && (
+          <div className="space-y-1.5">
+            <div className="mono-label text-[9px]">EMBEDDED SENSORS</div>
+            {live?.sensors.map(s => (
+              <div key={s.sensor_code} className="flex justify-between gap-2 text-[10px] text-slate-300">
+                <span>{s.sensor_code}</span>
+                <span className="mono-readout text-[9px]">{Number(s.latest).toFixed(1)} {s.unit}</span>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Budget intelligence */}
         {primaryProject && (
@@ -454,7 +492,7 @@ function IntelligencePanel({
         <div className="flex items-center gap-2 pt-2 border-t border-white/[0.04]">
           <Clock className="w-3 h-3 text-[#55555f]" />
           <span className="mono-label text-[8px]">
-            LAST SCAN: {new Date(Date.now() - road.id * 180000).toUTCString().slice(0, 25)}
+            LAST RELAID: {road.lastRelayingDate?.slice(0, 10) || 'not recorded'}
           </span>
         </div>
       </div>
@@ -521,12 +559,22 @@ export default function DigitalTwinView() {
   }, [selectedRoadId]);
 
   const [selectedRoad, setSelectedRoad] = useState<Road>(initialRoad);
+  const { data: live = null } = useLive<TwinData>(`/screens/twin/${selectedRoad.id}`);
+  const sceneData = useMemo<SceneLiveData>(() => ({
+    openDefects: live?.defects.length ?? 0,
+    sensors: (live?.sensors ?? []).map(sensor => {
+      const over = sensor.alert_threshold !== null && Number(sensor.latest) > Number(sensor.alert_threshold);
+      const reading = sensor.latest === null ? 'No reading yet.' : `Latest reading ${sensor.latest} ${sensor.unit}.`;
+      const limit = sensor.alert_threshold === null ? '' : ` Alert above ${sensor.alert_threshold} ${sensor.unit}.`;
+      return { label: sensor.sensor_code, details: reading + limit, status: over ? 'critical' as const : sensor.latest === null ? 'warning' as const : 'active' as const };
+    }),
+  }), [live]);
   const clock = useClock();
   const sceneRef = useRef<THREE.Scene | null>(null);
 
-  // Panel visibility state — start collapsed so the 3D model is fully visible
-  const [leftOpen,  setLeftOpen]  = useState(false);
-  const [rightOpen, setRightOpen] = useState(false);
+  // Panel visibility state — Frame 08 shows both panels beside the model
+  const [leftOpen,  setLeftOpen]  = useState(true);
+  const [rightOpen, setRightOpen] = useState(true);
 
   // Sync local state with store changes
   useEffect(() => {
@@ -598,7 +646,7 @@ export default function DigitalTwinView() {
         {/* 3D Canvas — always fills the full pane */}
         <div className="absolute inset-0 z-0">
           <ErrorBoundary>
-            <RoadInspectionScene sceneRef={sceneRef} />
+            <RoadInspectionScene sceneRef={sceneRef} live={sceneData} />
           </ErrorBoundary>
         </div>
 
@@ -643,6 +691,7 @@ export default function DigitalTwinView() {
               </button>
               <IntelligencePanel
                 road={selectedRoad}
+                live={live}
                 canvasAction={canvasAction}
                 setCanvasAction={setCanvasAction}
               />

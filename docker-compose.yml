@@ -15,6 +15,7 @@ services:
       - ./docs/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
       - ./docs/mock_data.sql:/docker-entrypoint-initdb.d/02_mock_data.sql
       - ./docs/schema_documented.sql:/docker-entrypoint-initdb.d/03_schema_documented.sql
+      - ./docs/seed_wireframes.sql:/docker-entrypoint-initdb.d/04_seed_wireframes.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d roadwatch"]
       interval: 5s
@@ -49,7 +50,7 @@ services:
       - POSTGRES_PORT=5432
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - CONCENTRATE_API_KEY=mock-concentrate-key-998811
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
     volumes:
       - ./backend:/app
     depends_on:

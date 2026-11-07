@@ -40,6 +40,7 @@ Thumbs.db
 # Submitted files uploaded separately
 docs/*
 !docs/schema_documented.sql
+!docs/seed_wireframes.sql
 README.md
 *.zip
 *.docx

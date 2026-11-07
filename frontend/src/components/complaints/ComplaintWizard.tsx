@@ -23,6 +23,8 @@ import {
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { routeComplaint, RoutingResult } from '@/services/routingEngine';
+import { API_BASE } from '@/services/api';
+import { OfflineSyncManager } from '@/services/offlineSync';
 import { ComplaintCategory, Complaint, Road } from '@/types';
 import { roads } from '@/data/mockData';
 
@@ -45,62 +47,6 @@ const WizardMap = dynamic<WizardMapProps>(
     )
   }
 );
-
-// Preset Mock Defect Scenarios for Simulator Mode
-const PRESETS = [
-  {
-    id: 'pothole',
-    label: 'Sub-base Pothole',
-    category: 'pothole' as ComplaintCategory,
-    severity: 'critical' as const,
-    title: 'Severe sub-base collapse crater on S.V. Road',
-    size: '45cm x 30cm, Depth: 12cm',
-    confidence: '98.2%',
-    coordinates: [19.1242, 72.8422] as [number, number], // Ward K-West
-    description: 'Large structural pothole showing severe asphalt fragmentation. Bounding box coordinates indicate sub-base failure due to heavy vehicle compaction.'
-  },
-  {
-    id: 'waterlogging',
-    label: 'Drainage Clog',
-    category: 'waterlogging' as ComplaintCategory,
-    severity: 'high' as const,
-    title: 'Active hydraulic congestion near WEH Express',
-    size: 'Volume: 12m³, Depth: 15cm',
-    confidence: '94.6%',
-    coordinates: [19.0435, 72.8624] as [number, number], // Ward F-North
-    description: 'Stormwater drainage saturation and reverse flow. Highly localized hydraulic wear detected on asphalt overlay.'
-  },
-  {
-    id: 'paving',
-    label: 'Paver Defect',
-    category: 'paving_defect' as ComplaintCategory,
-    severity: 'medium' as const,
-    title: 'Displaced paver block interlocking shifting',
-    size: 'Displaced blocks: 18 units',
-    confidence: '91.8%',
-    coordinates: [19.0182, 72.8415] as [number, number], // Ward H-East
-    description: 'Loose paving block grid shifting under heavy axial transport wear. Leveling mortar bedding audit suggested.'
-  },
-  {
-    id: 'debris',
-    label: 'Aggregate Dump',
-    category: 'debris' as ComplaintCategory,
-    severity: 'medium' as const,
-    title: 'Construction concrete rubble lane block',
-    size: 'Est. Volume: 2.4 cubic meters',
-    confidence: '89.5%',
-    coordinates: [19.0760, 72.8777] as [number, number], // PWD default
-    description: 'Unlawful dumping of dry aggregates and masonry debris blocking vehicular lane margins.'
-  }
-];
-
-// Interactive Scanner Hot-spots mapping to presets (Google Lens style)
-const SCATTER_NODES = [
-  { presetIdx: 0, x: '35%', y: '45%', label: 'Pothole' },
-  { presetIdx: 1, x: '65%', y: '60%', label: 'Drainage Clog' },
-  { presetIdx: 2, x: '45%', y: '30%', label: 'Paver Defect' },
-  { presetIdx: 3, x: '75%', y: '40%', label: 'Aggregate Dump' }
-];
 
 // Helper to calculate distance in km between two lat/lng points
 function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
@@ -133,109 +79,13 @@ function findNearestRoad(lat: number, lng: number): Road | null {
   return nearestRoad;
 }
 
-// Generate base64 SVG preview image based on category
-function getSvgDataUrl(category: ComplaintCategory, titleText: string, size: string) {
-  let svgColor = '#f43f5e';
-  if (category === 'waterlogging') svgColor = '#38bdf8';
-  else if (category === 'paving_defect') svgColor = '#f59e0b';
-  else if (category === 'debris') svgColor = '#a78bfa';
-
-  const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 150" width="200" height="150" style="background:#07070a;font-family:monospace">
-    <rect width="200" height="150" fill="#07070a"/>
-    <g opacity="0.15">
-      <line x1="0" y1="75" x2="200" y2="75" stroke="#22d3ee" stroke-width="0.5"/>
-      <line x1="100" y1="0" x2="100" y2="150" stroke="#22d3ee" stroke-width="0.5"/>
-    </g>
-    <rect x="50" y="35" width="100" height="80" rx="4" fill="none" stroke="${svgColor}" stroke-width="1.5" stroke-dasharray="3 3"/>
-    <circle cx="100" cy="75" r="15" fill="none" stroke="${svgColor}" stroke-width="2"/>
-    <text x="15" y="20" fill="${svgColor}" font-size="7" font-weight="bold">AI SCANNED: ${category.toUpperCase().replace('_', ' ')}</text>
-    <text x="15" y="132" fill="#94a3b8" font-size="6">METRICS: ${size}</text>
-    <text x="15" y="142" fill="#55555f" font-size="5">ROADWATCH AI-LENS v2.0</text>
-  </svg>`;
-  
-  try {
-    return 'data:image/svg+xml;base64,' + btoa(svgContent);
-  } catch (err) {
-    return '';
-  }
-}
-
-// stylized wireframe SVGs for camera simulation presets
-function DefectVisualizer({ category, size }: { category: ComplaintCategory; size: string }) {
-  return (
-    <div className="w-full h-full bg-slate-950 relative flex items-center justify-center overflow-hidden border border-white/[0.04] rounded-2xl min-h-[220px]">
-      <div className="absolute inset-0 command-grid-dense opacity-25" />
-      <svg width="100%" height="100%" viewBox="0 0 200 150" className="relative z-10 w-full h-full max-h-48 max-w-sm">
-        <line x1={0} y1={75} x2={200} y2={75} stroke="rgba(34,211,238,0.12)" strokeWidth={0.5} strokeDasharray="3 3" />
-        <line x1={100} y1={0} x2={100} y2={150} stroke="rgba(34,211,238,0.12)" strokeWidth={0.5} strokeDasharray="3 3" />
-        
-        {category === 'pothole' && (
-          <g>
-            <circle cx={100} cy={75} r={35} fill="none" stroke="#f43f5e" strokeWidth={1} strokeDasharray="3 2" opacity={0.35} />
-            <circle cx={100} cy={75} r={24} fill="none" stroke="#f43f5e" strokeWidth={1.2} opacity={0.6} />
-            <circle cx={96} cy={78} r={14} fill="rgba(244,63,94,0.15)" stroke="#f43f5e" strokeWidth={1.5} />
-            <line x1={100} y1={75} x2={130} y2={50} stroke="#f43f5e" strokeWidth={0.75} />
-            <circle cx={130} cy={50} r={1.5} fill="#f43f5e" />
-            <text x={134} y={52} fill="#f43f5e" fontSize={5} fontFamily="monospace" fontWeight="bold">MAX DEPTH: 12cm</text>
-            <text x={10} y={15} fill="rgba(255,255,255,0.3)" fontSize={5} fontFamily="monospace">MODEL: CAVITY_DETECTOR_V2</text>
-            <text x={10} y={23} fill="#f43f5e" fontSize={5} fontFamily="monospace" fontWeight="bold">STRUCTURAL CONTOUR BLOCK</text>
-          </g>
-        )}
-
-        {category === 'waterlogging' && (
-          <g>
-            <path d="M 30,85 Q 65,70 100,85 T 170,85 L 170,120 L 30,120 Z" fill="rgba(56,189,248,0.1)" stroke="#38bdf8" strokeWidth={1} />
-            <path d="M 35,95 Q 65,85 100,95 T 165,95" fill="none" stroke="#38bdf8" strokeWidth={0.5} strokeDasharray="2 3" />
-            <line x1={100} y1={105} x2={100} y2={125} stroke="#38bdf8" strokeWidth={0.75} strokeDasharray="2 2" />
-            <polygon points="100,128 97,124 103,124" fill="#38bdf8" />
-            <text x={105} y={117} fill="#38bdf8" fontSize={5} fontFamily="monospace" fontWeight="bold">CONGESTION LEVEL: 92%</text>
-            <text x={10} y={15} fill="rgba(255,255,255,0.3)" fontSize={5} fontFamily="monospace">MODEL: FLOW_VECTOR_ANALYST</text>
-          </g>
-        )}
-
-        {category === 'paving_defect' && (
-          <g>
-            {[-2, -1, 0, 1, 2].map((x) =>
-              [-1, 0, 1].map((y) => {
-                const cx = 100 + x * 24;
-                const cy = 75 + y * 16;
-                const isDisplaced = x === 0 && y === 0;
-                const rotate = isDisplaced ? 'rotate(12 100 75)' : '';
-                return (
-                  <rect
-                    key={`${x}-${y}`}
-                    x={cx - 10} y={cy - 6} width={20} height={12}
-                    fill={isDisplaced ? 'rgba(245,158,11,0.15)' : 'none'}
-                    stroke={isDisplaced ? '#f59e0b' : 'rgba(255,255,255,0.12)'}
-                    strokeWidth={isDisplaced ? 1.2 : 0.7}
-                    transform={rotate}
-                  />
-                );
-              })
-            )}
-            <text x={112} y={85} fill="#f59e0b" fontSize={4.5} fontFamily="monospace" fontWeight="bold">DISPLACED BLOCK: θ=+12°</text>
-            <text x={10} y={15} fill="rgba(255,255,255,0.3)" fontSize={5} fontFamily="monospace">MODEL: TILE_ALIGNMENT_ENGINE</text>
-          </g>
-        )}
-
-        {category === 'debris' && (
-          <g>
-            <polygon points="70,105 130,105 150,85 90,85" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth={0.5} />
-            <polygon points="100,45 130,105 70,105" fill="none" stroke="#a78bfa" strokeWidth={1} />
-            <polygon points="100,45 150,85 130,105" fill="none" stroke="#a78bfa" strokeWidth={0.75} strokeDasharray="3 1" />
-            <line x1={100} y1={45} x2={145} y2={45} stroke="#a78bfa" strokeWidth={0.5} strokeDasharray="2 2" />
-            <text x={148} y={47} fill="#a78bfa" fontSize={5} fontFamily="monospace" fontWeight="bold">VOL: ~2.4 m³</text>
-            <text x={10} y={15} fill="rgba(255,255,255,0.3)" fontSize={5} fontFamily="monospace">MODEL: OBSTRUCTION_VOLUME_SCAN</text>
-          </g>
-        )}
-      </svg>
-      <div className="absolute bottom-2 left-3 right-3 flex justify-between z-20 text-[7px] font-mono text-cyan-500/60 tracking-wider">
-        <span>GRID: RESOLVED</span>
-        <span>{size}</span>
-      </div>
-    </div>
-  );
-}
+const REPORT_CATEGORIES: { value: ComplaintCategory; label: string }[] = [
+  { value: 'pothole', label: 'Pothole' },
+  { value: 'paving_defect', label: 'Paving defect' },
+  { value: 'waterlogging', label: 'Waterlogging' },
+  { value: 'debris', label: 'Debris' },
+  { value: 'missing_signage', label: 'Missing signage' },
+];
 
 export default function ComplaintWizard() {
   const { 
@@ -247,7 +97,9 @@ export default function ComplaintWizard() {
 
   const [step, setStep] = useState(1);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [selectedPresetIndex, setSelectedPresetIndex] = useState(0);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [manualEntry, setManualEntry] = useState(false);
 
   // Form details resolved by AI and customized by user
   const [title, setTitle] = useState('');
@@ -257,8 +109,7 @@ export default function ComplaintWizard() {
   const [coordinates, setCoordinates] = useState<[number, number]>([19.1242, 72.8422]); // SV Road defaults
   const [associatedRoadId, setAssociatedRoadId] = useState<number | null>(null);
   const [roadName, setRoadName] = useState('S.V. Road');
-  const [confidenceScore, setConfidenceScore] = useState('98.2%');
-  const [defectSize, setDefectSize] = useState('45cm x 30cm, Depth: 12cm');
+  const [defectSize, setDefectSize] = useState('Not measured');
 
   // Webcam stream handlers
   const [isWebcamActive, setIsWebcamActive] = useState(false);
@@ -273,21 +124,18 @@ export default function ComplaintWizard() {
   const [routingInfo, setRoutingInfo] = useState<RoutingResult | null>(null);
   const [analysisProgressText, setAnalysisProgressText] = useState('ISOLATING PAVEMENT LAYER COORDS...');
 
-  // Geo-position coordinates jitter
-  const [jitterCoords, setJitterCoords] = useState<[number, number]>([19.1242, 72.8422]);
+  // Device position, shown on the scanner and used for reports typed by hand
+  const [gps, setGps] = useState<[number, number] | null>(null);
 
-  // Jitter coordinates to simulate GPS tracking
   useEffect(() => {
-    if (step === 2) {
-      const interval = setInterval(() => {
-        const base = isWebcamActive ? [19.0760, 72.8777] : PRESETS[selectedPresetIndex].coordinates;
-        const latJitter = base[0] + (Math.random() - 0.5) * 0.0002;
-        const lngJitter = base[1] + (Math.random() - 0.5) * 0.0002;
-        setJitterCoords([latJitter, lngJitter]);
-      }, 1200);
-      return () => clearInterval(interval);
-    }
-  }, [step, isWebcamActive, selectedPresetIndex]);
+    if (step !== 2 || !navigator.geolocation) return;
+    const watch = navigator.geolocation.watchPosition(
+      position => setGps([position.coords.latitude, position.coords.longitude]),
+      () => setGps(null),
+      { enableHighAccuracy: true, timeout: 8000 },
+    );
+    return () => navigator.geolocation.clearWatch(watch);
+  }, [step]);
 
   // Analysis text ticker cycle effect
   useEffect(() => {
@@ -349,59 +197,103 @@ export default function ComplaintWizard() {
     return () => stopWebcam();
   }, [step]);
 
-  // AI-Lens defect capture
+  // Real analysis: send the photo to the backend vision pipeline. Nothing is
+  // filed yet (persist=false); the citizen reviews the result first.
+  const analyzePhoto = async (photo: Blob) => {
+    setPhotoError(null);
+    setManualEntry(false);
+    setStep(3);
+    setAiAnalyzing(true);
+    try {
+      const compressed = await OfflineSyncManager.compressMediaAsset(photo);
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(compressed);
+      });
+      setPhotoPreview(dataUrl);
+
+      const body = new FormData();
+      body.append('image', compressed, 'road-photo.jpg');
+      body.append('persist', 'false');
+      const position = await new Promise<GeolocationPosition | null>(resolve => {
+        if (!navigator.geolocation) return resolve(null);
+        navigator.geolocation.getCurrentPosition(resolve, () => resolve(null), { timeout: 4000 });
+      });
+      if (position) {
+        body.append('latitude', String(position.coords.latitude));
+        body.append('longitude', String(position.coords.longitude));
+      }
+
+      const response = await fetch(`${API_BASE}/chat/analyze-photo`, { method: 'POST', body });
+      if (!response.ok) throw new Error('The photo could not be analysed.');
+      const lines = (await response.text()).split('\n').filter(Boolean).map(line => JSON.parse(line));
+      const failure = lines.find(line => line.type === 'error');
+      if (failure) throw new Error(failure.content);
+      const telemetry = lines.find(line => line.type === 'telemetry');
+      const analysis = lines.find(line => line.type === 'metadata')?.analysis;
+      if (!analysis) throw new Error('The photo could not be analysed.');
+
+      const allowed: ComplaintCategory[] = ['pothole', 'paving_defect', 'waterlogging', 'debris', 'missing_signage'];
+      const detected: ComplaintCategory = allowed.includes(analysis.defect_type) ? analysis.defect_type : 'paving_defect';
+      const label = detected.replace('_', ' ');
+      const point: [number, number] = telemetry?.latitude != null
+        ? [telemetry.latitude, telemetry.longitude]
+        : coordinates;
+      setCoordinates(point);
+      setCategory(detected);
+      setSeverity(analysis.severity === 'emergency' ? 'critical' : analysis.severity);
+      setDefectSize(`${analysis.width_m} m wide, depth ${analysis.depth_cm} cm`);
+      setTitle(`${label.charAt(0).toUpperCase()}${label.slice(1)} reported by photo`);
+      setDescription(analysis.recommended_action || `Road ${label} identified from a citizen photo.`);
+      const nearest = findNearestRoad(point[0], point[1]);
+      setAssociatedRoadId(nearest ? nearest.id : null);
+      setRoadName(nearest ? nearest.name : 'Unmapped Ward Segment');
+      setAiAnalyzing(false);
+    } catch (err) {
+      // Offline or AI failure: keep any photo and let the citizen describe it.
+      setAiAnalyzing(false);
+      const reason = err instanceof Error ? err.message : 'The photo could not be analysed.';
+      setPhotoError(`${reason} Describe the damage below instead.`);
+      startManualEntry();
+    }
+  };
+
+  const startManualEntry = () => {
+    const point = gps ?? coordinates;
+    const nearest = findNearestRoad(point[0], point[1]);
+    setCoordinates(point);
+    setAssociatedRoadId(nearest ? nearest.id : null);
+    setRoadName(nearest ? nearest.name : 'Unmapped Ward Segment');
+    setDefectSize('Not measured');
+    setTitle('');
+    setDescription('');
+    setManualEntry(true);
+    setStep(3);
+  };
+
+  const restartScan = () => {
+    setManualEntry(false);
+    setPhotoPreview(null);
+    setPhotoError(null);
+    setStep(2);
+  };
+
+  const captureWebcamFrame = () => {
+    const video = videoRef.current;
+    if (!video || !video.videoWidth) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d')?.drawImage(video, 0, 0);
+    canvas.toBlob(blob => { if (blob) analyzePhoto(blob); }, 'image/jpeg', 0.85);
+  };
+
   const handleCapture = () => {
     setShutterFlashing(true);
     setTimeout(() => setShutterFlashing(false), 150);
-
-    setStep(3);
-    setAiAnalyzing(true);
-
-    // Initialize defaults based on selected preset or webcam fallback
-    const preset = PRESETS[selectedPresetIndex];
-    
-    // Resolve coordinates
-    let resolvedCoords: [number, number] = preset.coordinates;
-    let resolvedCategory: ComplaintCategory = preset.category;
-    let resolvedSeverity = preset.severity;
-    let resolvedTitle = preset.title;
-    let resolvedDescription = preset.description;
-    let resolvedSize = preset.size;
-    let resolvedConfidence = preset.confidence;
-
-    if (isWebcamActive) {
-      // In webcam mode, pick random profile coordinates from SV Road area
-      resolvedCoords = [19.1242 + (Math.random() - 0.5) * 0.01, 72.8422 + (Math.random() - 0.5) * 0.01];
-      resolvedCategory = 'pothole';
-      resolvedSeverity = 'high';
-      resolvedTitle = 'Subsurface structural pothole detected via camera stream';
-      resolvedDescription = 'Pothole defect scanned via camera stream coordinates. Distress vectors show pavement sub-base erosion.';
-      resolvedSize = '32cm x 28cm, Depth: 8.5cm';
-      resolvedConfidence = '94.2%';
-    }
-
-    setCoordinates(resolvedCoords);
-    setCategory(resolvedCategory);
-    setSeverity(resolvedSeverity);
-    setDefectSize(resolvedSize);
-    setConfidenceScore(resolvedConfidence);
-
-    // Resolve nearest road
-    const nearest = findNearestRoad(resolvedCoords[0], resolvedCoords[1]);
-    if (nearest) {
-      setAssociatedRoadId(nearest.id);
-      setRoadName(nearest.name);
-    } else {
-      setAssociatedRoadId(null);
-      setRoadName('Unmapped Ward Segment');
-    }
-
-    // Trigger AI compilation delay
-    setTimeout(() => {
-      setTitle(resolvedTitle);
-      setDescription(resolvedDescription);
-      setAiAnalyzing(false);
-    }, 1800);
+    captureWebcamFrame();
   };
 
   // Routing trigger
@@ -416,11 +308,8 @@ export default function ComplaintWizard() {
   const handleSubmit = async () => {
     if (!routingInfo) return;
 
-    // Generate diagnostic data-url image preview
-    const base64Preview = getSvgDataUrl(category, title, defectSize);
-
     const complaintData = {
-      title: title || `${category.replace('_', ' ')} defect report`,
+      title: title || `${REPORT_CATEGORIES.find(option => option.value === category)?.label ?? 'Road defect'} report`,
       description,
       category,
       geometry: {
@@ -430,7 +319,7 @@ export default function ComplaintWizard() {
       status: 'pending' as const,
       assignedAuthorityId: routingInfo.authorityId,
       roadId: associatedRoadId || undefined,
-      imagePreview: base64Preview || undefined
+      imagePreview: photoPreview ?? undefined
     };
 
     setSubmitError(null);
@@ -444,6 +333,9 @@ export default function ComplaintWizard() {
   };
 
   const handleClose = () => {
+    setPhotoPreview(null);
+    setPhotoError(null);
+    setSubmitError(null);
     stopWebcam();
     setIsReporting(false);
     resetForm();
@@ -451,7 +343,7 @@ export default function ComplaintWizard() {
 
   const resetForm = () => {
     setStep(1);
-    setSelectedPresetIndex(0);
+    setManualEntry(false);
     setTitle('');
     setDescription('');
     setCategory('pothole');
@@ -564,12 +456,11 @@ export default function ComplaintWizard() {
                   className="absolute inset-0 w-full h-full object-cover"
                 />
               ) : (
-                /* Simulator frame preset preview */
-                <div className="absolute inset-0 w-full h-full">
-                  <DefectVisualizer 
-                    category={PRESETS[selectedPresetIndex].category} 
-                    size={PRESETS[selectedPresetIndex].size}
-                  />
+                <div className="absolute inset-0 flex w-full h-full flex-col items-center justify-center gap-2 px-8 text-center">
+                  <Camera className="h-6 w-6 text-slate-500" aria-hidden />
+                  <p className="text-[12px] text-slate-300">
+                    {webcamAvailable ? 'Camera is off. Turn it on, or upload a road photo.' : 'Camera is not available. Upload a road photo instead.'}
+                  </p>
                 </div>
               )}
 
@@ -587,50 +478,22 @@ export default function ComplaintWizard() {
               {/* Active scanning sweep bar */}
               <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400/80 to-transparent shadow-[0_0_12px_#22d3ee] pointer-events-none z-20 animate-scanline" />
 
-              {/* Google Lens Scatter Nodes */}
-              {!isWebcamActive && SCATTER_NODES.map((node) => {
-                const isActive = selectedPresetIndex === node.presetIdx;
-                return (
-                  <button
-                    key={node.presetIdx}
-                    type="button"
-                    onClick={() => setSelectedPresetIndex(node.presetIdx)}
-                    style={{ left: node.x, top: node.y }}
-                    className="absolute -translate-x-1/2 -translate-y-1/2 z-30 group p-1 focus:outline-none cursor-pointer"
-                    aria-label={`Select preset: ${node.label}`}
-                  >
-                    <span className="relative flex h-5 w-5 items-center justify-center">
-                      <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isActive ? 'bg-cyan-400' : 'bg-white/40'}`} />
-                      <span className={`relative inline-flex rounded-full h-2.5 w-2.5 shadow-[0_0_8px_currentColor] transition-all duration-300 ${
-                        isActive 
-                          ? 'bg-cyan-400 text-cyan-400 scale-125' 
-                          : 'bg-white/70 text-white group-hover:bg-cyan-300 group-hover:scale-110'
-                      }`} />
-                    </span>
-                    {/* Tooltip on hover */}
-                    <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-slate-950/90 border border-white/[0.08] text-[7.5px] font-black uppercase text-slate-200 px-2 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-md pointer-events-none">
-                      {node.label}
-                    </div>
-                  </button>
-                );
-              })}
-
               {/* Telemetry metadata layers */}
               <div className="absolute top-4 left-6 right-6 flex justify-between items-start pointer-events-none z-20">
                 <div className="bg-slate-950/60 backdrop-blur-md px-2 py-1 border border-white/[0.04] rounded-sm space-y-0.5">
                   <div className="flex items-center gap-1">
                     <span className="w-1 h-1 rounded-full bg-cyan-400 animate-ping inline-block" />
-                    <span className="mono-label text-[7px] text-cyan-400">GPS MATCHING</span>
+                    <span className="mono-label text-[7px] text-cyan-400">{gps ? 'GPS LOCKED' : 'GPS UNAVAILABLE'}</span>
                   </div>
                   <div className="mono-readout text-[8px] font-bold text-slate-350 tracking-wider">
-                    {jitterCoords[0].toFixed(5)}, {jitterCoords[1].toFixed(5)}
+                    {gps ? `${gps[0].toFixed(5)}, ${gps[1].toFixed(5)}` : 'Set on map later'}
                   </div>
                 </div>
                 
                 <div className="bg-slate-950/60 backdrop-blur-md px-2 py-1 border border-white/[0.04] rounded-sm text-right">
                   <div className="mono-label text-[7px]">SIGNAL DEPTH</div>
                   <div className="mono-readout text-[8px] text-slate-350">
-                    {isWebcamActive ? 'WEBCAM RELAY' : 'SIMULATION MODE'}
+                    {isWebcamActive ? 'CAMERA ON' : 'CAMERA OFF'}
                   </div>
                 </div>
               </div>
@@ -650,7 +513,7 @@ export default function ComplaintWizard() {
                 >
                   {isWebcamActive ? (
                     <>
-                      <MonitorPlay className="w-3.5 h-3.5" /> SIMULATOR MODE
+                      <MonitorPlay className="w-3.5 h-3.5" /> TURN OFF CAMERA
                     </>
                   ) : (
                     <>
@@ -671,33 +534,32 @@ export default function ComplaintWizard() {
             {/* Shutter / Capture control bar */}
             <div className="p-4 border-t border-white/[0.05] bg-slate-955 flex flex-col gap-3 shrink-0">
               
-              {/* Preset buttons - display in Simulator mode */}
-              {!isWebcamActive && (
-                <div className="space-y-1.5">
-                  <span className="mono-label text-[7.5px] block text-center opacity-60">SELECT SCANNING TEMPLATE</span>
-                  <div className="flex gap-1.5 overflow-x-auto pb-1.5 px-0.5 justify-center">
-                    {PRESETS.map((p, idx) => (
-                      <button
-                        key={p.id}
-                        onClick={() => setSelectedPresetIndex(idx)}
-                        className={`px-3 py-1.5 rounded-lg border text-[8.5px] font-black uppercase transition-all shrink-0 ${
-                          selectedPresetIndex === idx
-                            ? 'bg-cyan-500/10 border-cyan-500/50 text-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.1)]'
-                            : 'border-white/[0.06] text-[#55555f] hover:border-white/[0.12] hover:text-slate-400'
-                        }`}
-                      >
-                        {p.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <label className="mx-auto cursor-pointer rounded-lg border border-cyan-400/40 bg-cyan-500/10 px-3 py-2 text-[11px] font-semibold text-cyan-300">
+                Upload a road photo
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="sr-only"
+                  aria-label="Upload a road photo"
+                  onChange={event => {
+                    const file = event.target.files?.[0];
+                    if (file) analyzePhoto(file);
+                    event.target.value = '';
+                  }}
+                />
+              </label>
+              {photoError && <p role="alert" className="px-2 text-center text-[11px] text-rose-300">{photoError}</p>}
+              <button type="button" onClick={startManualEntry} className="mx-auto text-[11px] text-slate-300 underline underline-offset-2 hover:text-cyan-300">
+                No photo? Describe the damage instead
+              </button>
 
               {/* Giant shutter layout */}
               <div className="flex items-center justify-center py-2">
                 <button
                   onClick={handleCapture}
-                  className="w-16 h-16 rounded-full border-4 border-slate-900 flex items-center justify-center transition-all bg-white relative hover:scale-105 active:scale-95 cursor-pointer shadow-lg shadow-white/5"
+                  disabled={!isWebcamActive}
+                  className="w-16 h-16 rounded-full border-4 border-slate-900 flex items-center justify-center transition-all bg-white relative hover:scale-105 active:scale-95 cursor-pointer shadow-lg shadow-white/5 disabled:cursor-not-allowed disabled:opacity-40"
                   aria-label="Capture Road Defect"
                 >
                   <div className="absolute inset-0 rounded-full border border-white/20 animate-pulse scale-110 pointer-events-none" />
@@ -715,36 +577,11 @@ export default function ComplaintWizard() {
           <div className="flex-1 flex flex-col p-5 justify-between relative overflow-hidden animate-in fade-in duration-300">
             {/* Frozen frame / scanning matrix */}
             <div className="space-y-4">
+              {(aiAnalyzing || photoPreview) && (
               <div className="relative rounded-2xl overflow-hidden border border-white/[0.08] min-h-[200px]">
-                <DefectVisualizer category={category} size={defectSize} />
-                
-                {/* AI bounding diagnostics frame */}
-                {!aiAnalyzing && (
-                  <div className="absolute inset-x-8 top-10 bottom-12 bg-rose-500/5 rounded flex flex-col justify-between p-2 animate-in zoom-in-95 duration-300">
-                    {/* Animated SVG Border */}
-                    <svg className="absolute inset-0 w-full h-full pointer-events-none rounded">
-                      <rect 
-                        width="100%" 
-                        height="100%" 
-                        fill="none" 
-                        stroke="#f43f5e" 
-                        strokeWidth="1.5" 
-                        strokeDasharray="6 4" 
-                        className="animate-dash"
-                        style={{ opacity: 0.5 }}
-                      />
-                    </svg>
-                    {/* Bounding box glow points */}
-                    <div className="absolute -top-1 -left-1 w-2 h-2 bg-rose-400 border border-white rounded-full animate-pulse z-10" />
-                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-rose-400 border border-white rounded-full animate-pulse z-10" />
-                    <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-rose-400 border border-white rounded-full animate-pulse z-10" />
-                    <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-rose-400 border border-white rounded-full animate-pulse z-10" />
-
-                    <div className="bg-rose-950/85 backdrop-blur-md px-1.5 py-0.5 rounded border border-rose-500/30 text-[7px] font-mono text-rose-400 self-start uppercase tracking-wider relative z-10">
-                      IDENTIFIED: {category.replace('_', ' ')} // {confidenceScore} CONFIDENCE
-                    </div>
-                  </div>
-                )}
+                {photoPreview
+                  ? <img src={photoPreview} alt="Road photo attached to this report" className="h-[200px] w-full object-cover" />
+                  : <div className="h-[200px] w-full bg-slate-950" />}
 
                 {aiAnalyzing && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-950/85 backdrop-blur-xs">
@@ -756,6 +593,36 @@ export default function ComplaintWizard() {
                 )}
               </div>
 
+              )}
+
+              {photoError && <p role="alert" className="rounded-lg border border-amber-400/40 bg-amber-500/10 px-3 py-2 text-[11px] leading-relaxed text-amber-200">{photoError}</p>}
+
+              {manualEntry ? (
+                <div className="space-y-3">
+                  <label className="block space-y-1 text-[12px] text-slate-200">
+                    <span>What is the problem?</span>
+                    <select
+                      value={category}
+                      onChange={event => setCategory(event.target.value as ComplaintCategory)}
+                      className="w-full rounded-lg border border-white/[0.1] bg-slate-950 px-3 py-2 text-[13px] text-slate-100"
+                    >
+                      {REPORT_CATEGORIES.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+                    </select>
+                  </label>
+                  <label className="block space-y-1 text-[12px] text-slate-200">
+                    <span>Describe the damage and where it is</span>
+                    <textarea
+                      value={description}
+                      onChange={event => setDescription(event.target.value)}
+                      rows={4}
+                      minLength={10}
+                      className="w-full rounded-lg border border-white/[0.1] bg-slate-950 px-3 py-2 text-[13px] text-slate-100"
+                    />
+                  </label>
+                  <p className="text-[11px] text-slate-400">Nearest road: {roadName}. You can correct the pin on the next step.</p>
+                </div>
+              ) : (
+              <>
               {/* Diagnosis Statistics */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
@@ -797,18 +664,20 @@ export default function ComplaintWizard() {
                   </p>
                 )}
               </div>
+              </>
+              )}
             </div>
 
             <div className="space-y-2 pt-2">
               <button
                 onClick={() => setStep(4)}
-                disabled={aiAnalyzing}
+                disabled={aiAnalyzing || (manualEntry && description.trim().length < 10)}
                 className="w-full py-3.5 rounded-2xl bg-cyan-400 hover:bg-cyan-500 text-slate-950 text-xs font-black tracking-widest uppercase disabled:bg-slate-900 disabled:text-slate-600 transition-all cursor-pointer shadow-lg shadow-cyan-400/10"
               >
                 CONFIRM INTEL ROUTING
               </button>
               <button
-                onClick={() => setStep(2)}
+                onClick={restartScan}
                 className="w-full py-2.5 rounded-xl border border-white/[0.08] hover:bg-white/[0.02] text-muted-foreground hover:text-slate-200 text-[10px] uppercase font-bold tracking-wider transition-all"
               >
                 Scan Again

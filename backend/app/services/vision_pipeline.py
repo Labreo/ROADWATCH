@@ -2,20 +2,18 @@ import os
 import base64
 from typing import Dict, Any
 
-class ConcentrateAPIConfig:
-    def __init__(
-        self,
-        model_name: str = "gemini-3.5-flash",
-        temperature: float = 0.0,
-    ):
+from app.services.llm_config import LLM_ENDPOINT, LLM_MODEL, llm_api_key
+
+class VisionConfig:
+    def __init__(self, model_name: str = LLM_MODEL, temperature: float = 0.0):
         self.model_name = model_name
         self.temperature = temperature
-        self.api_key = os.environ.get("CONCENTRATE_API_KEY", "")
-        self.api_endpoint = "https://api.concentrate.ai/v1/chat/completions"
+        self.api_key = llm_api_key()
+        self.api_endpoint = LLM_ENDPOINT
 
 class RoadDamageEvaluator:
-    def __init__(self, config: ConcentrateAPIConfig | None = None):
-        self.config = config or ConcentrateAPIConfig()
+    def __init__(self, config: VisionConfig | None = None):
+        self.config = config or VisionConfig()
 
     async def evaluate_damage_stream(self, image_bytes: bytes, latitude: float | None, longitude: float | None):
         import json
@@ -23,7 +21,7 @@ class RoadDamageEvaluator:
 
         api_key = self.config.api_key
         if not api_key:
-            yield json.dumps({"type": "error", "content": "CONCENTRATE_API_KEY is not configured."})
+            yield json.dumps({"type": "error", "content": "GEMINI_API_KEY is not configured."})
             return
 
         base64_image = base64.b64encode(image_bytes).decode("utf-8")
@@ -74,7 +72,7 @@ class RoadDamageEvaluator:
             async with client.stream("POST", self.config.api_endpoint, json=payload, headers=headers) as response:
                 if response.status_code != 200:
                     error_text = await response.aread()
-                    yield json.dumps({"type": "error", "content": f"Concentrate API error {response.status_code}: {error_text.decode(errors='replace')}"})
+                    yield json.dumps({"type": "error", "content": f"LLM API error {response.status_code}: {error_text.decode(errors='replace')}"})
                     return
 
                 async for line in response.aiter_lines():

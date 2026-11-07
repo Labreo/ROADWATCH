@@ -11,9 +11,11 @@ type Tab = (typeof TABS)[number];
 
 export default function LedgerScreen() {
   const [tab, setTab] = useState<Tab>('Spend flow');
+  const role = useStore(s => s.userRole);
+  const tabs = role === 'admin' || role === 'auditor' ? TABS : TABS.filter(t => t !== 'Audit log');
   return (
     <div className="flex flex-col gap-4">
-      <Tabs tabs={TABS} active={tab} onChange={setTab} />
+      <Tabs tabs={tabs} active={tab} onChange={setTab} />
       {tab === 'Spend flow' && <SpendFlow />}
       {tab === 'Budget variance' && <BudgetVariance />}
       {tab === 'Procurement' && <Procurement />}
@@ -141,6 +143,7 @@ interface Tender {
 
 function Procurement() {
   const region = useStore(s => s.regionCode);
+  const canAward = useStore(s => s.userRole) === 'admin';
   const state = useLive<Tender[]>(`/screens/tenders?region=${region}`);
   const firms = useLive<{ id: number; name: string; blacklisted: boolean }[]>(`/screens/contractors?region=${region}`);
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -180,12 +183,12 @@ function Procurement() {
                   { head: 'SCORE', cell: b => <Mono tone={b.is_winner ? 'emerald' : undefined}>{b.weighted_total ?? '—'}</Mono> },
                   {
                     head: 'RESULT',
-                    cell: b => b.is_winner ? <Badge tone="emerald">WINNER</Badge> : tender.status === 'awarded' ? <Badge>NOT AWARDED</Badge> : (
+                    cell: b => b.is_winner ? <Badge tone="emerald">WINNER</Badge> : tender.status === 'awarded' ? <Badge>NOT AWARDED</Badge> : !canAward ? <Badge tone="amber">UNDER REVIEW</Badge> : (
                       <ActionButton variant="primary" onDone={state.reload} action={() => apiPost(`/screens/tenders/${tender.id}/award/${b.contractor_id}`)}>Award</ActionButton>
                     ),
                   },
                 ]} />
-                <form onSubmit={e => e.preventDefault()} className="flex flex-wrap items-end gap-2 border-t border-[var(--border-bright)] p-4">
+                {canAward && <form onSubmit={e => e.preventDefault()} className="flex flex-wrap items-end gap-2 border-t border-[var(--border-bright)] p-4">
                   <label className="flex flex-col gap-1 text-xs text-[var(--fg-dim)]">Contractor
                     <select value={firmId} onChange={e => setFirmId(e.target.value)} className={field}>
                       <option value="">Select</option>
@@ -205,7 +208,7 @@ function Procurement() {
                   >
                     Submit bid
                   </ActionButton>
-                </form>
+                </form>}
               </Card>
               <Card title="Evaluation criteria">
                 <ul className="flex flex-col gap-3">

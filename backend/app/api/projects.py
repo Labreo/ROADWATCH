@@ -7,7 +7,8 @@ contingency reserves, approval trail, and cost-per-km normalization.
 from datetime import date
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
+from app.api.auth import WRITERS, require
 
 from app.services.database import db
 from app.services.validators import (
@@ -44,7 +45,7 @@ async def get_fund_sources(project_id: int):
     )
 
 
-@router.put("/projects/{project_id}/fund-sources")
+@router.put("/projects/{project_id}/fund-sources", dependencies=[Depends(require(*WRITERS))])
 async def replace_fund_sources(project_id: int, payload: list[FundSourcePayload]):
     """Bulk-replace fund sources for a project (delete existing, insert new)."""
     _get_project_or_404(project_id)
@@ -99,7 +100,7 @@ async def get_variance_reasons(project_id: int):
     )
 
 
-@router.post("/projects/{project_id}/variance-reasons")
+@router.post("/projects/{project_id}/variance-reasons", dependencies=[Depends(require(*WRITERS))])
 async def create_variance_reason(project_id: int, payload: ValidatedVariancePayload):
     """Record a budget variance reason for a project."""
     project = _get_project_or_404(project_id)
@@ -124,7 +125,7 @@ async def create_variance_reason(project_id: int, payload: ValidatedVariancePayl
     return rows[0]
 
 
-@router.patch("/variance-reasons/{variance_id}")
+@router.patch("/variance-reasons/{variance_id}", dependencies=[Depends(require(*WRITERS))])
 async def update_variance_reason(variance_id: int, payload: dict):
     """Partially update a variance reason (e.g. add approval)."""
     allowed = {"approved_by", "approval_date", "approval_document_url", "reason"}
@@ -155,7 +156,7 @@ async def get_milestones(project_id: int):
     )
 
 
-@router.post("/projects/{project_id}/milestones")
+@router.post("/projects/{project_id}/milestones", dependencies=[Depends(require(*WRITERS))])
 async def create_milestone(project_id: int, payload: ValidatedMilestonePayload):
     """Create a new milestone for a project."""
     _get_project_or_404(project_id)
@@ -173,7 +174,7 @@ async def create_milestone(project_id: int, payload: ValidatedMilestonePayload):
     return rows[0]
 
 
-@router.patch("/milestones/{milestone_id}")
+@router.patch("/milestones/{milestone_id}", dependencies=[Depends(require(*WRITERS))])
 async def update_milestone(milestone_id: int, payload: dict):
     """Update milestone fields (status, amount, dates, etc.)."""
     allowed = {
@@ -209,7 +210,7 @@ async def get_contingency(project_id: int):
     return rows[0] if rows else {}
 
 
-@router.post("/projects/{project_id}/contingency")
+@router.post("/projects/{project_id}/contingency", dependencies=[Depends(require(*WRITERS))])
 async def upsert_contingency(project_id: int, payload: ValidatedContingencyPayload):
     """Create or update contingency reserve for a project."""
     _get_project_or_404(project_id)
@@ -241,7 +242,7 @@ async def upsert_contingency(project_id: int, payload: ValidatedContingencyPaylo
     return rows[0]
 
 
-@router.post("/projects/{project_id}/contingency/release")
+@router.post("/projects/{project_id}/contingency/release", dependencies=[Depends(require("admin"))])
 async def release_contingency(project_id: int, payload: dict):
     """Record a contingency utilization. Payload: {amount, approved_by, notes}."""
     _get_project_or_404(project_id)
@@ -311,7 +312,7 @@ async def list_approvals(
     return db.query(sql, tuple(params))
 
 
-@router.post("/approvals")
+@router.post("/approvals", dependencies=[Depends(require(*WRITERS))])
 async def create_approval(payload: ValidatedApprovalPayload):
     """Create an approval record."""
     rows = db.query(
@@ -327,7 +328,7 @@ async def create_approval(payload: ValidatedApprovalPayload):
     return rows[0]
 
 
-@router.patch("/approvals/{approval_id}")
+@router.patch("/approvals/{approval_id}", dependencies=[Depends(require("admin"))])
 async def update_approval(approval_id: int, payload: dict):
     """Update approval status, approver, or comments."""
     allowed = {"approved_by", "approved_at", "status", "comments"}
@@ -437,7 +438,7 @@ def get_project_beneficiaries(project_id: int):
     )
 
 
-@router.post("/projects/{project_id}/beneficiaries")
+@router.post("/projects/{project_id}/beneficiaries", dependencies=[Depends(require(*WRITERS))])
 def create_project_beneficiary(project_id: int, payload: dict):
     _get_project_or_404(project_id)
     required = ['population_served', 'beneficiary_type']

@@ -20,6 +20,19 @@ interface LayerState {
   stress: boolean;
 }
 
+export interface SceneLiveData {
+  openDefects: number;
+  sensors: { label: string; details: string; status: 'active' | 'warning' | 'critical' }[];
+}
+
+export const SENSOR_POSITIONS: [number, number, number][] = [
+  [-1.1, 0.25, 0.6],
+  [0.1, 0.35, -0.8],
+  [1.2, 0.15, 0.3],
+];
+
+const NO_LIVE_DATA: SceneLiveData = { openDefects: 0, sensors: [] };
+
 interface SensorPointProps {
   position: [number, number, number];
   label: string;
@@ -198,7 +211,7 @@ function RepairLayer() {
 
 // ── Pothole Layer ────────────────────────────────────────────
 
-const POTHOLE_POSITIONS: [number, number, number][] = [
+export const POTHOLE_POSITIONS: [number, number, number][] = [
   [0.3,  0.0, 0.5],
   [-0.9, 0.0, -0.2],
   [1.2,  0.0, 0.0],
@@ -250,10 +263,10 @@ function PotholeRing({ position, delay }: { position: [number,number,number]; de
   );
 }
 
-function PotholeLayer() {
+function PotholeLayer({ count }: { count: number }) {
   return (
     <group>
-      {POTHOLE_POSITIONS.map((pos, i) => (
+      {POTHOLE_POSITIONS.slice(0, count).map((pos, i) => (
         <PotholeRing key={i} position={pos} delay={i * 0.65} />
       ))}
     </group>
@@ -309,7 +322,7 @@ function StressLayer() {
 
 // ── Main Pavement Model ──────────────────────────────────────
 
-function PavementModel({ layers }: { layers: LayerState }) {
+function PavementModel({ layers, live }: { layers: LayerState; live: SceneLiveData }) {
   const { scene } = useGLTF('/3d/roadInspection.glb');
   const groupRef = useRef<THREE.Group>(null);
   const uStructuralStressIntensity = useStore(state => state.uStructuralStressIntensity);
@@ -419,32 +432,13 @@ function PavementModel({ layers }: { layers: LayerState }) {
       {/* Diagnostic Overlay Layers */}
       {layers.drainage && <DrainageLayer />}
       {layers.repair    && <RepairLayer />}
-      {layers.potholes  && <PotholeLayer />}
+      {layers.potholes  && <PotholeLayer count={live.openDefects} />}
       {layers.stress    && <StressLayer />}
 
       {/* Sensor nodes */}
-      {layers.sensors && (
-        <>
-          <SensorPoint
-            position={[-1.1, 0.25, 0.6]}
-            label="Telemetry Node A-01"
-            details="Structural deflection index: 0.24mm. Sub-base structural stress: NORMAL."
-            status="active"
-          />
-          <SensorPoint
-            position={[0.1, 0.35, -0.8]}
-            label="Telemetry Node B-04"
-            details="Moisture infiltration ratio: 42%. Water logging risk: ELEVATED."
-            status="warning"
-          />
-          <SensorPoint
-            position={[1.2, 0.15, 0.3]}
-            label="Telemetry Node C-02"
-            details="Surface shear crack detected. Asphalt integrity: CRITICAL FAULT."
-            status="critical"
-          />
-        </>
-      )}
+      {layers.sensors && live.sensors.slice(0, SENSOR_POSITIONS.length).map((sensor, i) => (
+        <SensorPoint key={sensor.label} position={SENSOR_POSITIONS[i]} label={sensor.label} details={sensor.details} status={sensor.status} />
+      ))}
     </group>
   );
 }
@@ -563,7 +557,7 @@ const LAYER_DEFS: { key: keyof LayerState; label: string; color: string; shortLa
   { key: 'sensors',  label: 'Sensor Nodes',    color: '#22d3ee', shortLabel: 'SENSORS'  },
   { key: 'drainage', label: 'Drainage Flow',   color: '#38bdf8', shortLabel: 'DRAIN'    },
   { key: 'repair',   label: 'Repair Patches',  color: '#34d399', shortLabel: 'REPAIR'   },
-  { key: 'potholes', label: 'Pothole Map',     color: '#f43f5e', shortLabel: 'POTHOLES' },
+  { key: 'potholes', label: 'Open Defects',     color: '#f43f5e', shortLabel: 'DEFECTS' },
   { key: 'stress',   label: 'Stress Zones',    color: '#f59e0b', shortLabel: 'STRESS'   },
 ];
 
@@ -620,7 +614,7 @@ function SceneRefBinder({ sceneRef }: { sceneRef?: React.MutableRefObject<THREE.
 
 // ── Root Export ──────────────────────────────────────────────
 
-export default function RoadInspectionScene({ sceneRef }: { sceneRef?: React.MutableRefObject<THREE.Scene | null> }) {
+export default function RoadInspectionScene({ sceneRef, live = NO_LIVE_DATA }: { sceneRef?: React.MutableRefObject<THREE.Scene | null>; live?: SceneLiveData }) {
   const [layers, setLayers] = useState<LayerState>({
     sensors:  true,
     drainage: true,
@@ -696,7 +690,7 @@ export default function RoadInspectionScene({ sceneRef }: { sceneRef?: React.Mut
         <pointLight position={[0, -2, 0]} intensity={0.3} color="#7c3aed" />
 
         <Suspense fallback={<SceneLoader />}>
-          <PavementModel layers={layers} />
+          <PavementModel layers={layers} live={live} />
         </Suspense>
 
         <CinematicCamera controlsRef={controlsRef} />

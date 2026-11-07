@@ -5,11 +5,26 @@ import { Ban, Database } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { apiPost, useLive } from '@/services/api';
 import { ActionButton, Badge, Card, Loadable, Mono, Table, money } from './ui';
+import { RadarChart } from './charts';
 
 interface Contractor {
   id: number; contractor_code: string; name: string; rating: number; projects_completed: number; projects_delayed: number;
   performance_index: number; blacklisted: boolean; blacklisted_reason: string | null; license_number: string;
-  active_contracts: number; contract_value: number;
+  active_contracts: number; contract_value: number; warranty_claims: number;
+}
+
+const RADAR_AXES = ['Quality', 'On time', 'Experience', 'Index', 'Warranty'];
+
+/** Scores from contractor records, each 0 to 1. Experience is relative to the busiest firm. */
+function radarValues(firm: Contractor, mostCompleted: number) {
+  const finished = firm.projects_completed + firm.projects_delayed;
+  return [
+    Number(firm.rating) / 5,
+    finished ? firm.projects_completed / finished : 0,
+    mostCompleted ? firm.projects_completed / mostCompleted : 0,
+    Number(firm.performance_index) / 100,
+    1 / (1 + Number(firm.warranty_claims)),
+  ];
 }
 
 const indexTone = (v: number) => (v >= 80 ? 'emerald' : v >= 60 ? 'cyan' : v >= 40 ? 'amber' : 'rose');
@@ -24,6 +39,7 @@ export default function ContractorsScreen() {
     <Loadable state={state}>
       {firms => {
         const firm = firms.find(f => f.id === selectedId) ?? firms.find(f => f.blacklisted) ?? firms[0];
+        const mostCompleted = Math.max(0, ...firms.map(f => f.projects_completed));
         return (
           <div className="flex flex-col gap-4">
             <section className="flex items-center gap-3 rounded-lg border border-cyan-400/30 bg-cyan-500/[0.06] px-4 py-2.5">
@@ -59,7 +75,15 @@ export default function ContractorsScreen() {
                         <span>{firm.blacklisted_reason ?? 'No reason recorded.'}</span>
                       </p>
                     )}
-                    {[['Code', firm.contractor_code], ['License', firm.license_number], ['Performance index', firm.performance_index], ['Contracts held', firm.active_contracts], ['Contract value', money(firm.contract_value)]].map(([k, v]) => (
+                    <RadarChart
+                      label={`${firm.name} scored against the regional average`}
+                      axes={RADAR_AXES}
+                      series={[
+                        { name: 'Regional average', color: 'var(--signal-cyan)', values: RADAR_AXES.map((_, i) => firms.reduce((acc, f) => acc + radarValues(f, mostCompleted)[i], 0) / firms.length) },
+                        { name: firm.name, color: firm.blacklisted ? 'var(--signal-rose)' : 'var(--signal-emerald)', values: radarValues(firm, mostCompleted) },
+                      ]}
+                    />
+                    {[['Code', firm.contractor_code], ['License', firm.license_number], ['Performance index', firm.performance_index], ['Contracts held', firm.active_contracts], ['Contract value', money(firm.contract_value)], ['Warranty claims', firm.warranty_claims]].map(([k, v]) => (
                       <p key={String(k)} className="flex justify-between gap-3"><span className="text-[var(--fg-dim)]">{k}</span><span>{v}</span></p>
                     ))}
                     {role === 'admin' && (firm.blacklisted ? (

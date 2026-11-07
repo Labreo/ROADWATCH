@@ -61,7 +61,8 @@ import RegionsScreen from '@/components/live/RegionsScreen';
 import SensorsScreen from '@/components/live/SensorsScreen';
 import PlaybackScreen from '@/components/live/PlaybackScreen';
 import MyReportsScreen from '@/components/live/MyReportsScreen';
-import { apiGet } from '@/services/api';
+import { apiGet, loadSession } from '@/services/api';
+import LoginDialog from '@/components/shared/LoginDialog';
 
 import DigitalTwinView from '@/components/twin/DigitalTwinView';
 import BottomSheet from '@/components/shared/BottomSheet';
@@ -103,7 +104,7 @@ interface LiveComplaint {
   status: Complaint['status']; priority: number; escalation_level: Complaint['escalationLevel']; created_at: string;
   assigned_authority_id: number | null; road_id: number | null; image_url: string | null;
   target_resolution_hours: number; sla_breached_at: string | null; last_escalated_at: string | null;
-  coordinates: [number, number];
+  road_name: string | null; coordinates: [number, number];
 }
 
 const toComplaint = (row: LiveComplaint): Complaint => ({
@@ -121,6 +122,7 @@ const toComplaint = (row: LiveComplaint): Complaint => ({
   targetResolutionHours: row.target_resolution_hours,
   assignedAuthorityId: row.assigned_authority_id ?? 0,
   roadId: row.road_id ?? undefined,
+  roadName: row.road_name ?? undefined,
   createdAt: row.created_at,
   imageUrl: row.image_url ?? undefined,
 });
@@ -154,8 +156,8 @@ export default function Page() {
     demoMode,
     setDemoMode,
     userRole,
-    setUserRole,
   } = useStore();
+  const isStaff = userRole !== 'citizen';
   const [isSyncingUI, setIsSyncingUI] = useState(false);
   const [complaintsTab, setComplaintsTab] = useState<'reports' | 'sync'>('reports');
 
@@ -182,7 +184,7 @@ export default function Page() {
     let cancelled = false;
     let retry: ReturnType<typeof setTimeout> | undefined;
     const load = () => Promise.all([
-      apiGet<LiveRoad[]>(`/screens/roads?region=${regionCode}`),
+      apiGet<LiveRoad[]>(`/screens/roads?region=${regionCode}&major=true`),
       apiGet<LiveComplaint[]>(`/screens/complaints?region=${regionCode}`),
     ]).then(([liveRoads, liveComplaints]) => {
       if (cancelled) return;
@@ -204,6 +206,14 @@ export default function Page() {
       clearTimeout(retry);
     };
   }, [regionCode]);
+
+  // Drop a stored session the server no longer recognises.
+  useEffect(() => {
+    if (!loadSession()) return;
+    apiGet('/auth/me').catch(err => {
+      if (err?.status === 401) useStore.getState().setSession(null);
+    });
+  }, []);
 
   // Initialize connection sync manager on mount
   useEffect(() => {
@@ -723,7 +733,7 @@ export default function Page() {
                         <div className="border-t border-border/30 pt-3 text-[10px] text-muted-foreground space-y-1">
                           <div className="flex justify-between">
                             <span>Road Segment:</span>
-                            <strong className="text-slate-355">{road ? road.name : 'Unknown Segment'}</strong>
+                            <strong className="text-slate-355">{road ? road.name : c.roadName ?? 'Unknown Segment'}</strong>
                           </div>
                           <div className="flex justify-between">
                             <span>Assigned to:</span>
@@ -791,48 +801,48 @@ export default function Page() {
       )}
 
       {/* VIEW 6: MUNICIPAL OPERATIONS (Frames 11 to 14) */}
-      {!isChatDriven && activeView === 'admin' && userRole === 'admin' && (
+      {!isChatDriven && activeView === 'admin' && isStaff && (
         <ErrorBoundary>
           <div className="flex-1 min-h-0 overflow-y-auto pr-1">
             <OperationsScreen />
           </div>
         </ErrorBoundary>
       )}
-      {!isChatDriven && activeView === 'admin' && userRole !== 'admin' && (
+      {!isChatDriven && activeView === 'admin' && !isStaff && (
         <AdminRestrictedView />
       )}
 
       {/* VIEW 7: HISTORICAL PLAYBACK (Frame 10) */}
-      {!isChatDriven && activeView === 'playback' && userRole === 'admin' && (
+      {!isChatDriven && activeView === 'playback' && isStaff && (
         <ErrorBoundary>
           <div className="flex-1 min-h-0 overflow-y-auto pr-1">
             <PlaybackScreen />
           </div>
         </ErrorBoundary>
       )}
-      {!isChatDriven && activeView === 'playback' && userRole !== 'admin' && (
+      {!isChatDriven && activeView === 'playback' && !isStaff && (
         <AdminRestrictedView />
       )}
 
       {/* VIEW 8: SENSOR NETWORK (Frame 09) */}
-      {!isChatDriven && activeView === 'sensors' && userRole === 'admin' && (
+      {!isChatDriven && activeView === 'sensors' && isStaff && (
         <ErrorBoundary>
           <div className="flex-1 min-h-0 overflow-y-auto pr-1">
             <SensorsScreen />
           </div>
         </ErrorBoundary>
       )}
-      {!isChatDriven && activeView === 'sensors' && userRole !== 'admin' && (
+      {!isChatDriven && activeView === 'sensors' && !isStaff && (
         <AdminRestrictedView />
       )}
 
       {/* VIEW 9: DIGITAL TWIN COMMAND CONSOLE */}
-      {!isChatDriven && activeView === 'twin' && userRole === 'admin' && (
+      {!isChatDriven && activeView === 'twin' && isStaff && (
         <ErrorBoundary>
           <DigitalTwinView />
         </ErrorBoundary>
       )}
-      {!isChatDriven && activeView === 'twin' && userRole !== 'admin' && (
+      {!isChatDriven && activeView === 'twin' && !isStaff && (
         <AdminRestrictedView />
       )}
 
@@ -1089,6 +1099,7 @@ export default function Page() {
 
       {/* Complaint wizard overlay */}
       <ComplaintWizard />
+      <LoginDialog />
 
 
     </div>
@@ -1097,7 +1108,7 @@ export default function Page() {
 
 // Admin-restricted view shown to citizens
 function AdminRestrictedView() {
-  const setUserRole = useStore((s) => s.setUserRole);
+  const setLoginOpen = useStore((s) => s.setLoginOpen);
   const setActiveView = useStore((s) => s.setActiveView);
   return (
     <motion.div
@@ -1108,20 +1119,18 @@ function AdminRestrictedView() {
       <div className="max-w-md text-center glass-panel rounded-2xl p-8 border border-white/[0.06]">
         <ShieldAlert className="w-12 h-12 text-indigo-400 mx-auto mb-4" />
         <h2 className="text-sm font-black text-slate-100 uppercase tracking-wider mb-2">
-          Admin View Required
+          Staff sign-in required
         </h2>
         <p className="text-[11px] text-muted-foreground leading-relaxed mb-6">
-          This section is only available in Admin mode. Switch to access the full
-          operations dashboard, contractor registry, and infrastructure controls.
+          Sign in as a ward engineer, administrator or public auditor to open
+          this section.
         </p>
         <div className="flex gap-3 justify-center">
           <button
-            onClick={() => {
-              setUserRole('admin');
-            }}
+            onClick={() => setLoginOpen(true)}
             className="px-4 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white text-[10px] font-black uppercase tracking-wider transition-all"
           >
-            Switch to Admin
+            Sign in
           </button>
           <button
             onClick={() => setActiveView('chat')}

@@ -1,5 +1,6 @@
 from typing import Optional
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
+from app.api.auth import WRITERS, require
 from pydantic import BaseModel
 from app.services.conflict_resolver import ConflictResolver
 
@@ -24,7 +25,7 @@ class RoadConflictDetectRequest(BaseModel):
     geom_wkt: Optional[str] = None
 
 
-@router.post("/conflicts/roads/detect")
+@router.post("/conflicts/roads/detect", dependencies=[Depends(require(*WRITERS))])
 async def detect_road_conflicts(req: RoadConflictDetectRequest):
     duplicates = ConflictResolver.detect_road_duplicates(
         req.name, req.road_code, req.geom_wkt
@@ -37,7 +38,7 @@ class AuthorityConflictDetectRequest(BaseModel):
     department_code: Optional[str] = None
 
 
-@router.post("/conflicts/authorities/detect")
+@router.post("/conflicts/authorities/detect", dependencies=[Depends(require(*WRITERS))])
 async def detect_authority_conflicts(req: AuthorityConflictDetectRequest):
     duplicates = ConflictResolver.detect_authority_duplicates(
         req.name, req.department_code
@@ -50,7 +51,7 @@ class ConflictCreateGroupRequest(BaseModel):
     entity_ids: list[int]  # [primary_id, ...duplicates]
 
 
-@router.post("/conflicts/roads/create-group")
+@router.post("/conflicts/roads/create-group", dependencies=[Depends(require(*WRITERS))])
 async def create_road_conflict_group(req: ConflictCreateGroupRequest):
     group_id = ConflictResolver.create_road_conflict_group(
         req.conflict_key, req.entity_ids
@@ -60,7 +61,7 @@ async def create_road_conflict_group(req: ConflictCreateGroupRequest):
     return {"group_id": group_id, "status": "created"}
 
 
-@router.post("/conflicts/authorities/create-group")
+@router.post("/conflicts/authorities/create-group", dependencies=[Depends(require(*WRITERS))])
 async def create_authority_conflict_group(req: ConflictCreateGroupRequest):
     group_id = ConflictResolver.create_authority_conflict_group(
         req.conflict_key, req.entity_ids
@@ -75,7 +76,7 @@ class ConflictResolveRequest(BaseModel):
     resolved_by: Optional[str] = "system"
 
 
-@router.post("/conflicts/roads/{group_id}/resolve")
+@router.post("/conflicts/roads/{group_id}/resolve", dependencies=[Depends(require(*WRITERS))])
 async def resolve_road_conflict(group_id: int, req: ConflictResolveRequest):
     result = ConflictResolver.resolve_road_conflict(
         group_id, req.resolution, req.resolved_by
@@ -85,7 +86,7 @@ async def resolve_road_conflict(group_id: int, req: ConflictResolveRequest):
     return result
 
 
-@router.post("/conflicts/authorities/{group_id}/resolve")
+@router.post("/conflicts/authorities/{group_id}/resolve", dependencies=[Depends(require(*WRITERS))])
 async def resolve_authority_conflict(group_id: int, req: ConflictResolveRequest):
     result = ConflictResolver.resolve_authority_conflict(
         group_id, req.resolution, req.resolved_by

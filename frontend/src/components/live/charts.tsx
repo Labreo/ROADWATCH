@@ -137,3 +137,42 @@ export function SankeyChart({ flows }: { flows: Flow[] }) {
     </svg>
   );
 }
+
+/** Radar chart. Each axis value runs from 0 to 1. */
+export function RadarChart({ axes, series, label }: {
+  axes: string[];
+  series: { name: string; color: string; values: number[] }[];
+  label: string;
+}) {
+  const S = 300, C = S / 2, R = 104;
+  const point = (i: number, v: number) => {
+    const angle = -Math.PI / 2 + (i * 2 * Math.PI) / axes.length;
+    return [C + R * v * Math.cos(angle), C + R * v * Math.sin(angle)] as const;
+  };
+  const shape = (values: number[]) => `M${values.map((v, i) => point(i, Math.min(Math.max(v, 0), 1)).map(n => n.toFixed(1)).join(' ')).join('L')}Z`;
+  return (
+    <figure>
+      <svg role="img" aria-label={label} viewBox={`-50 0 ${S + 100} ${S}`} className="mx-auto w-full max-w-[340px]">
+        {[0.33, 0.66, 1].map(ring => <path key={ring} d={shape(axes.map(() => ring))} fill="none" stroke="var(--border-bright)" />)}
+        {axes.map((axis, i) => {
+          const [x, y] = point(i, 1);
+          const [tx, ty] = point(i, 1.18);
+          return (
+            <g key={axis}>
+              <line x1={C} y1={C} x2={x} y2={y} stroke="var(--border-bright)" />
+              <text x={tx} y={ty + 4} fontSize="11" fill="var(--fg-dim)" textAnchor={Math.abs(tx - C) < 12 ? 'middle' : tx > C ? 'start' : 'end'}>{axis}</text>
+            </g>
+          );
+        })}
+        {series.map(s => <path key={s.name} d={shape(s.values)} fill={s.color} fillOpacity={0.18} stroke={s.color} strokeWidth={2} />)}
+      </svg>
+      <figcaption className="mt-1 flex justify-center gap-4 text-xs text-[var(--fg-dim)]">
+        {series.map(s => (
+          <span key={s.name} className="flex items-center gap-1.5">
+            <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: s.color }} />{s.name}
+          </span>
+        ))}
+      </figcaption>
+    </figure>
+  );
+}

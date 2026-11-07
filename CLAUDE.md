@@ -82,7 +82,7 @@ npm run mobile:android             # Sync + open Android Studio
 - **Services** (business logic in `backend/app/services/`):
   - `road_retriever.py` — Structured SQL queries for roads, contractors, complaints (parameterized, no raw injection)
   - `retrieval_engine.py` — LLM query processing with tool calling
-  - `vision_pipeline.py` — Streams images to Concentrate AI for defect classification
+  - `vision_pipeline.py` — Streams images to Gemini for defect classification
   - `authority_resolver.py` — Geospatial authority matching (ST_Contains on municipal boundaries)
   - `database.py` — Postgres/PostGIS connection with auto-schema initialization
 - **Database**: uses `?` placeholders internally, auto-converted to `%s` for psycopg2
@@ -99,7 +99,7 @@ npm run mobile:android             # Sync + open Android Studio
 ### Key Data Flow: AI Chat with Photo
 1. POST `/api/v1/chat/analyze-photo` — multipart with image + GPS
 2. Coordinates resolved: form params → EXIF GPS → fallback (Mumbai)
-3. Concentrate AI vision pipeline evaluates damage (streaming)
+3. Gemini vision pipeline evaluates damage (streaming)
 4. Backend creates complaint record in PostGIS
 5. Returns NDJSON stream: telemetry → content → metadata/draft_complaint
 
@@ -129,9 +129,21 @@ conda create -n roadwatch-db -c conda-forge postgis python=3.11 pip
 ./scripts/dev-backend.sh            # API on http://localhost:8000
 cd frontend && npm run dev          # App on http://localhost:3000
 ```
-`docs/schema_documented.sql` adds what Documents 1, 3 and 4 specify (citizens, status history, state machine, audit lock, role views, sensors). Load order: `schema.sql`, `mock_data.sql`, `schema_documented.sql`.
+`docs/schema_documented.sql` adds what Documents 1, 3 and 4 specify (citizens, status history, state machine, spatial routing, audit lock, role views, sensors, sign-in, milestone tests). `docs/seed_wireframes.sql` scales invented Mumbai sample data to the wireframe totals. Load order: `schema.sql`, `mock_data.sql`, `schema_documented.sql`, `seed_wireframes.sql`.
 
 The wireframe screens live in `frontend/src/components/live/` and read `backend/app/api/screens.py`.
+
+### AI
+Chat and photo analysis use Gemini through its OpenAI-compatible endpoint (`backend/app/services/llm_config.py`). Set `GEMINI_API_KEY`; `LLM_MODEL` overrides the model. Keep the key server-side.
+
+### Sign-in and roles
+`backend/app/api/auth.py` handles citizen, engineer, admin and auditor accounts. Passwords are pgcrypto bcrypt hashes and sessions store only a token hash. Public transparency screens need no sign-in. Role-specific reads run under `SET LOCAL ROLE roadwatch_<role>` through the views in `schema_documented.sql`. `ROADWATCH_DEMO_LOGIN=1`, set by `scripts/dev-backend.sh`, enables one-click sample accounts; never set it on a deployment.
+
+### Tests
+With the API running from `scripts/dev-backend.sh`:
+```bash
+cd backend && ~/miniforge3/envs/roadwatch-db/bin/python -m pytest app/tests -q
+```
 
 ## Project Directory Structure
 ```

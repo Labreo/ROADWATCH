@@ -213,6 +213,7 @@ export interface Complaint {
   declinedAuthorityIds?: number[]; // Track declined reassignments
   assignedAuthorityId: number;
   roadId?: number;
+  roadName?: string;
   createdAt: string;
   imageUrl?: string;
   imagePreview?: string;

@@ -1,10 +1,8 @@
 'use client';
 
+import { useStore } from '@/store/useStore';
 import { useLive } from '@/services/api';
 import { Card, Kpi, KpiRow, Loadable, Mono, StatusBadge, hours, shortDate } from './ui';
-
-// The app has no sign-in yet, so this shows the demo citizen seeded in schema_documented.sql.
-const DEMO_CITIZEN_ID = 2;
 
 interface Report {
   id: number; title: string; status: string; priority: number; created_at: string; authority: string | null;
@@ -20,7 +18,17 @@ interface Reports {
 const isOpen = (r: Report) => !['resolved', 'rejected'].includes(r.status);
 
 export default function MyReportsScreen() {
-  const state = useLive<Reports>(`/screens/citizens/${DEMO_CITIZEN_ID}/reports`);
+  const role = useStore(s => s.session?.user.role);
+  const setLoginOpen = useStore(s => s.setLoginOpen);
+  const state = useLive<Reports>(role === 'citizen' ? '/screens/me/reports' : null);
+  if (role !== 'citizen') {
+    return (
+      <div className="m-auto flex max-w-md flex-col items-center gap-3 rounded-lg border border-[var(--border-bright)] bg-[var(--surface-1)] p-8 text-center">
+        <p className="text-sm text-[var(--foreground)]">Sign in with a citizen account to track your reports.</p>
+        <button onClick={() => setLoginOpen(true)} className="rounded-md bg-[var(--signal-cyan)] px-4 py-2 text-[13px] font-medium text-[#04161a]">Sign in</button>
+      </div>
+    );
+  }
   return (
     <Loadable state={state}>
       {({ citizen, reports }) => (

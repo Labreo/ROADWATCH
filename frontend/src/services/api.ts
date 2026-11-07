@@ -8,10 +8,47 @@ export class ApiError extends Error {
   }
 }
 
+export interface SessionUser {
+  id: number;
+  email: string;
+  display_name: string;
+  role: 'citizen' | 'engineer' | 'admin' | 'auditor';
+  citizen_id: number | null;
+  authority_id: number | null;
+}
+
+export interface Session {
+  token: string;
+  user: SessionUser;
+}
+
+const SESSION_KEY = 'rw_session';
+
+export function loadSession(): Session | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const stored = window.localStorage.getItem(SESSION_KEY);
+    return stored ? JSON.parse(stored) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveSession(session: Session | null) {
+  if (typeof window === 'undefined') return;
+  if (session) window.localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  else window.localStorage.removeItem(SESSION_KEY);
+}
+
+export function authHeaders(): Record<string, string> {
+  const session = loadSession();
+  return session ? { Authorization: `Bearer ${session.token}` } : {};
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response;
   try {
-    response = await fetch(`${API_BASE}${path}`, init);
+    response = await fetch(`${API_BASE}${path}`, { ...init, headers: { ...authHeaders(), ...init?.headers } });
   } catch {
     throw new ApiError('Backend is not reachable. Start it with scripts/dev-backend.sh.', 0);
   }

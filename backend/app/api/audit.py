@@ -7,14 +7,15 @@ contractors, and roads.
 
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
+from app.api.auth import require
 
 from app.services.database import db
 
 router = APIRouter()
 
 
-@router.get("/audit/log")
+@router.get("/audit/log", dependencies=[Depends(require("admin", "auditor"))])
 async def get_audit_log(
     table_name: Optional[str] = Query(None, description="Filter by table name"),
     record_id: Optional[int] = Query(None, description="Filter by record ID"),
@@ -51,7 +52,7 @@ async def get_audit_log(
     return db.query(sql, tuple(params))
 
 
-@router.get("/audit/log/{log_id}")
+@router.get("/audit/log/{log_id}", dependencies=[Depends(require("admin", "auditor"))])
 async def get_audit_entry(log_id: int):
     """Return a single audit log entry by its ID."""
     sql = "SELECT * FROM audit_log WHERE id = %s"

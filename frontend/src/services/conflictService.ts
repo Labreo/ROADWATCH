@@ -1,6 +1,6 @@
 import { roads as defaultRoads, authorities as defaultAuthorities } from '@/data/mockData';
 
-const API_BASE = 'http://localhost:8000/api/v1';
+import { API_BASE, authHeaders } from '@/services/api';
 
 interface ConflictGroup {
   id: number;
@@ -119,7 +119,7 @@ export async function detectRoadDuplicates(
   try {
     const resp = await fetch(`${API_BASE}/conflicts/roads/detect`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
       body: JSON.stringify({
         name,
         road_code: roadCode,
@@ -161,7 +161,7 @@ export async function detectAuthorityDuplicates(
   try {
     const resp = await fetch(`${API_BASE}/conflicts/authorities/detect`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
       body: JSON.stringify({
         name,
         department_code: departmentCode,
@@ -200,7 +200,7 @@ export async function createRoadConflictGroup(
   try {
     const resp = await fetch(`${API_BASE}/conflicts/roads/create-group`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
       body: JSON.stringify({
         conflict_key: conflictKey,
         entity_ids: entityIds,
@@ -224,7 +224,7 @@ export async function createAuthorityConflictGroup(
   try {
     const resp = await fetch(`${API_BASE}/conflicts/authorities/create-group`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
       body: JSON.stringify({
         conflict_key: conflictKey,
         entity_ids: entityIds,
@@ -249,7 +249,7 @@ export async function resolveRoadConflict(
   try {
     const resp = await fetch(`${API_BASE}/conflicts/roads/${groupId}/resolve`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
       body: JSON.stringify({
         resolution,
         resolved_by: resolvedBy,
@@ -275,7 +275,7 @@ export async function resolveAuthorityConflict(
   try {
     const resp = await fetch(`${API_BASE}/conflicts/authorities/${groupId}/resolve`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
       body: JSON.stringify({
         resolution,
         resolved_by: resolvedBy,

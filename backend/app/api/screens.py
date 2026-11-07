@@ -1,60 +1,24 @@
 """Read models and actions behind the 20 wireframe screens.
 
-Every handler talks to PostgreSQL directly. Unlike ``db`` it has no mock
-fallback, so a rejected trigger (state machine, blacklist, audit lock) reaches
-the client as a 409 with PostgreSQL's own message.
+Public transparency data needs no sign-in. Operational screens and every action
+check the caller's role; role-specific reads go through the views in
+docs/schema_documented.sql under ``SET LOCAL ROLE``.
 """
-from contextlib import contextmanager
+import os
 from typing import Optional
 
-import psycopg2
-from fastapi import APIRouter, Header, HTTPException, Query
-from psycopg2.extras import RealDictCursor
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from app.services.database import DATABASE_URL
+from app.api.auth import STAFF, require
+from app.services.live_db import one, rows, tx
 
 router = APIRouter(prefix="/screens", tags=["screens"])
 
 # Liquidated damages accrued per overdue hour, used by the SLA screen.
-LD_PER_OVERDUE_HOUR_INR = 4000
+LD_PER_OVERDUE_HOUR_INR = int(os.environ.get("LD_PER_OVERDUE_HOUR_INR", "4000"))
 HEALTH_BY_STATUS = {"good": 88, "fair": 66, "under_construction": 58, "poor": 46}
 OPEN_STATUSES = ("pending", "routed", "in_progress")
-
-
-@contextmanager
-def tx(actor: str = "system", remarks: str = ""):
-    conn = psycopg2.connect(DATABASE_URL, connect_timeout=3)
-    try:
-        with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute(
-                "SELECT set_config('app.changed_by', %s, true), set_config('app.status_remarks', %s, true)",
-                (actor, remarks),
-            )
-            yield cur
-        conn.commit()
-    except psycopg2.errors.Error as exc:
-        conn.rollback()
-        message = (exc.diag.message_primary or str(exc)).strip()
-        if isinstance(exc, (psycopg2.errors.CheckViolation, psycopg2.errors.UniqueViolation,
-                            psycopg2.errors.InsufficientPrivilege, psycopg2.errors.ForeignKeyViolation)):
-            raise HTTPException(status_code=409, detail=message)
-        raise HTTPException(status_code=500, detail=message)
-    except psycopg2.OperationalError as exc:
-        raise HTTPException(status_code=503, detail=f"Database unavailable: {exc}")
-    finally:
-        conn.close()
-
-
-def rows(sql: str, params: tuple = ()) -> list:
-    with tx() as cur:
-        cur.execute(sql, params)
-        return [dict(r) for r in cur.fetchall()]
-
-
-def one(sql: str, params: tuple = ()) -> Optional[dict]:
-    result = rows(sql, params)
-    return result[0] if result else None
 
 
 def health_score(status: str, open_complaints: int) -> int:
@@ -112,8 +76,10 @@ def overview(region: str = "IN"):
 
 
 @router.get("/roads")
-def road_list(region: str = "IN"):
-    return road_rows("WHERE a.region_code = %s", (region,))
+def road_list(region: str = "IN", major: bool = False):
+    """``major`` leaves out the ward streets, which would crowd the city map."""
+    extra = " AND r.road_code NOT LIKE 'WARD-%%'" if major else ""
+    return road_rows("WHERE a.region_code = %s" + extra, (region,))
 
 
 @router.get("/roads/{road_id}")
@@ -140,31 +106,34 @@ def complaint_list(region: str = "IN"):
     return rows(
         """SELECT c.id, c.client_temp_id, c.title, c.description, c.category, c.status, c.priority, c.escalation_level,
                   c.created_at, c.assigned_authority_id, c.road_id, c.image_url, c.target_resolution_hours,
-                  c.sla_breached_at, c.last_escalated_at,
+                  c.sla_breached_at, c.last_escalated_at, r.name AS road_name,
                   ST_AsGeoJSON(c.geom)::json -> 'coordinates' AS coordinates
            FROM complaints c LEFT JOIN authorities a ON a.id = c.assigned_authority_id
-           WHERE a.region_code = %s OR a.region_code IS NULL ORDER BY c.created_at DESC""", (region,))
+           LEFT JOIN roads r ON r.id = c.road_id
+           WHERE a.region_code = %s OR a.region_code IS NULL
+           ORDER BY (c.status IN ('resolved', 'rejected')), c.created_at DESC LIMIT 300""", (region,))
 
 
 # -------------------------------------------------------------------------
 # Frame 06: citizen reports
 # -------------------------------------------------------------------------
-@router.get("/citizens/{citizen_id}/reports")
-def citizen_reports(citizen_id: int):
-    citizen = one("SELECT * FROM citizen_complaint_totals WHERE citizen_id = %s", (citizen_id,))
-    if not citizen:
-        raise HTTPException(status_code=404, detail="Citizen not found")
+@router.get("/me/reports")
+def my_reports(user: dict = Depends(require("citizen"))):
+    citizen_id = user["citizen_id"]
+    citizen = one("SELECT * FROM citizen_complaint_totals WHERE citizen_id = %s", (citizen_id,), role="citizen")
     reports = rows(
-        """SELECT c.id, c.title, c.category, c.status, c.priority, c.escalation_level, c.created_at,
-                  a.name AS authority, r.name AS road_name, c.target_resolution_hours,
-                  ROUND((c.target_resolution_hours - EXTRACT(EPOCH FROM NOW() - c.created_at) / 3600)::numeric, 1) AS hours_left
-           FROM complaints c LEFT JOIN authorities a ON a.id = c.assigned_authority_id
-           LEFT JOIN roads r ON r.id = c.road_id WHERE c.citizen_id = %s ORDER BY c.created_at DESC""",
-        (citizen_id,))
+        """SELECT id, title, category, status, priority, escalation_level, created_at, assigned_authority AS authority,
+                  road_name, target_resolution_hours,
+                  ROUND((target_resolution_hours - EXTRACT(EPOCH FROM NOW() - created_at) / 3600)::numeric, 1) AS hours_left
+           FROM v_citizen_complaints WHERE citizen_id = %s ORDER BY created_at DESC LIMIT 50""",
+        (citizen_id,), role="citizen")
+    ids = [report["id"] for report in reports]
+    history = rows(
+        "SELECT complaint_id, history_seq, old_status, new_status, changed_at, remarks FROM v_citizen_status_history "
+        "WHERE citizen_id = %s AND complaint_id = ANY(%s) ORDER BY complaint_id, history_seq",
+        (citizen_id, ids), role="citizen") if ids else []
     for report in reports:
-        report["history"] = rows(
-            "SELECT history_seq, old_status, new_status, changed_at, remarks FROM status_history "
-            "WHERE complaint_id = %s ORDER BY history_seq", (report["id"],))
+        report["history"] = [h for h in history if h["complaint_id"] == report["id"]]
     return {"citizen": citizen, "reports": reports}
 
 
@@ -172,7 +141,7 @@ def citizen_reports(citizen_id: int):
 # Frames 11 to 15: operations
 # -------------------------------------------------------------------------
 @router.get("/operations")
-def operations(region: str = "IN"):
+def operations(region: str = "IN", user: dict = Depends(require(*STAFF))):
     kpi = one(
         """SELECT COUNT(*) FILTER (WHERE c.status IN ('pending','routed','in_progress')) AS open_queue,
                   COUNT(*) FILTER (WHERE c.status = 'routed') AS routed,
@@ -188,7 +157,14 @@ def operations(region: str = "IN"):
         (region, region))
     delivery = one(
         """SELECT COUNT(*) AS total, COUNT(*) FILTER (WHERE status = 'sent') AS sent FROM notification_log""")
-    queue = rows(
+    if user["role"] == "engineer":
+        queue = rows(
+            """SELECT id, title, category, status, priority, escalation_level, authority, road_code, road_name, hours_left
+               FROM v_engineer_queue WHERE assigned_authority_id = %s
+               ORDER BY escalation_level DESC, priority DESC, created_at LIMIT 40""",
+            (user["authority_id"],), role="engineer")
+    else:
+        queue = rows(
         """SELECT c.id, c.title, c.category, c.status, c.priority, c.escalation_level, a.department_code AS authority,
                   r.road_code, r.name AS road_name,
                   ROUND((c.target_resolution_hours - EXTRACT(EPOCH FROM NOW() - c.created_at) / 3600)::numeric, 1) AS hours_left
@@ -202,7 +178,11 @@ def operations(region: str = "IN"):
                   (SELECT l.response_code FROM notification_log l WHERE l.authority_id = a.id ORDER BY l.id DESC LIMIT 1) AS last_code
            FROM authority_webhooks w JOIN authorities a ON a.id = w.authority_id ORDER BY a.id LIMIT 8""")
     log = rows("SELECT id, table_name, record_id, action, changed_by, changed_at FROM audit_log ORDER BY id DESC LIMIT 14")
-    return {"kpi": kpi, "delivery": delivery, "queue": queue, "webhooks": hooks, "log": log}
+    jurisdictions = rows(
+        "SELECT authority_id, name, roads, projects, budget_allocated, open_complaints "
+        "FROM v_admin_jurisdiction_summary WHERE region_code = %s ORDER BY open_complaints DESC",
+        (region,), role="admin") if user["role"] == "admin" else []
+    return {"kpi": kpi, "delivery": delivery, "queue": queue, "webhooks": hooks, "log": log, "jurisdictions": jurisdictions}
 
 
 class Transition(BaseModel):
@@ -211,8 +191,8 @@ class Transition(BaseModel):
 
 
 @router.post("/complaints/{complaint_id}/transition")
-def transition(complaint_id: int, body: Transition, x_user: str = Header(default="web.operator")):
-    with tx(x_user, body.remarks) as cur:
+def transition(complaint_id: int, body: Transition, user: dict = Depends(require("engineer", "admin"))):
+    with tx(user["email"], body.remarks) as cur:
         cur.execute("UPDATE complaints SET status = %s WHERE id = %s RETURNING id, status",
                     (body.status, complaint_id))
         updated = cur.fetchone()
@@ -222,8 +202,8 @@ def transition(complaint_id: int, body: Transition, x_user: str = Header(default
 
 
 @router.post("/complaints/{complaint_id}/escalate")
-def escalate(complaint_id: int, x_user: str = Header(default="web.operator")):
-    with tx(x_user) as cur:
+def escalate(complaint_id: int, user: dict = Depends(require("engineer", "admin"))):
+    with tx(user["email"]) as cur:
         cur.execute("SELECT escalation_level FROM complaints WHERE id = %s FOR UPDATE", (complaint_id,))
         current = cur.fetchone()
         if not current:
@@ -236,7 +216,7 @@ def escalate(complaint_id: int, x_user: str = Header(default="web.operator")):
             "sla_breached_at = COALESCE(sla_breached_at, NOW()) WHERE id = %s", (level + 1, complaint_id))
         cur.execute(
             "INSERT INTO sla_escalations (complaint_id, from_level, to_level, escalated_by) VALUES (%s, %s, %s, %s)",
-            (complaint_id, level, level + 1, x_user))
+            (complaint_id, level, level + 1, user["email"]))
     return {"id": complaint_id, "escalation_level": level + 1}
 
 
@@ -247,7 +227,7 @@ async def webhook_sink(authority_code: str):
 
 
 @router.get("/sla")
-def sla(region: str = "IN"):
+def sla(region: str = "IN", user: dict = Depends(require(*STAFF))):
     breaches = rows(
         """SELECT c.id, c.title, c.category, c.escalation_level, c.priority, a.department_code AS authority,
                   r.name AS road_name, ct.name AS contractor,
@@ -271,18 +251,21 @@ def sla(region: str = "IN"):
                WHERE a.region_code = %s AND c.status IN ('pending','routed','in_progress') GROUP BY 1 ORDER BY 1""", (region,)),
         "breaches": breaches,
         "ld_rate_per_hour_inr": LD_PER_OVERDUE_HOUR_INR,
+        "history": rows(
+            "SELECT id, complaint_id, title, from_level, to_level, notified_at, escalated_to "
+            "FROM v_auditor_sla_breaches ORDER BY id DESC LIMIT 10", role="auditor"),
     }
 
 
 @router.post("/sla/run")
-def run_sla(x_user: str = Header(default="sla.worker")):
-    with tx(x_user) as cur:
+def run_sla(user: dict = Depends(require("admin"))):
+    with tx(user["email"]) as cur:
         cur.execute("SELECT escalate_overdue_complaints() AS escalated")
         return dict(cur.fetchone())
 
 
 @router.get("/conflicts")
-def conflicts():
+def conflicts(user: dict = Depends(require(*STAFF))):
     return {
         "roads": rows(
             """SELECT g.id, g.conflict_key, g.resolved, g.resolved_by, r.name AS primary_road, r.road_code,
@@ -308,21 +291,21 @@ def conflicts():
 
 
 @router.post("/conflicts/{kind}/{group_id}/resolve")
-def resolve_conflict(kind: str, group_id: int, x_user: str = Header(default="gis.admin")):
+def resolve_conflict(kind: str, group_id: int, user: dict = Depends(require("admin"))):
     tables = {"road": "road_conflict_groups", "authority": "authority_conflict_groups"}
     if kind not in tables:
         raise HTTPException(status_code=404, detail="Unknown conflict type")
-    with tx(x_user) as cur:
+    with tx(user["email"]) as cur:
         cur.execute(
             f"UPDATE {tables[kind]} SET resolved = TRUE, resolved_at = NOW(), resolved_by = %s "
-            "WHERE id = %s AND NOT resolved RETURNING id", (x_user, group_id))
+            "WHERE id = %s AND NOT resolved RETURNING id", (user["email"], group_id))
         if not cur.fetchone():
             raise HTTPException(status_code=409, detail="Conflict group is already resolved or does not exist")
     return {"id": group_id, "resolved": True}
 
 
 @router.get("/projects")
-def projects(region: str = "IN"):
+def projects(region: str = "IN", user: dict = Depends(require(*STAFF))):
     data = rows(
         """SELECT p.id, p.title, p.status, p.start_date, p.target_end_date, p.budget_allocated, p.budget_spent,
                   p.delay_days, c.name AS contractor, r.name AS road_name
@@ -332,6 +315,11 @@ def projects(region: str = "IN"):
         project["milestones"] = rows(
             """SELECT milestone_num, title, amount, status, due_date, completion_date, verified_by, payment_release_date
                FROM project_milestones WHERE project_id = %s ORDER BY milestone_num""", (project["id"],))
+        tests = rows(
+            """SELECT milestone_num, test_name, measured, unit, spec_min, spec_max, passed, tested_on
+               FROM milestone_tests WHERE project_id = %s ORDER BY id""", (project["id"],))
+        for milestone in project["milestones"]:
+            milestone["tests"] = [t for t in tests if t["milestone_num"] == milestone["milestone_num"]]
     return data
 
 
@@ -340,8 +328,8 @@ class MilestoneVerify(BaseModel):
 
 
 @router.post("/projects/{project_id}/milestones/{milestone_num}/verify")
-def verify_milestone(project_id: int, milestone_num: int, body: MilestoneVerify, x_user: str = Header(default="field.engineer")):
-    with tx(x_user) as cur:
+def verify_milestone(project_id: int, milestone_num: int, body: MilestoneVerify, user: dict = Depends(require("engineer", "admin"))):
+    with tx(user["email"]) as cur:
         cur.execute(
             """UPDATE project_milestones SET status = 'completed', completion_date = COALESCE(completion_date, CURRENT_DATE),
                       verified_by = %s WHERE project_id = %s AND milestone_num = %s RETURNING milestone_num, status""",
@@ -353,8 +341,8 @@ def verify_milestone(project_id: int, milestone_num: int, body: MilestoneVerify,
 
 
 @router.post("/projects/{project_id}/milestones/{milestone_num}/release-payment")
-def release_payment(project_id: int, milestone_num: int, x_user: str = Header(default="treasury.officer")):
-    with tx(x_user) as cur:
+def release_payment(project_id: int, milestone_num: int, user: dict = Depends(require("admin"))):
+    with tx(user["email"]) as cur:
         cur.execute(
             """UPDATE project_milestones SET payment_release_date = CURRENT_DATE
                WHERE project_id = %s AND milestone_num = %s AND status = 'completed'
@@ -431,7 +419,10 @@ def contractors(region: str = "IN"):
     return rows(
         """SELECT c.id, c.contractor_code, c.name, c.rating, c.projects_completed, c.projects_delayed,
                   c.performance_index, c.blacklisted, c.blacklisted_reason, c.license_number,
-                  COUNT(p.id) AS active_contracts, COALESCE(SUM(p.budget_allocated), 0) AS contract_value
+                  COUNT(p.id) AS active_contracts, COALESCE(SUM(p.budget_allocated), 0) AS contract_value,
+                  COALESCE(SUM(p.delay_days), 0) AS delay_days,
+                  COALESCE((SELECT SUM(w.claim_count) FROM project_warranties w JOIN projects q ON q.id = w.project_id
+                            WHERE q.contractor_id = c.id), 0) AS warranty_claims
            FROM contractors c LEFT JOIN projects p ON p.contractor_id = c.id
            WHERE c.license_number LIKE %s GROUP BY c.id ORDER BY c.performance_index DESC""",
         (f"LIC-{region}-%",))
@@ -443,10 +434,10 @@ class BlacklistChange(BaseModel):
 
 
 @router.post("/contractors/{contractor_id}/blacklist")
-def set_blacklist(contractor_id: int, body: BlacklistChange, x_user: str = Header(default="vigilance.officer")):
+def set_blacklist(contractor_id: int, body: BlacklistChange, user: dict = Depends(require("admin"))):
     if body.blacklisted and not body.reason.strip():
         raise HTTPException(status_code=422, detail="A debarment reason is required")
-    with tx(x_user) as cur:
+    with tx(user["email"]) as cur:
         cur.execute(
             "UPDATE contractors SET blacklisted = %s, blacklisted_reason = %s WHERE id = %s RETURNING id, blacklisted",
             (body.blacklisted, body.reason.strip() or None, contractor_id))
@@ -481,8 +472,8 @@ class BidIn(BaseModel):
 
 
 @router.post("/tenders/{tender_id}/bids")
-def submit_bid(tender_id: int, body: BidIn, x_user: str = Header(default="tender.clerk")):
-    with tx(x_user) as cur:
+def submit_bid(tender_id: int, body: BidIn, user: dict = Depends(require("admin"))):
+    with tx(user["email"]) as cur:
         cur.execute(
             """INSERT INTO tender_bids (tender_id, contractor_id, financial_quote, technical_score)
                VALUES (%s, %s, %s, %s) RETURNING id""",
@@ -492,8 +483,8 @@ def submit_bid(tender_id: int, body: BidIn, x_user: str = Header(default="tender
 
 
 @router.post("/tenders/{tender_id}/award/{contractor_id}")
-def award_tender(tender_id: int, contractor_id: int, x_user: str = Header(default="tender.officer")):
-    with tx(x_user) as cur:
+def award_tender(tender_id: int, contractor_id: int, user: dict = Depends(require("admin"))):
+    with tx(user["email"]) as cur:
         cur.execute("SELECT blacklisted FROM contractors WHERE id = %s", (contractor_id,))
         firm = cur.fetchone()
         if not firm:
@@ -510,13 +501,17 @@ def award_tender(tender_id: int, contractor_id: int, x_user: str = Header(defaul
 
 
 @router.get("/audit")
-def audit(action: Optional[str] = Query(default=None, pattern="^(INSERT|UPDATE|DELETE)$"), limit: int = Query(default=40, le=200)):
+def audit(
+    action: Optional[str] = Query(default=None, pattern="^(INSERT|UPDATE|DELETE)$"),
+    limit: int = Query(default=40, le=200),
+    user: dict = Depends(require("admin", "auditor")),
+):
     where, params = ("WHERE action = %s", (action,)) if action else ("", ())
     return {
-        "total": one("SELECT COUNT(*) AS n FROM audit_log")["n"],
+        "total": one("SELECT COUNT(*) AS n FROM audit_log", role="auditor")["n"],
         "events": rows(
             f"""SELECT id, table_name, record_id, action, old_values, new_values, changed_by, changed_at
-                FROM audit_log {where} ORDER BY id DESC LIMIT %s""", (*params, limit)),
+                FROM audit_log {where} ORDER BY id DESC LIMIT %s""", (*params, limit), role="auditor"),
     }
 
 
@@ -524,7 +519,7 @@ def audit(action: Optional[str] = Query(default=None, pattern="^(INSERT|UPDATE|D
 # Frames 08 to 10: twin, sensors, playback
 # -------------------------------------------------------------------------
 @router.get("/sensors")
-def sensors():
+def sensors(user: dict = Depends(require(*STAFF))):
     data = rows(
         """SELECT s.id, s.sensor_code, s.sensor_type, s.chainage_km, s.depth_mm, s.unit, s.alert_threshold,
                   s.battery_pct, s.last_calibrated, r.road_code,
@@ -539,7 +534,7 @@ def sensors():
 
 
 @router.get("/playback/{road_id}")
-def playback(road_id: int):
+def playback(road_id: int, user: dict = Depends(require(*STAFF))):
     road = one("SELECT id, name, road_code, status FROM roads WHERE id = %s", (road_id,))
     if not road:
         raise HTTPException(status_code=404, detail="Road not found")
@@ -552,12 +547,28 @@ def playback(road_id: int):
 
 
 @router.get("/twin/{road_id}")
-def twin(road_id: int):
+def twin(road_id: int, user: dict = Depends(require(*STAFF))):
     found = road_rows("WHERE r.id = %s", (road_id,))
     if not found:
         raise HTTPException(status_code=404, detail="Road not found")
     return {
         **found[0],
+        "project": one(
+            """SELECT p.id, p.title, p.status, p.budget_allocated, p.budget_spent
+               FROM projects p WHERE p.road_id = %s ORDER BY p.start_date DESC LIMIT 1""", (road_id,)),
+        "contractor_detail": one(
+            """SELECT c.name, c.contractor_code, c.rating, c.projects_completed, c.projects_delayed, c.blacklisted
+               FROM contractors c WHERE c.id = COALESCE(
+                 (SELECT p.contractor_id FROM projects p WHERE p.road_id = %s ORDER BY p.start_date DESC LIMIT 1),
+                 (SELECT r.contractor_id FROM roads r WHERE r.id = %s))""", (road_id, road_id)),
+        "defects": rows(
+            """SELECT id, title, category, priority, status FROM complaints
+               WHERE road_id = %s AND status IN ('pending', 'routed', 'in_progress')
+               ORDER BY priority DESC, created_at DESC LIMIT 6""", (road_id,)),
+        "sensors": rows(
+            """SELECT s.sensor_code, s.sensor_type, s.unit, s.alert_threshold,
+                      (SELECT reading FROM sensor_readings x WHERE x.sensor_id = s.id ORDER BY recorded_at DESC LIMIT 1) AS latest
+               FROM iot_sensors s WHERE s.road_id = %s ORDER BY s.sensor_code""", (road_id,)),
         "materials": rows(
             """SELECT m.material_type, m.specification_grade, m.source_quarry, m.test_date, m.approved_by
                FROM road_materials m JOIN projects p ON p.id = m.project_id WHERE p.road_id = %s""", (road_id,)),

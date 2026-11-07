@@ -16,7 +16,7 @@ interface RoadOption { id: number; name: string; road_code: string }
 
 export default function PlaybackScreen() {
   const region = useStore(s => s.regionCode);
-  const roads = useLive<RoadOption[]>(`/screens/roads?region=${region}`);
+  const roads = useLive<RoadOption[]>(`/screens/roads?region=${region}&major=true`);
   const [roadId, setRoadId] = useState<number | null>(null);
   const activeRoad = roadId ?? roads.data?.[0]?.id ?? null;
   const state = useLive<{ road: RoadOption & { status: string }; history: Point[] }>(activeRoad ? `/screens/playback/${activeRoad}` : null);

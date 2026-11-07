@@ -5,6 +5,7 @@ import asyncio
 from app.services.road_retriever import StructuredRoadRetriever
 from app.services.authority_resolver import AuthorityResolver
 from app.services.database import db
+from app.services.llm_config import LLM_ENDPOINT, LLM_MODEL, llm_api_key
 from app.services.transparency_service import calculate_road_transparency, get_citywide_transparency_snapshot, calculate_vfm_index, get_citywide_vfm_snapshot
 from app.services.inflation_service import InflationService
 from app.services.predictive_analytics import CostPredictor
@@ -827,7 +828,7 @@ class RetrievalEngine:
 
     @classmethod
     async def stream_response(cls, system_prompt: str, user_message: str, history: list = []):
-        api_key = os.environ.get("CONCENTRATE_API_KEY", "")
+        api_key = llm_api_key()
         if not api_key:
             fallback_text = cls.generate_deterministic_fallback(system_prompt, user_message, history)
             chunk_size = 8
@@ -842,7 +843,7 @@ class RetrievalEngine:
         messages.append({"role": "user", "content": user_message})
 
         payload = {
-            "model": "gemini-3.5-flash",
+            "model": LLM_MODEL,
             "messages": messages,
             "temperature": 0.0,
             "stream": True
@@ -854,10 +855,10 @@ class RetrievalEngine:
         }
 
         async with httpx.AsyncClient(timeout=30.0) as client:
-            async with client.stream("POST", "https://api.concentrate.ai/v1/chat/completions", json=payload, headers=headers) as response:
+            async with client.stream("POST", LLM_ENDPOINT, json=payload, headers=headers) as response:
                 if response.status_code != 200:
                     error_text = await response.aread()
-                    print(f"Concentrate API error {response.status_code}: {error_text.decode(errors='replace')}")
+                    print(f"LLM API error {response.status_code}: {error_text.decode(errors='replace')}")
                     fallback_text = cls.generate_deterministic_fallback(system_prompt, user_message, history)
                     chunk_size = 8
                     for i in range(0, len(fallback_text), chunk_size):

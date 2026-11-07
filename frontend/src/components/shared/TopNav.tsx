@@ -44,6 +44,7 @@ export default function TopNav() {
     isOnline,
     setIsOnline,
     toggleSidebar,
+    setLoginOpen,
   } = useStore();
 
   const [notifOpen, setNotifOpen]   = useState(false);
@@ -275,7 +276,7 @@ export default function TopNav() {
         </div>
 
         {/* Avatar */}
-        <button className="w-8 h-8 rounded-full border border-cyan-500/25 bg-gradient-to-br from-cyan-950/60 to-indigo-950/60 flex items-center justify-center text-cyan-400 hover:border-cyan-500/50 transition-all btn-press shadow-sm"
+        <button onClick={() => setLoginOpen(true)} className="w-8 h-8 rounded-full border border-cyan-500/25 bg-gradient-to-br from-cyan-950/60 to-indigo-950/60 flex items-center justify-center text-cyan-400 hover:border-cyan-500/50 transition-all btn-press shadow-sm"
           aria-label={t('user.profile')}>
           <User className="w-3.5 h-3.5" />
         </button>

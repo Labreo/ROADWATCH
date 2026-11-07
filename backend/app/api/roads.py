@@ -8,8 +8,10 @@ import os
 import uuid
 from pathlib import Path
 
-from fastapi import APIRouter, HTTPException, Query, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Form
 from fastapi.responses import FileResponse
+
+from app.api.auth import WRITERS, require
 
 from app.services.database import db
 from app.services.road_retriever import StructuredRoadRetriever
@@ -84,7 +86,7 @@ async def list_road_documents(road_id: int):
     return StructuredRoadRetriever.get_road_documents(road_id)
 
 
-@router.post("/roads/{road_id}/documents")
+@router.post("/roads/{road_id}/documents", dependencies=[Depends(require(*WRITERS))])
 async def upload_road_document(
     road_id: int,
     file: UploadFile = File(...),
@@ -134,7 +136,7 @@ async def upload_road_document(
     }
 
 
-@router.delete("/roads/{road_id}/documents/{doc_id}")
+@router.delete("/roads/{road_id}/documents/{doc_id}", dependencies=[Depends(require(*WRITERS))])
 async def delete_road_document(road_id: int, doc_id: int):
     """Delete a document by ID.
 

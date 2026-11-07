@@ -44,6 +44,8 @@ const NEXT_STEP: Record<string, { to: string; label: string } | undefined> = {
 
 function CommandCenter() {
   const region = useStore(s => s.regionCode);
+  const role = useStore(s => s.userRole);
+  const canWork = role === 'engineer' || role === 'admin';
   const state = useLive<Ops>(`/screens/operations?region=${region}`, 15000);
   return (
     <Loadable state={state}>
@@ -75,7 +77,7 @@ function CommandCenter() {
                     head: 'ACTION',
                     cell: r => {
                       const next = NEXT_STEP[r.status];
-                      if (!next) return null;
+                      if (!next || !canWork) return null;
                       return (
                         <span className="flex gap-1.5">
                           <ActionButton onDone={state.reload} action={() => apiPost(`/screens/complaints/${r.id}/transition`, { status: next.to, remarks: `${next.label} from command center` })}>
@@ -135,6 +137,7 @@ interface Sla {
 
 function SlaEngine() {
   const region = useStore(s => s.regionCode);
+  const role = useStore(s => s.userRole);
   const state = useLive<Sla>(`/screens/sla?region=${region}`);
   const [result, setResult] = useState<string | null>(null);
   return (
@@ -154,10 +157,12 @@ function SlaEngine() {
               <Card title="Statutory SLA matrix" flush right={
                 <span className="flex items-center gap-2">
                   {result && <Mono tone="emerald">{result}</Mono>}
-                  <ActionButton variant="primary" onDone={state.reload} action={async () => {
-                    const r = await apiPost<{ escalated: number }>('/screens/sla/run');
-                    setResult(`${r.escalated} escalated`);
-                  }}>Run escalation check</ActionButton>
+                  {role === 'admin' && (
+                    <ActionButton variant="primary" onDone={state.reload} action={async () => {
+                      const r = await apiPost<{ escalated: number }>('/screens/sla/run');
+                      setResult(`${r.escalated} escalated`);
+                    }}>Run escalation check</ActionButton>
+                  )}
                 </span>
               }>
                 <Table
@@ -229,6 +234,7 @@ function BoundaryMap({ boundaries }: { boundaries: ConflictData['boundaries'] })
 }
 
 function Conflicts() {
+  const role = useStore(s => s.userRole);
   const state = useLive<ConflictData>('/screens/conflicts');
   return (
     <Loadable state={state}>
@@ -255,7 +261,7 @@ function Conflicts() {
                 {roads.map(r => (
                   <li key={`road-${r.id}`} className="flex items-center justify-between gap-2 text-[13px] text-[var(--foreground)]">
                     <span><Mono tone="cyan">{r.conflict_key}</Mono><br />{r.primary_road ?? 'Unassigned road'}</span>
-                    {r.resolved ? <Badge tone="emerald">RESOLVED</Badge> : (
+                    {r.resolved ? <Badge tone="emerald">RESOLVED</Badge> : role !== 'admin' ? <Badge tone="rose">OPEN</Badge> : (
                       <ActionButton variant="primary" onDone={state.reload} action={() => apiPost(`/screens/conflicts/road/${r.id}/resolve`, {})}>Resolve</ActionButton>
                     )}
                   </li>
@@ -263,7 +269,7 @@ function Conflicts() {
                 {authorities.map(a => (
                   <li key={`auth-${a.id}`} className="flex items-center justify-between gap-2 text-[13px] text-[var(--foreground)]">
                     <span><Mono tone="cyan">{a.conflict_key}</Mono><br />{a.primary_authority ?? 'Unassigned authority'}</span>
-                    {a.resolved ? <Badge tone="emerald">RESOLVED</Badge> : (
+                    {a.resolved ? <Badge tone="emerald">RESOLVED</Badge> : role !== 'admin' ? <Badge tone="rose">OPEN</Badge> : (
                       <ActionButton variant="primary" onDone={state.reload} action={() => apiPost(`/screens/conflicts/authority/${a.id}/resolve`, {})}>Resolve</ActionButton>
                     )}
                   </li>
@@ -287,6 +293,7 @@ function Conflicts() {
 interface Milestone {
   milestone_num: number; title: string; amount: number; status: string; due_date: string | null;
   completion_date: string | null; verified_by: string | null; payment_release_date: string | null;
+  tests: { test_name: string; measured: number; unit: string; spec_min: number | null; spec_max: number | null; passed: boolean; tested_on: string }[];
 }
 
 interface Project {
@@ -296,6 +303,7 @@ interface Project {
 
 function Scheduler() {
   const region = useStore(s => s.regionCode);
+  const role = useStore(s => s.userRole);
   const state = useLive<Project[]>(`/screens/projects?region=${region}`);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   return (
@@ -307,6 +315,7 @@ function Scheduler() {
         const end = Math.max(new Date(project.target_end_date).getTime(), ...project.milestones.map(m => new Date(m.due_date ?? project.target_end_date).getTime()));
         const pos = (date: string | null) => Math.min(100, Math.max(0, ((new Date(date ?? project.target_end_date).getTime() - start) / (end - start || 1)) * 100));
         const today = pos(new Date().toISOString());
+        const inspected = [...project.milestones].reverse().find(m => m.tests.length > 0);
         return (
           <div className="flex flex-col gap-4">
             <label className="flex items-center gap-2 text-xs text-[var(--fg-dim)]">
@@ -361,11 +370,40 @@ function Scheduler() {
                 { head: 'VERIFIED BY', cell: m => m.verified_by ?? 'Pending' },
                 {
                   head: 'STATUS',
-                  cell: m => m.payment_release_date ? <Badge tone="emerald">PAID</Badge> : m.status === 'completed' && m.verified_by
-                    ? <ActionButton variant="primary" onDone={state.reload} action={() => apiPost(`/screens/projects/${project.id}/milestones/${m.milestone_num}/release-payment`)}>Authorize payout</ActionButton>
-                    : <ActionButton onDone={state.reload} action={() => apiPost(`/screens/projects/${project.id}/milestones/${m.milestone_num}/verify`, { verified_by: 'Ward field engineer' })}>Verify milestone</ActionButton>,
+                  cell: m => {
+                    if (m.payment_release_date) return <Badge tone="emerald">PAID</Badge>;
+                    if (m.status === 'completed' && m.verified_by) {
+                      return role === 'admin'
+                        ? <ActionButton variant="primary" onDone={state.reload} action={() => apiPost(`/screens/projects/${project.id}/milestones/${m.milestone_num}/release-payment`)}>Authorize payout</ActionButton>
+                        : <Badge tone="amber">READY TO PAY</Badge>;
+                    }
+                    return role === 'engineer' || role === 'admin'
+                      ? <ActionButton onDone={state.reload} action={() => apiPost(`/screens/projects/${project.id}/milestones/${m.milestone_num}/verify`, { verified_by: 'Ward field engineer' })}>Verify milestone</ActionButton>
+                      : <StatusBadge status={m.status} />;
+                  },
                 },
               ]} />
+            </Card>
+            <Card title="Field verification">
+              {inspected ? (
+                <div className="flex flex-col gap-3">
+                  <p className="text-xs text-[var(--fg-dim)]">M{inspected.milestone_num} {inspected.title}{inspected.verified_by ? `, signed by ${inspected.verified_by}` : ''}</p>
+                  <div className="grid gap-2 md:grid-cols-3">
+                    {inspected.tests.map(t => (
+                      <div key={t.test_name} className="rounded-md border border-[var(--border-bright)] bg-[var(--surface-2)] px-3 py-2">
+                        <p className="text-xs text-[var(--foreground)]">{t.test_name}</p>
+                        <p className="mt-1 flex items-center justify-between gap-2">
+                          <Mono tone={t.passed ? 'emerald' : 'rose'}>{t.measured} {t.unit}</Mono>
+                          <Badge tone={t.passed ? 'emerald' : 'rose'}>{t.passed ? 'PASS' : 'FAIL'}</Badge>
+                        </p>
+                        <p className="mt-1 text-[11px] text-[var(--fg-dim)]">
+                          Spec {t.spec_min !== null && t.spec_max !== null ? `${t.spec_min} to ${t.spec_max}` : t.spec_min !== null ? `at least ${t.spec_min}` : `at most ${t.spec_max}`} {t.unit}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : <p className="text-[13px] text-[var(--fg-dim)]">No core sample results recorded for this project yet.</p>}
             </Card>
           </div>
         );

@@ -380,16 +380,24 @@ FROM contractors;
 
 CREATE OR REPLACE VIEW v_citizen_complaints AS
 SELECT c.id, c.citizen_id, c.title, c.category, c.status, c.priority, c.escalation_level,
-       c.created_at, a.name AS assigned_authority, r.name AS road_name
+       c.created_at, a.name AS assigned_authority, r.name AS road_name, c.target_resolution_hours
 FROM complaints c
 LEFT JOIN authorities a ON a.id = c.assigned_authority_id
 LEFT JOIN roads r ON r.id = c.road_id;
 
+CREATE OR REPLACE VIEW v_citizen_status_history AS
+SELECT h.complaint_id, c.citizen_id, h.history_seq, h.old_status, h.new_status, h.changed_at, h.remarks
+FROM status_history h
+JOIN complaints c ON c.id = h.complaint_id;
+
 CREATE OR REPLACE VIEW v_engineer_queue AS
 SELECT c.id, c.title, c.category, c.status, c.priority, c.escalation_level,
-       c.assigned_authority_id, r.name AS road_name, r.road_code, c.created_at
+       c.assigned_authority_id, r.name AS road_name, r.road_code, c.created_at,
+       a.department_code AS authority,
+       ROUND((c.target_resolution_hours - EXTRACT(EPOCH FROM NOW() - c.created_at) / 3600)::numeric, 1) AS hours_left
 FROM complaints c
 LEFT JOIN roads r ON r.id = c.road_id
+LEFT JOIN authorities a ON a.id = c.assigned_authority_id
 WHERE c.status IN ('routed', 'in_progress');
 
 CREATE OR REPLACE VIEW v_admin_jurisdiction_summary AS
@@ -422,7 +430,8 @@ BEGIN
     END LOOP;
 END $$;
 
-GRANT SELECT ON v_public_road_scorecard, v_public_contractor_ranking, v_citizen_complaints
+GRANT SELECT ON v_public_road_scorecard, v_public_contractor_ranking, v_citizen_complaints,
+    v_citizen_status_history, citizen_complaint_totals
     TO roadwatch_citizen, roadwatch_engineer, roadwatch_admin, roadwatch_auditor;
 GRANT INSERT ON complaints TO roadwatch_citizen;
 GRANT SELECT ON v_engineer_queue TO roadwatch_engineer, roadwatch_admin;
@@ -516,3 +525,93 @@ UPDATE complaints c SET
         SELECT a.id FROM authorities a WHERE ST_Contains(a.geom_boundary, c.geom)
         ORDER BY ST_Area(a.geom_boundary) LIMIT 1))
 WHERE c.road_id IS NULL OR c.assigned_authority_id IS NULL;
+
+-- -------------------------------------------------------------------------
+-- 15. SIGN-IN (Document 1, section 4: citizen, engineer, admin, auditor)
+--     Bcrypt hashes come from pgcrypto; sessions store only a token hash.
+--     Sample accounts below are for local demos and share one test password.
+-- -------------------------------------------------------------------------
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+CREATE TABLE IF NOT EXISTS app_users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    display_name VARCHAR(200) NOT NULL,
+    role VARCHAR(20) NOT NULL CHECK (role IN ('citizen', 'engineer', 'admin', 'auditor')),
+    citizen_id INT UNIQUE REFERENCES citizens(id) ON DELETE CASCADE,
+    authority_id INT REFERENCES authorities(id) ON DELETE SET NULL,
+    is_demo BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_citizen_link CHECK ((role = 'citizen') = (citizen_id IS NOT NULL))
+);
+
+CREATE TABLE IF NOT EXISTS app_sessions (
+    token_hash CHAR(64) PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES app_users(id) ON DELETE CASCADE,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
+INSERT INTO app_users (email, password_hash, display_name, role, citizen_id, authority_id, is_demo)
+SELECT v.email, crypt('roadwatch-demo', gen_salt('bf', 10)), v.name, v.role, v.citizen_id, a.id, TRUE
+FROM (VALUES
+    ('rohan.shetty@roadwatch.example', 'Rohan Shetty', 'citizen', 2, NULL),
+    ('ward.engineer@roadwatch.example', 'Asha Kulkarni', 'engineer', NULL, 'MCGM-KW'),
+    ('commissioner@roadwatch.example', 'Municipal Commissioner', 'admin', NULL, NULL),
+    ('auditor@roadwatch.example', 'Public Auditor', 'auditor', NULL, NULL)
+) AS v(email, name, role, citizen_id, department)
+LEFT JOIN authorities a ON a.department_code = v.department
+ON CONFLICT (email) DO NOTHING;
+
+-- -------------------------------------------------------------------------
+-- 16. MILESTONE QUALITY TESTS (Document 4, Frame 14)
+--     Treasury payout needs every recorded core test to pass.
+-- -------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS milestone_tests (
+    id SERIAL PRIMARY KEY,
+    project_id INT NOT NULL,
+    milestone_num INT NOT NULL,
+    test_name VARCHAR(100) NOT NULL,
+    measured NUMERIC(8, 2) NOT NULL,
+    unit VARCHAR(10) NOT NULL,
+    spec_min NUMERIC(8, 2),
+    spec_max NUMERIC(8, 2),
+    tested_on DATE NOT NULL DEFAULT CURRENT_DATE,
+    passed BOOLEAN GENERATED ALWAYS AS (
+        (spec_min IS NULL OR measured >= spec_min) AND (spec_max IS NULL OR measured <= spec_max)
+    ) STORED,
+    UNIQUE (project_id, milestone_num, test_name),
+    FOREIGN KEY (project_id, milestone_num) REFERENCES project_milestones(project_id, milestone_num) ON DELETE CASCADE
+);
+
+INSERT INTO milestone_tests (project_id, milestone_num, test_name, measured, unit, spec_min, spec_max, tested_on)
+SELECT m.project_id, m.milestone_num, t.name, t.measured, t.unit, t.spec_min, t.spec_max,
+       COALESCE(m.completion_date, CURRENT_DATE)
+FROM project_milestones m
+CROSS JOIN (VALUES
+    ('Compacted thickness', 51.2, 'mm', 50.0, NULL),
+    ('Marshall density', 98.4, '%', 97.0, NULL),
+    ('Bitumen content', 5.3, '%', 5.0, 5.5)
+) AS t(name, measured, unit, spec_min, spec_max)
+WHERE m.status = 'completed'
+ON CONFLICT (project_id, milestone_num, test_name) DO NOTHING;
+
+CREATE OR REPLACE FUNCTION block_payout_on_failed_test()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.payment_release_date IS NOT NULL AND OLD.payment_release_date IS NULL AND EXISTS (
+        SELECT 1 FROM milestone_tests t
+        WHERE t.project_id = NEW.project_id AND t.milestone_num = NEW.milestone_num AND NOT t.passed
+    ) THEN
+        RAISE EXCEPTION 'Payout blocked: a quality test failed for milestone % of project %',
+            NEW.milestone_num, NEW.project_id
+            USING ERRCODE = 'check_violation';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_block_payout_on_failed_test ON project_milestones;
+CREATE TRIGGER trg_block_payout_on_failed_test
+BEFORE UPDATE OF payment_release_date ON project_milestones
+FOR EACH ROW EXECUTE FUNCTION block_payout_on_failed_test();

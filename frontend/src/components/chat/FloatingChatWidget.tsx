@@ -1,5 +1,7 @@
 'use client';
 
+import { useStore } from '@/store/useStore';
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { updateReportsCache } from '@/lib/localChatEngine';
 
@@ -58,6 +60,7 @@ I can help you monitor local road quality, check public spending records (CPPP &
 *Type **"help"** for options, or select a suggestion chip to start!*`;
 
 export default function FloatingChatWidget() {
+  const isReporting = useStore(state => state.isReporting);
   const [isOpen, setIsOpen] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
@@ -595,8 +598,10 @@ export default function FloatingChatWidget() {
     return <>{parts}</>;
   };
 
+  if (isReporting) return null;
+
   return (
-    <div className="fixed bottom-6 right-6 z-[9999] font-sans">
+    <div className="fixed bottom-24 right-4 z-[9999] font-sans lg:bottom-6 lg:right-6">
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}

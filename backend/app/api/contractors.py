@@ -6,7 +6,8 @@ normalized ``contractor_code`` and computed ``performance_index``.
 
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
+from app.api.auth import require
 
 from app.services.database import db
 
@@ -64,7 +65,7 @@ async def get_contractor(contractor_id: int):
     return rows[0]
 
 
-@router.patch("/contractors/{contractor_id}")
+@router.patch("/contractors/{contractor_id}", dependencies=[Depends(require("admin"))])
 async def update_contractor(contractor_id: int, payload: dict):
     """Partially update a contractor's editable fields.
 

@@ -34,7 +34,6 @@ import {
   Loader
 } from 'lucide-react';
 import { routeComplaint } from '@/services/routingEngine';
-import { streamConcentrateReply, isConcentrateConfigured } from '@/services/concentrateClient';
 import { useStore } from '@/store/useStore';
 import { detectRegionSwitch, detectRegionFromText, detectRegionFromGps } from '@/services/regionDetectionService';
 import { isComparisonQuery, getCrossRegionComparison, generateComparisonResponse } from '@/services/regionComparisonService';
@@ -247,7 +246,7 @@ function defectTypeLabel(code: string): string {
 }
 
 // Simulated client-side vision classifier. Deterministic so the on-stage demo
-// never depends on a live backend/Concentrate call. Matches the demo narration
+// never depends on a live backend call. Matches the demo narration
 // (Class 1 structural failure, standing water, P1). The ~2s delay gives the UI
 // an "analyzing" beat that fills presentation time.
 function analyzePhotoDraft(): Promise<Partial<WizardData>> {
@@ -505,32 +504,6 @@ export default function ChatOrchestrator() {
     }
   };
 
-  // Live LLM fallback: stream a grounded answer from Concentrate AI directly
-  // from the browser when the backend is down and no canned demo reply matched.
-  // Returns true if it produced an answer, false if it should fall through to
-  // the static "backend unavailable" message.
-  const streamLiveLLM = async (textToSend: string): Promise<boolean> => {
-    if (!isConcentrateConfigured()) return false;
-    try {
-      const history = messages.map(m => ({ role: m.role, content: m.content }));
-      let acc = '';
-      await streamConcentrateReply(textToSend, history, (delta) => {
-        acc += delta;
-        setMessages(prev => {
-          const updated = [...prev];
-          const last = updated[updated.length - 1];
-          if (last && last.role === 'assistant') last.content = acc;
-          return updated;
-        });
-      });
-      // Nothing came back — treat as failure so caller shows the error.
-      return acc.trim().length > 0;
-    } catch (e) {
-      console.warn('Concentrate live fallback failed:', e);
-      return false;
-    }
-  };
-
   const handleSubmit = async (textToSend: string) => {
     if (!textToSend.trim() || isLoading) return;
 
@@ -701,9 +674,7 @@ export default function ChatOrchestrator() {
           demoReply.auditReport
         );
       } else {
-        // No canned match — try a live grounded LLM answer before giving up.
-        const answered = await streamLiveLLM(textToSend);
-        if (!answered) await submitBackendError();
+        await submitBackendError();
       }
       // Always fire navigation — even if we showed an error, open the right panel
       dispatchNavigationFromQuery(textToSend);
@@ -824,8 +795,7 @@ export default function ChatOrchestrator() {
           );
           dispatchNavigationFromQuery(textToSend);
         } else {
-          const answered = await streamLiveLLM(textToSend);
-          if (!answered) await submitBackendError();
+          await submitBackendError();
           dispatchNavigationFromQuery(textToSend);
         }
       } else {
@@ -849,8 +819,7 @@ export default function ChatOrchestrator() {
         );
       } else {
         console.warn("Chat stream error:", error);
-        const answered = await streamLiveLLM(textToSend);
-        if (!answered) await submitBackendError();
+        await submitBackendError();
       }
       // Always fire navigation regardless of whether demo reply was found
       dispatchNavigationFromQuery(textToSend);

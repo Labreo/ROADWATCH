@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import Optional
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
+from app.api.auth import STAFF, WRITERS, optional_user, require
 from app.services.database import db
 from app.services.authority_resolver import AuthorityResolver
 from app.services.sla_service import compute_priority
@@ -59,7 +60,7 @@ class RoutingFeedbackPayload(BaseModel):
 
 
 @router.post("/complaints")
-async def create_complaint(payload: ComplaintPayload):
+async def create_complaint(payload: ComplaintPayload, user: Optional[dict] = Depends(optional_user)):
     coords = payload.geometry["coordinates"]
     lon, lat = float(coords[0]), float(coords[1])
     geom_wkt = f"POINT({lon} {lat})"
@@ -152,8 +153,8 @@ async def create_complaint(payload: ComplaintPayload):
     insert_sql = """
     INSERT INTO complaints (title, description, category, geom, status, priority,
       client_temp_id, image_url, assigned_authority_id, road_id,
-      target_resolution_hours, citizen_contact, created_at, updated_at)
-    VALUES (%s, %s, %s, ST_GeomFromText(%s, 4326), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+      target_resolution_hours, citizen_contact, citizen_id, created_at, updated_at)
+    VALUES (%s, %s, %s, ST_GeomFromText(%s, 4326), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     RETURNING id
     """
     params = (
@@ -169,6 +170,7 @@ async def create_complaint(payload: ComplaintPayload):
         payload.roadId,
         target_hours,
         payload.citizenContact,
+        (user or {}).get("citizen_id") or 1,
         created_at,
         created_at,
     )
@@ -240,7 +242,7 @@ async def create_complaint(payload: ComplaintPayload):
     }
 
 
-@router.get("/complaints/queue")
+@router.get("/complaints/queue", dependencies=[Depends(require(*STAFF))])
 async def get_complaint_queue(
     authority_id: Optional[int] = None,
     status: Optional[str] = None,
@@ -300,7 +302,7 @@ async def get_complaint_queue(
     }
 
 
-@router.post("/complaints/{complaint_id}/decline")
+@router.post("/complaints/{complaint_id}/decline", dependencies=[Depends(require(*WRITERS))])
 async def decline_complaint(complaint_id: int, payload: DeclinePayload):
     """
     Authority declines a complaint assignment. System reroutes to next-best authority.
@@ -527,7 +529,7 @@ async def submit_routing_feedback(complaint_id: int, payload: RoutingFeedbackPay
     }
 
 
-@router.put("/complaints/{complaint_id}/status")
+@router.put("/complaints/{complaint_id}/status", dependencies=[Depends(require(*WRITERS))])
 async def update_complaint_status(complaint_id: int, payload: dict):
     """
     B1: Update complaint status and send citizen notification.
@@ -565,7 +567,7 @@ async def update_complaint_status(complaint_id: int, payload: dict):
     }
 
 
-@router.put("/complaints/{complaint_id}/vision-priority")
+@router.put("/complaints/{complaint_id}/vision-priority", dependencies=[Depends(require(*WRITERS))])
 async def update_vision_priority(complaint_id: int, payload: dict):
     """
     B3: Update complaint priority based on vision analysis results.

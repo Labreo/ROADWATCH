@@ -8,10 +8,10 @@ import { NetworkStatusProvider } from '@/providers/NetworkStatusProvider';
 import OfflineBanner from './OfflineBanner';
 import SyncToast from './SyncToast';
 import {
-  MessageSquare,
+  Camera,
+  FileText,
+  House,
   Map,
-  Coins,
-  HardHat,
   type LucideProps,
 } from 'lucide-react';
 
@@ -35,10 +35,10 @@ export default function ResponsiveShell({ children }: ResponsiveShellProps) {
   }, [loadCachedData]);
 
   const mobileNavItems: NavItem[] = [
-    { id: 'chat',        label: 'Chat',        icon: MessageSquare, action: () => setActiveView('chat')        },
-    { id: 'roads',       label: 'Map',         icon: Map,           action: () => setActiveView('roads')       },
-    { id: 'budgets',     label: 'Budgets',     icon: Coins,         action: () => setActiveView('budgets')     },
-    { id: 'contractors', label: 'Contractors', icon: HardHat,       action: () => setActiveView('contractors') },
+    { id: 'dashboard',   label: 'Home',        icon: House,         action: () => setActiveView('dashboard') },
+    { id: 'roads',       label: 'Map',         icon: Map,           action: () => setActiveView('roads') },
+    { id: 'complaints',  label: 'Report',      icon: Camera,        action: () => setActiveView('complaints') },
+    { id: 'reports',     label: 'My Reports',  icon: FileText,      action: () => setActiveView('reports') },
   ];
 
   return (

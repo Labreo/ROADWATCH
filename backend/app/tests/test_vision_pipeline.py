@@ -1,49 +1,51 @@
+"""Photo analysis endpoint. The vision model is replaced by a stub, so no API
+key or network is needed, but the local database must be running."""
 import io
+import json
+import os
+
+os.environ.setdefault("POSTGRES_HOST", "localhost")
+
+import pytest
 from fastapi.testclient import TestClient
+
 from app.main import app
 from app.services.vision_pipeline import RoadDamageEvaluator
 
 client = TestClient(app)
+PHOTO = ("road.jpg", io.BytesIO(b"\xff\xd8\xff\xe0 not a real photo"), "image/jpeg")
+ON_SV_ROAD = {"latitude": "19.1197", "longitude": "72.8371", "persist": "false"}
 
-def test_road_damage_evaluator_kw():
-    evaluator = RoadDamageEvaluator()
-    # coordinates inside Ward K-West (MCGM-KW)
-    lat = 19.1200
-    lon = 72.8400
-    res = evaluator.evaluate_damage(b"fake-image-bytes", lat, lon)
-    assert res["defect_type"] == "pothole"
-    assert res["confidence"] >= 0.8
-    assert "pothole" in res["description"].lower()
 
-def test_road_damage_evaluator_proximity():
-    evaluator = RoadDamageEvaluator()
-    # (19.1190, 72.8531) is accident ID 1005. Test with a coordinate 50 meters away
-    lat = 19.1192
-    lon = 72.8533
-    res = evaluator.evaluate_damage(b"fake-image-bytes", lat, lon)
-    assert len(res["proximity_accidents"]) > 0
-    assert res["proximity_accidents"][0]["accident_id"] == 1005
-    assert res["proximity_accidents"][0]["distance_meters"] < 100.0
+def stub_vision(monkeypatch, reply: str):
+    async def stream(self, image_bytes, latitude, longitude):
+        yield reply
 
-def test_analyze_photo_endpoint():
-    # Make a multipart post request
-    file_data = {
-        "image": (
-            "test_image.jpg", 
-            io.BytesIO(b"\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x01\x00`\x00`\x00\x00\xff\xdb\x00C"), 
-            "image/jpeg"
-        )
-    }
-    form_data = {
-        "latitude": "19.1190", 
-        "longitude": "72.8360"
-    }
-    
-    response = client.post("/api/v1/chat/analyze-photo", files=file_data, data=form_data)
+    monkeypatch.setattr(RoadDamageEvaluator, "evaluate_damage_stream", stream)
+
+
+def analyse():
+    response = client.post("/api/v1/chat/analyze-photo", files={"image": PHOTO}, data=ON_SV_ROAD)
     assert response.status_code == 200
-    data = response.json()
-    assert data["success"] is True
-    assert data["analysis"]["defect_type"] == "pothole"
-    assert data["draft_complaint"]["assignedAuthorityId"] == 1 # MCGM-KW
-    assert data["draft_complaint"]["status"] == "pending"
-    assert data["draft_complaint"]["roadId"] == 3 # S.V. Road
+    return [json.loads(line) for line in response.text.splitlines()]
+
+
+def test_preview_returns_analysis_without_filing(monkeypatch):
+    stub_vision(monkeypatch, json.dumps({
+        "defectType": "pothole", "estimatedDepthCm": 12, "estimatedWidthM": 1.2,
+        "severity": "high", "hasTraffic": True, "recommendedAction": "Patch the surface",
+    }))
+    events = analyse()
+    telemetry = next(e for e in events if e["type"] == "telemetry")
+    assert telemetry["latitude"] == pytest.approx(19.1197)
+    metadata = next(e for e in events if e["type"] == "metadata")
+    assert metadata["analysis"]["defect_type"] == "pothole"
+    assert metadata["analysis"]["depth_cm"] == 12
+    assert metadata["draft_complaint"]["id"] is None
+
+
+def test_preview_reports_unreadable_model_output(monkeypatch):
+    stub_vision(monkeypatch, "this is not JSON")
+    events = analyse()
+    assert any(e["type"] == "error" for e in events)
+    assert not any(e["type"] == "metadata" for e in events)
