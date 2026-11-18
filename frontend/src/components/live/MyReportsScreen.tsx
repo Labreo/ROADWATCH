@@ -1,8 +1,8 @@
 'use client';
 
 import { useStore } from '@/store/useStore';
-import { useLive } from '@/services/api';
-import { Card, Kpi, KpiRow, Loadable, Mono, StatusBadge, hours, shortDate } from './ui';
+import { apiDelete, useLive } from '@/services/api';
+import { ActionButton, Card, Kpi, KpiRow, Loadable, Mono, StatusBadge, hours, shortDate } from './ui';
 
 interface Report {
   id: number; title: string; status: string; priority: number; created_at: string; authority: string | null;
@@ -61,6 +61,19 @@ export default function MyReportsScreen() {
                     </li>
                   ))}
                 </ol>
+                {['pending', 'routed'].includes(r.status) && (
+                  <ActionButton
+                    variant="danger"
+                    className="mt-3"
+                    action={() => {
+                      if (!window.confirm(`Withdraw report CMP-${String(r.id).padStart(5, '0')}? This deletes it.`)) return Promise.resolve();
+                      return apiDelete(`/screens/me/reports/${r.id}`);
+                    }}
+                    onDone={state.reload}
+                  >
+                    Withdraw report
+                  </ActionButton>
+                )}
               </Card>
             ))}
             {reports.length === 0 && <p className="text-[13px] text-[var(--fg-dim)]">No reports filed yet.</p>}

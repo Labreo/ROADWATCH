@@ -58,6 +58,7 @@ import OperationsScreen from '@/components/live/OperationsScreen';
 import LedgerScreen from '@/components/live/LedgerScreen';
 import ContractorsScreen from '@/components/live/ContractorsScreen';
 import RegionsScreen from '@/components/live/RegionsScreen';
+import DatabaseScreen from '@/components/live/DatabaseScreen';
 import SensorsScreen from '@/components/live/SensorsScreen';
 import PlaybackScreen from '@/components/live/PlaybackScreen';
 import MyReportsScreen from '@/components/live/MyReportsScreen';
@@ -853,6 +854,18 @@ export default function Page() {
             <RegionsScreen />
           </div>
         </ErrorBoundary>
+      )}
+
+      {/* VIEW 11: DATABASE EXPLORER (staff) */}
+      {!isChatDriven && activeView === 'database' && isStaff && (
+        <ErrorBoundary>
+          <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+            <DatabaseScreen />
+          </div>
+        </ErrorBoundary>
+      )}
+      {!isChatDriven && activeView === 'database' && !isStaff && (
+        <AdminRestrictedView />
       )}
 
       {/* VIEW 0: CONVERSATIONAL ORCHESTRATOR SHELL */}

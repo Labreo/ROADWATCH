@@ -11,6 +11,18 @@ from app.services.authority_resolver import AuthorityResolver
 from app.services.road_retriever import StructuredRoadRetriever
 from app.services.database import db
 from app.services.sla_service import compute_priority, compute_priority_from_vision
+from decimal import Decimal
+
+
+def _json_default(value):
+    # PostgreSQL NUMERIC columns arrive as Decimal; dates as date/datetime.
+    if isinstance(value, Decimal):
+        return float(value)
+    return str(value)
+
+
+def _dumps(payload) -> str:
+    return json.dumps(payload, default=_json_default)
 
 router = APIRouter()
 
@@ -39,14 +51,14 @@ async def chat_endpoint(request: ChatRequest):
         # Stream response from retrieval engine
         async for chunk in RetrievalEngine.stream_response(system_prompt, request.message, history):
             full_response += chunk
-            yield json.dumps({"type": "content", "content": chunk}) + "\n"
+            yield _dumps({"type": "content", "content": chunk}) + "\n"
             
         # Update assistant response in conversational memory
         if request.session_id in sessions_memory:
             sessions_memory[request.session_id].append({"role": "assistant", "content": full_response})
             
         # Emit final metadata
-        yield json.dumps({
+        yield _dumps({
             "type": "metadata",
             "citations": citations,
             "suggested_actions": suggested_actions,
@@ -124,7 +136,7 @@ async def analyze_photo_endpoint(
         
         try:
             # Yield status event
-            yield json.dumps({"type": "status", "content": "Extracting metadata..."}) + "\n"
+            yield _dumps({"type": "status", "content": "Extracting metadata..."}) + "\n"
             
             # Read the uploaded image binary
             try:
@@ -164,13 +176,13 @@ async def analyze_photo_endpoint(
             # and no spatial authority routing will be attempted
 
             # Yield coordinate resolution event
-            yield json.dumps({
+            yield _dumps({
                 "type": "telemetry",
                 "latitude": resolved_lat,
                 "longitude": resolved_lon
             }) + "\n"
             
-            yield json.dumps({"type": "status", "content": "Analyzing image with AI vision..."}) + "\n"
+            yield _dumps({"type": "status", "content": "Analyzing image with AI vision..."}) + "\n"
 
             # 2. Run vision damage evaluation pipeline streaming
             evaluator = RoadDamageEvaluator()
@@ -178,9 +190,9 @@ async def analyze_photo_endpoint(
             full_ai_response = ""
             async for chunk in evaluator.evaluate_damage_stream(image_bytes, resolved_lat, resolved_lon):
                 full_ai_response += chunk
-                yield json.dumps({"type": "content", "content": chunk}) + "\n"
+                yield _dumps({"type": "content", "content": chunk}) + "\n"
                 
-            yield json.dumps({"type": "status", "content": "Persisting complaint report..."}) + "\n"
+            yield _dumps({"type": "status", "content": "Persisting complaint report..."}) + "\n"
 
             # 3. Parse JSON response from the model
             cleaned_response = full_ai_response.strip()
@@ -197,7 +209,7 @@ async def analyze_photo_endpoint(
             except Exception as json_err:
                 print(f"Failed to parse vision response JSON: {json_err}. Raw: {full_ai_response}")
                 if not persist:
-                    yield json.dumps({"type": "error", "content": "The photo could not be analysed. Try another photo."}) + "\n"
+                    yield _dumps({"type": "error", "content": "The photo could not be analysed. Try another photo."}) + "\n"
                     return
                 analysis = {
                     "defectType": "pothole",
@@ -299,7 +311,7 @@ async def analyze_photo_endpoint(
             }
             
             # Yield final metadata
-            yield json.dumps({
+            yield _dumps({
                 "type": "metadata",
                 "success": True,
                 "analysis": {
@@ -319,7 +331,7 @@ async def analyze_photo_endpoint(
         except Exception as outer_err:
             import traceback
             traceback.print_exc()
-            yield json.dumps({
+            yield _dumps({
                 "type": "error",
                 "content": str(outer_err)
             }) + "\n"
@@ -342,7 +354,7 @@ async def analyze_photo_endpoint(
                 "imageUrl": "/uploads/error.jpg",
                 "imagePreview": "/uploads/error.jpg"
             }
-            yield json.dumps({
+            yield _dumps({
                 "type": "metadata",
                 "success": False,
                 "error": str(outer_err),

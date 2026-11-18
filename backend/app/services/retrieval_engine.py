@@ -709,6 +709,35 @@ class RetrievalEngine:
             suggested_prompts.append("Which contractors are blacklisted?")
             suggested_prompts.append("How do I report a pothole?")
 
+        # Questions about contractors in general ("which are blacklisted?",
+        # "who has the worst rating?") name no single contractor, so give the
+        # model the whole registry to rank from.
+        if not contractor_id and intent == "contractor_lookup":
+            registry = db.query(
+                "SELECT c.id, c.name, c.contractor_code, c.rating, c.performance_index, "
+                "c.projects_completed, c.projects_delayed, c.blacklisted, c.blacklisted_reason, "
+                "(SELECT COUNT(*) FROM projects p WHERE p.contractor_id = c.id) AS project_count "
+                "FROM contractors c ORDER BY c.blacklisted DESC, c.rating ASC"
+            ) or []
+            if registry:
+                lines = ["Contractor Registry (all registered contractors, lowest rated first):"]
+                for c in registry:
+                    status = f"BLACKLISTED ({c['blacklisted_reason'] or 'no reason recorded'})" if c['blacklisted'] else "Active"
+                    lines.append(
+                        f"- {c['name']} ({c['contractor_code']}): rating {c['rating']}/5.00, "
+                        f"performance index {c['performance_index']}, {c['projects_completed']} completed, "
+                        f"{c['projects_delayed']} delayed, {c['project_count']} projects on record, status {status}"
+                    )
+                    if c['blacklisted']:
+                        citations.append({
+                            "type": "contractor",
+                            "id": c['id'],
+                            "name": c['name'],
+                            "rating": c['rating'],
+                            "blacklisted": True
+                        })
+                context_facts.append("\n".join(lines))
+
         # Clean duplicates from suggested prompts
         suggested_prompts = list(dict.fromkeys(suggested_prompts))[:3]
         
@@ -760,19 +789,19 @@ class RetrievalEngine:
 
         if is_lie_probe:
             system_prompt = (
-                "You are ROADWATCH AI. Under your multi-agent auditing loop (Granite Guardian Pattern), "
+                "You are ROADWATCH AI. Under your multi-agent auditing loop (fact-check against the database), "
                 "you MUST flag this assertion as UNGROUNDED and contradict it. The user has claimed that "
                 "Omega Infrastructure completed repaving S.V. Road yesterday for ₹4.8 Cr. However, "
                 "according to the database, S.V. Road was last repaved on 2018-06-10 (not yesterday), "
                 "and Omega Infrastructure is currently blacklisted due to severe performance issues.\n\n"
-                "State clearly that the Granite Guardian model has flagged this assertion as UNGROUNDED "
+                "State clearly that the ROADWATCH fact check has flagged this assertion as UNGROUNDED "
                 "due to contradictions with the database records, and list the correct facts from the database."
             )
             audit_report = {
                 "is_grounded": False,
                 "confidence": 0.08,
-                "guardian_model": "Granite Guardian 2b",
-                "generator_model": "Granite 3.3 8b",
+                "guardian_model": "Rule-based DB fact check",
+                "generator_model": LLM_MODEL,
                 "latency_ms": 118,
                 "tokens_parsed": 450,
                 "audit_log": [
@@ -780,7 +809,7 @@ class RetrievalEngine:
                     "Retrieved S.V. Road (ID 3) records from database",
                     "Contradiction found: last relaying date in DB is 2018-06-10 (user claimed yesterday)",
                     "Contradiction found: Contractor Omega status is blacklisted=True (user claimed active repaving)",
-                    "Granite Guardian: Fact verification failed. Assertions contradict DB ground truth.",
+                    "Fact check: Fact verification failed. Assertions contradict DB ground truth.",
                     "Result: UNGROUNDED (Response flagged and blocked)"
                 ]
             }
@@ -794,8 +823,8 @@ class RetrievalEngine:
             audit_report = {
                 "is_grounded": True,
                 "confidence": 1.0,
-                "guardian_model": "Granite Guardian 2b",
-                "generator_model": "Granite 3.3 8b",
+                "guardian_model": "Rule-based DB fact check",
+                "generator_model": LLM_MODEL,
                 "latency_ms": 32,
                 "tokens_parsed": 94,
                 "audit_log": [
@@ -810,8 +839,8 @@ class RetrievalEngine:
             audit_report = {
                 "is_grounded": True,
                 "confidence": 0.98,
-                "guardian_model": "Granite Guardian 2b",
-                "generator_model": "Granite 3.3 8b",
+                "guardian_model": "Rule-based DB fact check",
+                "generator_model": LLM_MODEL,
                 "latency_ms": 135,
                 "tokens_parsed": 512,
                 "audit_log": [
@@ -819,7 +848,7 @@ class RetrievalEngine:
                     "Retrieved structured database records from PostGIS for resolved entities",
                     "Verified response facts match database records",
                     "Checked answer text: no ungrounded material substitutions or variance anomalies found",
-                    "Granite Guardian: Response verified against DB ground truth successfully.",
+                    "Fact check: Response verified against DB ground truth successfully.",
                     "Result: GROUNDED (Verified Grounded Seal generated)"
                 ]
             }
@@ -891,7 +920,7 @@ class RetrievalEngine:
                 "The assertion that **Omega Infrastructure completed repaving S.V. Road yesterday for ₹4.8 Cr** is **contradicted** by the database:\n\n"
                 "- **Last Relaying Date in DB:** 2018-06-10 (not yesterday)\n"
                 "- **Contractor Status:** Omega Infrastructure is **blacklisted** (Rating: 1.80★) due to severe compaction deficits and material substitution fraud.\n\n"
-                "The Granite Guardian model has flagged this response as **UNGROUNDED** and blocked the false statement from being integrated into the public ledger."
+                "The ROADWATCH fact check has flagged this response as **UNGROUNDED** and blocked the false statement from being integrated into the public ledger."
             )
         elif "omega" in msg_lower and "yesterday" in msg_lower and "4.8" in msg_lower:
             return (
@@ -899,7 +928,7 @@ class RetrievalEngine:
                 "The assertion that **Omega Infrastructure completed repaving S.V. Road yesterday for ₹4.8 Cr** is **contradicted** by the database:\n\n"
                 "- **Last Relaying Date in DB:** 2018-06-10 (not yesterday)\n"
                 "- **Contractor Status:** Omega Infrastructure is **blacklisted** (Rating: 1.80★) due to severe compaction deficits and material substitution fraud.\n\n"
-                "The Granite Guardian model has flagged this response as **UNGROUNDED** and blocked the false statement from being integrated into the public ledger."
+                "The ROADWATCH fact check has flagged this response as **UNGROUNDED** and blocked the false statement from being integrated into the public ledger."
             )
         
         # Check for Noise/Out of scope in generate_deterministic_fallback

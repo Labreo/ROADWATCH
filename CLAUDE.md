@@ -129,6 +129,7 @@ conda create -n roadwatch-db -c conda-forge postgis python=3.11 pip
 ./scripts/dev-backend.sh            # API on http://localhost:8000
 cd frontend && npm run dev          # App on http://localhost:3000
 ```
+`./scripts/start-demo.sh` runs all three; `./scripts/reset-demo-db.sh` rebuilds the database from the seed files. The demo walkthrough is in `DEMO.md`; the Database screen (`frontend/src/components/live/DatabaseScreen.tsx`, `backend/app/api/db_explorer.py`) shows the schema and runs fixed read-only example queries.
 `docs/schema_documented.sql` adds what Documents 1, 3 and 4 specify (citizens, status history, state machine, spatial routing, audit lock, role views, sensors, sign-in, milestone tests). `docs/seed_wireframes.sql` scales invented Mumbai sample data to the wireframe totals. Load order: `schema.sql`, `mock_data.sql`, `schema_documented.sql`, `seed_wireframes.sql`.
 
 The wireframe screens live in `frontend/src/components/live/` and read `backend/app/api/screens.py`.

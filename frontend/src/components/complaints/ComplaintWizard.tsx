@@ -616,8 +616,14 @@ export default function ComplaintWizard() {
                       onChange={event => setDescription(event.target.value)}
                       rows={4}
                       minLength={10}
-                      className="w-full rounded-lg border border-white/[0.1] bg-slate-950 px-3 py-2 text-[13px] text-slate-100"
+                      placeholder="e.g. Large pile of construction debris blocking the left lane near the bus stop"
+                      className="w-full rounded-lg border border-white/[0.1] bg-slate-950 px-3 py-2 text-[13px] text-slate-100 placeholder:text-slate-600"
                     />
+                    <span className={`block text-[11px] ${description.trim().length < 10 ? 'text-amber-300' : 'text-emerald-400'}`}>
+                      {description.trim().length < 10
+                        ? `Write at least 10 characters to continue (${description.trim().length}/10).`
+                        : 'Looks good. Continue to check the location.'}
+                    </span>
                   </label>
                   <p className="text-[11px] text-slate-400">Nearest road: {roadName}. You can correct the pin on the next step.</p>
                 </div>
@@ -674,7 +680,7 @@ export default function ComplaintWizard() {
                 disabled={aiAnalyzing || (manualEntry && description.trim().length < 10)}
                 className="w-full py-3.5 rounded-2xl bg-cyan-400 hover:bg-cyan-500 text-slate-950 text-xs font-black tracking-widest uppercase disabled:bg-slate-900 disabled:text-slate-600 transition-all cursor-pointer shadow-lg shadow-cyan-400/10"
               >
-                CONFIRM INTEL ROUTING
+                {manualEntry ? 'Continue to location' : 'Confirm and route report'}
               </button>
               <button
                 onClick={restartScan}

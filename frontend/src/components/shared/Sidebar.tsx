@@ -16,6 +16,7 @@ import {
   Home,
   TriangleAlert,
   FileText,
+  Database,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -111,6 +112,7 @@ export default function Sidebar() {
     { id: 'sensors'     as AppView, label: 'Sensor Monitor',      icon: Activity },
     { id: 'twin'        as AppView, label: 'Digital Twin',        icon: Globe },
     { id: 'regions'     as AppView, label: 'Regions Hub',         icon: Globe },
+    { id: 'database'    as AppView, label: 'Database',            icon: Database },
   ];
 
   const navSections = [

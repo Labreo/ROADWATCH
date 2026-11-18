@@ -42,6 +42,9 @@ export function NetworkStatusProvider({ children }: { children: React.ReactNode 
         // A worker left over from an earlier run serves stale dev chunks.
         navigator.serviceWorker.getRegistrations()
           .then((registrations) => registrations.forEach((registration) => registration.unregister()));
+        if ('caches' in window) {
+          caches.keys().then((keys) => keys.forEach((key) => caches.delete(key)));
+        }
       }
     }
 

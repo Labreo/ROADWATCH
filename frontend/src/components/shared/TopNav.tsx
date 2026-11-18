@@ -34,6 +34,7 @@ const VIEW_TITLES: Record<string, { label: string; section: string }> = {
   sensors:     { label: 'Sensor Monitor',                 section: 'Intelligence'   },
   twin:        { label: 'Digital Twin',                   section: 'Intelligence'   },
   admin:       { label: 'Operations Center',              section: 'System'         },
+  database:    { label: 'Database Explorer',              section: 'System'         },
 };
 
 export default function TopNav() {

@@ -70,7 +70,7 @@ function findBestDemoReply(query: string): DemoMessage | null {
   // ("₹4.8 Cr", "completed", "report") that would otherwise mis-route to the
   // budget or complaint scenarios. A claim about Omega + SV Road framed as a
   // question/assertion ("...right?", "completed", "yesterday", "for ₹4.8")
-  // is the Granite Guardian falsification probe.
+  // is the fact-check falsification probe.
   if (
     /omega/i.test(q) &&
     /(completed|repair|repav|yesterday|4\.8|right\?|₹|cr\b|crore)/i.test(q)
@@ -660,9 +660,12 @@ export default function ChatOrchestrator() {
     // + citations). In demo mode, skip the live backend entirely so hard-
     // coded scripted responses always play regardless of server status.
     // ------------------------------------------------------------------
+    // A question with no matching script goes to the live backend when it is
+    // up, so demo mode never blocks real answers.
     if (!isBackendOnline || demoMode !== 'off') {
-      const demoReply = findBestDemoReply(textToSend) ?? buildGroundedReply(textToSend);
-      if (demoReply) {
+      const demoReply = findBestDemoReply(textToSend) ?? (isBackendOnline ? null : buildGroundedReply(textToSend));
+      if (demoReply || !isBackendOnline) {
+        if (demoReply) {
         await streamResponse(
           demoReply.content,
           (demoReply.citations as any) ?? [],
@@ -673,13 +676,14 @@ export default function ChatOrchestrator() {
           undefined,
           demoReply.auditReport
         );
-      } else {
-        await submitBackendError();
+        } else {
+          await submitBackendError();
+        }
+        // Always fire navigation — even if we showed an error, open the right panel
+        dispatchNavigationFromQuery(textToSend);
+        setIsLoading(false);
+        return;
       }
-      // Always fire navigation — even if we showed an error, open the right panel
-      dispatchNavigationFromQuery(textToSend);
-      setIsLoading(false);
-      return;
     }
 
     let userLat: number | undefined;
@@ -700,9 +704,9 @@ export default function ChatOrchestrator() {
       }
     } catch (e) {}
 
-    // Abort the stream if the backend hangs for more than 10 seconds
+    // Abort the stream if the backend hangs for more than 30 seconds
     const abortController = new AbortController();
-    const streamTimeout = setTimeout(() => abortController.abort(), 10000);
+    const streamTimeout = setTimeout(() => abortController.abort(), 30000);
 
     try {
       const response = await fetch("http://localhost:8000/api/v1/chat", {

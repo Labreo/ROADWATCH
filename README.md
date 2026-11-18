@@ -1,5 +1,7 @@
 # ROADWATCH 🚧 — Civic Infrastructure Intelligence Platform
 
+> **Running the final demo?** See [DEMO.md](DEMO.md): `./scripts/reset-demo-db.sh` then `./scripts/start-demo.sh`, and the step-by-step script.
+
 **ROADWATCH** is a next-generation smart-city infrastructure accountability and transparency platform. Designed to bridge the gap between citizens, contractors, and municipal departments, the platform enables public spend tracking, automated geospatial defect routing, and real-time infrastructure diagnostics through lightweight WebGL digital twins.
 
 ---

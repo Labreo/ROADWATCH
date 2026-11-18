@@ -366,10 +366,10 @@ export const demoSnippets: DemoSnippet[] = [
   },
   {
     id: 'scenario-e',
-    title: 'Granite Guardian Falsification Probe',
+    title: 'Fact-Check Falsification Probe',
     subtitle: 'AI Governance & Verifiable Spine (Sanjaya-RATH Audit)',
     description:
-      'A user feeds the AI a false claim. The Granite Guardian audit layer cross-checks it against the grounded record and refuses to confirm the lie. Covers judging criteria 3.',
+      'A user feeds the AI a false claim. The fact-check audit layer cross-checks it against the grounded record and refuses to confirm the lie. Covers judging criteria 3.',
     criteria: [3],
     duration: '~90s',
     messages: [
@@ -408,8 +408,8 @@ export const demoSnippets: DemoSnippet[] = [
         auditReport: {
           is_grounded: false,
           confidence: 0.97,
-          guardian_model: 'Granite-Guardian-3.0-8B',
-          generator_model: 'Sanjaya-RATH-Core',
+          guardian_model: 'Rule-based DB fact check',
+          generator_model: 'gemini-2.5-flash',
           latency_ms: 412,
           tokens_parsed: 1184,
           audit_log: [
@@ -435,7 +435,7 @@ export const demoSnippets: DemoSnippet[] = [
         title: 'Falsification probe',
         description: 'AI catches a false claim and refuses to confirm it',
         narration:
-          'The user asserts a false claim ("Omega completed SV Road repairs yesterday for ₹4.8 Cr"). The Granite Guardian audit layer decomposes the claim, cross-checks each assertion against the grounded PostGIS ledger, and returns an UNGROUNDED verdict instead of agreeing.',
+          'The user asserts a false claim ("Omega completed SV Road repairs yesterday for ₹4.8 Cr"). The fact-check audit layer decomposes the claim, cross-checks each assertion against the grounded PostGIS ledger, and returns an UNGROUNDED verdict instead of agreeing.',
         dispatchActions: [
           {
             type: 'SET_CONTEXT_VIEW',

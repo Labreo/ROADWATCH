@@ -7,7 +7,7 @@ import { OfflineSyncManager } from '@/services/offlineSync';
 import { playbackSteps } from '@/data/historicalData';
 import { generateStressZones } from '@/data/sensorData';
 
-export type AppView = 'dashboard' | 'reports' | 'roads' | 'contractors' | 'budgets' | 'complaints' | 'admin' | 'playback' | 'sensors' | 'twin' | 'chat' | 'regions';
+export type AppView = 'dashboard' | 'reports' | 'roads' | 'contractors' | 'budgets' | 'complaints' | 'admin' | 'playback' | 'sensors' | 'twin' | 'chat' | 'regions' | 'database';
 
 export type DemoMode = 'off' | 'tour' | 'scripted';
 
@@ -284,7 +284,7 @@ export const useStore = create<AppState>((set, get) => {
             const v = payload.view;
             if (v === 'map' || v === 'roads') {
               updates.activeView = 'roads';
-            } else if (['dashboard', 'contractors', 'budgets', 'complaints', 'admin', 'playback', 'sensors', 'twin', 'chat', 'regions'].includes(v)) {
+            } else if (['dashboard', 'contractors', 'budgets', 'complaints', 'admin', 'playback', 'sensors', 'twin', 'chat', 'regions', 'database'].includes(v)) {
               updates.activeView = v;
             }
           }

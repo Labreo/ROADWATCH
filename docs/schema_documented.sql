@@ -596,6 +596,15 @@ CROSS JOIN (VALUES
 WHERE m.status = 'completed'
 ON CONFLICT (project_id, milestone_num, test_name) DO NOTHING;
 
+-- One core sample below specification on an open milestone, so the payout
+-- block can be shown: verifying it works, releasing the payment does not.
+INSERT INTO milestone_tests (project_id, milestone_num, test_name, measured, unit, spec_min, spec_max, tested_on)
+SELECT m.project_id, m.milestone_num, 'Compacted thickness', 42.0, 'mm', 50.0, NULL, CURRENT_DATE - 3
+FROM project_milestones m
+JOIN projects p ON p.id = m.project_id
+WHERE p.title = 'SV Road Emergency Asphalt Laying' AND m.milestone_num = 2
+ON CONFLICT (project_id, milestone_num, test_name) DO NOTHING;
+
 CREATE OR REPLACE FUNCTION block_payout_on_failed_test()
 RETURNS TRIGGER AS $$
 BEGIN

@@ -137,6 +137,25 @@ def my_reports(user: dict = Depends(require("citizen"))):
     return {"citizen": citizen, "reports": reports}
 
 
+@router.delete("/me/reports/{complaint_id}")
+def withdraw_report(complaint_id: int, user: dict = Depends(require("citizen"))):
+    """A citizen withdraws their own report before work starts. The audit trigger records the deletion."""
+    with tx(user["email"], "Withdrawn by citizen") as cur:
+        cur.execute(
+            """DELETE FROM complaints
+               WHERE id = %s AND citizen_id = %s AND status IN ('pending', 'routed')
+               RETURNING id""",
+            (complaint_id, user["citizen_id"]),
+        )
+        if cur.fetchone():
+            return {"withdrawn": complaint_id}
+        cur.execute("SELECT status FROM complaints WHERE id = %s AND citizen_id = %s", (complaint_id, user["citizen_id"]))
+        found = cur.fetchone()
+    if not found:
+        raise HTTPException(status_code=404, detail="Report not found")
+    raise HTTPException(status_code=409, detail=f"This report is already {found['status'].replace('_', ' ')} and can no longer be withdrawn.")
+
+
 # -------------------------------------------------------------------------
 # Frames 11 to 15: operations
 # -------------------------------------------------------------------------

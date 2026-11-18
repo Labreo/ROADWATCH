@@ -69,6 +69,8 @@ export const apiPost = <T,>(path: string, body?: unknown) =>
     body: body === undefined ? undefined : JSON.stringify(body),
   });
 
+export const apiDelete = <T,>(path: string) => request<T>(path, { method: 'DELETE' });
+
 /** Fetch a backend read model. `reload` refetches after an action succeeds. */
 export function useLive<T>(path: string | null, refreshMs?: number) {
   const [data, setData] = useState<T | null>(null);

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'roadwatch-cache-v2';
+const CACHE_NAME = 'roadwatch-cache-v3';
 const MAP_CACHE_NAME = 'roadwatch-map-tiles';
 const CHAT_CACHE_NAME = 'roadwatch-chat-v1';
 const DYNAMIC_CACHE_NAME = 'roadwatch-dynamic-v1';
@@ -149,8 +149,9 @@ self.addEventListener('fetch', (event) => {
               console.error('Service worker same-origin fetch failed:', err);
             });
 
-          // Return cached response immediately if available, else await network response
-          return cachedResponse || fetchPromise;
+          // Network-first: a cached script from an older build can import
+          // modules that no longer exist, so the cache is only an offline fallback.
+          return fetchPromise.then((networkResponse) => networkResponse || cachedResponse);
         });
       })
     );

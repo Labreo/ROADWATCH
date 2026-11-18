@@ -4,6 +4,7 @@ started by scripts/dev-backend.sh, which enables the sample accounts.
     pytest app/tests/test_access.py -v
 """
 import json
+import os
 import random
 import urllib.error
 import urllib.request
@@ -91,8 +92,26 @@ def test_wrong_password_and_injection_are_rejected():
     assert call("/auth/login", {"email": "' OR 1=1 --", "password": "' OR 1=1 --"})[0] == 401
 
 
-def test_register_files_report_then_logout():
+def remove_test_citizen(email):
+    """Delete the throwaway citizen; the cascade removes its report too."""
+    import psycopg2
+    with psycopg2.connect(
+        host=os.environ.get("POSTGRES_HOST", "localhost"), port=os.environ.get("POSTGRES_PORT", "5432"),
+        user=os.environ.get("POSTGRES_USER", "postgres"), password=os.environ.get("POSTGRES_PASSWORD", "postgres"),
+        dbname=os.environ.get("POSTGRES_DB", "roadwatch"),
+    ) as conn, conn.cursor() as cur:
+        cur.execute("DELETE FROM citizens WHERE email = %s", (email,))
+
+
+@pytest.fixture
+def test_email():
     email = f"citizen-{uuid.uuid4().hex[:10]}@roadwatch.example"
+    yield email
+    remove_test_citizen(email)
+
+
+def test_register_files_report_then_logout(test_email):
+    email = test_email
     code, session = call("/auth/register", {
         "first_name": "Test", "last_name": "Citizen", "email": email,
         "password": "correct-horse", "residential_ward": "K-West", "phone_numbers": ["+91-90000-11111"],
@@ -117,6 +136,11 @@ def test_register_files_report_then_logout():
     code, mine = call("/screens/me/reports", token=token)
     assert code == 200
     assert [report["title"] for report in mine["reports"]] == ["Access test report"]
+
+    report_id = mine["reports"][0]["id"]
+    assert call(f"/screens/me/reports/{report_id}", token=login("citizen"), method="DELETE")[0] == 404
+    assert call(f"/screens/me/reports/{report_id}", token=token, method="DELETE")[0] == 200
+    assert call("/screens/me/reports", token=token)[1]["reports"] == []
 
     assert call("/auth/logout", {}, token)[0] == 200
     assert call("/auth/me", token=token)[0] == 401
