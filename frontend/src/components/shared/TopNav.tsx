@@ -35,7 +35,7 @@ const VIEW_TITLES: Record<string, { label: string; section: string }> = {
   twin:         { label: 'Digital Twin & 3D Crater Lab',     section: 'Intelligence'   },
   admin:        { label: 'Operations Center',                section: 'System'         },
   database:     { label: 'Database Explorer',                section: 'System'         },
-  showcase:     { label: '3 PM Mentorship Showcase Cockpit', section: 'Live Showcase'  },
+  showcase:     { label: 'Showcase Cockpit', section: 'Live Showcase'  },
   pothole3d:    { label: 'img2threejs 3D Pothole Studio',    section: '3D Engineering' },
   monsoon:      { label: 'MonsoonShield Flood Predictor',    section: 'Intelligence'   },
   civictrust:   { label: 'CivicTrust & Statutory RTI',       section: 'Accountability' },
@@ -169,7 +169,7 @@ export default function TopNav() {
 
       {/* Right: action tray */}
       <div className="flex items-center gap-2 shrink-0">
-        {/* 3 PM Mentorship Showcase Mode Quick Button */}
+        {/* Showcase Mode Quick Button */}
         <button
           type="button"
           onClick={() => setActiveView('showcase')}
@@ -178,7 +178,7 @@ export default function TopNav() {
               ? 'bg-cyan-400 text-slate-950 border-cyan-300 shadow-lg shadow-cyan-400/25'
               : 'bg-cyan-950/50 border-cyan-400/50 text-cyan-300 hover:bg-cyan-400 hover:text-slate-950'
           }`}
-          title="Open 3 PM Mentorship Showcase Mode"
+          title="Open Showcase Mode"
         >
           <span>★ Showcase Mode</span>
         </button>

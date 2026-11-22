@@ -585,6 +585,9 @@ export default function Img2ThreePotholeModal({
               </span>
             </div>
             <h2 className="text-sm font-bold text-white">{spec.title}</h2>
+            <p className="mt-0.5 text-[10px] text-amber-300/90">
+              Estimate, not a measurement: an uploaded photo is read by its shading; a report without a photo is modelled from its priority. Confirm on site before ordering material.
+            </p>
           </div>
         </div>
 

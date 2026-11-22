@@ -97,7 +97,7 @@ export default function Sidebar() {
   };
 
   const citizenItems: { id: AppView; label: string; icon: any; badge?: string | number }[] = [
-    { id: 'showcase'     as AppView, label: '3 PM Showcase Mode', icon: Sparkles, badge: 'LIVE' },
+    { id: 'showcase'     as AppView, label: 'Showcase Mode', icon: Sparkles, badge: 'LIVE' },
     { id: 'dashboard'    as AppView, label: 'Overview',           icon: Home },
     { id: 'pothole3d'    as AppView, label: '3D Pothole Studio',  icon: Box, badge: '3D' },
     { id: 'mobile_deck'  as AppView, label: 'Mobile App & Flow',  icon: Smartphone },
@@ -115,7 +115,7 @@ export default function Sidebar() {
   ];
 
   const adminItems: { id: AppView; label: string; icon: any; badge?: string | number }[] = [
-    { id: 'showcase'     as AppView, label: '3 PM Showcase Mode',  icon: Sparkles, badge: 'LIVE' },
+    { id: 'showcase'     as AppView, label: 'Showcase Mode',  icon: Sparkles, badge: 'LIVE' },
     { id: 'dashboard'    as AppView, label: 'Overview',            icon: Home },
     { id: 'pothole3d'    as AppView, label: '3D Pothole Studio',   icon: Box, badge: '3D' },
     { id: 'mobile_deck'  as AppView, label: 'Mobile App & Flow',   icon: Smartphone },

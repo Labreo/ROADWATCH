@@ -135,7 +135,7 @@ export default function ShowcaseMode() {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center gap-1 rounded-full bg-cyan-400 px-2.5 py-0.5 font-mono text-[10px] font-extrabold uppercase text-slate-950">
-                <Sparkles className="h-3 w-3" /> 3 PM MENTORSHIP SHOWCASE MODE
+                <Sparkles className="h-3 w-3" /> SHOWCASE MODE
               </span>
               <span className="font-mono text-xs text-cyan-300">
                 All Features Live · PostgreSQL + PostGIS + Gemini + img2threejs WebGL
@@ -284,7 +284,7 @@ export default function ShowcaseMode() {
               {
                 role: 'citizen' as const,
                 title: '1. Citizen Workflow',
-                account: 'kanakwaradkar@gmail.com',
+                account: 'rohan.shetty@roadwatch.example (sample citizen)',
                 items: [
                   'Register with ward dropdown & password confirmation or Google OAuth 2 + PKCE',
                   'File geotagged report via AI-Lens Camera + img2threejs 3D Crater Scan',
@@ -298,7 +298,7 @@ export default function ShowcaseMode() {
               {
                 role: 'engineer' as const,
                 title: '2. Ward Engineer Workflow',
-                account: 'engineer.kw@mcgm.gov.in (Ward K-West)',
+                account: 'ward.engineer@roadwatch.example (Ward K-West)',
                 items: [
                   'Scoped strictly to own ward (MCGM-KW); cross-ward edits blocked with 403',
                   'Transition ward complaints (routed → in_progress → resolved) via state machine',
@@ -312,7 +312,7 @@ export default function ShowcaseMode() {
               {
                 role: 'admin' as const,
                 title: '3. Administrator Workflow',
-                account: 'admin@roadwatch.gov.in',
+                account: 'commissioner@roadwatch.example',
                 items: [
                   'Full city-wide command center & statutory SLA escalation runner',
                   'Create staff accounts (engineer/auditor/admin) & reset passwords',
@@ -326,7 +326,7 @@ export default function ShowcaseMode() {
               {
                 role: 'auditor' as const,
                 title: '4. Public Auditor Workflow',
-                account: 'auditor@cag.gov.in',
+                account: 'auditor@roadwatch.example',
                 items: [
                   'Read-only forensic access across all regions under SET LOCAL ROLE roadwatch_auditor',
                   'Inspect append-only audit_log with side-by-side JSONB old_values vs new_values',

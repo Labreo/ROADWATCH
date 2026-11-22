@@ -405,7 +405,7 @@ export default function MobileAppPresentation({
           <div className="rounded-xl border border-amber-400/30 bg-amber-500/10 p-4">
             <div className="flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase text-amber-300">
               <Sparkles className="h-3.5 w-3.5" />
-              3 PM Mentorship Talking Point
+              Talking Point
             </div>
             <p className="mt-1 text-xs text-amber-100 leading-relaxed">{slide.mentorNote}</p>
           </div>

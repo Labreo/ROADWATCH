@@ -1,0 +1,31 @@
+Sample pothole photos for the ROADWATCH demo, from Wikimedia Commons.
+
+04-street-pothole-kyiv.jpg
+  Original: A pothole in Dilova Street in Kyiv.jpg
+  Author: Роман Рябенко
+  Licence: CC0 http://creativecommons.org/publicdomain/zero/1.0/deed.en
+  Source: https://commons.wikimedia.org/wiki/File:A_pothole_in_Dilova_Street_in_Kyiv.jpg
+
+03-water-filled-pothole.jpg
+  Original: Pothole in Potomac after rain.jpg
+  Author: Ser Amantio di Nicolao
+  Licence: CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0
+  Source: https://commons.wikimedia.org/wiki/File:Pothole_in_Potomac_after_rain.jpg
+
+05-pothole-montreal.jpg
+  Original: Pothole in Villeray, Montréal.jpg
+  Author: Miguel Tremblay
+  Licence: Public domain 
+  Source: https://commons.wikimedia.org/wiki/File:Pothole_in_Villeray,_Montr%C3%A9al.jpg
+
+02-asphalt-pothole-closeup.jpg
+  Original: Pothole in an asphalt pavement.jpg
+  Author: Frankie Fouganthin
+  Licence: CC BY-SA 4.0 https://creativecommons.org/licenses/by-sa/4.0
+  Source: https://commons.wikimedia.org/wiki/File:Pothole_in_an_asphalt_pavement.jpg
+
+01-bengaluru-potholes.jpg
+  Original: Potholes in Bengaluru road.jpg
+  Author: Mallikarjunasj
+  Licence: CC0 http://creativecommons.org/publicdomain/zero/1.0/deed.en
+  Source: https://commons.wikimedia.org/wiki/File:Potholes_in_Bengaluru_road.jpg

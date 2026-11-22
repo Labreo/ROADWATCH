@@ -862,7 +862,7 @@ export default function Page() {
         <AdminRestrictedView />
       )}
 
-      {/* VIEW 12: 3 PM MENTORSHIP SHOWCASE COCKPIT */}
+      {/* VIEW 12: SHOWCASE COCKPIT */}
       {!isChatDriven && activeView === 'showcase' && (
         <ErrorBoundary>
           <div className="flex-1 min-h-0 overflow-y-auto pr-1">
