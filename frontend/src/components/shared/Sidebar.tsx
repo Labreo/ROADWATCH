@@ -17,6 +17,7 @@ import {
   TriangleAlert,
   FileText,
   Database,
+  Radio,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -96,6 +97,7 @@ export default function Sidebar() {
     { id: 'budgets'     as AppView, label: 'Budget Compliance', icon: Coins },
     { id: 'contractors' as AppView, label: 'Contractor Scores', icon: HardHat },
     { id: 'complaints'  as AppView, label: 'Report an Issue',   icon: TriangleAlert },
+    { id: 'ride'        as AppView, label: 'Bump Radar',        icon: Radio },
     { id: 'reports'     as AppView, label: 'My Reports',        icon: FileText },
     { id: 'regions'     as AppView, label: 'Regions Hub',       icon: Globe },
   ];
@@ -107,6 +109,7 @@ export default function Sidebar() {
     { id: 'budgets'     as AppView, label: 'Budget Compliance',   icon: Coins },
     { id: 'contractors' as AppView, label: 'Contractor Scores',   icon: HardHat },
     { id: 'complaints'  as AppView, label: 'Complaints',          icon: TriangleAlert },
+    { id: 'ride'        as AppView, label: 'Bump Radar',          icon: Radio },
     { id: 'admin'       as AppView, label: 'Operations Dashboard', icon: Shield },
     { id: 'playback'    as AppView, label: 'Playback',            icon: Clock },
     { id: 'sensors'     as AppView, label: 'Sensor Monitor',      icon: Activity },

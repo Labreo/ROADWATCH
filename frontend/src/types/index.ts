@@ -20,6 +20,8 @@ export interface Authority {
   conflictGroupId?: number;
   regionCode?: string;
   timezone?: string;
+  /** Engineer account assigned to this ward, from the database. */
+  officerName?: string;
 }
 
 export interface Contractor {

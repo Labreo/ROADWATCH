@@ -13,6 +13,18 @@ if [ -z "${GEMINI_API_KEY:-}" ] && [ -f "$KEY_FILE" ]; then
   export GEMINI_API_KEY
 fi
 
+# Google sign-in (optional): put GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in
+# .roadwatch-secrets at the project root. That file is git-ignored.
+SECRETS_FILE="$ROOT/.roadwatch-secrets"
+if [ -f "$SECRETS_FILE" ]; then
+  for name in GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET; do
+    if [ -z "${!name:-}" ]; then
+      value="$(sed -nE "s/^[[:space:]]*(export[[:space:]]+)?$name=//p" "$SECRETS_FILE" | head -1 | tr -d "\"' ")"
+      [ -n "$value" ] && export "$name=$value"
+    fi
+  done
+fi
+
 export ROADWATCH_DEMO_LOGIN=1
 export POSTGRES_HOST=localhost POSTGRES_PORT="${POSTGRES_PORT:-5432}"
 export POSTGRES_USER=postgres POSTGRES_PASSWORD=postgres POSTGRES_DB=roadwatch

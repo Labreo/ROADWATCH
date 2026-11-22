@@ -130,7 +130,11 @@ conda create -n roadwatch-db -c conda-forge postgis python=3.11 pip
 cd frontend && npm run dev          # App on http://localhost:3000
 ```
 `./scripts/start-demo.sh` runs all three; `./scripts/reset-demo-db.sh` rebuilds the database from the seed files. The demo walkthrough is in `DEMO.md`; the Database screen (`frontend/src/components/live/DatabaseScreen.tsx`, `backend/app/api/db_explorer.py`) shows the schema and runs fixed read-only example queries.
-`docs/schema_documented.sql` adds what Documents 1, 3 and 4 specify (citizens, status history, state machine, spatial routing, audit lock, role views, sensors, sign-in, milestone tests). `docs/seed_wireframes.sql` scales invented Mumbai sample data to the wireframe totals. Load order: `schema.sql`, `mock_data.sql`, `schema_documented.sql`, `seed_wireframes.sql`.
+`docs/schema_documented.sql` adds what Documents 1, 3 and 4 specify (citizens, status history, state machine, spatial routing, audit lock, role views, sensors, sign-in, milestone tests). `docs/seed_wireframes.sql` scales invented Mumbai sample data to the wireframe totals. Load order: `schema.sql`, `mock_data.sql`, `schema_documented.sql`, `seed_wireframes.sql`, `schema_wow.sql` (Bump Radar `ride_bumps`, `repair_checks`, 3-year sample warranties).
+
+Shared data: `frontend/src/services/liveData.ts` loads authorities, contractors, projects, roads and complaints from `/screens/reference`, `/screens/roads`, `/screens/complaints` into the arrays in `src/data/mockData.ts`, so older components (map, road panel, wizard, timeline) show database rows; the bundled rows are only the offline fallback.
+
+Accountability features (`backend/app/api/wow.py`): Bump Radar (`components/live/BumpRadar.tsx`, detector in `services/bumpDetector.ts`; PostGIS `ST_ClusterDBSCAN`, 3 shocks from 2 rides within 15 m files a report), warranty clawback (Budget Compliance → Warranty claims, Gemini drafts the notice from DB facts), proof of repair (My Reports → Check the repair on site, 50 m GPS check + Gemini; a failed check opens an escalated follow-up via `parent_complaint_id`).
 
 The wireframe screens live in `frontend/src/components/live/` and read `backend/app/api/screens.py`.
 
@@ -138,7 +142,7 @@ The wireframe screens live in `frontend/src/components/live/` and read `backend/
 Chat and photo analysis use Gemini through its OpenAI-compatible endpoint (`backend/app/services/llm_config.py`). Set `GEMINI_API_KEY`; `LLM_MODEL` overrides the model. Keep the key server-side.
 
 ### Sign-in and roles
-`backend/app/api/auth.py` handles citizen, engineer, admin and auditor accounts. Passwords are pgcrypto bcrypt hashes and sessions store only a token hash. Public transparency screens need no sign-in. Role-specific reads run under `SET LOCAL ROLE roadwatch_<role>` through the views in `schema_documented.sql`. `ROADWATCH_DEMO_LOGIN=1`, set by `scripts/dev-backend.sh`, enables one-click sample accounts; never set it on a deployment.
+`backend/app/api/auth.py` handles citizen, engineer, admin and auditor accounts. Passwords are pgcrypto bcrypt hashes and sessions store only a token hash. Public transparency screens need no sign-in. Google sign-in (OAuth 2 + PKCE, `/auth/google/*`) turns on when `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` are in the git-ignored `.roadwatch-secrets` (see `.roadwatch-secrets.example`); it signs in the account with Google's verified email or creates a citizen. Administrators create engineer/admin/auditor accounts and reset passwords in Operations → Staff accounts (`/auth/users`); engineers can only change reports and milestones in their own ward. Role-specific reads run under `SET LOCAL ROLE roadwatch_<role>` through the views in `schema_documented.sql`. `ROADWATCH_DEMO_LOGIN=1`, set by `scripts/dev-backend.sh`, enables one-click sample accounts; never set it on a deployment.
 
 ### Tests
 With the API running from `scripts/dev-backend.sh`:

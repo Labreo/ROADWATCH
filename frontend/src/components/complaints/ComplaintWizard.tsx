@@ -25,6 +25,7 @@ import dynamic from 'next/dynamic';
 import { routeComplaint, RoutingResult } from '@/services/routingEngine';
 import { API_BASE } from '@/services/api';
 import { OfflineSyncManager } from '@/services/offlineSync';
+import { refreshLiveData } from '@/services/liveData';
 import { ComplaintCategory, Complaint, Road } from '@/types';
 import { roads } from '@/data/mockData';
 
@@ -327,6 +328,8 @@ export default function ComplaintWizard() {
       const ticket = await queueComplaint(complaintData);
       setTicketResult(ticket);
       setStep(5);
+      // Pull the saved report (with the ward the database routed it to) into the map and registry.
+      refreshLiveData();
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'This report could not be filed.');
     }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useLive } from '@/services/api';
 import { motion } from 'framer-motion';
 import {
   AlertTriangle,
@@ -26,7 +27,7 @@ interface StepDef {
   /** Which complaint statuses count this step as "active" (pulsing) */
   activeStatuses: ComplaintStatus[];
   description: (c: Complaint) => string;
-  timestamp: (c: Complaint) => string | null;
+  timestamp: (c: Complaint, when: Record<string, string>) => string | null;
 }
 
 const STEPS: StepDef[] = [
@@ -52,11 +53,7 @@ const STEPS: StepDef[] = [
       const name = authority?.name ?? `Authority #${c.assignedAuthorityId}`;
       return `Assigned to ${name} for processing.`;
     },
-    timestamp: (c) => {
-      // For pending, no timestamp yet; for others, use createdAt (real data would use routedAt)
-      if (c.status === 'pending') return null;
-      return c.createdAt;
-    },
+    timestamp: (c, when) => when.routed ?? (c.status === 'pending' ? null : c.createdAt),
   },
   {
     key: 'in_progress',
@@ -72,15 +69,7 @@ const STEPS: StepDef[] = [
       }
       return 'Awaiting assignment and scheduling by the responsible authority.';
     },
-    timestamp: (c) => {
-      if (c.status === 'in_progress' || c.status === 'resolved') {
-        // Offset by 1 day from created as approximation; real data would have startedAt
-        const d = new Date(c.createdAt);
-        d.setDate(d.getDate() + 1);
-        return d.toISOString();
-      }
-      return null;
-    },
+    timestamp: (_c, when) => when.in_progress ?? null,
   },
   {
     key: 'terminal',
@@ -98,15 +87,7 @@ const STEPS: StepDef[] = [
       }
       return 'SLA target pending — awaiting authority action.';
     },
-    timestamp: (c) => {
-      if (c.status === 'resolved' || c.status === 'rejected') {
-        // Offset by 3 days from created as approximation
-        const d = new Date(c.createdAt);
-        d.setDate(d.getDate() + 3);
-        return d.toISOString();
-      }
-      return null;
-    },
+    timestamp: (_c, when) => when.resolved ?? when.rejected ?? null,
   },
 ];
 
@@ -180,6 +161,14 @@ export interface ComplaintTimelineProps {
 
 export default function ComplaintTimeline({ complaint }: ComplaintTimelineProps) {
   const { status, createdAt } = complaint;
+  // Real status changes from the database (reports still queued offline have none yet).
+  const { data: history } = useLive<{ new_status: string; changed_at: string }[]>(
+    complaint.id < 100000 ? `/screens/complaints/${complaint.id}/history` : null);
+  const when = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const h of history ?? []) map[h.new_status] = h.changed_at;
+    return map;
+  }, [history]);
 
   const authorityName = useMemo(() => {
     const a = getAuthority(complaint.assignedAuthorityId);
@@ -253,7 +242,7 @@ export default function ComplaintTimeline({ complaint }: ComplaintTimelineProps)
           const DisplayIcon =
             step.key === 'terminal' && isRejected ? AlertTriangle : Icon;
 
-          const ts = step.timestamp(complaint);
+          const ts = step.timestamp(complaint, when);
           const desc = step.description(complaint);
           const isLast = idx === STEPS.length - 1;
 

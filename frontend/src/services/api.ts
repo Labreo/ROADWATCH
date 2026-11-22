@@ -45,6 +45,27 @@ export function authHeaders(): Record<string, string> {
   return session ? { Authorization: `Bearer ${session.token}` } : {};
 }
 
+const FIELD_NAMES: Record<string, string> = {
+  email: 'Email', password: 'Password', new_password: 'New password', current_password: 'Current password',
+  first_name: 'First name', last_name: 'Last name', residential_ward: 'Ward', display_name: 'Name',
+};
+
+/** Turn FastAPI's error body (a string, or a list of field errors) into one readable sentence. */
+function errorText(detail: unknown, status: number): string {
+  if (typeof detail === 'string') return detail;
+  if (Array.isArray(detail) && detail.length > 0) {
+    return detail.map((item: { loc?: unknown[]; msg?: string }) => {
+      const field = String(item.loc?.[item.loc.length - 1] ?? '');
+      const msg = (item.msg ?? 'is not valid').replace(/^Value error, /, '');
+      const label = FIELD_NAMES[field];
+      if (/at least (\d+) characters/.test(msg)) return `${label ?? 'This field'} needs at least ${msg.match(/(\d+)/)?.[1]} characters.`;
+      return label && !msg.toLowerCase().includes(label.toLowerCase()) ? `${label}: ${msg}.` : `${msg}.`;
+    }).join(' ');
+  }
+  if (detail && typeof detail === 'object' && 'message' in detail) return String((detail as { message: string }).message);
+  return `Request failed (${status})`;
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response;
   try {
@@ -54,8 +75,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   }
   if (!response.ok) {
     const body = await response.json().catch(() => null);
-    const detail = typeof body?.detail === 'string' ? body.detail : `Request failed (${response.status})`;
-    throw new ApiError(detail, response.status);
+    throw new ApiError(errorText(body?.detail, response.status), response.status);
   }
   return response.json();
 }

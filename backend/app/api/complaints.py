@@ -302,8 +302,8 @@ async def get_complaint_queue(
     }
 
 
-@router.post("/complaints/{complaint_id}/decline", dependencies=[Depends(require(*WRITERS))])
-async def decline_complaint(complaint_id: int, payload: DeclinePayload):
+@router.post("/complaints/{complaint_id}/decline")
+async def decline_complaint(complaint_id: int, payload: DeclinePayload, user: dict = Depends(require(*WRITERS))):
     """
     Authority declines a complaint assignment. System reroutes to next-best authority.
     """
@@ -318,6 +318,8 @@ async def decline_complaint(complaint_id: int, payload: DeclinePayload):
         raise HTTPException(status_code=404, detail="Complaint not found.")
 
     complaint = complaints[0]
+    if user["role"] == "engineer" and complaint["assigned_authority_id"] != user["authority_id"]:
+        raise HTTPException(status_code=403, detail="This report belongs to another ward.")
 
     if complaint["status"] not in ("routed", "pending"):
         raise HTTPException(
@@ -431,6 +433,8 @@ async def get_escalation_chain(complaint_id: int):
     if not complaint:
         raise HTTPException(status_code=404, detail="Complaint not found.")
     complaint = complaint[0]
+    if user["role"] == "engineer" and complaint["assigned_authority_id"] != user["authority_id"]:
+        raise HTTPException(status_code=403, detail="This report belongs to another ward.")
 
     # Fetch escalation audit trail
     escalations = db.query(
@@ -529,8 +533,8 @@ async def submit_routing_feedback(complaint_id: int, payload: RoutingFeedbackPay
     }
 
 
-@router.put("/complaints/{complaint_id}/status", dependencies=[Depends(require(*WRITERS))])
-async def update_complaint_status(complaint_id: int, payload: dict):
+@router.put("/complaints/{complaint_id}/status")
+async def update_complaint_status(complaint_id: int, payload: dict, user: dict = Depends(require(*WRITERS))):
     """
     B1: Update complaint status and send citizen notification.
     Payload: { "status": "resolved" }

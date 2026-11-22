@@ -30,7 +30,7 @@ def health_score(status: str, open_complaints: int) -> int:
 # -------------------------------------------------------------------------
 ROAD_SQL = """
 SELECT r.id, r.name, r.road_code, r.status, r.road_type, r.length_km, r.surface_type, r.lane_count,
-       r.width_m, r.aadt, r.last_relaying_date, a.name AS authority, a.department_code,
+       r.width_m, r.aadt, r.last_relaying_date, r.authority_id, a.name AS authority, a.department_code,
        ct.name AS contractor, ct.contractor_code, ct.blacklisted AS contractor_blacklisted,
        ST_AsGeoJSON(r.geom)::json -> 'coordinates' AS coordinates,
        COUNT(c.id) FILTER (WHERE c.status IN ('pending','routed','in_progress')) AS open_complaints,
@@ -204,6 +204,17 @@ def operations(region: str = "IN", user: dict = Depends(require(*STAFF))):
     return {"kpi": kpi, "delivery": delivery, "queue": queue, "webhooks": hooks, "log": log, "jurisdictions": jurisdictions}
 
 
+def own_ward_only(cur, user: dict, table: str, record_id: int) -> None:
+    """Engineers act only inside their own ward or department; admins act anywhere."""
+    if user["role"] != "engineer":
+        return
+    column = "assigned_authority_id" if table == "complaints" else "authority_id"
+    cur.execute(f"SELECT {column} AS authority_id FROM {table} WHERE id = %s", (record_id,))
+    found = cur.fetchone()
+    if found and found["authority_id"] != user["authority_id"]:
+        raise HTTPException(status_code=403, detail="This belongs to another ward. Only that ward's engineer or an administrator can change it.")
+
+
 class Transition(BaseModel):
     status: str
     remarks: str = Field(default="", max_length=500)
@@ -212,6 +223,7 @@ class Transition(BaseModel):
 @router.post("/complaints/{complaint_id}/transition")
 def transition(complaint_id: int, body: Transition, user: dict = Depends(require("engineer", "admin"))):
     with tx(user["email"], body.remarks) as cur:
+        own_ward_only(cur, user, "complaints", complaint_id)
         cur.execute("UPDATE complaints SET status = %s WHERE id = %s RETURNING id, status",
                     (body.status, complaint_id))
         updated = cur.fetchone()
@@ -223,6 +235,7 @@ def transition(complaint_id: int, body: Transition, user: dict = Depends(require
 @router.post("/complaints/{complaint_id}/escalate")
 def escalate(complaint_id: int, user: dict = Depends(require("engineer", "admin"))):
     with tx(user["email"]) as cur:
+        own_ward_only(cur, user, "complaints", complaint_id)
         cur.execute("SELECT escalation_level FROM complaints WHERE id = %s FOR UPDATE", (complaint_id,))
         current = cur.fetchone()
         if not current:
@@ -349,6 +362,7 @@ class MilestoneVerify(BaseModel):
 @router.post("/projects/{project_id}/milestones/{milestone_num}/verify")
 def verify_milestone(project_id: int, milestone_num: int, body: MilestoneVerify, user: dict = Depends(require("engineer", "admin"))):
     with tx(user["email"]) as cur:
+        own_ward_only(cur, user, "projects", project_id)
         cur.execute(
             """UPDATE project_milestones SET status = 'completed', completion_date = COALESCE(completion_date, CURRENT_DATE),
                       verified_by = %s WHERE project_id = %s AND milestone_num = %s RETURNING milestone_num, status""",
@@ -596,3 +610,38 @@ def twin(road_id: int, user: dict = Depends(require(*STAFF))):
                FROM project_warranties w JOIN projects p ON p.id = w.project_id
                JOIN contractors c ON c.id = p.contractor_id WHERE p.road_id = %s""", (road_id,)),
     }
+
+
+# -------------------------------------------------------------------------
+# Reference data the older map, wizard and chat panels read: authorities with
+# their boundaries, contractors and projects, all straight from PostgreSQL.
+# -------------------------------------------------------------------------
+@router.get("/reference")
+def reference(region: str = "IN"):
+    authorities = rows(
+        """SELECT a.id, a.name, a.department_code, a.contact_email, a.contact_phone, a.region_code, a.conflict_group_id,
+                  ST_AsGeoJSON(a.geom_boundary)::json AS boundary,
+                  (SELECT u.display_name FROM app_users u WHERE u.role = 'engineer' AND u.authority_id = a.id
+                   ORDER BY u.id LIMIT 1) AS engineer
+           FROM authorities a WHERE a.region_code = %s ORDER BY a.id""", (region,))
+    contractors = rows(
+        """SELECT id, name, license_number, registration_date, contact_email, contact_phone, rating,
+                  projects_completed, projects_delayed, blacklisted, blacklisted_reason
+           FROM contractors ORDER BY id""")
+    projects = rows(
+        """SELECT p.id, p.title, p.road_id, p.contractor_id, p.authority_id, p.budget_allocated, p.budget_spent,
+                  p.status, p.start_date, p.target_end_date, p.actual_end_date, p.delay_days,
+                  COALESCE((SELECT json_agg(json_build_object('sourceName', f.source_name, 'amount', f.amount)
+                                         ORDER BY f.amount DESC)
+                            FROM fund_sources f WHERE f.project_id = p.id), '[]'::json) AS fund_sources
+           FROM projects p JOIN authorities a ON a.id = p.authority_id
+           WHERE a.region_code = %s ORDER BY p.id""", (region,))
+    return {"authorities": authorities, "contractors": contractors, "projects": projects}
+
+
+@router.get("/complaints/{complaint_id}/history")
+def complaint_history(complaint_id: int):
+    """Public status trail of one report (no citizen details), for the timeline."""
+    return rows(
+        """SELECT history_seq, old_status, new_status, changed_at
+           FROM status_history WHERE complaint_id = %s ORDER BY history_seq""", (complaint_id,))

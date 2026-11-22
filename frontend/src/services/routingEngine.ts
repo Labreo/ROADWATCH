@@ -225,7 +225,13 @@ function offlineRoute(longitude: number, latitude: number, resolvedRoadId: numbe
 function createOfflineResult(authority: Authority, type: RoutingResult['jurisdictionType'], trail: string[]): RoutingResult {
   const template = globalTemplates.IN;
   const tierTemplate = template.tiers[type] || template.tiers.pwd_default;
-  const engineer = executiveEngineers[authority.id] || { name: 'Commissioner Office', email: 'commissioner@mcgm.gov.in', phone: '+91-22-2262-0251' };
+  // Live data: the ward's engineer account and the authority's own contact details.
+  const fallback = executiveEngineers[authority.id] || { name: 'Commissioner Office', email: 'commissioner@mcgm.gov.in', phone: '+91-22-2262-0251' };
+  const engineer = {
+    name: authority.officerName ?? (authority.contactEmail ? `${authority.departmentCode} duty engineer` : fallback.name),
+    email: authority.contactEmail || fallback.email,
+    phone: authority.contactPhone || fallback.phone,
+  };
 
   return {
     authorityId: authority.id,

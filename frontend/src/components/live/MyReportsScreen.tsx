@@ -3,6 +3,7 @@
 import { useStore } from '@/store/useStore';
 import { apiDelete, useLive } from '@/services/api';
 import { ActionButton, Card, Kpi, KpiRow, Loadable, Mono, StatusBadge, hours, shortDate } from './ui';
+import RepairCheck from './RepairCheck';
 
 interface Report {
   id: number; title: string; status: string; priority: number; created_at: string; authority: string | null;
@@ -61,6 +62,7 @@ export default function MyReportsScreen() {
                     </li>
                   ))}
                 </ol>
+                {r.status === 'resolved' && <RepairCheck reportId={r.id} onDone={state.reload} />}
                 {['pending', 'routed'].includes(r.status) && (
                   <ActionButton
                     variant="danger"

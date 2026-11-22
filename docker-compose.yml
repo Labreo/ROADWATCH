@@ -16,6 +16,7 @@ services:
       - ./docs/mock_data.sql:/docker-entrypoint-initdb.d/02_mock_data.sql
       - ./docs/schema_documented.sql:/docker-entrypoint-initdb.d/03_schema_documented.sql
       - ./docs/seed_wireframes.sql:/docker-entrypoint-initdb.d/04_seed_wireframes.sql
+      - ./docs/schema_wow.sql:/docker-entrypoint-initdb.d/05_schema_wow.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d roadwatch"]
       interval: 5s

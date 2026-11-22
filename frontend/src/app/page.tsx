@@ -59,10 +59,12 @@ import LedgerScreen from '@/components/live/LedgerScreen';
 import ContractorsScreen from '@/components/live/ContractorsScreen';
 import RegionsScreen from '@/components/live/RegionsScreen';
 import DatabaseScreen from '@/components/live/DatabaseScreen';
+import BumpRadar from '@/components/live/BumpRadar';
 import SensorsScreen from '@/components/live/SensorsScreen';
 import PlaybackScreen from '@/components/live/PlaybackScreen';
 import MyReportsScreen from '@/components/live/MyReportsScreen';
-import { apiGet, loadSession } from '@/services/api';
+import { API_BASE, SessionUser, apiGet, loadSession } from '@/services/api';
+import { loadLiveData } from '@/services/liveData';
 import LoginDialog from '@/components/shared/LoginDialog';
 
 import DigitalTwinView from '@/components/twin/DigitalTwinView';
@@ -78,55 +80,7 @@ import ContractorHistoryCard from '@/components/transparency/ContractorHistoryCa
 import TransparencyScoreCard from '@/components/transparency/TransparencyScoreCard';
 import SankeyFlowVisualizer from '@/components/transparency/SankeyFlowVisualizer';
 
-interface LiveRoad {
-  id: number; name: string; road_code: string; road_type: Road['roadType']; status: Road['status'];
-  length_km: number; last_relaying_date: string | null; coordinates: [number, number][];
-  surface_type: Road['surfaceType'] | null; lane_count: number | null; width_m: number | null; aadt: number | null;
-}
 
-const toRoad = (row: LiveRoad): Road => ({
-  id: row.id,
-  name: row.name,
-  roadCode: row.road_code,
-  roadType: row.road_type,
-  status: row.status,
-  lengthKm: Number(row.length_km),
-  authorityId: roads.find(existing => existing.id === row.id)?.authorityId ?? 0,
-  lastRelayingDate: row.last_relaying_date ?? '',
-  geometry: { type: 'LineString', coordinates: row.coordinates },
-  surfaceType: row.surface_type ?? undefined,
-  laneCount: row.lane_count ?? undefined,
-  widthM: row.width_m === null ? undefined : Number(row.width_m),
-  aadt: row.aadt ?? undefined,
-});
-
-interface LiveComplaint {
-  id: number; client_temp_id: string | null; title: string; description: string; category: Complaint['category'];
-  status: Complaint['status']; priority: number; escalation_level: Complaint['escalationLevel']; created_at: string;
-  assigned_authority_id: number | null; road_id: number | null; image_url: string | null;
-  target_resolution_hours: number; sla_breached_at: string | null; last_escalated_at: string | null;
-  road_name: string | null; coordinates: [number, number];
-}
-
-const toComplaint = (row: LiveComplaint): Complaint => ({
-  id: row.id,
-  clientTempId: row.client_temp_id ?? undefined,
-  title: row.title,
-  description: row.description,
-  category: row.category,
-  geometry: { type: 'Point', coordinates: row.coordinates },
-  status: row.status,
-  escalationLevel: row.escalation_level,
-  priority: row.priority,
-  slaBreachedAt: row.sla_breached_at ?? undefined,
-  lastEscalatedAt: row.last_escalated_at ?? undefined,
-  targetResolutionHours: row.target_resolution_hours,
-  assignedAuthorityId: row.assigned_authority_id ?? 0,
-  roadId: row.road_id ?? undefined,
-  roadName: row.road_name ?? undefined,
-  createdAt: row.created_at,
-  imageUrl: row.image_url ?? undefined,
-});
 
 export default function Page() {
   const {
@@ -178,27 +132,13 @@ export default function Page() {
   const drawerRoad = selectedRoadId ? roads.find(r => r.id === selectedRoadId) : null;
   const drawerProjects = drawerRoad ? projects.filter(p => p.roadId === drawerRoad.id) : projects;
 
-  // Replace the bundled road list with database rows when the backend is up.
-  // Every consumer reads the shared `roads` array, so update it in place.
-  const [, setLiveRoadsVersion] = useState(0);
+  // Replace the bundled sample rows (roads, complaints, authorities, contractors,
+  // projects) with database rows when the backend is up; retry while offline.
+  const liveDataVersion = useStore(s => s.liveDataVersion);
   useEffect(() => {
     let cancelled = false;
     let retry: ReturnType<typeof setTimeout> | undefined;
-    const load = () => Promise.all([
-      apiGet<LiveRoad[]>(`/screens/roads?region=${regionCode}&major=true`),
-      apiGet<LiveComplaint[]>(`/screens/complaints?region=${regionCode}`),
-    ]).then(([liveRoads, liveComplaints]) => {
-      if (cancelled) return;
-      if (liveRoads.length > 0) {
-        roads.splice(0, roads.length, ...liveRoads.map(toRoad));
-        setLiveRoadsVersion(version => version + 1);
-      }
-      const saved = new Set(liveComplaints.map(row => row.client_temp_id));
-      // Keep reports still queued on this device until the server has them.
-      const queued = useStore.getState().complaintsList.filter(c => c.clientTempId && c.id >= 100000 && !saved.has(c.clientTempId));
-      useStore.setState({ complaintsList: [...queued, ...liveComplaints.map(toComplaint)] });
-    }).catch(() => {
-      // Offline: keep bundled data and try again until the backend answers.
+    const load = () => loadLiveData(regionCode).catch(() => {
       if (!cancelled) retry = setTimeout(load, 5000);
     });
     load();
@@ -207,6 +147,25 @@ export default function Page() {
       clearTimeout(retry);
     };
   }, [regionCode]);
+
+  // Finish "Sign in with Google": the backend sends the browser back here with
+  // the session token (or an error) in the URL fragment.
+  const [oauthError, setOauthError] = useState<string | null>(null);
+  useEffect(() => {
+    const hash = new URLSearchParams(window.location.hash.slice(1));
+    const token = hash.get('auth_token');
+    const failure = hash.get('auth_error');
+    if (!token && !failure) return;
+    window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    if (failure) {
+      setOauthError(failure);
+      return;
+    }
+    fetch(`${API_BASE}/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => (res.ok ? res.json() : Promise.reject(new Error('Google sign-in could not be completed.'))))
+      .then((user: SessionUser) => useStore.getState().setSession({ token: token as string, user }))
+      .catch(err => setOauthError(err instanceof Error ? err.message : 'Google sign-in could not be completed.'));
+  }, []);
 
   // Drop a stored session the server no longer recognises.
   useEffect(() => {
@@ -847,6 +806,15 @@ export default function Page() {
         <AdminRestrictedView />
       )}
 
+      {/* BUMP RADAR: pothole detection from a riding phone's accelerometer */}
+      {!isChatDriven && activeView === 'ride' && (
+        <ErrorBoundary>
+          <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+            <BumpRadar />
+          </div>
+        </ErrorBoundary>
+      )}
+
       {/* VIEW 10: REGIONS HUB (Frame 15) */}
       {!isChatDriven && activeView === 'regions' && (
         <ErrorBoundary>
@@ -1113,6 +1081,12 @@ export default function Page() {
       {/* Complaint wizard overlay */}
       <ComplaintWizard />
       <LoginDialog />
+      {oauthError && (
+        <div role="alert" className="fixed bottom-6 left-1/2 z-[2100] flex -translate-x-1/2 items-center gap-3 rounded-lg border border-rose-500/40 bg-slate-950 px-4 py-3 text-[13px] text-rose-200 shadow-xl">
+          {oauthError}
+          <button onClick={() => setOauthError(null)} className="text-rose-300 underline">Dismiss</button>
+        </div>
+      )}
 
 
     </div>

@@ -41,6 +41,7 @@ Thumbs.db
 docs/*
 !docs/schema_documented.sql
 !docs/seed_wireframes.sql
+!docs/schema_wow.sql
 README.md
 *.zip
 *.docx
@@ -50,3 +51,6 @@ Competiton
 post_mortem_analysis
 # Local PostgreSQL data directory (scripts/dev-db.sh)
 .roadwatch-pg/
+
+# Local secrets (Google sign-in)
+.roadwatch-secrets

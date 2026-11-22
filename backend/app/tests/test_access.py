@@ -171,3 +171,122 @@ def test_audit_log_is_for_admins_and_auditors(tokens):
     assert call("/audit/log")[0] == 401
     assert call("/audit/log", token=tokens["citizen"])[0] == 403
     assert call("/audit/log", token=tokens["auditor"])[0] == 200
+
+
+def test_engineer_cannot_change_another_wards_report(tokens):
+    me = call("/auth/me", token=tokens["engineer"])[1]
+    reports = call("/screens/complaints?region=IN")[1]
+    foreign = next((r for r in reports if r["assigned_authority_id"] not in (me["authority_id"], None)
+                    and r["status"] in ("pending", "routed")), None)
+    assert foreign, "sample data should have an open report in another ward"
+    assert call(f"/screens/complaints/{foreign['id']}/transition", {"status": "in_progress"}, tokens["engineer"])[0] == 403
+    assert call(f"/screens/complaints/{foreign['id']}/escalate", {}, tokens["engineer"])[0] == 403
+
+
+def test_admin_manages_staff_accounts(tokens):
+    email = f"eng-{uuid.uuid4().hex[:8]}@roadwatch.example"
+    code, created = call("/auth/users", {"email": email, "display_name": "Test Engineer", "role": "engineer",
+                                         "authority_id": 2, "password": "ward-fn-2026"}, tokens["admin"])
+    assert code == 200
+    try:
+        assert call("/auth/users", {"email": "x@roadwatch.example", "display_name": "x", "role": "engineer",
+                                    "password": "ward-fn-2026"}, tokens["admin"])[0] == 400
+        assert call("/auth/users", {"email": "y@roadwatch.example", "display_name": "y", "role": "admin",
+                                    "password": "ward-fn-2026"}, tokens["engineer"])[0] == 403
+        code, session = call("/auth/login", {"email": email, "password": "ward-fn-2026"})
+        assert code == 200 and session["user"]["authority_id"] == 2
+        assert call(f"/auth/users/{created['id']}/password", {"new_password": "reset-pass-2026"}, tokens["admin"])[0] == 200
+        assert call("/auth/me", token=session["token"])[0] == 401
+    finally:
+        assert call(f"/auth/users/{created['id']}", token=tokens["admin"], method="DELETE")[0] == 200
+
+
+def test_register_errors_and_password_change(test_email):
+    body = {"first_name": "Test", "last_name": "Citizen", "email": test_email,
+            "password": "correct-horse", "residential_ward": "K-West"}
+    code, session = call("/auth/register", body)
+    assert code == 200
+    code, error = call("/auth/register", body)
+    assert code == 409 and "already exists" in error["detail"]
+    assert call("/auth/register", {**body, "email": "not-an-email"})[0] == 422
+    token = session["token"]
+    assert call("/auth/password", {"current_password": "wrong", "new_password": "new-horse-2026"}, token)[0] == 400
+    assert call("/auth/password", {"current_password": "correct-horse", "new_password": "new-horse-2026"}, token)[0] == 200
+    assert call("/auth/login", {"email": test_email, "password": "new-horse-2026"})[0] == 200
+
+
+def test_public_reference_data_and_report_history():
+    code, ref = call("/screens/reference?region=IN")
+    assert code == 200 and ref["authorities"] and ref["contractors"] and ref["projects"]
+    assert ref["authorities"][0]["boundary"]["type"] == "Polygon"
+    code, history = call("/screens/complaints/1/history")
+    assert code == 200 and isinstance(history, list)
+    assert call("/auth/google/enabled")[0] == 200
+
+
+def _sql(statement, params=()):
+    import psycopg2
+    with psycopg2.connect(
+        host=os.environ.get("POSTGRES_HOST", "localhost"), port=os.environ.get("POSTGRES_PORT", "5432"),
+        user=os.environ.get("POSTGRES_USER", "postgres"), password=os.environ.get("POSTGRES_PASSWORD", "postgres"),
+        dbname=os.environ.get("POSTGRES_DB", "roadwatch"),
+    ) as conn, conn.cursor() as cur:
+        cur.execute(statement, params)
+
+
+def test_bump_radar_files_report_after_two_rides():
+    # A random spot inside K-West, away from other test data.
+    lat, lon = 19.115 + random.random() * 0.01, 72.835 + random.random() * 0.005
+    rides = [str(uuid.uuid4()), str(uuid.uuid4())]
+    created = []
+    try:
+        code, first = call("/screens/bumps", {"ride_id": rides[0], "bumps": [
+            {"lat": lat, "lon": lon, "intensity": 12.5, "speed_kmh": 25},
+            {"lat": lat + 0.00003, "lon": lon, "intensity": 9.0, "speed_kmh": 25}]})
+        assert code == 200 and first["new_reports"] == []  # one ride is not enough
+        code, second = call("/screens/bumps", {"ride_id": rides[1], "bumps": [
+            {"lat": lat + 0.00002, "lon": lon + 0.00001, "intensity": 11.0, "speed_kmh": 30}]})
+        assert code == 200 and len(second["new_reports"]) == 1
+        created = [r["id"] for r in second["new_reports"]]
+        assert second["new_reports"][0]["assigned_authority_id"] is not None  # routed by the trigger
+        spots = call("/screens/bumps/clusters")[1]["clusters"]
+        assert any(s["complaint_id"] == created[0] and s["confirmed"] for s in spots)
+    finally:
+        _sql("DELETE FROM ride_bumps WHERE ride_id = ANY(%s::uuid[])", (rides,))
+        if created:
+            _sql("DELETE FROM complaints WHERE id = ANY(%s)", (created,))
+
+
+def test_warranty_claims_and_notice_rights(tokens):
+    code, data = call("/screens/warranty-claims?region=IN")
+    assert code == 200 and data["claims"], "sample Mumbai warranties should cover some reports"
+    claim = data["claims"][0]
+    assert claim["warranty_start_date"] <= claim["created_at"][:10] <= claim["warranty_end_date"]
+    assert call(f"/screens/warranty-claims/{claim['complaint_id']}/notice", {}, tokens["citizen"])[0] == 403
+    assert call(f"/screens/warranty-claims/{claim['complaint_id']}/notice", {})[0] == 401
+
+
+def test_repair_check_needs_owner_resolved_report_and_presence(tokens):
+    code, mine = call("/screens/me/reports", token=tokens["citizen"])
+    resolved = next(r for r in mine["reports"] if r["status"] == "resolved")
+    open_one = next(r for r in mine["reports"] if r["status"] in ("routed", "in_progress"))
+
+    def post(report_id, token, lat, lon):
+        boundary = uuid.uuid4().hex
+        body = (f'--{boundary}\r\nContent-Disposition: form-data; name="latitude"\r\n\r\n{lat}\r\n'
+                f'--{boundary}\r\nContent-Disposition: form-data; name="longitude"\r\n\r\n{lon}\r\n'
+                f'--{boundary}\r\nContent-Disposition: form-data; name="photo"; filename="p.jpg"\r\n'
+                f'Content-Type: image/jpeg\r\n\r\n').encode() + b"\xff\xd8\xff\xd9" + f"\r\n--{boundary}--\r\n".encode()
+        request = urllib.request.Request(f"{BASE}/screens/me/reports/{report_id}/verify-repair", data=body, method="POST",
+                                         headers={"Authorization": f"Bearer {token}", "Content-Type": f"multipart/form-data; boundary={boundary}"})
+        try:
+            with urllib.request.urlopen(request, timeout=30) as response:
+                return response.status, json.loads(response.read())
+        except urllib.error.HTTPError as error:
+            return error.code, json.loads(error.read() or b"{}")
+
+    assert post(open_one["id"], tokens["citizen"], 0, 0)[0] == 409       # not resolved yet
+    assert post(resolved["id"], tokens["engineer"], 0, 0)[0] == 403      # citizens only
+    code, result = post(resolved["id"], tokens["citizen"], 0.0, 0.0)     # far from Mumbai
+    assert code == 200 and result["verdict"] == "too_far"
+    _sql("DELETE FROM repair_checks WHERE complaint_id = %s AND verdict = 'too_far'", (resolved["id"],))

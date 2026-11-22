@@ -6,19 +6,24 @@ import { apiPost, useLive } from '@/services/api';
 import {
   ActionButton, Badge, Card, Kpi, KpiRow, Loadable, Mono, StatusBadge, Table, Tabs, hours, money, num, shortDate,
 } from './ui';
+import StaffAccounts from './StaffAccounts';
 
-const TABS = ['Command center', 'SLA escalations', 'Jurisdiction conflicts', 'Repair scheduler'] as const;
+const TABS = ['Command center', 'SLA escalations', 'Jurisdiction conflicts', 'Repair scheduler', 'Staff accounts'] as const;
 type Tab = (typeof TABS)[number];
 
 export default function OperationsScreen() {
   const [tab, setTab] = useState<Tab>('Command center');
+  const role = useStore(s => s.userRole);
+  // Only administrators manage accounts.
+  const tabs = role === 'admin' ? TABS : TABS.filter(t => t !== 'Staff accounts');
   return (
     <div className="flex flex-col gap-4">
-      <Tabs tabs={TABS} active={tab} onChange={setTab} />
+      <Tabs tabs={tabs} active={tab} onChange={setTab} />
       {tab === 'Command center' && <CommandCenter />}
       {tab === 'SLA escalations' && <SlaEngine />}
       {tab === 'Jurisdiction conflicts' && <Conflicts />}
       {tab === 'Repair scheduler' && <Scheduler />}
+      {tab === 'Staff accounts' && role === 'admin' && <StaffAccounts />}
     </div>
   );
 }

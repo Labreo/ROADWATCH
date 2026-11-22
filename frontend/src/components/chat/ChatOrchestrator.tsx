@@ -173,8 +173,8 @@ import ContractorHistoryCard from '@/components/transparency/ContractorHistoryCa
 import TransparencyScoreCard from '@/components/transparency/TransparencyScoreCard';
 import SankeyFlowVisualizer from '@/components/transparency/SankeyFlowVisualizer';
 import RegionsOverview from '@/components/regions/RegionsOverview';
-import SensorDashboard from '@/components/sensors/SensorDashboard';
-import PlaybackDashboard from '@/components/playback/PlaybackDashboard';
+import SensorsScreen from '@/components/live/SensorsScreen';
+import PlaybackScreen from '@/components/live/PlaybackScreen';
 import BottomSheet from '@/components/shared/BottomSheet';
 import CitationRenderer, { Citation } from './CitationRenderer';
 
@@ -1596,7 +1596,7 @@ export default function ChatOrchestrator() {
                 {contextView === 'sensors' && (
                   <div className="w-full h-full flex flex-col bg-slate-950/90 overflow-y-auto">
                     <ErrorBoundary>
-                      <SensorDashboard embedded />
+                      <SensorsScreen />
                     </ErrorBoundary>
                   </div>
                 )}
@@ -1604,7 +1604,7 @@ export default function ChatOrchestrator() {
                 {contextView === 'playback' && (
                   <div className="w-full h-full flex flex-col bg-slate-950/90 overflow-y-auto">
                     <ErrorBoundary>
-                      <PlaybackDashboard embedded />
+                      <PlaybackScreen />
                     </ErrorBoundary>
                   </div>
                 )}
@@ -1931,7 +1931,7 @@ export default function ChatOrchestrator() {
             {contextView === 'sensors' && (
               <div className="w-full min-h-[300px]">
                 <ErrorBoundary>
-                  <SensorDashboard embedded />
+                  <SensorsScreen />
                 </ErrorBoundary>
               </div>
             )}
@@ -1939,7 +1939,7 @@ export default function ChatOrchestrator() {
             {contextView === 'playback' && (
               <div className="w-full min-h-[300px]">
                 <ErrorBoundary>
-                  <PlaybackDashboard embedded />
+                  <PlaybackScreen />
                 </ErrorBoundary>
               </div>
             )}

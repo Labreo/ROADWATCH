@@ -7,7 +7,7 @@ import { OfflineSyncManager } from '@/services/offlineSync';
 import { playbackSteps } from '@/data/historicalData';
 import { generateStressZones } from '@/data/sensorData';
 
-export type AppView = 'dashboard' | 'reports' | 'roads' | 'contractors' | 'budgets' | 'complaints' | 'admin' | 'playback' | 'sensors' | 'twin' | 'chat' | 'regions' | 'database';
+export type AppView = 'dashboard' | 'reports' | 'roads' | 'contractors' | 'budgets' | 'complaints' | 'admin' | 'playback' | 'sensors' | 'twin' | 'chat' | 'regions' | 'database' | 'ride';
 
 export type DemoMode = 'off' | 'tour' | 'scripted';
 
@@ -120,6 +120,8 @@ interface AppState {
 
   // Region State
   regionCode: string;
+  /** Bumped each time live database rows replace the shared data arrays. */
+  liveDataVersion: number;
   setRegionCode: (code: string) => void;
 
   // Exchange Rate State
@@ -354,6 +356,7 @@ export const useStore = create<AppState>((set, get) => {
 
     // Region State
     regionCode: 'IN',
+    liveDataVersion: 0,
     setRegionCode: (code) => {
       set({ regionCode: code });
       if (typeof window !== 'undefined') {
@@ -426,7 +429,7 @@ export const useStore = create<AppState>((set, get) => {
 
     // Demo Mode — starts in scripted mode so ChatOrchestrator uses local
     // hardcoded demo responses instead of hitting the live backend.
-    demoMode: 'scripted',
+    demoMode: 'off',
     setDemoMode: (mode) => set({ demoMode: mode }),
     activeDemoSnippet: null,
     setActiveDemoSnippet: (id) => set({ activeDemoSnippet: id }),

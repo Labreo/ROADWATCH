@@ -4,9 +4,10 @@ import { useState } from 'react';
 import { useStore } from '@/store/useStore';
 import { apiPost, useLive } from '@/services/api';
 import { ActionButton, Badge, Card, Kpi, KpiRow, Loadable, Mono, StatusBadge, Table, Tabs, money, num, shortDate } from './ui';
+import WarrantyClaims from './WarrantyClaims';
 import { Flow, SankeyChart } from './charts';
 
-const TABS = ['Spend flow', 'Budget variance', 'Procurement', 'Audit log'] as const;
+const TABS = ['Spend flow', 'Budget variance', 'Warranty claims', 'Procurement', 'Audit log'] as const;
 type Tab = (typeof TABS)[number];
 
 export default function LedgerScreen() {
@@ -18,6 +19,7 @@ export default function LedgerScreen() {
       <Tabs tabs={tabs} active={tab} onChange={setTab} />
       {tab === 'Spend flow' && <SpendFlow />}
       {tab === 'Budget variance' && <BudgetVariance />}
+      {tab === 'Warranty claims' && <WarrantyClaims />}
       {tab === 'Procurement' && <Procurement />}
       {tab === 'Audit log' && <AuditLog />}
     </div>
