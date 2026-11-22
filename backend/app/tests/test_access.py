@@ -290,3 +290,92 @@ def test_repair_check_needs_owner_resolved_report_and_presence(tokens):
     code, result = post(resolved["id"], tokens["citizen"], 0.0, 0.0)     # far from Mumbai
     assert code == 200 and result["verdict"] == "too_far"
     _sql("DELETE FROM repair_checks WHERE complaint_id = %s AND verdict = 'too_far'", (resolved["id"],))
+
+
+def test_img2threejs_pothole_3d_scan_engine(tokens):
+    code, listing = call("/screens/pothole-3d?region=IN")
+    assert code == 200 and "scans" in listing and "candidates" in listing
+    candidate = listing["candidates"][0]
+    scan_id = None
+    try:
+        code, saved = call(
+            "/screens/pothole-3d",
+            {
+                "complaint_id": candidate["id"],
+                "road_id": candidate["road_id"],
+                "scan_title": "Pytest img2threejs 3D Volumetric Scan",
+                "width_m": 1.25,
+                "length_m": 0.95,
+                "depth_cm": 10.5,
+                "volume_liters": 61.4,
+                "asphalt_kg": 168.1,
+                "tack_coat_liters": 2.6,
+                "estimated_cost_inr": 19800,
+                "exposed_layer": "Wet Mix Macadam (WMM Sub-Base Exposed)",
+                "irc_severity": "CRITICAL (IRC:82 > 9cm)",
+                "water_pooling_pct": 40,
+                "spalling_index": 0.72,
+                "heightmap_json": {"grid_size": 32, "max_depth_cm": 10.5},
+                "threejs_code": "export function createPotholeGroup(THREE) { return new THREE.Group(); }",
+            },
+            tokens["citizen"],
+        )
+        assert code == 200 and saved["id"]
+        scan_id = saved["id"]
+        code, after = call("/screens/pothole-3d?region=IN")
+        assert code == 200 and any(s["id"] == scan_id for s in after["scans"])
+    finally:
+        if scan_id:
+            _sql("DELETE FROM pothole_3d_scans WHERE id = %s", (scan_id,))
+
+
+def test_monsoon_shield_risk_and_preventive_dispatch(tokens):
+    code, data = call("/screens/monsoon-risk?rainfall_mm_hr=125&region=IN")
+    assert code == 200 and data["corridors"] and data["rainfall_mm_hr"] == 125.0
+    corridor = data["corridors"][0]
+    wo_id = None
+    try:
+        code, dispatched = call(
+            "/screens/monsoon-risk/dispatch",
+            {
+                "road_id": corridor["road_id"],
+                "rainfall_mm_hr": 125.0,
+                "action_type": "Pre-Monsoon Storm-Drain Desilting & Polymer Cold-Mix",
+                "crew_assigned": "Pytest Monsoon Rapid Unit",
+            },
+            tokens["engineer"],
+        )
+        assert code == 200 and dispatched["work_order_id"]
+        wo_id = dispatched["work_order_id"]
+    finally:
+        if wo_id:
+            _sql("DELETE FROM preventive_work_orders WHERE id = %s", (wo_id,))
+
+
+def test_civic_trust_crowd_verification_and_rti_dossier(tokens):
+    code, feed = call("/screens/civic-trust?region=IN")
+    assert code == 200 and feed["complaints"]
+    target_id = feed["complaints"][0]["id"]
+    try:
+        code, vote = call(
+            f"/screens/civic-trust/{target_id}/verify",
+            {
+                "vote_type": "confirm_hazard",
+                "verifier_name": "Pytest Ward Citizen",
+                "distance_m": 10.2,
+                "comment": "Confirmed crater hazard on site during pytest.",
+            },
+            tokens["citizen"],
+        )
+        assert code == 200 and vote["complaint_id"] == target_id
+        code, rti = call(f"/screens/civic-trust/{target_id}/rti-dossier")
+        assert code == 200 and "RIGHT TO INFORMATION ACT, 2005" in rti["dossier"]
+    finally:
+        _sql("DELETE FROM complaint_verifications WHERE verifier_name = 'Pytest Ward Citizen'")
+
+
+def test_safe_corridor_shock_free_router():
+    code, data = call("/screens/safe-corridor?vehicle_type=ambulance&region=IN")
+    assert code == 200 and data["recommended_safe_corridor"] and data["high_hazard_direct_corridor"]
+    assert data["recommended_safe_corridor"]["stability_score"] >= data["high_hazard_direct_corridor"]["stability_score"]
+

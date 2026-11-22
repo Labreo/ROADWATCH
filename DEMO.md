@@ -74,6 +74,16 @@ To stop: press `Ctrl+C` in the terminal running `start-demo.sh`. The database ke
 ### Step 6 — AI over the database · 1 min
 - **Chat Assistant**: *"Which contractor has the worst rating?"* or *"How much was spent on S.V. Road?"*. The backend runs SQL, passes only those rows to Gemini, and shows source cards. Gemini never touches the database directly.
 
+### Step 7 — 3 PM Mentorship Showcase Mode, img2threejs 3D Crater Lab & Mobile Presentation · 3 min
+- Click **★ Showcase Mode** in the top navigation bar (or **3 PM Showcase Mode** at the top of the sidebar):
+  1. **1. img2threejs 3D Pothole Studio**: Upload any 2D pothole photo (or pick a live DB complaint), drag the **Cross-Section Laser Slicer**, adjust **Monsoon Water Pool (%)**, switch between **Pavement Strata PBR**, **Laser Depth Heatmap**, **Wireframe**, and **Simulate HMA Patch Repair**, inspect the **img2threejs TypeScript Code** tab, and click **Save 3D Scan & BoQ to DB** (writes to `pothole_3d_scans` + `audit_log`).
+  2. **2. Mobile App & Workflow Deck**: Step through the 8 interactive slides explaining the Capacitor iOS/Android + Offline-First PWA architecture while clicking through the synchronized **Live iPhone 16 Pro Simulator** on the right (or open `http://localhost:3000/mobile-presentation.html` full-screen).
+  3. **3. MonsoonShield Flood Predictor**: Drag the rainfall slider (`35 mm/hr` → `165 mm/hr Cloudburst`) to predict flood depth and asphalt stripping risk, then click **Dispatch Crew** to create a `preventive_work_orders` row in PostgreSQL.
+  4. **4. CivicTrust & RTI Generator**: Click **+1 I Hit This Too** (2+ confirmations auto-boost complaint priority to P5), **Flag Fake Closure** (reopens and escalates), or **Draft RTI Dossier** to generate an official Section 6(1) Right to Information Act petition from live database facts.
+  5. **5. SafeCorridor Ambulance Router**: Compare the recommended shock-free corridor against high-hazard routes using PostGIS `complaints` and `ride_bumps` vertical shock telemetry (`m/s²`).
+  6. **6. Bump Radar + Warranty Clawback**: Replay accelerometer rides (`ST_ClusterDBSCAN` auto-files reports) and draft contractor warranty recovery notices.
+  7. **7. All 4 User Roles End-to-End Check**: Use the **1-Click Active Role Switcher** at the top (`Public Guest`, `Citizen`, `Ward Engineer`, `Administrator`, `Public Auditor`) or click **Run Live E2E Verification Suite** to verify all endpoints and RBAC rules live.
+
 ---
 
 ## 3. DBMS concepts and where to show them

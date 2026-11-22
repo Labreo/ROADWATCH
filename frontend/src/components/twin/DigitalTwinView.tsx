@@ -398,10 +398,37 @@ function IntelligencePanel({
 
         {/* Open defects from complaints */}
         <div className="space-y-1.5">
-          <div className="mono-label text-[9px]">OPEN DEFECTS ({live?.defects.length ?? 0})</div>
+          <div className="flex items-center justify-between">
+            <div className="mono-label text-[9px]">OPEN DEFECTS ({live?.defects.length ?? 0})</div>
+            <button
+              type="button"
+              onClick={() =>
+                useStore.getState().openPothole3dModal({
+                  roadId: road.id,
+                  title: `3D Crater Scan: ${road.name} (${road.roadCode})`,
+                })
+              }
+              className="rounded border border-cyan-400/40 bg-cyan-500/15 px-2 py-0.5 font-mono text-[8.5px] font-bold text-cyan-300 hover:bg-cyan-500/25 cursor-pointer"
+            >
+              + 3D Crater Studio
+            </button>
+          </div>
           {live?.defects.map(d => (
-            <div key={d.id} className="flex justify-between gap-2 text-[10px] text-slate-300">
-              <span className="truncate">{d.title}</span>
+            <div key={d.id} className="flex items-center justify-between gap-2 text-[10px] text-slate-300">
+              <span className="truncate flex-1">{d.title}</span>
+              <button
+                type="button"
+                onClick={() =>
+                  useStore.getState().openPothole3dModal({
+                    complaintId: d.id,
+                    roadId: road.id,
+                    title: `#CMP-${String(d.id).padStart(5, '0')}: ${d.title}`,
+                  })
+                }
+                className="rounded border border-amber-400/40 bg-amber-500/15 px-1.5 py-0.5 font-mono text-[8px] font-bold text-amber-300 hover:bg-amber-500/25 cursor-pointer shrink-0"
+              >
+                3D Scan
+              </button>
               <span className={`mono-readout text-[9px] ${d.priority >= 4 ? 'text-rose-400' : ''}`}>P{d.priority}</span>
             </div>
           ))}

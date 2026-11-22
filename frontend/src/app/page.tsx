@@ -63,6 +63,12 @@ import BumpRadar from '@/components/live/BumpRadar';
 import SensorsScreen from '@/components/live/SensorsScreen';
 import PlaybackScreen from '@/components/live/PlaybackScreen';
 import MyReportsScreen from '@/components/live/MyReportsScreen';
+import ShowcaseMode from '@/components/live/ShowcaseMode';
+import MonsoonShieldScreen from '@/components/live/MonsoonShieldScreen';
+import CivicTrustScreen from '@/components/live/CivicTrustScreen';
+import SafeCorridorScreen from '@/components/live/SafeCorridorScreen';
+import MobileAppPresentation from '@/components/live/MobileAppPresentation';
+import Img2ThreePotholeModal from '@/components/3d/Img2ThreePotholeModal';
 import { API_BASE, SessionUser, apiGet, loadSession } from '@/services/api';
 import { loadLiveData } from '@/services/liveData';
 import LoginDialog from '@/components/shared/LoginDialog';
@@ -111,6 +117,9 @@ export default function Page() {
     demoMode,
     setDemoMode,
     userRole,
+    pothole3dModal,
+    openPothole3dModal,
+    closePothole3dModal,
   } = useStore();
   const isStaff = userRole !== 'citizen';
   const [isSyncingUI, setIsSyncingUI] = useState(false);
@@ -699,8 +708,25 @@ export default function Page() {
                             <span>Assigned to:</span>
                             <strong className="text-slate-355">{authority ? authority.departmentCode : 'Unassigned'}</strong>
                           </div>
-                          <div className="text-[9px] text-right text-slate-500 pt-1">
-                            Reported: {new Date(c.createdAt).toLocaleDateString()}
+                          <div className="flex items-center justify-between pt-2">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openPothole3dModal({
+                                  complaintId: c.id,
+                                  roadId: c.roadId ?? 3,
+                                  title: `#CMP-${String(c.id).padStart(5, '0')}: ${c.title}`,
+                                  photoUrl: c.imagePreview ?? c.imageUrl ?? null,
+                                });
+                              }}
+                              className="rounded-lg border border-cyan-400/40 bg-cyan-500/15 px-2.5 py-1 text-[9.5px] font-bold uppercase tracking-wider text-cyan-300 hover:bg-cyan-500/25 cursor-pointer"
+                            >
+                              3D Crater Scan (img2threejs)
+                            </button>
+                            <span className="text-[9px] text-slate-500">
+                              Reported: {new Date(c.createdAt).toLocaleDateString()}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -834,6 +860,60 @@ export default function Page() {
       )}
       {!isChatDriven && activeView === 'database' && !isStaff && (
         <AdminRestrictedView />
+      )}
+
+      {/* VIEW 12: 3 PM MENTORSHIP SHOWCASE COCKPIT */}
+      {!isChatDriven && activeView === 'showcase' && (
+        <ErrorBoundary>
+          <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+            <ShowcaseMode />
+          </div>
+        </ErrorBoundary>
+      )}
+
+      {/* VIEW 13: IMG2THREEJS 3D POTHOLE VOLUMETRIC STUDIO */}
+      {!isChatDriven && activeView === 'pothole3d' && (
+        <ErrorBoundary>
+          <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+            <Img2ThreePotholeModal embedded={true} open={true} />
+          </div>
+        </ErrorBoundary>
+      )}
+
+      {/* VIEW 14: MONSOONSHIELD FLOOD & SUB-BASE STRIPPING PREDICTOR */}
+      {!isChatDriven && activeView === 'monsoon' && (
+        <ErrorBoundary>
+          <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+            <MonsoonShieldScreen />
+          </div>
+        </ErrorBoundary>
+      )}
+
+      {/* VIEW 15: CIVICTRUST CROWD-VERIFICATION & STATUTORY RTI ENGINE */}
+      {!isChatDriven && activeView === 'civictrust' && (
+        <ErrorBoundary>
+          <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+            <CivicTrustScreen />
+          </div>
+        </ErrorBoundary>
+      )}
+
+      {/* VIEW 16: SAFECORRIDOR AMBULANCE & TWO-WHEELER ROUTER */}
+      {!isChatDriven && activeView === 'safecorridor' && (
+        <ErrorBoundary>
+          <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+            <SafeCorridorScreen />
+          </div>
+        </ErrorBoundary>
+      )}
+
+      {/* VIEW 17: INTERACTIVE MOBILE APP & WORKFLOW PRESENTATION DECK */}
+      {!isChatDriven && activeView === 'mobile_deck' && (
+        <ErrorBoundary>
+          <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+            <MobileAppPresentation onLaunch3DModal={() => openPothole3dModal()} />
+          </div>
+        </ErrorBoundary>
       )}
 
       {/* VIEW 0: CONVERSATIONAL ORCHESTRATOR SHELL */}
@@ -1081,6 +1161,16 @@ export default function Page() {
       {/* Complaint wizard overlay */}
       <ComplaintWizard />
       <LoginDialog />
+      {pothole3dModal.open && (
+        <Img2ThreePotholeModal
+          open={pothole3dModal.open}
+          onClose={closePothole3dModal}
+          initialComplaintId={pothole3dModal.complaintId}
+          initialRoadId={pothole3dModal.roadId}
+          initialTitle={pothole3dModal.title}
+          initialPhotoUrl={pothole3dModal.photoUrl}
+        />
+      )}
       {oauthError && (
         <div role="alert" className="fixed bottom-6 left-1/2 z-[2100] flex -translate-x-1/2 items-center gap-3 rounded-lg border border-rose-500/40 bg-slate-950 px-4 py-3 text-[13px] text-rose-200 shadow-xl">
           {oauthError}

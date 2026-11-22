@@ -93,7 +93,8 @@ export default function ComplaintWizard() {
     isReporting, 
     setIsReporting, 
     isOnline, 
-    queueComplaint 
+    queueComplaint,
+    openPothole3dModal,
   } = useStore();
 
   const [step, setStep] = useState(1);
@@ -678,6 +679,19 @@ export default function ComplaintWizard() {
             </div>
 
             <div className="space-y-2 pt-2">
+              <button
+                type="button"
+                onClick={() =>
+                  openPothole3dModal({
+                    roadId: associatedRoadId ?? 3,
+                    title: title || `${category.replace('_', ' ')} on ${roadName}`,
+                    photoUrl: photoPreview,
+                  })
+                }
+                className="w-full py-2.5 rounded-xl border border-amber-400/50 bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 text-[10px] font-black tracking-wider uppercase transition-all cursor-pointer"
+              >
+                Reconstruct 3D Crater &amp; BoQ (img2threejs)
+              </button>
               <button
                 onClick={() => setStep(4)}
                 disabled={aiAnalyzing || (manualEntry && description.trim().length < 10)}

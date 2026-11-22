@@ -25,21 +25,31 @@ import AccessibilityPanel from './AccessibilityPanel';
 import RegionSelector from './RegionSelector';
 
 const VIEW_TITLES: Record<string, { label: string; section: string }> = {
-  dashboard:   { label: 'Dashboard Overview',             section: 'Intelligence'   },
-  roads:       { label: 'Road Registry',                  section: 'Intelligence'   },
-  contractors: { label: 'Contractor Transparency',        section: 'Accountability' },
-  budgets:     { label: 'Budget & Expense Audits',        section: 'Accountability' },
-  playback:    { label: 'Historical Playback',            section: 'Accountability' },
-  complaints:  { label: 'Citizen Defect Reports',         section: 'Accountability' },
-  sensors:     { label: 'Sensor Monitor',                 section: 'Intelligence'   },
-  twin:        { label: 'Digital Twin',                   section: 'Intelligence'   },
-  admin:       { label: 'Operations Center',              section: 'System'         },
-  database:    { label: 'Database Explorer',              section: 'System'         },
+  dashboard:    { label: 'Dashboard Overview',               section: 'Intelligence'   },
+  roads:        { label: 'Road Registry',                    section: 'Intelligence'   },
+  contractors:  { label: 'Contractor Transparency',          section: 'Accountability' },
+  budgets:      { label: 'Budget & Expense Audits',          section: 'Accountability' },
+  playback:     { label: 'Historical Playback',              section: 'Accountability' },
+  complaints:   { label: 'Citizen Defect Reports',           section: 'Accountability' },
+  sensors:      { label: 'Sensor Monitor',                   section: 'Intelligence'   },
+  twin:         { label: 'Digital Twin & 3D Crater Lab',     section: 'Intelligence'   },
+  admin:        { label: 'Operations Center',                section: 'System'         },
+  database:     { label: 'Database Explorer',                section: 'System'         },
+  showcase:     { label: '3 PM Mentorship Showcase Cockpit', section: 'Live Showcase'  },
+  pothole3d:    { label: 'img2threejs 3D Pothole Studio',    section: '3D Engineering' },
+  monsoon:      { label: 'MonsoonShield Flood Predictor',    section: 'Intelligence'   },
+  civictrust:   { label: 'CivicTrust & Statutory RTI',       section: 'Accountability' },
+  safecorridor: { label: 'SafeCorridor Shock-Free Router',   section: 'Intelligence'   },
+  mobile_deck:  { label: 'Mobile App & Workflow Deck',       section: 'Presentation'   },
+  ride:         { label: 'Bump Radar Accelerometer',         section: 'Intelligence'   },
+  reports:      { label: 'My Citizen Reports & SLA',         section: 'Accountability' },
 };
 
 export default function TopNav() {
   const {
     activeView,
+    setActiveView,
+    openPothole3dModal,
     searchQuery,
     setSearchQuery,
     isOnline,
@@ -159,6 +169,29 @@ export default function TopNav() {
 
       {/* Right: action tray */}
       <div className="flex items-center gap-2 shrink-0">
+        {/* 3 PM Mentorship Showcase Mode Quick Button */}
+        <button
+          type="button"
+          onClick={() => setActiveView('showcase')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+            activeView === 'showcase'
+              ? 'bg-cyan-400 text-slate-950 border-cyan-300 shadow-lg shadow-cyan-400/25'
+              : 'bg-cyan-950/50 border-cyan-400/50 text-cyan-300 hover:bg-cyan-400 hover:text-slate-950'
+          }`}
+          title="Open 3 PM Mentorship Showcase Mode"
+        >
+          <span>★ Showcase Mode</span>
+        </button>
+
+        {/* Quick 3D Pothole Studio Modal Trigger */}
+        <button
+          type="button"
+          onClick={() => openPothole3dModal()}
+          className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-amber-400/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer"
+          title="Launch img2threejs 3D Pothole Reconstruction Modal"
+        >
+          <span>3D Pothole Lab</span>
+        </button>
 
         {/* Network status — click to simulate offline/online for the demo.
             Toggling back to online auto-flushes the offline queue (Flow E). */}

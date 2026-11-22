@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ROADWATCH — Mobile App &amp; End-to-End PostGIS Workflow Presentation</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #050811;
+      color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: #090e1a;
+      border-bottom: 1px solid #1e293b;
+      padding: 14px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .badge {
+      background: #22d3ee;
+      color: #04161a;
+      font-family: monospace;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 99px;
+      letter-spacing: 0.06em;
+    }
+    .team { font-family: monospace; font-size: 12px; color: #38bdf8; }
+    .controls { display: flex; gap: 8px; align-items: center; }
+    button, a.btn {
+      background: #1e293b;
+      color: #f8fafc;
+      border: 1px solid #334155;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    button.primary, a.btn.primary {
+      background: #22d3ee;
+      color: #04161a;
+      border-color: #22d3ee;
+    }
+    main {
+      flex: 1;
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 28px;
+      display: grid;
+      grid-template-columns: 1fr 390px;
+      gap: 28px;
+      align-items: start;
+    }
+    @media (max-width: 1024px) {
+      main { grid-template-columns: 1fr; }
+    }
+    .slide-card {
+      background: #0b1222;
+      border: 1px solid #1e293b;
+      border-radius: 20px;
+      padding: 32px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    }
+    .slide-kicker {
+      font-family: monospace;
+      font-size: 11px;
+      color: #22d3ee;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .slide-title {
+      font-size: 28px;
+      font-weight: 800;
+      margin-top: 8px;
+      line-height: 1.25;
+      color: #ffffff;
+    }
+    .slide-sub {
+      font-size: 14px;
+      color: #94a3b8;
+      margin-top: 10px;
+      line-height: 1.6;
+    }
+    .steps {
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .step-box {
+      background: #111a2e;
+      border: 1px solid #1e293b;
+      border-left: 4px solid #22d3ee;
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+    .step-box h4 {
+      font-size: 15px;
+      color: #38bdf8;
+      margin-bottom: 6px;
+    }
+    .step-box p {
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+    .step-box code {
+      display: inline-block;
+      margin-top: 8px;
+      background: #070b14;
+      border: 1px solid #1e293b;
+      color: #fcd34d;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 11.5px;
+    }
+    .mentor-box {
+      margin-top: 22px;
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 13px;
+      color: #fde68a;
+      line-height: 1.5;
+    }
+    /* Phone Simulator Frame */
+    .phone-bezel {
+      background: #070b14;
+      border: 5px solid #1e293b;
+      border-radius: 42px;
+      padding: 16px;
+      width: 380px;
+      margin: 0 auto;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.75);
+    }
+    .notch {
+      width: 110px;
+      height: 20px;
+      background: #000;
+      border-radius: 99px;
+      margin: 0 auto 10px auto;
+      border: 1px solid #1e293b;
+    }
+    .phone-screen {
+      background: #0d1526;
+      border: 1px solid #1e293b;
+      border-radius: 26px;
+      padding: 18px;
+      min-height: 560px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .phone-header {
+      border-bottom: 1px solid #1e293b;
+      padding-bottom: 12px;
+    }
+    .phone-header h3 { font-size: 15px; color: #fff; margin-top: 4px; }
+    .phone-header p { font-family: monospace; font-size: 11px; color: #38bdf8; margin-top: 3px; }
+    .phone-card {
+      background: #070b14;
+      border: 1px solid #1e293b;
+      border-radius: 14px;
+      padding: 14px;
+      margin-top: 12px;
+      font-size: 12px;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+    .phone-cta {
+      width: 100%;
+      background: #22d3ee;
+      color: #04161a;
+      border: none;
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 12px;
+      text-transform: uppercase;
+      margin-top: 14px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="badge">3 PM MENTORSHIP DECK</span>
+      <strong>ROADWATCH Mobile App &amp; PostGIS End-to-End Workflow</strong>
+      <span class="team">Kanak Waradkar (24B-CO-030) · Krushna Surve (24B-CO-031) · Manjunath Gavada (24B-CO-035)</span>
+    </div>
+    <div class="controls">
+      <button onclick="prevSlide()">← Prev Slide</button>
+      <span id="counter" style="font-family:monospace;font-size:13px;padding:0 8px;">1 / 8</span>
+      <button class="primary" onclick="nextSlide()">Next Slide →</button>
+      <a class="btn primary" href="/">Open Live App Cockpit</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="slide-card" id="slideCard"></section>
+    <aside class="phone-bezel">
+      <div class="notch"></div>
+      <div class="phone-screen" id="phoneScreen"></div>
+    </aside>
+  </main>
+
+  <script>
+    const SLIDES = [
+      {
+        kicker: "SLIDE 1 OF 8 · MOBILE ARCHITECTURE",
+        title: "Capacitor Hybrid iOS/Android + Offline-First PWA Architecture",
+        sub: "One unified Next.js 16 + TypeScript codebase compiles to native iOS/Android via Capacitor 6 and runs as an offline-capable mobile PWA.",
+        steps: [
+          ["1. Native Hardware Sensors & Camera", "Reads 50 Hz 3-axis accelerometer (DeviceMotionEvent), high-accuracy GPS, and rear camera.", "Capacitor Geolocation + WebRTC facingMode: environment"],
+          ["2. Local-First IndexedDB Queue (Dexie.js)", "Compresses photos to <500 KB WebP on-device and stores reports offline during subway/monsoon dead zones.", "Dexie.js syncQueue + Service Worker Background Sync"],
+          ["3. PostGIS Spatial & Role-Secured Backend", "Every mobile request executes under PostgreSQL RBAC views (SET LOCAL ROLE roadwatch_citizen).", "v_citizen_complaints + v_citizen_status_history"]
+        ],
+        mentor: "Talking Point: The mobile app operates both passively in a rider's pocket (Bump Radar) and actively via the camera (AI-Lens + img2threejs 3D crater scan).",
+        phoneTitle: "ROADWATCH Mobile PWA",
+        phoneSub: "Ward K-West · GPS Locked (19.1197°N, 72.8464°E)",
+        phoneBody: "Active Modules:\n• AI-Lens Camera & img2threejs 3D Scan\n• Bump Radar 50 Hz Accelerometer\n• Dexie.js Offline Queue (0 Pending)\n• On-Site 50m Proof of Repair"
+      },
+      {
+        kicker: "SLIDE 2 OF 8 · PASSIVE SENSOR WORKFLOW",
+        title: "Workflow 1: Zero-Touch 'Bump Radar' Pothole Detection",
+        sub: "A commuter riding a two-wheeler or auto-rickshaw keeps the phone in their pocket. No typing or photo required.",
+        steps: [
+          ["1. 50 Hz Gravity Removal & Band-Pass Filter", "BumpDetector isolates vertical road impact shocks (m/s²) from normal vehicle vibration.", "threshold = max(7.5 m/s², movingRMS * 3.4)"],
+          ["2. PostGIS Spatial DBSCAN Clustering", "Shocks uploaded to ride_bumps are clustered within a 15m radius across separate rides.", "ST_ClusterDBSCAN(ST_Transform(geom, 3857), eps := 15, minpoints := 2)"],
+          ["3. Autonomous Report Creation & Ward Routing", "When 3 shocks from 2 separate rides agree within 15m, PostgreSQL files a P5 report automatically.", "INSERT INTO complaints → trg_auto_route_complaint"]
+        ],
+        mentor: "Talking Point: Cross-ride spatial clustering in PostGIS prevents false alarms from a single dropped phone.",
+        phoneTitle: "Bump Radar — Live Ride",
+        phoneSub: "Marine Drive · 34 km/h · 50 Hz Stream",
+        phoneBody: "Latest Shock: 14.6 m/s² at 18.9432°N, 72.8235°E\nCluster Status: 3 hits across 2 rides within 15m\nResult: Auto-Filed Ticket #CMP-01298 → Routed to MCGM-FN"
+      },
+      {
+        kicker: "SLIDE 3 OF 8 · CAMERA + IMG2THREEJS 3D SCAN",
+        title: "Workflow 2: AI-Lens Camera & img2threejs 3D Volumetric Crater Reconstruction",
+        sub: "Replaces static placeholder 3D models with a real-time 8-pass procedural Three.js crater mesh and engineering Bill of Quantities (BoQ).",
+        steps: [
+          ["1. 2D Photo Luminance & Edge Depth Extraction", "Samples a 32×32 luminance & Sobel gradient grid from the citizen's pothole photo.", "reconstructPotholeFromImage(photoDataUrl)"],
+          ["2. 8-Pass img2threejs Procedural THREE.Group", "Sculpts Wearing Course (BC), DBM Base, WMM Sub-Base, spalled rim stones, and water level.", "Pass 1 Blockout → Pass 3 Displaced Mesh → Pass 7 Laser Slicer"],
+          ["3. Automated Volumetric Bill of Quantities (BoQ)", "Integrates crater volume (Liters) to compute Hot-Mix Asphalt (kg), tack coat (L), and repair cost (₹).", "INSERT INTO pothole_3d_scans (volume_liters, asphalt_kg, estimated_cost_inr)"]
+        ],
+        mentor: "Talking Point: Every 2D pothole photo becomes an interactive, sliceable 3D engineering model with exact asphalt tonnage.",
+        phoneTitle: "img2threejs 3D Crater Lab",
+        phoneSub: "S.V. Road · 1.24m × 0.96m · Depth 11.2 cm",
+        phoneBody: "Volumetric BoQ:\n• Cavity Volume: 58.4 Liters\n• Hot-Mix Asphalt (HMA): 159.9 kg\n• Tack Coat Emulsion: 2.5 L\n• Exposed Stratum: WMM Sub-Base"
+      },
+      {
+        kicker: "SLIDE 4 OF 8 · OFFLINE-FIRST RESILIENCE",
+        title: "Workflow 3: Dead-Zone & Monsoon Offline Sync Pipeline",
+        sub: "Field reports captured in zero-connectivity zones are queued locally and reconciled idempotently.",
+        steps: [
+          ["1. Client WebP Compression & UUID Stamp", "Compresses image to <500 KB and assigns client_temp_id UUID.", "OfflineSyncManager.compressMediaAsset()"],
+          ["2. Automatic Reconnection Flush", "Flushes queued items automatically when network connectivity resumes.", "POST /api/v1/complaints/sync"],
+          ["3. 25m Spatial Duplicate Detection", "Detects existing open complaints within 25m and offers +1 priority boost.", "ST_DWithin(geom::geography, point::geography, 25)"]
+        ],
+        mentor: "Talking Point: Toggle the Online/Offline button in the top bar of ROADWATCH to show live IndexedDB queueing.",
+        phoneTitle: "Dexie.js Offline Sync Queue",
+        phoneSub: "Status: Offline Queue Ready",
+        phoneBody: "Queued Item #1: S.V. Road Crater (342 KB WebP)\nClient UUID: 9b1deb4d-3b7d-4bad-9bdd\nAuto-Flush: Triggers on window 'online' event"
+      },
+      {
+        kicker: "SLIDE 5 OF 8 · POSTGIS AUTO-ROUTING",
+        title: "Workflow 4: Deterministic PostGIS Spatial Routing & Warranty Match",
+        sub: "Citizens never guess which agency owns a road; PostgreSQL routes every report inside a BEFORE INSERT trigger.",
+        steps: [
+          ["1. Point-in-Polygon Ward Containment", "Finds the exact administrative ward polygon containing the GPS point.", "ST_Contains(authorities.geom_boundary, NEW.geom)"],
+          ["2. 20m Road Centerline Snapping", "Snaps the complaint pin to the nearest gazetted road LineString.", "ST_DWithin(roads.geom::geography, NEW.geom::geography, 20)"],
+          ["3. 3-Year MoRTH Defect Liability Warranty Match", "Flags whether the road is under an active contractor warranty.", "JOIN project_warranties WHERE created_at BETWEEN start AND end"]
+        ],
+        mentor: "Talking Point: Spatial routing lives in the database trigger trg_auto_route_complaint, guaranteeing 100% consistency.",
+        phoneTitle: "PostGIS Auto-Snap Result",
+        phoneSub: "Snapped 4.2m to SV-RD-01",
+        phoneBody: "Assigned Ward: MCGM Ward K-West\nRoad Segment: Swami Vivekananda Road\nWarranty Match: Active 36-Month DLP (Contractor Liable)"
+      },
+      {
+        kicker: "SLIDE 6 OF 8 · WARD ENGINEER WORKFLOW",
+        title: "Workflow 5: Ward Engineer Field App & Quality-Gated Milestone Payouts",
+        sub: "Engineers can only modify reports and milestones inside their own ward, and failed core tests block contractor payouts.",
+        steps: [
+          ["1. Ward-Scoped Queue & State Machine", "Enforces pending → routed → in_progress → resolved transitions.", "trg_complaint_state_machine + own_ward_only()"],
+          ["2. Core Sample Lab Verification", "Generated column computes pass/fail against MoRTH thickness/density specs.", "passed BOOLEAN GENERATED ALWAYS AS (...)"],
+          ["3. Database Trigger Blocks Failed Payouts", "Refuses payment release when any core test fails.", "trg_block_payout_on_failed_test → RAISE EXCEPTION"]
+        ],
+        mentor: "Talking Point: Even an administrator cannot release treasury funds if the database sees a failed core sample test.",
+        phoneTitle: "Engineer Field Console",
+        phoneSub: "Ward K-West · Er. Rajesh Deshmukh",
+        phoneBody: "Project #4 Milestone 2 Core Test:\nMeasured Asphalt Thickness: 42 mm\nSpecification Minimum: 50 mm\nDB Trigger Status: PAYOUT BLOCKED"
+      },
+      {
+        kicker: "SLIDE 7 OF 8 · ON-SITE PROOF OF REPAIR",
+        title: "Workflow 6: Citizen On-Site 'Proof of Repair' (50m Geofence + Live Camera)",
+        sub: "Stops fake contractor 'after' photos by requiring live on-site citizen verification within 50 meters.",
+        steps: [
+          ["1. 50-Meter PostGIS Geofence Check", "Verifies citizen phone GPS is within 50m of the reported defect.", "ST_Distance(c.geom::geography, gps::geography) <= 50"],
+          ["2. Gemini Vision Surface Check", "Checks the live camera photo to confirm whether the pothole was genuinely repaired.", "POST /api/v1/screens/me/reports/{id}/verify-repair"],
+          ["3. Automatic Priority-5 Escalated Reopen", "If the defect is still visible, opens a P5 / L1 follow-up linked via parent_complaint_id.", "INSERT INTO repair_checks + INSERT INTO complaints"]
+        ],
+        mentor: "Talking Point: Directly prevents the real-world civic issue of fake AI after-photos closing unresolved complaints.",
+        phoneTitle: "On-Site Proof of Repair",
+        phoneSub: "Distance: 11.4m (<= 50m Geofence OK)",
+        phoneBody: "AI Inspection Verdict: NOT REPAIRED\nObservation: Asphalt crater still visible\nAction: Reopened as Priority P5 & Escalated to Level 1"
+      },
+      {
+        kicker: "SLIDE 8 OF 8 · CLOSED-LOOP ACCOUNTABILITY",
+        title: "Workflow 7: Full Closed Loop — MonsoonShield, CivicTrust RTI & SafeCorridor",
+        sub: "Unites proactive monsoon prediction, crowd-verified Section 6(1) RTI petitions, ambulance safe routing, and an immutable audit log.",
+        steps: [
+          ["1. MonsoonShield Hydrological Predictor", "Simulates 15–180 mm/hr rainfall to predict flood depth & dispatch preventive crews.", "GET /screens/monsoon-risk + POST /monsoon-risk/dispatch"],
+          ["2. CivicTrust Crowd Consensus & Section 6(1) RTI", "2+ citizen confirmations boost priority to P5; 1-click exports official RTI Act dossier.", "POST /civic-trust/{id}/verify + GET /rti-dossier"],
+          ["3. SafeCorridor Ambulance Router & Immutable Audit Log", "Routes ambulances along lowest-shock corridors; every DB mutation is locked in audit_log.", "GET /screens/safe-corridor + trg_audit_log_immutable"]
+        ],
+        mentor: "Talking Point: All 4 user roles and all 7 accountability features run live against PostgreSQL 18 + PostGIS 3.7.",
+        phoneTitle: "Closed-Loop Governance Ready",
+        phoneSub: "4 Roles · 44 Tables · 39 Triggers",
+        phoneBody: "100% Live End-to-End:\n• Public Guest\n• Citizen (Kanak Waradkar)\n• Ward Engineer (MCGM-KW)\n• Administrator & Public Auditor"
+      }
+    ];
+
+    let idx = 0;
+    function render() {
+      const s = SLIDES[idx];
+      document.getElementById('counter').textContent = (idx + 1) + ' / ' + SLIDES.length;
+      document.getElementById('slideCard').innerHTML = `
+        <div class="slide-kicker">${s.kicker}</div>
+        <h1 class="slide-title">${s.title}</h1>
+        <p class="slide-sub">${s.sub}</p>
+        <div class="steps">
+          ${s.steps.map(st => `
+            <div class="step-box">
+              <h4>${st[0]}</h4>
+              <p>${st[1]}</p>
+              <code>${st[2]}</code>
+            </div>
+          `).join('')}
+        </div>
+        <div class="mentor-box"><strong>3 PM Mentorship Note:</strong> ${s.mentor}</div>
+      `;
+      document.getElementById('phoneScreen').innerHTML = `
+        <div>
+          <div class="phone-header">
+            <span style="font-family:monospace;font-size:10px;color:#22d3ee;">LIVE MOBILE VIEWPORT (390×844)</span>
+            <h3>${s.phoneTitle}</h3>
+            <p>${s.phoneSub}</p>
+          </div>
+          <div class="phone-card" style="white-space:pre-line;">${s.phoneBody}</div>
+        </div>
+        <div>
+          <button class="phone-cta" onclick="window.location.href='/'">Interact Live in ROADWATCH App →</button>
+        </div>
+      `;
+    }
+    function nextSlide() { idx = (idx + 1) % SLIDES.length; render(); }
+    function prevSlide() { idx = (idx - 1 + SLIDES.length) % SLIDES.length; render(); }
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') nextSlide();
+      if (e.key === 'ArrowLeft') prevSlide();
+    });
+    render();
+  </script>
+</body>
+</html>

@@ -540,8 +540,23 @@ export default function RoadDetailsPanel() {
                   <p className="text-[10px] text-muted-foreground leading-normal line-clamp-2">{c.description}</p>
                   
                   <EscalationSLAAlert complaint={c} compact />
-                  <div className="mono-readout text-[9px] text-[#55555f] text-right">
-                    Reported on: {new Date(c.createdAt).toLocaleDateString('en-IN')}
+                  <div className="flex items-center justify-between pt-1">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        useStore.getState().openPothole3dModal({
+                          complaintId: c.id,
+                          roadId: road.id,
+                          title: `#CMP-${String(c.id).padStart(5, '0')}: ${c.title}`,
+                        })
+                      }
+                      className="rounded border border-cyan-400/40 bg-cyan-500/15 px-2 py-0.5 font-mono text-[8.5px] font-bold text-cyan-300 hover:bg-cyan-500/25 cursor-pointer"
+                    >
+                      3D Crater Scan (img2threejs)
+                    </button>
+                    <span className="mono-readout text-[9px] text-[#55555f]">
+                      Reported on: {new Date(c.createdAt).toLocaleDateString('en-IN')}
+                    </span>
                   </div>
                 </div>
               ))}

@@ -21,6 +21,7 @@ const isOpen = (r: Report) => !['resolved', 'rejected'].includes(r.status);
 export default function MyReportsScreen() {
   const role = useStore(s => s.session?.user.role);
   const setLoginOpen = useStore(s => s.setLoginOpen);
+  const openPothole3dModal = useStore(s => s.openPothole3dModal);
   const state = useLive<Reports>(role === 'citizen' ? '/screens/me/reports' : null);
   if (role !== 'citizen') {
     return (
@@ -63,19 +64,32 @@ export default function MyReportsScreen() {
                   ))}
                 </ol>
                 {r.status === 'resolved' && <RepairCheck reportId={r.id} onDone={state.reload} />}
-                {['pending', 'routed'].includes(r.status) && (
-                  <ActionButton
-                    variant="danger"
-                    className="mt-3"
-                    action={() => {
-                      if (!window.confirm(`Withdraw report CMP-${String(r.id).padStart(5, '0')}? This deletes it.`)) return Promise.resolve();
-                      return apiDelete(`/screens/me/reports/${r.id}`);
-                    }}
-                    onDone={state.reload}
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      openPothole3dModal({
+                        complaintId: r.id,
+                        title: `#CMP-${String(r.id).padStart(5, '0')}: ${r.title}`,
+                      })
+                    }
+                    className="rounded-md border border-cyan-400/40 bg-cyan-500/15 px-3 py-1.5 text-xs font-semibold text-cyan-300 hover:bg-cyan-500/25 cursor-pointer"
                   >
-                    Withdraw report
-                  </ActionButton>
-                )}
+                    3D Crater Scan (img2threejs)
+                  </button>
+                  {['pending', 'routed'].includes(r.status) && (
+                    <ActionButton
+                      variant="danger"
+                      action={() => {
+                        if (!window.confirm(`Withdraw report CMP-${String(r.id).padStart(5, '0')}? This deletes it.`)) return Promise.resolve();
+                        return apiDelete(`/screens/me/reports/${r.id}`);
+                      }}
+                      onDone={state.reload}
+                    >
+                      Withdraw report
+                    </ActionButton>
+                  )}
+                </div>
               </Card>
             ))}
             {reports.length === 0 && <p className="text-[13px] text-[var(--fg-dim)]">No reports filed yet.</p>}

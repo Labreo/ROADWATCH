@@ -134,7 +134,15 @@ cd frontend && npm run dev          # App on http://localhost:3000
 
 Shared data: `frontend/src/services/liveData.ts` loads authorities, contractors, projects, roads and complaints from `/screens/reference`, `/screens/roads`, `/screens/complaints` into the arrays in `src/data/mockData.ts`, so older components (map, road panel, wizard, timeline) show database rows; the bundled rows are only the offline fallback.
 
-Accountability features (`backend/app/api/wow.py`): Bump Radar (`components/live/BumpRadar.tsx`, detector in `services/bumpDetector.ts`; PostGIS `ST_ClusterDBSCAN`, 3 shocks from 2 rides within 15 m files a report), warranty clawback (Budget Compliance → Warranty claims, Gemini drafts the notice from DB facts), proof of repair (My Reports → Check the repair on site, 50 m GPS check + Gemini; a failed check opens an escalated follow-up via `parent_complaint_id`).
+Accountability features (`backend/app/api/wow.py`):
+- **Bump Radar** (`components/live/BumpRadar.tsx`, detector in `services/bumpDetector.ts`; PostGIS `ST_ClusterDBSCAN`, 3 shocks from 2 rides within 15 m files a report)
+- **Warranty Clawback** (Budget Compliance → Warranty claims, Gemini drafts the notice from DB facts)
+- **Proof of Repair** (My Reports → Check the repair on site, 50 m GPS check + Gemini; a failed check opens an escalated follow-up via `parent_complaint_id`)
+- **img2threejs Procedural 3D Pothole Volumetric Studio** (`services/img2threeEngine.ts`, `components/3d/Img2ThreePotholeModal.tsx`, `pothole_3d_scans` table, `/screens/pothole-3d`): converts any 2D pothole photo or live DB defect into an 8-pass procedural Three.js `THREE.Group` with cross-section laser slicer, monsoon water-fill slider, HMA asphalt tonnage Bill of Quantities (BoQ), and downloadable TypeScript Three.js code
+- **MonsoonShield Hydrological Flood & Sub-Base Stripping Predictor** (`components/live/MonsoonShieldScreen.tsx`, `preventive_work_orders` table, `/screens/monsoon-risk`): simulates 15–180 mm/hr rainfall against PostGIS waterlogging complaints, pothole density, and sub-base moisture sensors, with 1-click preventive crew dispatch
+- **CivicTrust Crowd-Verification & Section 6(1) RTI Dossier Generator** (`components/live/CivicTrustScreen.tsx`, `complaint_verifications` table, `/screens/civic-trust`): community hazard confirmations auto-boost priority to P5, fake-closure flags reopen/escalate tickets, and 1-click generates a statutory Right to Information Act (Section 6(1)) petition from database facts
+- **SafeCorridor Ambulance & Two-Wheeler Shock-Free Router** (`components/live/SafeCorridorScreen.tsx`, `/screens/safe-corridor`): ranks and compares PostGIS road corridors by active pothole hazards and `ride_bumps` vertical shock telemetry (`m/s²`)
+- **3 PM Mentorship Showcase Mode & Mobile App Presentation** (`components/live/ShowcaseMode.tsx`, `components/live/MobileAppPresentation.tsx`, `public/mobile-presentation.html`): unified live demo cockpit with 1-click 4-role switcher, all 7 features, live E2E self-test runner, and an 8-slide interactive Mobile App & Workflow presentation paired with a live iPhone 16 Pro simulator.
 
 The wireframe screens live in `frontend/src/components/live/` and read `backend/app/api/screens.py`.
 

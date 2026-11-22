@@ -217,9 +217,10 @@ export const POTHOLE_POSITIONS: [number, number, number][] = [
   [1.2,  0.0, 0.0],
 ];
 
-function PotholeRing({ position, delay }: { position: [number,number,number]; delay: number }) {
+function PotholeRing({ position, delay, index = 0 }: { position: [number,number,number]; delay: number; index?: number }) {
   const ring1Ref = useRef<THREE.Mesh>(null);
   const ring2Ref = useRef<THREE.Mesh>(null);
+  const [hovered, setHovered] = useState(false);
 
   useFrame((state) => {
     const t = (state.clock.getElapsedTime() + delay) % 2;
@@ -238,12 +239,44 @@ function PotholeRing({ position, delay }: { position: [number,number,number]; de
   });
 
   return (
-    <group position={position}>
-      {/* Pothole cavity (depressed dark area) */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.02, 0]} frustumCulled={true}>
-        <circleGeometry args={[0.18, 16]} />
-        <meshStandardMaterial color="#0a0a0a" roughness={1} transparent opacity={0.85} />
+    <group
+      position={position}
+      onClick={(e) => {
+        e.stopPropagation();
+        useStore.getState().openPothole3dModal({
+          title: `3D Volumetric Scan — Corridor Crater #${index + 1}`,
+        });
+      }}
+      onPointerOver={(e) => {
+        e.stopPropagation();
+        setHovered(true);
+        document.body.style.cursor = 'pointer';
+      }}
+      onPointerOut={(e) => {
+        e.stopPropagation();
+        setHovered(false);
+        document.body.style.cursor = 'default';
+      }}
+    >
+      {/* Procedural 3D Crater Cavity Bowl + Exposed Sub-Base Stratum */}
+      <mesh position={[0, -0.04, 0]} frustumCulled={true}>
+        <cylinderGeometry args={[0.21, 0.11, 0.08, 24, 1, true]} />
+        <meshStandardMaterial color="#78350f" roughness={0.95} side={THREE.DoubleSide} />
       </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.075, 0]} frustumCulled={true}>
+        <circleGeometry args={[0.11, 20]} />
+        <meshStandardMaterial color="#090a0f" roughness={0.9} />
+      </mesh>
+      {/* Spalled Rim Stones */}
+      {[0, 1, 2, 3, 4, 5].map((k) => {
+        const ang = (k / 6) * Math.PI * 2;
+        return (
+          <mesh key={k} position={[Math.cos(ang) * 0.2, 0.01, Math.sin(ang) * 0.2]}>
+            <dodecahedronGeometry args={[0.024, 0]} />
+            <meshStandardMaterial color="#a16207" roughness={0.9} />
+          </mesh>
+        );
+      })}
       {/* Crack ring 1 */}
       <mesh ref={ring1Ref} rotation={[-Math.PI / 2, 0, 0]} frustumCulled={true}>
         <ringGeometry args={[0.17, 0.21, 24]} />
@@ -257,8 +290,15 @@ function PotholeRing({ position, delay }: { position: [number,number,number]; de
       {/* Central glowing core */}
       <mesh position={[0, 0.01, 0]} frustumCulled={true}>
         <sphereGeometry args={[0.06, 12, 12]} />
-        <meshBasicMaterial color="#f43f5e" transparent opacity={0.4} toneMapped={false} />
+        <meshBasicMaterial color={hovered ? '#22d3ee' : '#f43f5e'} transparent opacity={0.65} toneMapped={false} />
       </mesh>
+      {hovered && (
+        <Html distanceFactor={4.5} position={[0, 0.22, 0]} center>
+          <div className="rounded-lg border border-cyan-400/50 bg-slate-950/95 px-2.5 py-1 text-[9px] font-mono font-bold text-cyan-300 whitespace-nowrap shadow-xl pointer-events-none">
+            Click to launch img2threejs 3D Crater Studio →
+          </div>
+        </Html>
+      )}
     </group>
   );
 }
@@ -266,8 +306,8 @@ function PotholeRing({ position, delay }: { position: [number,number,number]; de
 function PotholeLayer({ count }: { count: number }) {
   return (
     <group>
-      {POTHOLE_POSITIONS.slice(0, count).map((pos, i) => (
-        <PotholeRing key={i} position={pos} delay={i * 0.65} />
+      {POTHOLE_POSITIONS.slice(0, Math.max(1, count)).map((pos, i) => (
+        <PotholeRing key={i} position={pos} delay={i * 0.65} index={i} />
       ))}
     </group>
   );

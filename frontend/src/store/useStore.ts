@@ -7,7 +7,35 @@ import { OfflineSyncManager } from '@/services/offlineSync';
 import { playbackSteps } from '@/data/historicalData';
 import { generateStressZones } from '@/data/sensorData';
 
-export type AppView = 'dashboard' | 'reports' | 'roads' | 'contractors' | 'budgets' | 'complaints' | 'admin' | 'playback' | 'sensors' | 'twin' | 'chat' | 'regions' | 'database' | 'ride';
+export type AppView =
+  | 'dashboard'
+  | 'reports'
+  | 'roads'
+  | 'contractors'
+  | 'budgets'
+  | 'complaints'
+  | 'admin'
+  | 'playback'
+  | 'sensors'
+  | 'twin'
+  | 'chat'
+  | 'regions'
+  | 'database'
+  | 'ride'
+  | 'showcase'
+  | 'pothole3d'
+  | 'monsoon'
+  | 'civictrust'
+  | 'safecorridor'
+  | 'mobile_deck';
+
+export interface Pothole3DModalState {
+  open: boolean;
+  complaintId?: number | null;
+  roadId?: number | null;
+  title?: string;
+  photoUrl?: string | null;
+}
 
 export type DemoMode = 'off' | 'tour' | 'scripted';
 
@@ -63,6 +91,11 @@ interface AppState {
   // Wizard state
   isReporting: boolean;
   setIsReporting: (reporting: boolean) => void;
+
+  // Img2ThreeJS 3D Pothole Modal state
+  pothole3dModal: Pothole3DModalState;
+  openPothole3dModal: (opts?: Omit<Pothole3DModalState, 'open'>) => void;
+  closePothole3dModal: () => void;
 
   // Complaints database
   complaintsList: Complaint[];
@@ -550,6 +583,11 @@ export const useStore = create<AppState>((set, get) => {
     // Report Wizard toggle
     isReporting: false,
     setIsReporting: (reporting) => set({ isReporting: reporting }),
+
+    // Img2ThreeJS 3D Pothole Modal state
+    pothole3dModal: { open: false },
+    openPothole3dModal: (opts = {}) => set({ pothole3dModal: { open: true, ...opts } }),
+    closePothole3dModal: () => set({ pothole3dModal: { open: false } }),
 
     // Complaints database state
     complaintsList: mockComplaints,
